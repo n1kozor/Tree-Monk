@@ -1,0 +1,649 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ---- Light theme (default) ----
+     Warm, internally-consistent palette (all neutrals share the warm hue ~38)
+     with clear separation: white cards pop on a warm canvas, chips/borders are
+     distinct, secondary text stays legible. */
+  :root {
+    --background: 38 32% 95.5%;
+    --foreground: 30 12% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 30 12% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 30 12% 11%;
+    --primary: 175 68% 34%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 38 16% 89%;
+    --secondary-foreground: 30 12% 16%;
+    --muted: 38 16% 89%;
+    --muted-foreground: 35 9% 37%;
+    --accent: 38 18% 84%;
+    --accent-foreground: 30 12% 16%;
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 38 16% 82%;
+    --input: 38 16% 82%;
+    --ring: 175 68% 34%;
+    --radius: 0.65rem;
+
+    /* Canvas */
+    --dots: 38 12% 77%;
+    --thread: 0 74% 45%;
+    --cork-base: 33 46% 66%;
+    --cork-spot: 30 38% 52%;
+    --cork-edge: 30 35% 38%;
+  }
+
+  /* ---- Dark theme ---- */
+  .dark {
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+    --card: 240 8% 7%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 9% 6%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 175 70% 45%;
+    --primary-foreground: 240 10% 4%;
+    --secondary: 240 5% 14%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 14%;
+    --muted-foreground: 240 5% 60%;
+    --accent: 240 5% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 6% 16%;
+    --input: 240 6% 16%;
+    --ring: 175 70% 45%;
+
+    --dots: 240 5% 17%;
+    --thread: 0 75% 55%;
+    --cork-base: 28 28% 19%;
+    --cork-spot: 25 32% 13%;
+    --cork-edge: 24 30% 9%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    margin: 0;
+    overflow: hidden;
+    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    user-select: none;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-secondary;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-accent;
+  }
+}
+
+/* ---- React Flow theming (token-driven, adapts to light/dark) ---- */
+.react-flow__attribution {
+  display: none;
+}
+.react-flow__edge-path {
+  stroke: hsl(var(--primary));
+  stroke-width: 2;
+}
+.react-flow__handle {
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  width: 10px;
+  height: 10px;
+}
+.react-flow__controls {
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+.react-flow__controls-button {
+  background: hsl(var(--card)) !important;
+  border: none !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  color: hsl(var(--foreground)) !important;
+  fill: hsl(var(--foreground)) !important;
+}
+.react-flow__controls-button svg {
+  fill: hsl(var(--foreground)) !important;
+}
+.react-flow__controls-button:hover {
+  background: hsl(var(--accent)) !important;
+}
+.react-flow__minimap {
+  background: hsl(var(--card)) !important;
+  border-radius: var(--radius);
+}
+
+/* ---- Time Machine dual-range slider ---- */
+.tm-range::-webkit-slider-runnable-track {
+  background: transparent;
+}
+.tm-range::-webkit-slider-thumb {
+  pointer-events: all;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+  margin-top: 3px;
+}
+.tm-range::-moz-range-thumb {
+  pointer-events: all;
+  width: 15px;
+  height: 15px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  cursor: pointer;
+}
+.tm-range::-moz-range-track {
+  background: transparent;
+}
+
+/* ---- Single-value slider with a visible track (settings panels) ---- */
+.tm-slider {
+  height: 16px;
+}
+.tm-slider::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+}
+.tm-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+.tm-slider::-moz-range-track {
+  height: 4px;
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+}
+.tm-slider::-moz-range-progress {
+  height: 4px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+}
+.tm-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--background));
+  cursor: pointer;
+}
+
+/* ---- Glassmorphism panel ---- */
+.tm-glass {
+  background: linear-gradient(
+    155deg,
+    hsl(var(--card) / 0.82),
+    hsl(var(--card) / 0.62)
+  );
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid hsl(var(--border) / 0.7);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 hsl(0 0% 100% / 0.06);
+}
+
+/* ---- MapLibre hover popup (themed) ---- */
+.tm-map-popup .maplibregl-popup-content {
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.7rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.tm-map-popup .maplibregl-popup-tip {
+  border-top-color: hsl(var(--popover));
+  border-bottom-color: hsl(var(--popover));
+}
+
+/* ---- Migration tracker (animated life-movement paths) ---- */
+.tm-migration {
+  stroke-dasharray: 10 8;
+  animation: tm-march 1s linear infinite;
+  filter: drop-shadow(0 0 3px rgba(245, 158, 11, 0.6));
+}
+@keyframes tm-march {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+/* ---- Animations off (Settings) ---- */
+.no-anim *,
+.no-anim *::before,
+.no-anim *::after {
+  transition-duration: 0.001ms !important;
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+}
+
+/* ---- Context menu items ---- */
+@layer components {
+  .ctx-item {
+    @apply flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent;
+  }
+  .ctx-label {
+    @apply flex items-center gap-1.5 px-2 pt-1.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground;
+  }
+  .ctx-chip {
+    @apply flex-1 cursor-pointer rounded border border-border py-1 text-xs font-medium hover:bg-accent;
+  }
+}
+
+/* ---- Detective corkboard surface (procedural cork-granule texture) ---- */
+.cork-surface {
+  background-color: hsl(var(--cork-base));
+  background-image:
+    radial-gradient(hsl(var(--cork-spot) / 0.55) 9%, transparent 10%),
+    radial-gradient(hsl(var(--cork-spot) / 0.4) 7%, transparent 8%),
+    radial-gradient(hsl(var(--cork-edge) / 0.35) 5%, transparent 6%),
+    radial-gradient(hsl(var(--cork-spot) / 0.3) 11%, transparent 12%),
+    /* fine speckle for a denser cork grain */
+    radial-gradient(hsl(var(--cork-edge) / 0.28) 30%, transparent 32%),
+    radial-gradient(hsl(var(--cork-spot) / 0.22) 28%, transparent 30%);
+  background-size: 16px 16px, 22px 22px, 13px 13px, 30px 30px, 5px 5px, 7px 6px;
+  background-position: 0 0, 8px 9px, 5px 12px, 14px 6px, 2px 3px, 4px 1px;
+  /* deep edge vignette so the wall feels lit from the centre */
+  box-shadow:
+    inset 0 0 180px hsl(var(--cork-edge) / 0.7),
+    inset 0 0 60px hsl(var(--cork-edge) / 0.45);
+}
+
+/* ---- Leaflet map theming ---- */
+.leaflet-container {
+  background: hsl(var(--muted));
+  font-family: inherit;
+}
+.map-dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9);
+}
+/* Period ("historical") map → warm, old-paper tint for the era mood. */
+.map-vintage .maplibregl-canvas {
+  filter: sepia(0.32) saturate(0.92) contrast(1.04) brightness(1.02);
+}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+.leaflet-popup-content {
+  margin: 0;
+  min-width: 230px;
+}
+.leaflet-popup-close-button {
+  color: hsl(var(--muted-foreground)) !important;
+}
+.leaflet-bar a {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+}
+.leaflet-bar a:hover {
+  background: hsl(var(--accent));
+}
+.tm-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px 9999px 9999px 2px;
+  transform: rotate(45deg);
+  border: 2px solid hsl(var(--background));
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  font-size: 11px;
+  font-weight: 700;
+}
+.tm-pin > span {
+  transform: rotate(-45deg);
+  color: #fff;
+}
+
+/* ---- Real pushpin — opaque, glossy 3D head + steel needle. Placed on the
+   card edge wherever a thread is tied (and one anchor pin per card). Positioned
+   by JS via --tx/--ty (hand jitter) and --rot (tilt); colour via --pc. Never
+   blocks the connection handles (pointer-events: none). */
+.tm-pushpin {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%) translate(var(--tx, 0), var(--ty, 0)) rotate(var(--rot, 0deg));
+  background:
+    radial-gradient(
+      circle at 34% 27%,
+      color-mix(in srgb, var(--pc, #e23b3b) 20%, #ffffff) 0%,
+      var(--pc, #e23b3b) 46%,
+      color-mix(in srgb, var(--pc, #e23b3b) 60%, #000000) 100%
+    );
+  box-shadow:
+    0 3px 4px -1px rgba(0, 0, 0, 0.55),
+    0 1px 2px rgba(0, 0, 0, 0.45),
+    inset -0.7px -0.9px 1.4px rgba(0, 0, 0, 0.45),
+    inset 0.8px 1px 1.3px rgba(255, 255, 255, 0.6);
+  pointer-events: none;
+  z-index: 30;
+}
+.tm-pushpin::before {
+  /* sharp specular glint on the dome */
+  content: '';
+  position: absolute;
+  top: 1.5px;
+  left: 1.8px;
+  width: 2.6px;
+  height: 1.9px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.92);
+  filter: blur(0.3px);
+}
+.tm-pushpin::after {
+  /* steel needle pressed into the board (sits behind the head) */
+  content: '';
+  position: absolute;
+  top: 58%;
+  left: 47%;
+  width: 1.2px;
+  height: 5px;
+  transform: rotate(22deg);
+  transform-origin: top center;
+  background: linear-gradient(#f4f4f5, #a1a1aa 50%, #3f3f46);
+  border-radius: 0 0 1px 1px;
+  box-shadow: 0 1px 1.2px rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+/* Aged sticky note — fibrous paper with a gentle, even warm tone (no blotches). */
+.paper-note {
+  background-color: #fbeeb0;
+  background-image:
+    linear-gradient(135deg, rgba(150, 110, 30, 0.12), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(120, 90, 20, 0.045) 0 1px, transparent 1px 25px),
+    radial-gradient(rgba(120, 90, 20, 0.05) 1px, transparent 1.4px);
+  background-size:
+    auto,
+    100% 25px,
+    7px 7px;
+}
+
+/* ---- Aged paper card (corkboard person / link / file / mystery surfaces) ----
+   Warm, evenly-yellowed stock: a soft diagonal age wash, faint paper fibres and
+   a fine grain — no ring stains, no torn triangles. A soft inner vignette plus a
+   drop shadow give it weight and lift it off the cork. */
+.cork-paper {
+  position: relative;
+  background-color: #f3ead2;
+  background-image:
+    linear-gradient(135deg, rgba(122, 86, 38, 0.1), transparent 48%),
+    linear-gradient(315deg, rgba(122, 86, 38, 0.08), transparent 52%),
+    repeating-linear-gradient(91deg, rgba(120, 90, 40, 0.025) 0 1px, transparent 1px 27px),
+    radial-gradient(rgba(120, 90, 40, 0.045) 1px, transparent 1.4px);
+  background-size: auto, auto, auto, 7px 7px;
+  color: #2b2620;
+  box-shadow:
+    inset 0 0 30px rgba(120, 80, 30, 0.08),
+    inset 0 -14px 22px -14px rgba(90, 60, 20, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.45);
+  filter:
+    drop-shadow(0 12px 13px rgba(0, 0, 0, 0.42)) drop-shadow(0 3px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* ---- Detective Kit nodes ---- */
+.tm-postit {
+  box-shadow: 0 12px 22px -10px rgba(0, 0, 0, 0.5);
+}
+
+/* Evidence — a physical photo / snapshot. */
+.tm-evidence {
+  position: relative;
+  background: #ffffff;
+  padding: 8px 8px 10px;
+  border-radius: 2px;
+  box-shadow: 0 16px 32px -10px rgba(0, 0, 0, 0.6);
+}
+.tm-evidence-frame {
+  overflow: hidden;
+  background: #e7e5e4;
+  line-height: 0;
+}
+.tm-evidence-caption {
+  margin-top: 6px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #44403c;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mystery / blindspot — an aged "unknown subject" dossier card (theme-agnostic,
+   sits naturally on the corkboard). */
+.tm-mystery {
+  position: relative;
+  border-radius: 6px;
+  background-color: #f3ead4;
+  background-image: radial-gradient(rgba(120, 90, 20, 0.09) 1px, transparent 1.4px);
+  background-size: 8px 8px;
+  border: 1px solid rgba(120, 90, 20, 0.28);
+  box-shadow: 0 16px 28px -12px rgba(0, 0, 0, 0.6);
+  color: #3f3a2e;
+}
+.tm-mystery-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 58px;
+  width: 58px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 50% 30%, #6b7280, #111827);
+  color: #e5e7eb;
+  box-shadow: inset 0 -6px 12px rgba(0, 0, 0, 0.45);
+}
+.tm-mystery-q {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  height: 22px;
+  width: 22px;
+  color: #b45309;
+  background: #f3ead4;
+  border: 1px solid rgba(120, 90, 20, 0.3);
+  border-radius: 9999px;
+  padding: 1px;
+}
+
+/* Investigation Zone — a large aged dossier sheet (no frame): evenly-yellowed
+   stock with a soft diagonal age wash, fibres and a fine grain. The zone colour
+   is washed in by the component as an inset box-shadow. The paper is a separate
+   layer behind the header/handles so it never clips the protruding label tab. */
+.tm-zone-paper {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  background-color: #f5eed6;
+  background-image:
+    linear-gradient(135deg, rgba(120, 86, 36, 0.1), transparent 45%),
+    linear-gradient(315deg, rgba(120, 86, 36, 0.07), transparent 50%),
+    radial-gradient(rgba(150, 120, 40, 0.05) 1px, transparent 1.6px),
+    radial-gradient(rgba(150, 120, 40, 0.04) 1px, transparent 1.6px);
+  background-size:
+    auto,
+    auto,
+    15px 15px,
+    9px 9px;
+  background-position:
+    0 0,
+    0 0,
+    0 0,
+    6px 7px;
+  box-shadow:
+    inset 0 0 0 2000px color-mix(in srgb, var(--zone, #6366f1) 7%, transparent),
+    inset 0 0 80px color-mix(in srgb, var(--zone, #6366f1) 13%, transparent),
+    inset 0 0 40px rgba(120, 80, 30, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  filter: drop-shadow(0 16px 22px rgba(0, 0, 0, 0.36));
+}
+
+/* Detective string — pulse while hovered so it's obvious it's grabbable. */
+@keyframes tm-rope-pulse {
+  0%,
+  100% {
+    stroke-width: 2.6px;
+  }
+  50% {
+    stroke-width: 5.5px;
+  }
+}
+.tm-rope-hot {
+  animation: tm-rope-pulse 0.85s ease-in-out infinite;
+  filter: brightness(1.2);
+}
+
+/* Edge label pill. */
+.tm-edge-label {
+  position: absolute;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: all;
+  white-space: nowrap;
+}
+
+/* Connection handles — hidden by default (clean corkboard look). No CSS
+   transform (React Flow uses it for centring). Shown for the selected node,
+   or for ALL nodes while a connection is being dragged. */
+.react-flow__handle.tm-handle {
+  width: 11px;
+  height: 11px;
+  background: hsl(var(--primary));
+  border: 2px solid hsl(var(--card));
+  opacity: 0;
+  pointer-events: none;
+  z-index: 20;
+  /* width/height transition gives a "magnetic catch" without breaking RF's
+     translate-based centring (the -50% stays relative to the new size). */
+  transition:
+    opacity 0.18s ease,
+    width 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
+    height 0.14s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.14s ease;
+}
+.react-flow__node.selected .react-flow__handle.tm-handle,
+.tm-connecting .react-flow__handle.tm-handle {
+  opacity: 0.92;
+  pointer-events: all;
+}
+.react-flow__handle.tm-handle:hover {
+  opacity: 1;
+  width: 17px;
+  height: 17px;
+  box-shadow:
+    0 0 0 5px hsl(var(--primary) / 0.22),
+    0 0 10px hsl(var(--primary) / 0.6);
+}
+/* While connecting, all handles glow softly to invite the connection. */
+.tm-connecting .react-flow__handle.tm-handle {
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.45);
+}
+
+/* Relationship finder: a glowing light streak that flows along each connector.
+   A per-connector --rel-delay staggers them so the light travels down the
+   whole path like a beam. */
+.rel-connector {
+  position: relative;
+  height: 3px;
+  border-radius: 9999px;
+  background: hsl(var(--primary) / 0.18);
+  overflow: hidden;
+}
+.rel-connector::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -45%;
+  height: 100%;
+  width: 45%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, hsl(var(--primary)), transparent);
+  box-shadow: 0 0 10px 2px hsl(var(--primary) / 0.7);
+  animation: rel-flow 1.6s linear infinite;
+  animation-delay: var(--rel-delay, 0s);
+}
+@keyframes rel-flow {
+  0% {
+    left: -45%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+/* The endpoint cards softly pulse so the two ends read as "connected". */
+.rel-endpoint {
+  animation: rel-pulse 2s ease-in-out infinite;
+}
+@keyframes rel-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 5px hsl(var(--primary) / 0);
+  }
+}
+/* A glowing light that runs ALONG an SVG connector path (the moving "beam"). */
+.rel-flow {
+  stroke-dasharray: 2 15;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px hsl(var(--primary)));
+  animation: rel-march 0.85s linear infinite;
+}
+@keyframes rel-march {
+  to {
+    stroke-dashoffset: -17;
+  }
+}

@@ -1,0 +1,63 @@
+appId: app.treemonk.desktop
+productName: TreeMonk
+# Where the in-app updater looks for new releases. It creates a DRAFT release per
+# tag (v<version>); CI uploads the Windows .exe and Linux .AppImage to it, then
+# the release is published with the localized notes (see .github/workflows).
+publish:
+  provider: github
+  owner: n1kozor
+  repo: Tree-Monk
+directories:
+  output: release
+  buildResources: build
+# Ad-hoc code-sign the macOS app so Apple Silicon doesn't report it as "damaged"
+# (an unsigned arm64 binary is rejected outright). See scripts/afterPack.cjs.
+afterPack: scripts/afterPack.cjs
+files:
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintrc,.prettierrc,tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+asarUnpack:
+  - '**/*.node'
+  - 'node_modules/better-sqlite3/**'
+extraResources:
+  # needs to `pip install` anything.
+  # App icon for the runtime window/taskbar.
+  - from: build/icon.png
+    to: icon.png
+  # Bundled "notable people" dataset for the Famous-relatives scan (Pantheon,
+  # CC BY 4.0). Populate via `npm run fetch:famous`.
+  - from: resources/famous
+    to: famous
+  # Hungarian user manual (self-contained HTML) — opened in an in-app window
+  # from the sidebar / Help.
+  - from: docs/TreeMonk-Kezikonyv.html
+    to: manual.html
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Office
+  maintainer: TreeMonk
+  # Without an explicit icon, electron-builder doesn't install a menu/taskbar icon
+  # on Linux (it expects build/icons/ otherwise). A single 512×512 PNG is enough —
+  # it generates the hicolor sizes and the .desktop Icon entry from it.
+  icon: build/icon.png
+  synopsis: Local-first genealogy and historical research workbench
+  desktop:
+    # Matches Electron's WM_CLASS so the running window picks up the same icon.
+    StartupWMClass: TreeMonk
+win:
+  icon: build/icon.ico
+  target:
+    - nsis
+mac:
+  target:
+    - dmg
+  category: public.app-category.productivity
+  # No Apple Developer ID yet → ship an UNSIGNED build (users right-click → Open
+  # once to bypass Gatekeeper). `identity: null` skips code signing cleanly so
+  # the CI build never fails for a missing certificate.
+  identity: null
+npmRebuild: true

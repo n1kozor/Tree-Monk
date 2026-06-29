@@ -1,0 +1,110 @@
+name: Release
+
+# Push a tag like v0.14.0 to build the Windows installer and the Linux AppImage,
+# upload both to a GitHub Release, and publish it with the localized notes that
+# the in-app updater reads.
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  # Create the draft release up front so the parallel build jobs only upload to
+  # it (avoids a race where both try to create the same release).
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create draft release if it does not exist
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --draft --title "TreeMonk ${TAG#v}" --notes "Build in progress…"
+          fi
+
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: dist:win
+          - os: ubuntu-latest
+            script: dist:linux
+          # Apple Silicon (arm64) .dmg — unsigned (see electron-builder.yml mac).
+          - os: macos-latest
+            script: dist:mac
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # dist:win / dist:linux already fetch the bundled assets, build the app and
+      # run electron-builder; the trailing args turn on GitHub publishing.
+      - name: Build and publish
+        run: npm run ${{ matrix.script }} -- --publish always
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Build the read-only browser demo (treemonk.eu/demo) and attach it to the
+  # release as a tarball. The VPS pulls this asset (no credentials leave the VPS),
+  # so the live demo auto-updates with every release.
+  web-demo:
+    needs: prepare
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build read-only web demo
+        run: npx vite build --config vite.web.config.ts
+
+      - name: Package demo bundle
+        run: tar -czf treemonk-demo.tar.gz -C out-web .
+
+      - name: Attach to release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release upload "${GITHUB_REF_NAME}" treemonk-demo.tar.gz --clobber
+
+  # All artifacts uploaded → set the localized release notes and publish.
+  finalize:
+    needs: [build, web-demo]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish release with localized notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          VERSION="${TAG#v}"
+          NOTES_FILE=".github/release-notes/${VERSION}.md"
+          if [ -f "$NOTES_FILE" ]; then
+            gh release edit "$TAG" --notes-file "$NOTES_FILE" --draft=false --latest
+          else
+            gh release edit "$TAG" --draft=false --latest
+          fi

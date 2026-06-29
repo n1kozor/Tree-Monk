@@ -1,0 +1,86 @@
+# Dependencies
+node_modules/
+
+# Build output
+out/
+dist/
+release/
+# NOTE: build/ holds electron-builder resources (app icon) — it is source, keep it.
+
+# Packaged applications
+*.AppImage
+*.deb
+*.snap
+*.dmg
+*.exe
+*.msi
+*.zip
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# Optional self-contained interpreter (dropped in per electron-builder.yml)
+resources/python-runtime/
+# Bundled "notable people" dataset (fetched at build via npm run fetch:famous)
+resources/famous/
+
+# Local data / exports / test artifacts
+*.pdf
+# …but the versioned user manual is part of the project.
+!docs/*.pdf
+*.ged
+*.gedcom
+*.sqlite
+*.sqlite3
+*.db
+# Exception: the fictional, deterministic sample DB for the read-only web demo
+# is a committed asset (built by scripts/build-demo-db.mjs).
+!resources/demo.sqlite
+
+# Test artifacts (Playwright E2E)
+test-results/
+playwright-report/
+.playwright/
+
+# Local-only release cheatsheet (never push)
+RELEASING.md
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+
+# Marketing / landing site (standalone, not part of the app build)
+website/
+
+# Local screenshots (used only by the standalone landing site)
+Screenshot_*.png
+
+# Secrets / environment
+.env
+.env.*
+!.env.example
+
+# React Native (Expo) Android app — standalone, not part of the desktop build
+treemonk-mobile/
+
+# Web-demo build output
+out-web/
+
+# Support chat server — secrets, local DB and deps NEVER in git
+support-server/.env
+support-server/.env.*
+support-server/node_modules/
+support-server/*.db
+support-server/*.db-shm
+support-server/*.db-wal
+
+# local FS test script (borrowed-key login — not for release)
+kod.py
+
+# generated FamilySearch SDK (reference only — we call the API via fetch)
+.api/
