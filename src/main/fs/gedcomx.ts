@@ -1,7 +1,7 @@
 /**
  * Maps FamilySearch's official GEDCOM-X responses (the /platform/tree/* API)
  * into the app's existing `FsNode` stream, so the proven `FsIngester` DB writer
- * is reused unchanged. This replaces the old scraper's Python emitter.
+ * is reused unchanged.
  *
  * Only the fields the importer needs are typed here; the GEDCOM-X documents are
  * large, so everything is read defensively (any shape that doesn't match is just

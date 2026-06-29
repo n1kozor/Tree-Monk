@@ -1,5 +1,5 @@
 /**
- * Official FamilySearch integration (replaces the old scraper).
+ * Official FamilySearch integration.
  *
  * Auth: OAuth 2.0 Authorization Code + PKCE — the user signs in on FamilySearch's
  * OWN page (in an embedded window); TreeMonk never sees the password and never
@@ -12,7 +12,7 @@
  * existing FsNode stream so the proven FsIngester DB writer is reused.
  *
  * Until FS_CLIENT_ID is set the import is disabled (loginFamilySearchOAuth
- * resolves { ok:false, error:'NO_CLIENT_ID' }) — nothing falls back to scraping.
+ * resolves { ok:false, error:'NO_CLIENT_ID' }) — the import stays disabled until then.
  */
 import { app, BrowserWindow, session } from 'electron'
 import { createHash, randomBytes } from 'crypto'

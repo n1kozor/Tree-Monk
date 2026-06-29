@@ -182,8 +182,6 @@ export interface FamilySearchImportOptions {
   /** Keep the current global starting person (don't re-root on the imported root).
    *  Used by the per-person "deep import" so it only adds a branch. */
   keepRoot?: boolean
-  /** Override the python executable. */
-  python?: string
 }
 
 export interface FamilySearchPersonResult {

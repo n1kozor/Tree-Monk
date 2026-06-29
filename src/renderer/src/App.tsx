@@ -22,7 +22,6 @@ import { CalendarView } from '@/components/calendar/CalendarView'
 import { ChangelogView } from '@/components/changelog/ChangelogView'
 import { ProfileView } from '@/components/profile/ProfileView'
 import { SettingsView } from '@/components/settings/SettingsView'
-import { FamilySearchProgress } from '@/components/settings/FamilySearchProgress'
 import { MediaDownloadProgress } from '@/components/common/MediaDownloadProgress'
 import { CommandPalette } from '@/components/CommandPalette'
 import { SupportInviteDialog } from '@/components/common/SupportInviteDialog'
@@ -224,7 +223,6 @@ export default function App(): JSX.Element {
           </main>
         </div>
         <PersonPanel />
-        <FamilySearchProgress />
         <MediaDownloadProgress />
         <CommandPalette />
         <SupportInviteDialog open={supportInviteOpen} onOpenChange={setSupportInviteOpen} />

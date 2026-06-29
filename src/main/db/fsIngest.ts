@@ -324,7 +324,7 @@ export type FsNode = PersonNode | CoupleNode | ChildNode | SourceNode | PlaceNod
  * Stateful, streaming ingester. Each call writes ONE node into SQLite in a
  * micro-transaction and returns what changed so the caller can broadcast it.
  *
- * The Python engine streams every person (as a COMPLETE record) before any
+ * The importer streams every person (as a COMPLETE record) before any
  * relationship edge, so a person is inserted whole in a single step — no empty
  * placeholder that gets filled in later. `ensurePerson` only ever creates a stub
  * as a fallback for a relative the engine referenced but never sent (e.g. a
@@ -479,8 +479,8 @@ export class FsIngester {
         const changed = People.fillFrom(id, input)
         if (changed && this.preExisting.has(n.fid)) this.updated++
       } else {
-        // Brand-new → insert the COMPLETE person in one step. Because the Python
-        // engine now streams every person before any relationship edge, the
+        // Brand-new → insert the COMPLETE person in one step. Because the importer
+        // streams every person before any relationship edge, the
         // relatives this person links to already exist too — so no edge ever has
         // to invent an empty placeholder that gets filled in later.
         id = People.create(input).id

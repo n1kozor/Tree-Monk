@@ -348,10 +348,9 @@ export function registerIpc(): void {
     Audit.pause(() => importGedcomText(text))
   )
 
-  // FamilySearch streaming importer (Python child process → live SQLite ingest)
+  // FamilySearch streaming importer → live SQLite ingest
   ipcMain.handle(Channels.familysearch.import, async (e, options: FamilySearchImportOptions) => {
-    // Remember the settings (NEVER the password) so the dialog can pre-fill for
-    // an easy re-import next time.
+    // Remember the import settings so they can pre-fill for an easy re-import next time.
     AppSettings.set(
       'fs_import_settings',
       JSON.stringify({
