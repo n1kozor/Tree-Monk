@@ -377,42 +377,8 @@
 </ol>
 <div class="box note"><span class="t">Jó tudni</span> Nagy fájlnál az import eltarthat egy ideig. A program nem hoz létre duplikátumokat. A régen elhunyt személyek vélelmezett-elhunytként kerülnek be.</div>
 
-<h2>8.2 FamilySearch-import</h2>
-<ol class="steps">
-<li>A <span class="menu">Beállítások</span> menüből indítsa el a FamilySearch-importot, és jelentkezzen be.</li>
-<li>Adja meg a kezdő személyt és a behozni kívánt nemzedékek számát.</li>
-<li>A háttér-letöltés futtatása közben tovább dolgozhat: a folyamat kicsinyíthető vagy le is állítható.</li>
-</ol>
-<div class="box tip"><span class="t">Nem kell újra bejelentkeznie</span> A program megjegyzi a FamilySearch-bejelentkezést, így nem kell minden indításkor újra beírnia a jelszavát.</div>
-<p>Ha egy import félbeszakadt, a program felajánlja a félbemaradt adatok rendberakását (takarítását), hogy minden tiszta maradjon.</p>
-
-<h1>9. GEDCOM exportálás</h1>
-<p class="lead">Az exportálással megoszthatja a családfáját más programokkal vagy emberekkel.</p>
-<p>Az export előtt egy beállító ablak jelenik meg, ahol eldöntheti, kik kerüljenek a fájlba:</p>
-<table>
-<tr><th>Választás</th><th>Kik kerülnek be?</th></tr>
-<tr><td>Mindenki</td><td>A teljes családfa.</td></tr>
-<tr><td>Vérrokonok</td><td>Csak a vér szerinti rokonok.</td></tr>
-<tr><td>Ősök</td><td>A kiválasztott személy felmenői.</td></tr>
-<tr><td>Leszármazottak</td><td>A kiválasztott személy leszármazottai.</td></tr>
-</table>
-<p>A kezdő személy bárki lehet, és külön bekapcsolható, hogy a <b>házastársak</b> is bekerüljenek. Az ablak megmutatja, hány személy fog szerepelni a fájlban.</p>
-<div class="box tip"><span class="t">Példa</span> Ha egy unokatestvérének szeretné elküldeni a közös nagyszülők leszármazottait, válassza a nagyszülőt kezdő személynek, a <span class="ui">Leszármazottak</span> opciót, és kapcsolja be a házastársakat.</div>
-
-<h1>10. Biztonsági mentés és visszaállítás</h1>
-<p class="lead">A legjobb szokás, amit felvehet: rendszeresen mentse el a munkáját egy fájlba.</p>
-<ul>
-<li><b>Mentés:</b> a <span class="menu">Beállítások</span> menüből egyetlen fájlba mentheti a teljes családfáját. Tárolja ezt biztonságos helyen (pl. külső meghajtón vagy felhőben).</li>
-<li><b>Visszaállítás:</b> egy korábbi mentésből bármikor helyreállíthatja az adatait.</li>
-</ul>
-<div class="box warn"><span class="t">Figyelem</span> A visszaállítás <b>felülírja</b> a jelenlegi családfát a mentésben lévővel. Csak akkor használja, ha valóban a régi állapotot szeretné visszahozni.</div>
-
-<h1>11. A program frissítése</h1>
-<p>A TreeMonk automatikusan észleli, ha új verzió érhető el. Ilyenkor a felső sávban egy <b>villogó sárga gomb</b> hívja fel rá a figyelmét. Rákattintva a beállított nyelvén, szépen formázva olvashatja az újdonságokat, majd a <span class="ui">Letöltés</span> gombbal frissíthet.</p>
-<div class="box tip"><span class="t">Az adatai biztonságban vannak</span> A frissítés során a családfája és minden beállítása megmarad – nem kell tartania az adatvesztéstől.</div>
-
-<h1>12. Visszajelzés és support-csevegés</h1>
-
+<h2>8.2 FamilySearch-szinkron</h2>
+<p>A FamilySearch-szinkron <strong>fejlesztés alatt</strong> áll — hamarosan érkezik. Addig bármilyen GEDCOM-fájlból importálhatsz.</p>
 <h2>12.1 Visszajelzés</h2>
 <p>A <span class="ui">Hiba jelentése</span> gombbal (a bal menü tetején) vagy a <span class="menu">Beállítások</span> menüből küldhet visszajelzést. Választhat típust: <span class="ui">Hiba</span>, <span class="ui">Ötlet</span> vagy <span class="ui">Egyéb</span>, és megadhat egy e-mail-címet, ha választ szeretne (ez nem kötelező).</p>
 <div class="box note"><span class="t">Mi megy el?</span> Kizárólag az Ön üzenete, valamint a program verziója, az operációs rendszer és a nyelv. <b>A családfája adatai soha nem kerülnek elküldésre.</b></div>
@@ -443,9 +409,6 @@
 
 <h3>Lassú a program nagy családfánál.</h3>
 <p>Kapcsolja ki az animációkat a <span class="menu">Beállítások</span> menüben, és a fán zoomoljon ki egy kicsit – így a program érezhetően gyorsabb lesz.</p>
-
-<h3>Minden indításkor kéri a FamilySearch-jelszavamat.</h3>
-<p>Ezt a hibát javítottuk. Írja be a jelszavát még egyszer – ezután a program megjegyzi, és nem kéri újra minden indításkor.</p>
 
 <h3>Windowson nem indul el a telepítő.</h3>
 <p>Ez a SmartScreen védelem miatt van, és teljesen normális. Kattintson a <span class="ui">További információ</span> szövegre, majd a <span class="ui">Futtatás mindenképp</span> gombra (lásd a 3.1 pontot).</p>
@@ -742,40 +705,8 @@
 </ol>
 <div class="box note"><span class="t">Good to know</span> TreeMonk avoids creating duplicates, and people who lived very long ago are brought in as presumed deceased.</div>
 
-<h2>8.2 From FamilySearch</h2>
-<ol class="steps">
-  <li>Start the FamilySearch import from <span class="menu">Settings</span>.</li>
-  <li>Log in to your FamilySearch account.</li>
-  <li>Choose a starting person and how many generations to fetch.</li>
-  <li>The download runs in the background — you can minimise it, or stop it whenever you like.</li>
-</ol>
-<div class="box tip"><span class="t">No need to log in every time</span> TreeMonk remembers your FamilySearch login across restarts, so you only sign in once.</div>
-<div class="box note"><span class="t">If an import was interrupted</span> No problem — TreeMonk can clean up after a download that didn't finish, so your tree stays tidy.</div>
-
-<h1>9. GEDCOM export</h1>
-<p class="lead">Send part or all of your tree to someone else, or keep a copy in the standard format.</p>
-<p>When you export, a settings dialog lets you choose exactly who to include:</p>
-<table>
-  <tr><th>Choice</th><th>Who's included</th></tr>
-  <tr><td>Everyone</td><td>Your whole tree.</td></tr>
-  <tr><td>Blood relatives</td><td>People related to the starting person by birth.</td></tr>
-  <tr><td>Ancestors</td><td>The starting person's parents, grandparents, and so on.</td></tr>
-  <tr><td>Descendants</td><td>The starting person's children, grandchildren, and so on.</td></tr>
-</table>
-<p>The starting person can be anyone you choose, and you can decide whether to include spouses. A live count shows how many people will be exported.</p>
-<div class="box tip"><span class="t">Example</span> Want to share your father's side with a cousin? Pick your father as the starting person, choose Ancestors (or Blood relatives), include spouses, and export — then send them the file.</div>
-
-<h1>10. Backup &amp; restore</h1>
-<p class="lead">Keeping a backup means your hard work is always safe.</p>
-<p>A backup saves your entire tree into a single file. Store it somewhere safe — for example a USB stick or a cloud folder. To bring it back, use restore and choose your backup file.</p>
-<div class="box warn"><span class="t">Restore overwrites</span> Restoring replaces your current tree with the one in the backup. If you have new work you want to keep, make a fresh backup first.</div>
-
-<h1>11. Updating</h1>
-<p>TreeMonk checks for new versions for you. When one is ready, you'll see a gently blinking yellow button. Click it to read the release notes — written clearly and in your own language — then choose <span class="ui">Download</span> to update.</p>
-<div class="box tip"><span class="t">Your data is safe</span> Updating never touches your family tree. All your people, photos and sources stay exactly as they were.</div>
-
-<h1>12. Feedback &amp; support chat</h1>
-
+<h2>8.2 FamilySearch</h2>
+<p>FamilySearch sync is <strong>in development</strong> — coming soon. For now, you can import from any GEDCOM file.</p>
 <h2>12.1 Feedback</h2>
 <p>Found a bug or have a great idea? Send feedback right from the app. Choose <span class="ui">Bug</span>, <span class="ui">Idea</span> or <span class="ui">Other</span>, write your message, and optionally add your email so the developer can reply.</p>
 <div class="box note"><span class="t">What gets sent</span> Only your message, plus your app version, operating system and language. Your family tree is <strong>never</strong> sent.</div>
@@ -806,9 +737,6 @@
 
 <h3>The app feels slow on my huge tree.</h3>
 <p>Turn off animations in <span class="menu">Settings</span>, and zoom out a little. Both make a big difference on very large families.</p>
-
-<h3>It keeps asking for my FamilySearch password every time I open it.</h3>
-<p>This has been fixed. Enter your password once more, and from then on TreeMonk will remember it for you.</p>
 
 <h3>The Windows installer won't start.</h3>
 <p>That's Windows SmartScreen being cautious about a new app. Click <span class="ui">More info</span>, then <span class="ui">Run anyway</span>, and it will install normally.</p>
@@ -1103,43 +1031,8 @@
 </ol>
 <div class="box note"><span class="t">Gut zu wissen</span> TreeMonk erzeugt beim Import <strong>keine Duplikate</strong>. Personen, die schon sehr lange verstorben sind, werden als <em>vermutlich verstorben</em> übernommen.</div>
 
-<h2>8.2 Von FamilySearch importieren</h2>
-<ol class="steps">
-  <li>Starten Sie den FamilySearch-Import in den <span class="menu">Einstellungen</span>.</li>
-  <li><strong>Melden Sie sich</strong> mit Ihrem FamilySearch-Konto an.</li>
-  <li>Wählen Sie die <strong>Startperson</strong> und die Anzahl der <strong>Generationen</strong>, die geladen werden sollen.</li>
-  <li>Der Download läuft im Hintergrund. Sie können das Fenster <strong>verkleinern</strong> und weiterarbeiten oder den Vorgang <strong>stoppen</strong>.</li>
-</ol>
-<div class="box tip"><span class="t">Einmal anmelden genügt</span> TreeMonk <strong>merkt sich</strong> Ihre FamilySearch-Anmeldung über Neustarts hinweg. Sie müssen Ihr Passwort also nicht jedes Mal neu eingeben.</div>
-<p>Wurde ein Import abgebrochen, hilft Ihnen TreeMonk anschließend beim <strong>Aufräumen</strong> der unvollständig geladenen Daten.</p>
-
-<h1>9. GEDCOM-Export</h1>
-<p>Sie können Ihren Stammbaum – ganz oder teilweise – als GEDCOM-Datei ausgeben, um ihn weiterzugeben. Im Export-Dialog legen Sie fest, <strong>wer enthalten</strong> sein soll:</p>
-<table>
-  <tr><th>Auswahl</th><th>Bedeutung</th></tr>
-  <tr><td>Alle</td><td>Der gesamte Stammbaum.</td></tr>
-  <tr><td>Blutsverwandte</td><td>Nur die blutsverwandten Personen.</td></tr>
-  <tr><td>Vorfahren</td><td>Nur die Vorfahren der gewählten Startperson.</td></tr>
-  <tr><td>Nachkommen</td><td>Nur die Nachkommen der gewählten Startperson.</td></tr>
-</table>
-<p>Die <strong>Startperson</strong> für den Export können Sie frei wählen. Zusätzlich entscheiden Sie, ob die <strong>Ehepartner einbezogen</strong> werden, und sehen die <strong>Anzahl</strong> der enthaltenen Personen.</p>
-<div class="box tip"><span class="t">Beispiel</span> Möchten Sie nur Ihren Zweig der Familie an einen Cousin senden, wählen Sie ihn als Startperson und exportieren nur seine Vorfahren – samt Ehepartnern.</div>
-
-<h1>10. Sicherung &amp; Wiederherstellung</h1>
-<p>Eine <strong>Sicherung</strong> ist eine einzelne Datei, die Ihren kompletten Stammbaum enthält. Legen Sie sie regelmäßig an und bewahren Sie sie an einem sicheren Ort auf.</p>
-<ol class="steps">
-  <li>Öffnen Sie die <span class="menu">Einstellungen</span>.</li>
-  <li>Klicken Sie auf <span class="ui">Sicherung</span> und wählen Sie einen Speicherort.</li>
-  <li>Zum Zurückspielen wählen Sie <span class="ui">Wiederherstellung</span> und dann Ihre Sicherungsdatei.</li>
-</ol>
-<div class="box warn"><span class="t">Achtung</span> Eine Wiederherstellung <strong>überschreibt</strong> den aktuellen Arbeitsbereich vollständig. Alle Daten werden durch den Inhalt der Sicherung ersetzt. Legen Sie im Zweifel vorher eine zusätzliche Sicherung an.</div>
-
-<h1>11. Aktualisierung</h1>
-<p>TreeMonk prüft selbst, ob eine neue Version verfügbar ist. Gibt es ein Update, erscheint oben eine <strong>blinkende gelbe Schaltfläche</strong>. Klicken Sie darauf, um die Neuerungen zu sehen – sie werden Ihnen <strong>übersichtlich und in Ihrer Sprache</strong> angezeigt. Mit <span class="ui">Herunterladen</span> holen Sie sich die neue Version.</p>
-<div class="box tip"><span class="t">Ihre Daten bleiben erhalten</span> Bei einer Aktualisierung bleibt Ihr Stammbaum unverändert bestehen. Es geht nichts verloren.</div>
-
-<h1>12. Feedback &amp; Support-Chat</h1>
-
+<h2>8.2 FamilySearch</h2>
+<p>Die FamilySearch-Synchronisierung ist <strong>in Entwicklung</strong> — kommt bald. Bis dahin kannst du aus jeder GEDCOM-Datei importieren.</p>
 <h2>12.1 Feedback senden</h2>
 <p>Über <span class="ui">Problem melden</span> bzw. das Feedback-Fenster teilen Sie uns Ihre Erfahrungen mit. Wählen Sie die Art Ihrer Nachricht: <strong>Fehler</strong>, <strong>Idee</strong> oder <strong>Sonstiges</strong>. Sie können freiwillig Ihre <strong>E-Mail-Adresse</strong> angeben, falls wir antworten sollen.</p>
 <div class="box note"><span class="t">Was gesendet wird</span> Es wird nur <strong>Ihre Nachricht</strong> sowie technische Eckdaten (Version, Betriebssystem, Sprache) übertragen. Ihr <strong>Stammbaum wird niemals</strong> mitgesendet.</div>
@@ -1171,9 +1064,6 @@
 
 <h3>Das Programm ist bei einem riesigen Baum langsam.</h3>
 <p>Schalten Sie in den <span class="menu">Einstellungen</span> die <strong>Animationen aus</strong> und zoomen Sie etwas heraus. So bleibt alles flüssig.</p>
-
-<h3>TreeMonk fragt bei jedem Start nach dem FamilySearch-Passwort.</h3>
-<p>Das ist behoben. Geben Sie Ihre Anmeldung einmal ein – danach merkt sich TreeMonk sie über Neustarts hinweg.</p>
 
 <h3>Der Windows-Installer startet nicht.</h3>
 <p>Vermutlich blockiert <strong>SmartScreen</strong>. Klicken Sie auf <span class="ui">Weitere Informationen</span> und dann auf <span class="ui">Trotzdem ausführen</span>.</p>
