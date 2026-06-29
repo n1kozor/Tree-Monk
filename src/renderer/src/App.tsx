@@ -26,6 +26,7 @@ import { FamilySearchProgress } from '@/components/settings/FamilySearchProgress
 import { MediaDownloadProgress } from '@/components/common/MediaDownloadProgress'
 import { CommandPalette } from '@/components/CommandPalette'
 import { SupportInviteDialog } from '@/components/common/SupportInviteDialog'
+import { FsAnnounceDialog } from '@/components/common/FsAnnounceDialog'
 import { isDemo } from '@/lib/demo'
 import { PersonPanel } from '@/components/person/PersonPanel'
 import { Preloader } from '@/components/common/Preloader'
@@ -107,6 +108,7 @@ export default function App(): JSX.Element {
   const animations = useSettings((s) => s.animations)
   const { t } = useTranslation() // re-render on language change
   const [supportInviteOpen, setSupportInviteOpen] = useState(false)
+  const [fsAnnounceOpen, setFsAnnounceOpen] = useState(false)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -125,17 +127,35 @@ export default function App(): JSX.Element {
     return () => clearTimeout(watchdog)
   }, [refreshAll])
 
-  // One-time, no-pressure support invitation — shown shortly after launch and,
-  // once seen (closed any way), NEVER again (flag stored in the DB). There is no
-  // rating/feedback prompt on launch anymore.
+  // One-time notice that the new FamilySearch API connection is in development —
+  // shown once shortly after launch, BEFORE the support invitation.
   useEffect(() => {
     let cancelled = false
     let timer: ReturnType<typeof setTimeout> | undefined
     if (isDemo()) return
-    void window.api.supportInvite
+    void window.api.fsAnnounce
       ?.status()
       .then((seen) => {
         if (cancelled || seen) return
+        timer = setTimeout(() => !cancelled && setFsAnnounceOpen(true), 900)
+      })
+      .catch(() => undefined)
+    return () => {
+      cancelled = true
+      if (timer) clearTimeout(timer)
+    }
+  }, [])
+
+  // One-time, no-pressure support invitation — shown shortly after launch, but
+  // only once the FamilySearch notice above has been seen (so it comes second).
+  // Once seen (closed any way), NEVER again (flag stored in the DB).
+  useEffect(() => {
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout> | undefined
+    if (isDemo()) return
+    void Promise.all([window.api.supportInvite?.status(), window.api.fsAnnounce?.status()])
+      .then(([seen, fsSeen]) => {
+        if (cancelled || seen || !fsSeen) return
         timer = setTimeout(() => !cancelled && setSupportInviteOpen(true), 1500)
       })
       .catch(() => undefined)
@@ -208,6 +228,7 @@ export default function App(): JSX.Element {
         <MediaDownloadProgress />
         <CommandPalette />
         <SupportInviteDialog open={supportInviteOpen} onOpenChange={setSupportInviteOpen} />
+        <FsAnnounceDialog open={fsAnnounceOpen} onOpenChange={setFsAnnounceOpen} />
         <Toaster theme={theme} position="bottom-right" richColors />
       </div>
     </MotionConfig>

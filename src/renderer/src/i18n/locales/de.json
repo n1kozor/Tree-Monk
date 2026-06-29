@@ -1637,5 +1637,11 @@
     "transferHint": "Über den Link kannst du auch einfach überweisen oder den QR-Code scannen.",
     "anytime": "Du kannst jederzeit unterstützen: über die ❤-Schaltfläche oben in der linken Leiste.",
     "ok": "Alles klar, danke!"
+  },
+  "fsAnnounce": {
+    "title": "Die neue FamilySearch-Verbindung kommt",
+    "body": "Wir arbeiten an der neuen FamilySearch-API-Verbindung, damit du deinen Stammbaum sicher über die eigene Anmeldung von FamilySearch erreichst.",
+    "body2": "Die Integration ist in Entwicklung und kommt bald. In der Zwischenzeit bleiben GEDCOM-Import/-Export und alle bisherigen Funktionen voll verfügbar.",
+    "ok": "Verstanden"
   }
 }

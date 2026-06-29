@@ -10,7 +10,6 @@ import {
   RotateCcw,
   Sparkles,
   Trash2,
-  TreeDeciduous,
   Type,
   Upload
 } from 'lucide-react'
@@ -21,7 +20,6 @@ import { cn } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { ExportGedcomDialog } from '@/components/common/ExportGedcomDialog'
-import { FamilySearchImport } from './FamilySearchImport'
 import { isDemo } from '@/lib/demo'
 import { runPlaceStandardization } from '@/lib/standardizePlaces'
 import { importGedcomWithToast } from '@/lib/importGedcom'
@@ -88,7 +86,6 @@ export function SettingsView(): JSX.Element {
   const { fontSize, animations, dateFormat, setFontSize, setAnimations, setDateFormat } =
     useSettings()
   const [restoreOpen, setRestoreOpen] = useState(false)
-  const [fsOpen, setFsOpen] = useState(false)
   const [resetOpen, setResetOpen] = useState(false)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
@@ -176,14 +173,6 @@ export function SettingsView(): JSX.Element {
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t('settings.data')}
           </h3>
-          {!isDemo() && (
-            <Row icon={TreeDeciduous} title={t('fs.title')} desc={t('fs.desc')}>
-              <Button size="sm" className="gap-2" onClick={() => setFsOpen(true)}>
-                <TreeDeciduous className="h-4 w-4" />
-                {t('fs.importBtn')}
-              </Button>
-            </Row>
-          )}
           {interrupted && (
             <div className="flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
               <AlertTriangle className="h-4 w-4 shrink-0" />
@@ -274,7 +263,6 @@ export function SettingsView(): JSX.Element {
         <p>{t('settings.resetWarning')}</p>
       </ConfirmDialog>
 
-      <FamilySearchImport open={fsOpen} onOpenChange={setFsOpen} />
 
       <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
 

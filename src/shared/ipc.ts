@@ -255,6 +255,10 @@ export const Channels = {
   supportInvite: {
     status: 'supportInvite:status',
     markSeen: 'supportInvite:markSeen'
+  },
+  fsAnnounce: {
+    status: 'fsAnnounce:status',
+    markSeen: 'fsAnnounce:markSeen'
   }
 } as const
 
@@ -547,6 +551,12 @@ export interface TreeMonkApi {
     /** True once the one-time support invitation has been seen (never again). */
     status(): Promise<boolean>
     /** Record that the support invitation was seen — never shown again. */
+    markSeen(): Promise<void>
+  }
+  fsAnnounce: {
+    /** True once the one-time FamilySearch-API notice has been seen. */
+    status(): Promise<boolean>
+    /** Record that the FamilySearch-API notice was seen — never shown again. */
     markSeen(): Promise<void>
   }
 }

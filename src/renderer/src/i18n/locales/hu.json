@@ -1637,5 +1637,11 @@
     "transferHint": "A linken utalni is tudsz, vagy beolvashatod a QR-kódot.",
     "anytime": "Bármikor támogathatsz: a bal oldali sávban fent a ❤ gombbal.",
     "ok": "Rendben, köszönöm!"
+  },
+  "fsAnnounce": {
+    "title": "Készül az új FamilySearch-kapcsolat",
+    "body": "Dolgozunk az új FamilySearch-API kapcsolaton, hogy a fádat biztonságosan, a FamilySearch saját bejelentkezésén keresztül érhesd majd el.",
+    "body2": "Az integráció fejlesztés alatt áll, hamarosan érkezik. Addig a GEDCOM-import és -export, valamint minden eddigi funkció változatlanul elérhető.",
+    "ok": "Értem"
   }
 }

@@ -234,6 +234,10 @@ const api: TreeMonkApi = {
   supportInvite: {
     status: () => ipcRenderer.invoke(Channels.supportInvite.status),
     markSeen: () => ipcRenderer.invoke(Channels.supportInvite.markSeen)
+  },
+  fsAnnounce: {
+    status: () => ipcRenderer.invoke(Channels.fsAnnounce.status),
+    markSeen: () => ipcRenderer.invoke(Channels.fsAnnounce.markSeen)
   }
 }
 

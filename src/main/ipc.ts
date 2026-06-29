@@ -660,4 +660,6 @@ export function registerIpc(): void {
   // so it never reappears once seen, on this or any future version.
   ipcMain.handle(Channels.supportInvite.status, () => AppSettings.get('support_invite_seen') === '1')
   ipcMain.handle(Channels.supportInvite.markSeen, () => AppSettings.set('support_invite_seen', '1'))
+  ipcMain.handle(Channels.fsAnnounce.status, () => AppSettings.get('fs_announce_seen') === '1')
+  ipcMain.handle(Channels.fsAnnounce.markSeen, () => AppSettings.set('fs_announce_seen', '1'))
 }

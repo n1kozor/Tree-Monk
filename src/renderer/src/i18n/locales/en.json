@@ -1637,5 +1637,11 @@
     "transferHint": "On the link you can simply transfer, or scan the QR code.",
     "anytime": "You can support anytime: the ❤ button at the top of the left sidebar.",
     "ok": "Okay, thank you!"
+  },
+  "fsAnnounce": {
+    "title": "The new FamilySearch connection is coming",
+    "body": "We're working on the new FamilySearch API connection, so you'll be able to reach your tree securely through FamilySearch's own sign-in.",
+    "body2": "The integration is in development and coming soon. Meanwhile, GEDCOM import/export and every existing feature remain fully available.",
+    "ok": "Got it"
   }
 }
