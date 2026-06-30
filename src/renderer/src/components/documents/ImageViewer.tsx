@@ -83,7 +83,7 @@ export function ImageViewer({
           <Loader2 className="h-9 w-9 animate-spin text-white/70" />
         </div>
       )}
-      <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-lg border border-border bg-card/90 p-1 backdrop-blur">
+      <div className="glass-strong absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-2xl p-1">
         <Button
           variant="ghost"
           size="icon"

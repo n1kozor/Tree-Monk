@@ -895,7 +895,7 @@ export function GenealogyMap(): JSX.Element {
       <div ref={containerRef} className="h-full w-full" />
 
       {/* ---- Base-map segmented switcher (top center) ---- */}
-      <div className="tm-glass absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-1 rounded-full p-1.5">
+      <div className="glass-strong absolute left-1/2 top-3 z-30 flex -translate-x-1/2 items-center gap-1 rounded-full p-1.5">
         {MODES.map(({ key, icon: Icon, label }) => (
           <button
             key={key}
@@ -915,14 +915,14 @@ export function GenealogyMap(): JSX.Element {
       <button
         onClick={resetView}
         title={t('map.resetView')}
-        className="tm-glass absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-2xl text-foreground transition-all hover:scale-105 hover:text-primary"
+        className="glass-strong absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-2xl text-foreground transition-all hover:scale-105 hover:text-primary"
       >
         <Compass className="h-5 w-5" />
       </button>
 
       {/* ---- Historical-events panel (Wikidata) ---- */}
       {histLoading && (
-        <div className="tm-glass absolute right-3 top-16 z-30 flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium text-foreground">
+        <div className="glass-strong absolute right-3 top-16 z-30 flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium text-foreground">
           <span className="h-3 w-3 animate-spin rounded-full border-2 border-amber-500 border-t-transparent" />
           {t('map.histLoading')}
         </div>
@@ -930,13 +930,13 @@ export function GenealogyMap(): JSX.Element {
       {!histLoading && (histEvents.length > 0 || worldEvents.length > 0) && !histPanelOpen && (
         <button
           onClick={() => setHistPanelOpen(true)}
-          className="tm-glass absolute right-3 top-16 z-30 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-foreground transition-transform hover:scale-105"
+          className="glass-strong absolute right-3 top-16 z-30 flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold text-foreground transition-transform hover:scale-105"
         >
           <Landmark className="h-4 w-4 text-amber-500" /> {histEvents.length + worldEvents.length}
         </button>
       )}
       {!histLoading && (histEvents.length > 0 || worldEvents.length > 0) && histPanelOpen && (
-        <div className="tm-glass absolute right-3 top-16 z-30 flex max-h-[62vh] w-72 flex-col overflow-hidden rounded-2xl text-foreground">
+        <div className="glass-strong absolute right-3 top-16 z-30 flex max-h-[62vh] w-72 flex-col overflow-hidden rounded-2xl text-foreground">
           <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
             <span className="flex items-center gap-1.5 text-sm font-semibold">
               <Landmark className="h-4 w-4 text-amber-500" /> {t('map.histTitle')}
@@ -994,7 +994,7 @@ export function GenealogyMap(): JSX.Element {
       )}
 
       {/* ---- Control panel ---- */}
-      <div className="tm-glass absolute left-3 top-3 z-30 flex max-h-[calc(100%-1.5rem)] w-80 flex-col overflow-hidden rounded-2xl text-foreground">
+      <div className="glass-strong absolute left-3 top-3 z-30 flex max-h-[calc(100%-1.5rem)] w-80 flex-col overflow-hidden rounded-2xl text-foreground">
         <div className="space-y-3 overflow-y-auto p-4">
           {/* Search */}
           <div className="relative">
@@ -1008,7 +1008,7 @@ export function GenealogyMap(): JSX.Element {
               }}
               onFocus={() => setPersonMenu(true)}
               placeholder={t('map.searchPerson')}
-              className="h-9 w-full rounded-xl border border-border bg-background/50 pl-9 pr-8 text-sm outline-none transition-colors focus:border-primary/60"
+              className="h-9 w-full rounded-xl border border-border/40 bg-background/50 pl-9 pr-8 text-sm outline-none transition-colors focus:border-primary/60"
             />
             {(personQuery || personFilter) && (
               <button
@@ -1020,7 +1020,7 @@ export function GenealogyMap(): JSX.Element {
               </button>
             )}
             {personMenu && personMatches.length > 0 && !personFilter && (
-              <div className="absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-xl border border-border bg-popover p-1 shadow-2xl">
+              <div className="glass-strong absolute z-20 mt-1 max-h-72 w-full overflow-y-auto rounded-xl p-1">
                 {personMatches.map((p) => {
                   const by = yearOf(p.birthDate)
                   const dy = yearOf(p.deathDate)
@@ -1057,7 +1057,7 @@ export function GenealogyMap(): JSX.Element {
           {/* Filters toggle */}
           <button
             onClick={() => setPanelOpen((v) => !v)}
-            className="flex w-full items-center justify-between border-t border-border pt-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
+            className="flex w-full items-center justify-between border-t border-border/40 pt-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground"
           >
             <span className="flex items-center gap-1.5">
               <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -1074,7 +1074,7 @@ export function GenealogyMap(): JSX.Element {
               'flex w-full items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-medium transition-colors',
               bloodOnly
                 ? 'border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                : 'border-border text-muted-foreground hover:text-foreground'
+                : 'border-border/40 text-muted-foreground hover:text-foreground'
             )}
           >
             <Droplet className="h-3.5 w-3.5" />
@@ -1092,7 +1092,7 @@ export function GenealogyMap(): JSX.Element {
                     onClick={() => setKinds((p) => ({ ...p, [k]: !p[k] }))}
                     className={cn(
                       'flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 py-1.5 text-[11px] font-semibold transition-colors',
-                      kinds[k] ? 'border-transparent text-white' : 'border-border bg-background/40 text-muted-foreground hover:text-foreground'
+                      kinds[k] ? 'border-transparent text-white' : 'border-border/40 bg-background/40 text-muted-foreground hover:text-foreground'
                     )}
                     style={kinds[k] ? { background: KIND_COLOR[k] } : undefined}
                   >
@@ -1154,7 +1154,7 @@ export function GenealogyMap(): JSX.Element {
                       value={surnameQuery}
                       onChange={(e) => setSurnameQuery(e.target.value)}
                       placeholder={t('map.searchSurname')}
-                      className="h-7 w-full rounded-md border border-border bg-background/50 pl-7 pr-2 text-xs outline-none focus:border-primary/60"
+                      className="h-7 w-full rounded-xl border border-border/40 bg-background/50 pl-7 pr-2 text-xs outline-none focus:border-primary/60"
                     />
                   </div>
                   <div className="flex max-h-28 flex-wrap gap-1.5 overflow-y-auto">
@@ -1171,7 +1171,7 @@ export function GenealogyMap(): JSX.Element {
                             'rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors',
                             surnames.has(s)
                               ? 'border-primary bg-primary/20 text-primary'
-                              : 'border-border bg-background/40 text-muted-foreground hover:text-foreground'
+                              : 'border-border/40 bg-background/40 text-muted-foreground hover:text-foreground'
                           )}
                         >
                           {s}
@@ -1184,7 +1184,7 @@ export function GenealogyMap(): JSX.Element {
               {/* Migration toggle */}
               <button
                 onClick={() => setShowMigration((v) => !v)}
-                className="flex w-full items-center justify-between rounded-xl border border-border bg-background/40 px-3 py-2 text-xs font-medium transition-colors hover:bg-accent/40"
+                className="flex w-full items-center justify-between rounded-xl border border-border/40 bg-background/40 px-3 py-2 text-xs font-medium transition-colors hover:bg-accent/40"
               >
                 <span className="flex items-center gap-2">
                   <Route className="h-4 w-4 text-sky-400" />
@@ -1199,7 +1199,7 @@ export function GenealogyMap(): JSX.Element {
               <button
                 onClick={runGeocode}
                 disabled={geocoding}
-                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-background/40 px-3 py-2 text-xs font-medium transition-colors hover:bg-accent/40 disabled:opacity-70"
+                className="flex w-full items-center justify-center gap-2 rounded-xl border border-border/40 bg-background/40 px-3 py-2 text-xs font-medium transition-colors hover:bg-accent/40 disabled:opacity-70"
               >
                 <MapPin className={cn('h-4 w-4 text-emerald-400', geocoding && 'animate-pulse')} />
                 {geocoding
@@ -1223,7 +1223,7 @@ export function GenealogyMap(): JSX.Element {
 
       {filtered.length === 0 && !touring && (
         <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
-          <p className="max-w-sm rounded-lg bg-card/90 px-4 py-3 text-center text-sm text-muted-foreground shadow-lg backdrop-blur">{t('map.empty')}</p>
+          <p className="glass-strong max-w-sm rounded-2xl px-4 py-3 text-center text-sm text-muted-foreground">{t('map.empty')}</p>
         </div>
       )}
 
@@ -1232,7 +1232,7 @@ export function GenealogyMap(): JSX.Element {
         <button
           onClick={() => setTourSetupOpen(true)}
           title={t('tour.title')}
-          className="tm-glass absolute bottom-4 left-3 z-30 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-foreground shadow-lg transition-transform hover:scale-105 hover:text-primary"
+          className="glass-strong absolute bottom-4 left-3 z-30 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-foreground transition-transform hover:scale-105 hover:text-primary"
         >
           <Footprints className="h-4 w-4 text-primary" />
           {t('tour.title')}

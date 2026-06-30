@@ -336,14 +336,14 @@ export function FamilyTree(): JSX.Element {
 
   const Controls = (
     <div className="absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-1 rounded-lg border border-border bg-card/90 p-1 shadow-xl backdrop-blur">
+      <div className="glass-subtle flex items-center gap-1 rounded-xl p-1">
         {VIEWS.map(({ key, icon: Icon, labelKey }) => (
           <button
             key={key}
             onClick={() => setView(key)}
             title={t(labelKey)}
-            className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              view === key ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground'
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
+              view === key ? 'bg-primary/20 text-primary ring-1 ring-primary/20' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <Icon className="h-3.5 w-3.5" />
@@ -358,10 +358,10 @@ export function FamilyTree(): JSX.Element {
         <button
           onClick={() => setFilterOpen((v) => !v)}
           title={t('tree.filter')}
-          className={`flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium shadow-xl backdrop-blur transition-colors ${
+          className={`glass-subtle flex h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium transition-colors ${
             filterOpen
-              ? 'border-primary/50 bg-primary/15 text-primary'
-              : 'border-border bg-card/90 text-muted-foreground hover:text-primary'
+              ? 'bg-primary/15 text-primary ring-1 ring-primary/20'
+              : 'text-muted-foreground hover:text-primary'
           }`}
         >
           <Wand2 className="h-4 w-4" />
@@ -370,10 +370,10 @@ export function FamilyTree(): JSX.Element {
       )}
 
       {view === 'fan' && (
-        <div className="flex items-center gap-1 rounded-lg border border-border bg-card/90 p-1 shadow-xl backdrop-blur">
+        <div className="glass-subtle flex items-center gap-1 rounded-xl p-1">
           <button
             onClick={() => setGenerations((g) => Math.max(2, g - 1))}
-            className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+            className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
           >
             <Minus className="h-3.5 w-3.5" />
           </button>
@@ -382,7 +382,7 @@ export function FamilyTree(): JSX.Element {
           </span>
           <button
             onClick={() => setGenerations((g) => Math.min(6, g + 1))}
-            className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+            className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
           >
             <Plus className="h-3.5 w-3.5" />
           </button>
@@ -397,7 +397,7 @@ export function FamilyTree(): JSX.Element {
       <button
         onClick={() => setExportOpen(true)}
         title={t('export.title')}
-        className="flex h-8 items-center gap-1.5 rounded-lg border border-border bg-card/90 px-2.5 text-xs font-medium text-muted-foreground shadow-xl backdrop-blur transition-colors hover:text-primary"
+        className="glass-subtle flex h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         <Printer className="h-4 w-4" />
         <span className="hidden lg:inline">{t('export.action')}</span>
@@ -557,7 +557,7 @@ export function FamilyTree(): JSX.Element {
         <button
           onClick={resetToRoot}
           title={t('tree.resetToRoot')}
-          className="absolute bottom-5 right-5 z-10 flex items-center gap-2 rounded-full border border-border bg-card/90 px-4 py-2.5 text-sm font-medium text-foreground shadow-2xl backdrop-blur transition-colors hover:bg-accent hover:text-primary"
+          className="glass glass-hover absolute bottom-5 right-5 z-10 flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:text-primary"
         >
           <LocateFixed className="h-4 w-4 text-primary" />
           <span className="hidden md:inline">{t('tree.resetToRoot')}</span>

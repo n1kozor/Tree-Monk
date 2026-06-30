@@ -87,7 +87,7 @@ export function DocumentViewerDialog({
                 onClick={goPrev}
                 disabled={idx <= 0}
                 title={t('documents.prev')}
-                className="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/90 text-foreground shadow-lg backdrop-blur transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-30"
+                className="glass-strong absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -95,7 +95,7 @@ export function DocumentViewerDialog({
                 onClick={goNext}
                 disabled={idx >= list.length - 1}
                 title={t('documents.next')}
-                className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-border bg-card/90 text-foreground shadow-lg backdrop-blur transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-30"
+                className="glass-strong absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-foreground transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:opacity-30"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>

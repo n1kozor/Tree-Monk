@@ -167,8 +167,10 @@ export function DocumentsView(): JSX.Element {
     <button
       onClick={() => setAttach(value)}
       className={cn(
-        'rounded-md px-2.5 py-1 text-xs font-medium transition-colors',
-        attach === value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+        'rounded-xl px-2.5 py-1 text-xs font-medium transition-colors',
+        attach === value
+          ? 'bg-background text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
+          : 'text-muted-foreground hover:text-foreground'
       )}
     >
       {label}
@@ -178,7 +180,7 @@ export function DocumentsView(): JSX.Element {
   return (
     <div className="flex h-full flex-col">
       {/* ---- Toolbar ---- */}
-      <div className="space-y-2.5 border-b border-border p-4">
+      <div className="glass-subtle space-y-2.5 border-b border-border/40 p-4">
         <div className="flex items-center gap-2">
           <div className="relative max-w-sm flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -207,10 +209,10 @@ export function DocumentsView(): JSX.Element {
                 key={id}
                 onClick={() => setType(id)}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-medium transition-colors',
+                  'flex items-center gap-1.5 rounded-xl border px-2 py-1 text-xs font-medium transition-colors',
                   type === id
                     ? 'border-primary bg-primary/15 text-primary'
-                    : 'border-border text-muted-foreground hover:bg-accent'
+                    : 'border-border/40 text-muted-foreground hover:bg-accent'
                 )}
               >
                 <Icon className="h-3.5 w-3.5" />
@@ -222,7 +224,7 @@ export function DocumentsView(): JSX.Element {
           <div className="h-5 w-px bg-border" />
 
           {/* Attachment segmented */}
-          <div className="flex items-center gap-0.5 rounded-lg bg-secondary p-0.5">
+          <div className="flex items-center gap-0.5 rounded-xl bg-secondary/40 p-0.5">
             {attachBtn('all', t('documents.attachAll'))}
             {attachBtn('attached', t('documents.attached'))}
             {attachBtn('unattached', t('documents.unattachedShort'))}
@@ -234,7 +236,7 @@ export function DocumentsView(): JSX.Element {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
-            className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-primary"
+            className="h-8 rounded-xl border border-border/40 bg-background px-2 text-xs text-foreground outline-none focus:border-primary"
             title={t('documents.sort')}
           >
             <option value="newest">{t('documents.sortNewest')}</option>
@@ -299,7 +301,7 @@ export function DocumentsView(): JSX.Element {
           {attachedNames.length > 0 ? (
             <>
               <p className="mb-2">{t('delete.docAttached')}</p>
-              <ul className="mb-2 space-y-1 rounded-md border border-border bg-secondary/30 p-2">
+              <ul className="mb-2 space-y-1 rounded-xl border border-border/40 bg-secondary/40 p-2">
                 {attachedNames.map((n) => (
                   <li key={n} className="flex items-center gap-2 text-foreground">
                     <Users className="h-3.5 w-3.5 text-muted-foreground" /> {n}

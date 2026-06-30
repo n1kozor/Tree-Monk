@@ -49,7 +49,7 @@ export function PersonAliases({ personId }: { personId: string }): JSX.Element {
           {list.map((a) => (
             <span
               key={a.id}
-              className="flex items-center gap-1 rounded-full border border-border bg-secondary/50 py-1 pl-2.5 pr-1 text-xs"
+              className="flex items-center gap-1 rounded-full border border-border/40 bg-secondary/40 py-1 pl-2.5 pr-1 text-xs"
             >
               {formatName(a.givenName, a.surname) || '—'}
               <button onClick={() => remove(a.id)} className="rounded-full p-0.5 text-muted-foreground hover:text-destructive">

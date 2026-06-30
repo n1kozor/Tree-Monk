@@ -115,7 +115,7 @@ function DescendantTreeImpl({
 
       {hover && (
         <div
-          className="pointer-events-none fixed z-50 rounded-md border border-border bg-popover px-2.5 py-1.5 text-popover-foreground shadow-xl"
+          className="glass-strong pointer-events-none fixed z-50 rounded-xl px-2.5 py-1.5 text-card-foreground"
           style={{ left: hover.mx + 14, top: hover.my + 14 }}
         >
           <p className="text-xs font-semibold">{hover.label}</p>

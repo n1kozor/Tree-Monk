@@ -48,7 +48,7 @@ export function Topbar(): JSX.Element {
   const themeTitle = theme === 'dark' ? t('theme.light') : t('theme.dark')
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-card/30 px-4">
+    <header className="glass-edge relative z-30 flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border/40 px-4">
       <div className="flex min-w-0 items-center">
         <WorkspaceSwitcher />
       </div>

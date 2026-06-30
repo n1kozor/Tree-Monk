@@ -98,7 +98,7 @@ function EventEditDialog({
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus:border-primary"
+              className="h-9 w-full rounded-lg border border-input bg-background px-2 text-sm text-foreground outline-none focus:border-primary"
             >
               {options.map((ty) => (
                 <option key={ty} value={ty}>
@@ -194,9 +194,9 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
               tabIndex={0}
               onClick={() => setEditing(e)}
               onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && setEditing(e)}
-              className="group flex cursor-pointer items-center gap-2 rounded-md border border-border bg-secondary/40 px-2.5 py-1 text-xs transition-colors hover:border-primary/40 hover:bg-accent"
+              className="group flex cursor-pointer items-center gap-2 rounded-lg border border-border/40 bg-secondary/40 px-2.5 py-1 text-xs transition-colors hover:border-primary/40 hover:bg-accent"
             >
-              <span className="shrink-0 rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              <span className="shrink-0 rounded bg-secondary/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {typeLabel(t, e.type)}
               </span>
               <span className="min-w-0 flex-1 truncate">
@@ -222,7 +222,7 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
         <select
           value={type}
           onChange={(e) => setType(e.target.value as EventType)}
-          className="h-8 shrink-0 rounded-md border border-input bg-background px-2 text-xs text-foreground outline-none focus:border-primary"
+          className="h-8 shrink-0 rounded-lg border border-input bg-background px-2 text-xs text-foreground outline-none focus:border-primary"
         >
           {TYPES.map((ty) => (
             <option key={ty} value={ty}>

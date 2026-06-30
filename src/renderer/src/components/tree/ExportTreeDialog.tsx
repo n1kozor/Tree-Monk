@@ -452,7 +452,7 @@ export function ExportTreeDialog({
           )}
 
           {/* Estimate */}
-          <div className="rounded-lg border border-border bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">
+          <div className="rounded-xl border border-border/40 bg-secondary/30 px-3 py-2 text-xs text-muted-foreground">
             {dims ? (
               <>
                 {t('export.estSize', { w: mm(dims.width), h: mm(dims.height) })}
@@ -502,15 +502,15 @@ function Segmented({
   options: { value: string; label: string; icon?: React.ReactNode }[]
 }): JSX.Element {
   return (
-    <div className="flex flex-wrap gap-1 rounded-lg border border-border bg-secondary/40 p-1">
+    <div className="flex flex-wrap gap-1 rounded-xl border border-border/40 bg-secondary/40 p-1">
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
-          className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
+          className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium transition-colors ${
             value === o.value
-              ? 'bg-primary/20 text-primary'
+              ? 'bg-primary/20 text-primary ring-1 ring-primary/20'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
@@ -538,11 +538,11 @@ function Stepper({
   onChange: (v: number) => void
 }): JSX.Element {
   return (
-    <div className="flex items-center gap-1 rounded-lg border border-border bg-secondary/40 p-1">
+    <div className="flex items-center gap-1 rounded-xl border border-border/40 bg-secondary/40 p-1">
       <button
         type="button"
         onClick={() => onChange(Math.max(min, value - step))}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+        className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
       >
         <Minus className="h-3.5 w-3.5" />
       </button>
@@ -553,7 +553,7 @@ function Stepper({
       <button
         type="button"
         onClick={() => onChange(Math.min(max, value + step))}
-        className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
+        className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
       >
         <Plus className="h-3.5 w-3.5" />
       </button>
@@ -574,10 +574,10 @@ function Toggle({
     <button
       type="button"
       onClick={onToggle}
-      className={`rounded-md border px-2.5 py-1 text-xs font-medium transition-colors ${
+      className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors ${
         on
-          ? 'border-primary/40 bg-primary/20 text-primary'
-          : 'border-border bg-secondary/40 text-muted-foreground hover:text-foreground'
+          ? 'border-primary/40 bg-primary/20 text-primary ring-1 ring-primary/20'
+          : 'border-border/40 bg-secondary/40 text-muted-foreground hover:text-foreground'
       }`}
     >
       {label}

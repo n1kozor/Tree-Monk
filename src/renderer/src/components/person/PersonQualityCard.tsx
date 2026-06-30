@@ -17,7 +17,7 @@ export function PersonQualityCard({ person }: { person: Person }): JSX.Element {
   const complete = q.missing.length === 0
 
   return (
-    <div className="flex items-center gap-4 rounded-2xl border border-border bg-card/60 p-4 shadow-sm">
+    <div className="glass flex items-center gap-4 rounded-2xl p-4">
       <QualityRing value={q.score} size={68} />
       <div className="min-w-0 flex-1">
         <p className="flex items-center gap-1.5 text-sm font-semibold">
@@ -32,7 +32,7 @@ export function PersonQualityCard({ person }: { person: Person }): JSX.Element {
             <p className="mt-1 text-[11px] text-muted-foreground">{t('quality.missing')}</p>
             <div className="mt-1.5 flex flex-wrap gap-1">
               {q.missing.map((f) => (
-                <span key={f} className="rounded-md bg-secondary px-1.5 py-0.5 text-[11px] text-muted-foreground">
+                <span key={f} className="rounded-md bg-secondary/40 px-1.5 py-0.5 text-[11px] text-muted-foreground">
                   {t(`quality.field.${f}`)}
                 </span>
               ))}

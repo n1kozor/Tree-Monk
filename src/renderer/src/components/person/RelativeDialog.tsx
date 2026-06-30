@@ -120,13 +120,15 @@ export function RelativeDialog({
         </DialogHeader>
 
         {onPickExisting && (
-          <div className="flex gap-1 rounded-lg border border-border bg-secondary/40 p-1">
+          <div className="flex gap-1 rounded-xl border border-border/40 bg-secondary/40 p-1">
             <button
               type="button"
               onClick={() => setMode('create')}
               className={cn(
-                'flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
-                mode === 'create' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                'flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors',
+                mode === 'create'
+                  ? 'bg-card text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               <UserPlus className="h-3.5 w-3.5" /> {t('addPerson.createNew')}
@@ -135,8 +137,10 @@ export function RelativeDialog({
               type="button"
               onClick={() => setMode('existing')}
               className={cn(
-                'flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
-                mode === 'existing' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                'flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium transition-colors',
+                mode === 'existing'
+                  ? 'bg-card text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               <Link2 className="h-3.5 w-3.5" /> {t('addPerson.attachExisting')}
@@ -191,10 +195,10 @@ export function RelativeDialog({
                   type="button"
                   onClick={() => setSex(value)}
                   className={cn(
-                    'flex-1 rounded-md border px-2 py-1.5 text-xs font-medium transition-colors',
+                    'flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors',
                     sex === value
                       ? 'border-primary bg-primary/15 text-primary'
-                      : 'border-border text-muted-foreground hover:bg-accent'
+                      : 'border-border/40 text-muted-foreground hover:bg-accent'
                   )}
                 >
                   {label}

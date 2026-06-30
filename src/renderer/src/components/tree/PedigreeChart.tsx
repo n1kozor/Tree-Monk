@@ -431,11 +431,11 @@ export function PedigreeChart({
         background: layout.background === 'auto' ? 'hsl(var(--background))' : layout.background
       }}
     >
-      <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-border bg-card/90 p-1 shadow-xl backdrop-blur">
+      <div className="glass-subtle absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 rounded-xl p-1">
         <button
           onClick={expandAll}
           title={t('tree.expandAll')}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <Maximize2 className="h-3.5 w-3.5" />
           <span className="hidden xl:inline">{t('tree.expandAll')}</span>
@@ -443,7 +443,7 @@ export function PedigreeChart({
         <button
           onClick={collapseAll}
           title={t('tree.collapseAll')}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
+          className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
         >
           <Minimize2 className="h-3.5 w-3.5" />
           <span className="hidden xl:inline">{t('tree.collapseAll')}</span>
@@ -452,7 +452,7 @@ export function PedigreeChart({
         <button
           onClick={() => expandLine('father')}
           title={t('tree.paternalLine')}
-          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-sky-500 hover:bg-accent"
+          className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-sky-500 hover:bg-accent"
         >
           <span className="text-sm leading-none">♂</span>
           <span className="hidden lg:inline">{t('tree.paternalLine')}</span>
@@ -460,7 +460,7 @@ export function PedigreeChart({
         <button
           onClick={() => expandLine('mother')}
           title={t('tree.maternalLine')}
-          className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-pink-500 hover:bg-accent"
+          className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-pink-500 hover:bg-accent"
         >
           <span className="text-sm leading-none">♀</span>
           <span className="hidden lg:inline">{t('tree.maternalLine')}</span>
@@ -696,7 +696,7 @@ export function CoupleCard({
           <div className="fixed inset-0 z-40" onClick={() => setShowKids(false)} />
           <div
             onWheel={(e) => e.stopPropagation()}
-            className={`absolute left-0 right-0 z-50 max-h-52 overflow-y-auto overscroll-contain rounded-lg border border-border bg-popover shadow-2xl ${
+            className={`glass-strong absolute left-0 right-0 z-50 max-h-52 overflow-y-auto overscroll-contain rounded-2xl text-card-foreground ${
               openUp ? 'bottom-full mb-1' : 'top-full mt-1'
             }`}
           >
@@ -728,7 +728,7 @@ export function CoupleCard({
             <>
               <div className="fixed inset-0 z-40" onClick={() => setUnionMenu(null)} />
               <div
-                className={`absolute left-full z-50 ml-2 w-52 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-2xl ${
+                className={`glass-strong absolute left-full z-50 ml-2 w-52 overflow-hidden rounded-2xl p-1 text-card-foreground ${
                   unionMenu === 'primary' ? 'top-0' : 'bottom-0'
                 }`}
               >
@@ -861,7 +861,7 @@ function AddParentNode({
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={onClose} />
-          <div className="absolute left-7 top-0 z-50 w-40 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-2xl">
+          <div className="glass-strong absolute left-7 top-0 z-50 w-40 overflow-hidden rounded-2xl p-1 text-card-foreground">
             <p className="truncate px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">
               {forName}
             </p>

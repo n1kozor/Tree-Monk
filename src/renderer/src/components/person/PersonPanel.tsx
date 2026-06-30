@@ -226,8 +226,8 @@ export function PersonPanel(): JSX.Element | null {
 
   return (
     <>
-      <div data-testid="person-panel-backdrop" className="fixed inset-0 z-30 bg-black/40" onClick={close} />
-      <aside data-testid="person-panel" className="fixed right-0 top-0 z-40 flex h-full w-[500px] max-w-[92vw] animate-slide-in flex-col border-l border-border bg-card shadow-2xl">
+      <div data-testid="person-panel-backdrop" className="fixed inset-0 z-30 bg-black/25 backdrop-blur-md" onClick={close} />
+      <aside data-testid="person-panel" className="glass-strong fixed right-0 top-0 z-40 flex h-full w-[500px] max-w-[92vw] animate-slide-in flex-col rounded-l-3xl border-l border-border/40">
         {/* keyed by person id → re-runs a subtle swap animation so switching
             from one profile to another is clearly noticeable. */}
         <div key={person.id} className="flex min-h-0 flex-1 animate-panel-swap flex-col">

@@ -80,14 +80,14 @@ export function PlaceInput({
       />
       {loading && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
       {open && results.length > 0 && (
-        <div className="absolute z-50 mt-1 max-h-52 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-2xl">
+        <div className="glass-strong absolute z-50 mt-1 max-h-52 w-full overflow-y-auto rounded-2xl p-1">
           {results.map((r, i) => (
             <button
               key={i}
               type="button"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => pick(r)}
-              className="flex w-full items-start gap-2 rounded px-2 py-1.5 text-left text-xs hover:bg-accent"
+              className="flex w-full items-start gap-2 rounded-xl px-2 py-1.5 text-left text-xs hover:bg-accent"
             >
               <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
               <span className="line-clamp-2">{r.name}</span>

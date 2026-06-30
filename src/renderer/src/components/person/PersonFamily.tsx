@@ -244,7 +244,7 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
           <h4 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Users className="h-3.5 w-3.5" /> {t('person.parents')}
           </h4>
-          <div className="rounded-lg border border-border">
+          <div className="rounded-xl border border-border/40 bg-secondary/40">
             {[parentFamily.husbandId, parentFamily.wifeId]
               .map((id) => (id ? byId.get(id) : undefined))
               .filter((p): p is Person => !!p)
@@ -261,7 +261,7 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
           <h4 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Users className="h-3.5 w-3.5" /> {t('person.siblings')} ({fullSiblings.length})
           </h4>
-          <div className="rounded-lg border border-border">
+          <div className="rounded-xl border border-border/40 bg-secondary/40">
             {fullSiblings.map((p) => (
               <PersonRow key={p.id} p={p} onClick={() => selectPerson(p.id)} />
             ))}
@@ -278,7 +278,7 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
               · {otherParent ? fullName(otherParent) : t('common.unknown')}
             </span>
           </h4>
-          <div className="rounded-lg border border-border">
+          <div className="rounded-xl border border-border/40 bg-secondary/40">
             {kids.map((p) => (
               <PersonRow key={p.id} p={p} onClick={() => selectPerson(p.id)} />
             ))}
@@ -312,14 +312,14 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
             const spouse = spouseId ? byId.get(spouseId) : undefined
             const children = f.childIds.map((id) => byId.get(id)).filter((p): p is Person => !!p)
             return (
-              <div key={f.id} className="rounded-lg border border-border p-2">
+              <div key={f.id} className="rounded-xl border border-border/40 bg-secondary/40 p-2">
                 {spouse ? (
                   <PersonRow p={spouse} onClick={() => selectPerson(spouse.id)} />
                 ) : (
                   <p className="px-2 py-1.5 text-sm text-muted-foreground">{t('common.unknown')}</p>
                 )}
                 <MarriageEditor family={f} />
-                <div className="mt-1.5 border-t border-border/60 pt-1.5">
+                <div className="mt-1.5 border-t border-border/40 pt-1.5">
                   <div className="flex items-center justify-between px-2">
                     <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
                       <Baby className="h-3 w-3" /> {t('person.children')} ({children.length})

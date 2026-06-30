@@ -130,15 +130,15 @@ export function Sidebar(): JSX.Element {
         onClick={() => setView(v)}
         data-testid={`nav-${v}`}
         className={cn(
-          'relative flex h-10 items-center rounded-xl transition-colors',
+          'relative flex h-10 items-center rounded-xl transition-all duration-200',
           collapsed ? 'w-10 justify-center' : 'w-full gap-3 px-3',
           active
             ? tree
-              ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-              : 'bg-primary/20 text-primary'
+              ? 'bg-emerald-500/20 text-emerald-600 shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-emerald-500/20 dark:text-emerald-400'
+              : 'bg-primary/20 text-primary shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
             : tree
               ? 'text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400'
-              : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+              : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
         )}
       >
         <Icon className="h-[18px] w-[18px] shrink-0" />
@@ -167,7 +167,7 @@ export function Sidebar(): JSX.Element {
       <aside
         data-testid="sidebar"
         className={cn(
-          'flex h-full shrink-0 flex-col gap-1 overflow-hidden border-r border-border bg-card/40 px-2 py-3 transition-[width] duration-200',
+          'glass-edge flex h-full shrink-0 flex-col gap-1 overflow-hidden border-r border-border/40 px-2 py-3 transition-[width] duration-200',
           collapsed ? 'w-16 items-center' : 'w-56'
         )}
       >

@@ -71,7 +71,7 @@ export function BoardContextMenu({
     <>
       <div className="fixed inset-0 z-[60]" onClick={onClose} onContextMenu={(e) => { e.preventDefault(); onClose() }} />
       <div
-        className="fixed z-[61] min-w-[190px] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-2xl"
+        className="glass-strong fixed z-[61] min-w-[190px] overflow-hidden rounded-2xl p-1 text-popover-foreground"
         style={{ left: menu.x, top: menu.y }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -155,7 +155,7 @@ export function BoardContextMenu({
                   }
                 }}
                 onBlur={(e) => setEdgeLabel(menu.id, e.target.value.trim() || null)}
-                className="w-full rounded border border-border bg-secondary px-2 py-1 text-xs outline-none focus:border-primary/60"
+                className="w-full rounded-xl border border-border/40 bg-secondary/40 px-2 py-1 text-xs outline-none focus:border-primary/60"
               />
             </div>
 

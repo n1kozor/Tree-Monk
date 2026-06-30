@@ -88,7 +88,7 @@ function PersonSelect({
         />
       </div>
       {open && (
-        <div className="absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-md border border-border bg-popover p-1 shadow-xl">
+        <div className="glass-strong absolute z-50 mt-1 max-h-72 w-full overflow-y-auto rounded-xl p-1">
           {result.prompt ? (
             <p className="px-2 py-2 text-xs text-muted-foreground">{t('kinship.typeToSearch')}</p>
           ) : result.list.length === 0 ? (
@@ -257,7 +257,7 @@ export function RelationshipView(): JSX.Element {
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
-      <div className="space-y-2.5 border-b border-border p-3">
+      <div className="glass-subtle relative z-20 space-y-2.5 border-b border-border/40 p-3">
         {/* Title row (the topbar no longer prints the page name) */}
         <div className="flex items-center gap-2">
           <Route className="h-4 w-4 shrink-0 text-primary" />
@@ -394,7 +394,7 @@ export function RelationshipView(): JSX.Element {
                       }
                     >
                       <div
-                        className={cn('overflow-hidden rounded-xl border bg-card shadow-lg', isEnd && 'rel-endpoint')}
+                        className={cn('glass overflow-hidden rounded-xl border text-card-foreground', isEnd && 'rel-endpoint')}
                         style={
                           rt.inLaw
                             ? { borderColor: '#f43f5e' } // by-marriage (non-blood) → rose frame
@@ -419,7 +419,7 @@ export function RelationshipView(): JSX.Element {
                             )}
                           </span>
                         </button>
-                        <div className="flex min-h-[40px] flex-col justify-center gap-0.5 border-t border-border/60 bg-secondary/30 px-2.5 py-1">
+                        <div className="flex min-h-[40px] flex-col justify-center gap-0.5 border-t border-border/40 bg-secondary/40 px-2.5 py-1">
                           {spouses.length > 0 && (
                             <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                               <Heart className="h-3 w-3 shrink-0 text-pink-500" />
@@ -438,7 +438,7 @@ export function RelationshipView(): JSX.Element {
                         </div>
                       </div>
                       {isOpen && familyCount > 0 && (
-                        <div className="absolute left-0 top-full mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-xl">
+                        <div className="glass-strong absolute left-0 top-full mt-1 w-full overflow-hidden rounded-xl">
                           <div
                             className="max-h-56 overflow-y-auto p-1"
                             onWheel={(e) => e.stopPropagation()}

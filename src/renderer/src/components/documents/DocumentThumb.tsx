@@ -70,7 +70,7 @@ export function DocumentThumb({
   const { Icon, badge } = fileGlyph(doc)
 
   return (
-    <div className="group relative block w-full overflow-hidden rounded-lg border border-border bg-card text-left transition-colors hover:border-primary/50">
+    <div className="glass glass-hover group relative block w-full overflow-hidden rounded-2xl text-card-foreground text-left hover:border-primary/50">
       {onDelete && (
         <button
           onClick={(e) => {
@@ -78,7 +78,7 @@ export function DocumentThumb({
             onDelete()
           }}
           title="Delete"
-          className="absolute right-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-md bg-background/80 text-muted-foreground opacity-0 backdrop-blur transition-opacity hover:bg-destructive hover:text-destructive-foreground group-hover:opacity-100"
+          className="absolute right-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-xl bg-background/80 text-muted-foreground opacity-0 backdrop-blur transition-opacity hover:bg-destructive hover:text-destructive-foreground group-hover:opacity-100"
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>
@@ -117,7 +117,7 @@ export function DocumentThumb({
           ) : (
             <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
               <Icon className="h-9 w-9" />
-              <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-semibold tracking-wide">
+              <span className="rounded bg-muted/50 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide">
                 {badge}
               </span>
             </div>

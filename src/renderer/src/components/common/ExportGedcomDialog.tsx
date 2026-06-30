@@ -121,10 +121,10 @@ export function ExportGedcomDialog({
                   key={id}
                   onClick={() => setScope(id)}
                   className={cn(
-                    'flex flex-col gap-1 rounded-lg border p-2.5 text-left transition-colors',
+                    'flex flex-col gap-1 rounded-xl border p-2.5 text-left transition-colors',
                     scope === id
                       ? 'border-primary bg-primary/10'
-                      : 'border-border hover:bg-accent'
+                      : 'border-border/40 hover:bg-accent'
                   )}
                 >
                   <span
@@ -161,10 +161,10 @@ export function ExportGedcomDialog({
             <button
               onClick={() => setIncludeSpouses((v) => !v)}
               className={cn(
-                'flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors',
+                'flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition-colors',
                 includeSpouses
                   ? 'border-rose-500/50 bg-rose-500/10'
-                  : 'border-border hover:bg-accent'
+                  : 'border-border/40 hover:bg-accent'
               )}
             >
               <Heart
@@ -198,7 +198,7 @@ export function ExportGedcomDialog({
           </div>
 
           {/* Live count */}
-          <div className="rounded-lg bg-secondary/50 py-2 text-center text-sm text-muted-foreground">
+          <div className="rounded-xl bg-secondary/40 py-2 text-center text-sm text-muted-foreground">
             {t('gedcom.exportCount', { count })}
           </div>
         </div>

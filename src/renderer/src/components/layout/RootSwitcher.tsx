@@ -43,10 +43,10 @@ export function RootSwitcher(): JSX.Element {
         onClick={toggle}
         title={t('nav.startPersonHint')}
         className={cn(
-          'flex h-9 max-w-[240px] items-center gap-2 rounded-lg border px-2.5 text-xs font-medium shadow-sm transition-colors',
+          'flex h-9 max-w-[240px] items-center gap-2 rounded-xl px-2.5 text-xs font-medium transition-colors',
           current
-            ? 'border-border bg-card/90 text-foreground hover:bg-accent'
-            : 'animate-pulse border-amber-500/70 bg-amber-500/15 text-amber-700 hover:bg-amber-500/25 dark:text-amber-300'
+            ? 'glass-subtle text-foreground hover:bg-accent'
+            : 'animate-pulse border border-amber-500/70 bg-amber-500/15 text-amber-700 hover:bg-amber-500/25 dark:text-amber-300'
         )}
       >
         {current ? (
@@ -76,8 +76,8 @@ export function RootSwitcher(): JSX.Element {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-11 z-50 w-72 overflow-hidden rounded-lg border border-border bg-popover shadow-2xl">
-            <div className="flex items-center justify-between border-b border-border px-3 py-2">
+          <div className="glass-strong absolute right-0 top-11 z-50 w-72 overflow-hidden rounded-2xl">
+            <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
               <span className="flex items-center gap-1.5 text-xs font-semibold">
                 <Star className="h-3.5 w-3.5 text-primary" />
                 {t('nav.startPerson')}
@@ -95,14 +95,14 @@ export function RootSwitcher(): JSX.Element {
                 </button>
               )}
             </div>
-            <div className="relative border-b border-border p-2">
+            <div className="relative border-b border-border/40 p-2">
               <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
               <input
                 ref={inputRef}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t('common.search')}
-                className="w-full rounded-md bg-secondary px-2 py-1.5 pl-8 text-sm outline-none"
+                className="w-full rounded-xl bg-secondary/40 px-2 py-1.5 pl-8 text-sm outline-none backdrop-blur-sm"
               />
             </div>
             <div className="max-h-72 overflow-y-auto p-1">
@@ -118,7 +118,7 @@ export function RootSwitcher(): JSX.Element {
                     setQ('')
                   }}
                   className={cn(
-                    'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left hover:bg-accent',
+                    'flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left hover:bg-accent',
                     p.id === defaultRootId && 'bg-accent'
                   )}
                 >

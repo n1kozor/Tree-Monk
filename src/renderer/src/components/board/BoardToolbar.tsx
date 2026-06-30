@@ -99,14 +99,16 @@ export function BoardToolbar({ spawnAt, onWizard }: Props): JSX.Element {
   }
 
   return (
-    <div className="pointer-events-auto absolute left-1/2 top-4 z-10 flex max-w-[calc(100%-1.5rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-1 rounded-xl border border-border bg-card/90 p-1.5 shadow-2xl backdrop-blur">
-      <div className="flex items-center gap-1 rounded-lg bg-secondary p-0.5">
+    <div className="glass-strong pointer-events-auto absolute left-1/2 top-4 z-10 flex max-w-[calc(100%-1.5rem)] -translate-x-1/2 flex-wrap items-center justify-center gap-1 rounded-2xl p-1.5">
+      <div className="flex items-center gap-1 rounded-xl bg-secondary/40 p-0.5">
         <button
           onClick={() => setBoardMode('flat')}
           title={t('board.modeFlat')}
           className={cn(
-            'flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors',
-            boardMode === 'flat' ? 'bg-background text-foreground shadow' : 'text-muted-foreground hover:text-foreground'
+            'flex items-center gap-1.5 rounded-xl px-2 py-1 text-xs font-medium transition-colors',
+            boardMode === 'flat'
+              ? 'bg-background text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
+              : 'text-muted-foreground hover:text-foreground'
           )}
         >
           <LayoutDashboard className="h-3.5 w-3.5" />
@@ -116,8 +118,10 @@ export function BoardToolbar({ spawnAt, onWizard }: Props): JSX.Element {
           onClick={() => setBoardMode('corkboard')}
           title={t('board.modeCork')}
           className={cn(
-            'flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors',
-            boardMode === 'corkboard' ? 'bg-background text-foreground shadow' : 'text-muted-foreground hover:text-foreground'
+            'flex items-center gap-1.5 rounded-xl px-2 py-1 text-xs font-medium transition-colors',
+            boardMode === 'corkboard'
+              ? 'bg-background text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
+              : 'text-muted-foreground hover:text-foreground'
           )}
         >
           <Pin className="h-3.5 w-3.5" />
@@ -149,15 +153,15 @@ export function BoardToolbar({ spawnAt, onWizard }: Props): JSX.Element {
         {pickerOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setPickerOpen(false)} />
-            <div className="absolute left-0 top-10 z-50 w-80 overflow-hidden rounded-lg border border-border bg-popover shadow-2xl">
-              <div className="relative border-b border-border p-2">
+            <div className="glass-strong absolute left-0 top-10 z-50 w-80 overflow-hidden rounded-2xl">
+              <div className="relative border-b border-border/40 p-2">
                 <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
                 <input
                   ref={inputRef}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder={t('common.search')}
-                  className="w-full rounded-md bg-secondary px-2 py-1.5 pl-8 text-sm outline-none"
+                  className="w-full rounded-xl bg-secondary/40 px-2 py-1.5 pl-8 text-sm outline-none"
                 />
               </div>
               <div className="max-h-72 overflow-y-auto p-1">
@@ -228,15 +232,15 @@ export function BoardToolbar({ spawnAt, onWizard }: Props): JSX.Element {
         {mapOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setMapOpen(false)} />
-            <div className="absolute left-0 top-10 z-50 w-80 overflow-hidden rounded-lg border border-border bg-popover shadow-2xl">
-              <div className="relative border-b border-border p-2">
+            <div className="glass-strong absolute left-0 top-10 z-50 w-80 overflow-hidden rounded-2xl">
+              <div className="relative border-b border-border/40 p-2">
                 <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
                 <input
                   ref={mapInputRef}
                   value={mapQ}
                   onChange={(e) => setMapQ(e.target.value)}
                   placeholder={t('board.mapSearchPlaceholder')}
-                  className="w-full rounded-md bg-secondary px-2 py-1.5 pl-8 text-sm outline-none"
+                  className="w-full rounded-xl bg-secondary/40 px-2 py-1.5 pl-8 text-sm outline-none"
                 />
               </div>
               <div className="max-h-72 overflow-y-auto p-1">

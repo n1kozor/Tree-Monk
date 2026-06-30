@@ -43,7 +43,7 @@ const OPERATORS: QueryOperator[] = [
 const NO_VALUE: QueryOperator[] = ['isEmpty', 'notEmpty']
 
 const selectCls =
-  'h-9 rounded-md border border-input bg-transparent px-2 text-sm outline-none focus:ring-1 focus:ring-ring'
+  'h-9 rounded-xl border border-input bg-transparent px-2 text-sm outline-none focus:ring-1 focus:ring-ring'
 
 export function QueryView(): JSX.Element {
   const { t } = useTranslation()
@@ -118,7 +118,7 @@ export function QueryView(): JSX.Element {
   return (
     <div className="flex h-full flex-col">
       {/* Builder */}
-      <div className="border-b border-border p-4">
+      <div className="border-b border-border/40 p-4">
         {/* Saved-query chips */}
         {saved.length > 0 && (
           <div className="mb-3 flex items-start gap-2">
@@ -138,8 +138,8 @@ export function QueryView(): JSX.Element {
                     className={cn(
                       'group flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors',
                       activeId === q.id
-                        ? 'border-primary bg-primary/15 text-primary'
-                        : 'border-border bg-secondary/50 hover:bg-accent'
+                        ? 'border-primary/40 bg-primary/15 text-primary shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
+                        : 'border-border/40 bg-secondary/40 backdrop-blur-sm hover:bg-accent'
                     )}
                   >
                     <Bookmark className={cn('h-3 w-3 shrink-0', activeId === q.id && 'fill-current')} />
@@ -161,15 +161,15 @@ export function QueryView(): JSX.Element {
         )}
 
         <div className="mb-3 flex items-center gap-2">
-          <div className="flex items-center gap-1 rounded-lg bg-secondary p-0.5">
+          <div className="flex items-center gap-1 rounded-xl bg-secondary/40 p-0.5 backdrop-blur-sm">
             {(['AND', 'OR'] as const).map((c) => (
               <button
                 key={c}
                 onClick={() => pickCombinator(c)}
                 className={cn(
-                  'rounded-md px-3 py-1 text-xs font-semibold transition-colors',
+                  'rounded-lg px-3 py-1 text-xs font-semibold transition-colors',
                   combinator === c
-                    ? 'bg-background text-foreground shadow'
+                    ? 'bg-background text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
                     : 'text-muted-foreground hover:text-foreground'
                 )}
               >
@@ -219,7 +219,7 @@ export function QueryView(): JSX.Element {
               )}
               <button
                 onClick={() => removeRule(i)}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-destructive"
+                className="flex h-7 w-7 items-center justify-center rounded-xl text-muted-foreground hover:bg-accent hover:text-destructive"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -256,7 +256,7 @@ export function QueryView(): JSX.Element {
               </Button>
               <button
                 onClick={() => setNaming(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent"
+                className="flex h-8 w-8 items-center justify-center rounded-xl text-muted-foreground hover:bg-accent"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -273,13 +273,13 @@ export function QueryView(): JSX.Element {
       {/* Results */}
       {results !== null && (
         <>
-          <div className="flex items-center gap-2 border-b border-border px-4 py-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 border-b border-border/40 px-4 py-2 text-xs text-muted-foreground">
             {t('query.results', { count: results.length })}
           </div>
           <ScrollArea className="flex-1">
             <table className="w-full text-sm">
               <thead className="sticky top-0 bg-card/95 text-left text-xs text-muted-foreground backdrop-blur">
-                <tr className="border-b border-border">
+                <tr className="border-b border-border/40">
                   <th className="px-4 py-2 font-medium">{t('query.fields.surname')}</th>
                   <th className="px-2 py-2 font-medium">{t('person.sex')}</th>
                   <th className="px-2 py-2 font-medium">{t('person.birth')}</th>

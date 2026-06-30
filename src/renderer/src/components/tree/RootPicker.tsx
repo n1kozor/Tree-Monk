@@ -41,8 +41,8 @@ export function RootPicker({
           setTimeout(() => inputRef.current?.focus(), 10)
         }}
         className={cn(
-          'flex h-8 max-w-[220px] items-center gap-1.5 rounded-lg border border-border px-2.5 text-xs font-medium text-foreground hover:bg-accent',
-          flat ? 'bg-background' : 'bg-card/90 shadow-xl backdrop-blur'
+          'flex h-8 max-w-[220px] items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium text-foreground hover:bg-accent',
+          flat ? 'border border-border bg-background' : 'glass-subtle'
         )}
         title={t('tree.chooseRoot')}
       >
@@ -56,18 +56,18 @@ export function RootPicker({
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
             className={cn(
-              'absolute left-0 top-9 z-50 w-72 overflow-hidden rounded-lg border border-border bg-popover',
-              flat ? 'shadow-lg' : 'shadow-2xl'
+              'glass-strong absolute left-0 top-9 z-50 w-72 overflow-hidden rounded-2xl text-card-foreground',
+              flat && 'shadow-lg'
             )}
           >
-            <div className="relative border-b border-border p-2">
+            <div className="relative border-b border-border/40 p-2">
               <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
               <input
                 ref={inputRef}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder={t('common.search')}
-                className="w-full rounded-md bg-secondary px-2 py-1.5 pl-8 text-sm outline-none"
+                className="w-full rounded-xl bg-secondary/40 px-2 py-1.5 pl-8 text-sm outline-none"
               />
             </div>
             <div className="max-h-72 overflow-y-auto p-1">

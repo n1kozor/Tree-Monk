@@ -40,7 +40,7 @@ export function VitalNote({
           type="button"
           onClick={openModal}
           title={t('common.edit')}
-          className="group flex w-full items-start gap-1.5 rounded-md border border-border bg-muted/40 px-2 py-1.5 text-left text-xs leading-snug text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/70"
+          className="group flex w-full items-start gap-1.5 rounded-xl border border-border/40 bg-muted/50 px-2 py-1.5 text-left text-xs leading-snug text-muted-foreground transition-colors hover:border-primary/50 hover:bg-muted/70"
         >
           <span className="line-clamp-2 flex-1 whitespace-pre-line">{value}</span>
           <Pencil className="mt-0.5 h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-60" />
@@ -69,20 +69,20 @@ export function VitalNote({
             rows={8}
             placeholder={t('person.reasonHint')}
             onChange={(e) => setDraft(e.target.value)}
-            className="w-full resize-y rounded-md border border-border bg-background px-3 py-2 text-sm leading-relaxed text-foreground outline-none transition-colors focus:border-primary"
+            className="w-full resize-y rounded-xl border border-border/40 bg-background/60 px-3 py-2 text-sm leading-relaxed text-foreground outline-none transition-colors focus:border-primary"
           />
           <DialogFooter>
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className="rounded-md border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
+              className="rounded-xl border border-border/40 px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent"
             >
               {t('common.cancel')}
             </button>
             <button
               type="button"
               onClick={commit}
-              className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+              className="rounded-xl bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
             >
               {t('common.save')}
             </button>
@@ -146,7 +146,7 @@ export function FactSources({
             {matching.map((c) => {
               const url = (c.sourcePublication || '').match(/https?:\/\/\S+/)?.[0]
               return (
-                <div key={c.id} className="rounded-lg border border-border bg-card/60 p-3">
+                <div key={c.id} className="rounded-xl border border-border/40 bg-card/50 p-3">
                   <p className="text-sm font-medium leading-snug">{c.sourceTitle || t('person.sources')}</p>
                   {(c.recordDate || c.page) && (
                     <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
@@ -176,7 +176,7 @@ export function FactSources({
                     <button
                       type="button"
                       onClick={() => void window.api.app.openExternal(url)}
-                      className="mt-2 inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium transition-colors hover:bg-accent"
+                      className="mt-2 inline-flex items-center gap-1 rounded-lg border border-border/40 px-2 py-1 text-xs font-medium transition-colors hover:bg-accent"
                     >
                       <ExternalLink className="h-3 w-3" />
                       {t('person.openOnFs')}

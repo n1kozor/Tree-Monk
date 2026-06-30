@@ -41,7 +41,7 @@ export function SupportDialog({
           <p className="leading-relaxed text-muted-foreground">{t('support.intro')}</p>
 
           {methods.map(({ name, label, url, Qr }) => (
-            <div key={name} className="flex items-center gap-3 rounded-xl border border-border p-3">
+            <div key={name} className="flex items-center gap-3 rounded-xl border border-border/40 p-3">
               <div className="shrink-0 rounded-lg bg-white p-1.5 ring-1 ring-border">
                 <Qr className="h-24 w-24" />
               </div>

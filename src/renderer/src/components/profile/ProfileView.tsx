@@ -235,7 +235,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
 
         {/* Identity header — the name gets its own full-width row so the action
             buttons (which wrap) can never squeeze it. */}
-        <div className="mt-3 rounded-2xl border border-border bg-card/60 p-5 shadow-sm">
+        <div className="glass mt-3 rounded-2xl p-5">
           <div className="flex items-center gap-4">
             <button
               onClick={() => (person.profilePhotoId ? setFramingOpen(true) : void changeAvatar())}
@@ -297,7 +297,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
           </div>
 
           {/* Primary actions — own row, wrap freely. */}
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-border/40 pt-4">
             <Button
               variant="outline"
               size="sm"
@@ -424,10 +424,10 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                             type="button"
                             onClick={() => setSex(value)}
                             className={cn(
-                              'flex-1 rounded-md border px-2 py-1.5 text-xs font-medium transition-colors',
+                              'flex-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors',
                               person.sex === value
-                                ? 'border-primary bg-primary/15 text-primary'
-                                : 'border-border text-muted-foreground hover:bg-accent'
+                                ? 'border-primary bg-primary/15 text-primary shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
+                                : 'border-border/40 text-muted-foreground hover:bg-accent'
                             )}
                           >
                             {label}
@@ -486,7 +486,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                       onClick={copyBirthToChristening}
                       disabled={!person.birthDate && !person.birthPlace}
                       title={t('person.copyBirthToChristening')}
-                      className="flex items-center gap-1.5 rounded-md border border-primary/30 bg-primary/5 px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:border-border disabled:text-muted-foreground/50 disabled:hover:bg-transparent"
+                      className="flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:border-border disabled:text-muted-foreground/50 disabled:hover:bg-transparent"
                     >
                       <ArrowDownToLine className="h-3 w-3" />
                       {t('person.copyBirthToChristening')}
@@ -640,7 +640,7 @@ function Card({
   children: React.ReactNode
 }): JSX.Element {
   return (
-    <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm">
+    <section className="glass rounded-2xl p-4">
       {title && (
         <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h3>
       )}
@@ -673,7 +673,7 @@ function Badge({ className, children }: { className?: string; children: React.Re
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full border border-border bg-secondary/50 px-2.5 py-0.5 text-xs font-medium text-foreground',
+        'inline-flex items-center gap-1 rounded-full border border-border/40 bg-secondary/50 px-2.5 py-0.5 text-xs font-medium text-foreground',
         className
       )}
     >

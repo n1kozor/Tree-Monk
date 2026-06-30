@@ -71,8 +71,8 @@ export function HelpDialog({
       <DialogContent className="max-w-4xl gap-0 overflow-hidden p-0">
         <div className="flex h-[74vh]">
           {/* ---- Section nav ---- */}
-          <nav className="flex w-52 shrink-0 flex-col border-r border-border bg-secondary/30">
-            <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm font-semibold">
+          <nav className="flex w-52 shrink-0 flex-col border-r border-border/40 bg-secondary/30">
+            <div className="flex items-center gap-2 border-b border-border/40 px-4 py-3 text-sm font-semibold">
               <BookOpen className="h-4 w-4 text-primary" />
               {t('help.title')}
             </div>
@@ -94,7 +94,7 @@ export function HelpDialog({
               ))}
             </div>
             {/* Full PDF manual — opens in the OS viewer. */}
-            <div className="border-t border-border p-2">
+            <div className="border-t border-border/40 p-2">
               <button
                 onClick={() => void window.api.app.openManual()}
                 className="flex w-full items-center gap-2.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-left text-sm font-medium text-primary transition-colors hover:bg-primary/10"

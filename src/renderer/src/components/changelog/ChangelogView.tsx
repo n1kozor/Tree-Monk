@@ -56,7 +56,7 @@ export function ChangelogView(): JSX.Element {
   return (
     <div className="flex h-full w-full flex-col overflow-hidden">
       {/* Header */}
-      <header className="flex items-center gap-3 border-b border-border px-6 py-4">
+      <header className="flex items-center gap-3 border-b border-border/40 px-6 py-4">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/15 text-amber-500">
           <Sparkles className="h-5 w-5" />
         </div>
@@ -65,7 +65,7 @@ export function ChangelogView(): JSX.Element {
           <p className="truncate text-xs text-muted-foreground">{t('changelog.subtitle')}</p>
         </div>
         {current && (
-          <span className="rounded-md border border-border bg-secondary/40 px-2.5 py-1 font-mono text-xs text-muted-foreground">
+          <span className="rounded-xl border border-border/40 bg-secondary/40 px-2.5 py-1 font-mono text-xs text-muted-foreground">
             {t('changelog.current', { version: current })}
           </span>
         )}
@@ -73,7 +73,7 @@ export function ChangelogView(): JSX.Element {
           onClick={() => void load()}
           disabled={loading}
           title={t('changelog.refresh')}
-          className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:bg-accent disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-xl border border-border/40 px-2.5 py-1.5 text-xs font-medium text-foreground/80 transition-colors hover:bg-accent disabled:opacity-50"
         >
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
           {t('changelog.refresh')}
@@ -90,7 +90,7 @@ export function ChangelogView(): JSX.Element {
         ) : failed ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-sm text-muted-foreground">
             <p>{t('changelog.loadFailed')}</p>
-            <button onClick={() => void load()} className="rounded-lg border border-border px-3 py-1.5 text-xs hover:bg-accent">
+            <button onClick={() => void load()} className="rounded-xl border border-border/40 px-3 py-1.5 text-xs hover:bg-accent">
               {t('changelog.refresh')}
             </button>
           </div>
@@ -103,7 +103,7 @@ export function ChangelogView(): JSX.Element {
               </div>
             )}
 
-            <ol className="relative space-y-5 border-l border-border/70 pl-6">
+            <ol className="relative space-y-5 border-l border-border/40 pl-6">
               {releases?.map((r) => {
                 const rel = current ? cmpVersion(r.version, current) : 0
                 const isNew = rel > 0
@@ -119,8 +119,8 @@ export function ChangelogView(): JSX.Element {
                     />
                     <div
                       className={cn(
-                        'rounded-xl border bg-card/40 p-4 transition-colors',
-                        isNew ? 'border-amber-500/40' : isCurrent ? 'border-primary/40' : 'border-border'
+                        'glass glass-hover rounded-2xl p-4 text-card-foreground',
+                        isNew ? 'border-amber-500/40' : isCurrent ? 'border-primary/40' : ''
                       )}
                     >
                       <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -136,7 +136,7 @@ export function ChangelogView(): JSX.Element {
                           </span>
                         )}
                         {r.prerelease && (
-                          <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                          <span className="rounded-full bg-secondary/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                             {t('changelog.badgePre')}
                           </span>
                         )}

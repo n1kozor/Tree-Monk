@@ -111,10 +111,10 @@ export function GlobalSearch(): JSX.Element {
         onFocus={() => setOpen(true)}
         onKeyDown={onKey}
         placeholder={t('search.placeholder')}
-        className="h-9 w-full rounded-lg border border-border bg-background/60 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary/50 focus:bg-background"
+        className="h-9 w-full rounded-full bg-secondary/40 pl-8 pr-3 text-sm outline-none backdrop-blur-sm transition-colors placeholder:text-muted-foreground focus:bg-secondary/60 focus:ring-1 focus:ring-primary/30"
       />
       {open && q.trim().length >= 2 && (
-        <div className="absolute left-0 right-0 top-11 z-50 max-h-[60vh] overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-2xl">
+        <div className="glass-strong absolute left-0 right-0 top-11 z-50 max-h-[60vh] overflow-y-auto rounded-2xl p-1">
           {results.length === 0 ? (
             <p className="px-3 py-3 text-center text-xs text-muted-foreground">{t('search.empty')}</p>
           ) : (
@@ -125,7 +125,7 @@ export function GlobalSearch(): JSX.Element {
                 onMouseEnter={() => setActive(i)}
                 onClick={() => choose(r)}
                 className={cn(
-                  'flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors',
+                  'flex w-full items-center gap-2.5 rounded-xl px-2 py-1.5 text-left transition-colors',
                   i === active ? 'bg-accent' : 'hover:bg-accent/60'
                 )}
               >

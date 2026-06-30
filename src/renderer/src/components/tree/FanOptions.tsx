@@ -21,10 +21,10 @@ export function FanOptions(): JSX.Element {
       <button
         onClick={() => setOpen((v) => !v)}
         title={t('tree.fanOptions')}
-        className={`flex h-8 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium shadow-xl backdrop-blur transition-colors ${
+        className={`glass-subtle flex h-8 items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium transition-colors ${
           open
-            ? 'border-primary/50 bg-primary/15 text-primary'
-            : 'border-border bg-card/90 text-muted-foreground hover:text-primary'
+            ? 'bg-primary/15 text-primary ring-1 ring-primary/20'
+            : 'text-muted-foreground hover:text-primary'
         }`}
       >
         <SlidersHorizontal className="h-4 w-4" />
@@ -34,7 +34,7 @@ export function FanOptions(): JSX.Element {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-10 z-50 w-60 space-y-3 rounded-xl border border-border bg-popover p-3 shadow-2xl">
+          <div className="glass-strong absolute left-0 top-10 z-50 w-60 space-y-3 rounded-2xl p-3 text-card-foreground">
             {/* Sweep */}
             <Field label={t('tree.fanSweep')}>
               <Segmented
@@ -99,14 +99,14 @@ function Segmented<T extends string | number>({
   onChange: (v: T) => void
 }): JSX.Element {
   return (
-    <div className="flex gap-1 rounded-lg bg-muted/60 p-0.5">
+    <div className="flex gap-1 rounded-xl bg-muted/50 p-0.5">
       {options.map((o) => (
         <button
           key={String(o.value)}
           onClick={() => onChange(o.value)}
-          className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+          className={`flex-1 rounded-lg px-2 py-1 text-xs font-medium transition-colors ${
             value === o.value
-              ? 'bg-card text-foreground shadow-sm'
+              ? 'bg-card text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >

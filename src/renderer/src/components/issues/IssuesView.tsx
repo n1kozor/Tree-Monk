@@ -252,7 +252,7 @@ export function IssuesView(): JSX.Element {
 
   return (
     <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-3 border-b border-border p-4">
+      <div className="flex items-center justify-between gap-3 border-b border-border/40 p-4">
         <div className="flex min-w-0 items-center gap-2.5">
           <ShieldAlert className="h-5 w-5 shrink-0 text-primary" />
           <div className="min-w-0">
@@ -267,7 +267,7 @@ export function IssuesView(): JSX.Element {
       </div>
 
       {/* Tab bar */}
-      <div className="flex items-center gap-1 border-b border-border px-3">
+      <div className="flex items-center gap-1 border-b border-border/40 px-3">
         <TabButton
           active={tab === 'issues'}
           onClick={() => setTab('issues')}
@@ -315,7 +315,7 @@ export function IssuesView(): JSX.Element {
                   <div
                     key={issue.id}
                     className={cn(
-                      'rounded-lg border bg-card p-3',
+                      'rounded-xl border bg-secondary/40 p-3 backdrop-blur-sm',
                       issue.severity === 'high' ? 'border-destructive/40' : 'border-amber-500/30'
                     )}
                   >
@@ -334,7 +334,7 @@ export function IssuesView(): JSX.Element {
                             <button
                               key={p.id}
                               onClick={() => selectPerson(p.id)}
-                              className="flex items-center gap-1.5 rounded-md bg-secondary px-2 py-0.5 text-xs font-medium hover:bg-primary/15 hover:text-primary"
+                              className="flex items-center gap-1.5 rounded-lg bg-secondary/50 px-2 py-0.5 text-xs font-medium hover:bg-primary/15 hover:text-primary"
                             >
                               <PersonAvatar
                                 personId={p.id}
@@ -349,7 +349,7 @@ export function IssuesView(): JSX.Element {
                             <button
                               key={`${fix.kind}:${fix.personId}`}
                               onClick={() => setFixTarget(fix)}
-                              className="flex items-center gap-1 rounded-md border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary hover:bg-primary/20"
+                              className="flex items-center gap-1 rounded-lg border border-primary/40 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary hover:bg-primary/20"
                             >
                               <Bird className="h-3 w-3" />
                               {fixLabel(fix)}
@@ -358,7 +358,7 @@ export function IssuesView(): JSX.Element {
                           <button
                             onClick={() => setDismissTarget(issue)}
                             title={t('issues.dismissHint')}
-                            className="ml-auto flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground hover:border-destructive/40 hover:text-destructive"
+                            className="ml-auto flex items-center gap-1 rounded-lg border border-border/40 px-2 py-0.5 text-xs font-medium text-muted-foreground hover:border-destructive/40 hover:text-destructive"
                           >
                             <EyeOff className="h-3 w-3" />
                             {t('issues.dismiss')}
@@ -375,7 +375,7 @@ export function IssuesView(): JSX.Element {
         {/* ---- Possible duplicates ---- */}
         {tab === 'dups' && (
           <div className="flex h-full flex-col">
-            <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
+            <div className="flex items-center justify-between gap-2 border-b border-border/40 px-4 py-2.5">
               <p className="min-w-0 truncate text-xs text-muted-foreground">{t('issues.duplicatesHint')}</p>
               <Button size="sm" variant="outline" className="shrink-0 gap-2" onClick={scanDups} disabled={dupLoading}>
                 <RefreshCw className={cn('h-4 w-4', dupLoading && 'animate-spin')} />
@@ -403,9 +403,9 @@ export function IssuesView(): JSX.Element {
                       spouses: ma.spouses.join('|') !== mb.spouses.join('|')
                     }
                     return (
-                      <div key={c.aId + c.bId} className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+                      <div key={c.aId + c.bId} className="overflow-hidden rounded-2xl border border-border/40 bg-secondary/40 shadow-sm backdrop-blur-sm">
                         {/* Header: confidence + why-matched + actions */}
-                        <div className="flex flex-wrap items-center gap-2 border-b border-border/60 bg-secondary/30 px-3 py-1.5">
+                        <div className="flex flex-wrap items-center gap-2 border-b border-border/40 bg-secondary/30 px-3 py-1.5">
                           <span
                             className={cn(
                               'rounded-full px-2 py-0.5 text-[11px] font-bold tabular-nums',
@@ -416,7 +416,7 @@ export function IssuesView(): JSX.Element {
                           </span>
                           <span className="flex flex-wrap gap-1">
                             {c.reasons.map((r) => (
-                              <span key={r} className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                              <span key={r} className="rounded bg-secondary/50 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                                 {t(`issues.reason.${r}`, { defaultValue: r })}
                               </span>
                             ))}
@@ -437,7 +437,7 @@ export function IssuesView(): JSX.Element {
                           </span>
                         </div>
                         {/* The two candidates side by side, with their distinguishing facts. */}
-                        <div className="grid grid-cols-[1fr_auto_1fr] items-stretch divide-x divide-border/60">
+                        <div className="grid grid-cols-[1fr_auto_1fr] items-stretch divide-x divide-border/40">
                           <DupSide person={a} meta={ma} diff={diff} onSelect={() => selectPerson(a.id)} />
                           <div className="flex items-center justify-center px-1 text-muted-foreground/60">
                             <GitMerge className="h-4 w-4" />
@@ -511,7 +511,7 @@ export function IssuesView(): JSX.Element {
       >
         <p>{t('issues.dismissBody')}</p>
         {dismissTarget && (
-          <p className="mt-2 rounded-md border border-border bg-secondary/30 p-2 text-xs text-foreground">
+          <p className="mt-2 rounded-xl border border-border/40 bg-secondary/30 p-2 text-xs text-foreground">
             {t(`issues.rules.${dismissTarget.rule}`)} — {dismissTarget.detail}
           </p>
         )}
@@ -615,7 +615,7 @@ function NameNormalizeList({
           return (
             <div
               key={g.key}
-              className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-2 text-xs"
+              className="flex flex-wrap items-center gap-2 rounded-xl border border-border/40 bg-secondary/40 p-2 text-xs backdrop-blur-sm"
             >
               <span className="flex flex-wrap items-center gap-1">
                 {g.variants.map((v) => (
@@ -624,10 +624,10 @@ function NameNormalizeList({
                     onClick={() => setChosen((c) => ({ ...c, [g.key]: v.name }))}
                     title={keepLabel(v.name)}
                     className={cn(
-                      'rounded-md border px-1.5 py-0.5 transition-colors',
+                      'rounded-lg border px-1.5 py-0.5 transition-colors',
                       v.name === canonical
                         ? 'border-primary bg-primary/10 font-semibold text-foreground'
-                        : 'border-border text-muted-foreground hover:bg-accent'
+                        : 'border-border/40 text-muted-foreground hover:bg-accent'
                     )}
                   >
                     {v.name}
@@ -641,7 +641,7 @@ function NameNormalizeList({
                 onChange={(e) => setChosen((c) => ({ ...c, [g.key]: e.target.value }))}
                 spellCheck={false}
                 aria-label={finalLabel}
-                className="w-28 rounded-md border border-primary/40 bg-background px-2 py-0.5 text-xs font-semibold text-primary outline-none focus:border-primary"
+                className="w-28 rounded-lg border border-primary/40 bg-background px-2 py-0.5 text-xs font-semibold text-primary outline-none focus:border-primary"
               />
               <Button
                 size="sm"

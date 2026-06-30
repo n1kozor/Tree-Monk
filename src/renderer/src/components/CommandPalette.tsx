@@ -216,12 +216,12 @@ export function CommandPalette(): JSX.Element | null {
 
   return (
     <div className="fixed inset-0 z-[2000] flex items-start justify-center pt-[12vh]" onMouseDown={close}>
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-md" />
       <div
-        className="relative w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-popover shadow-2xl"
+        className="glass-strong relative w-full max-w-xl overflow-hidden rounded-3xl text-popover-foreground"
         onMouseDown={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center gap-2 border-b border-border px-4">
+        <div className="flex items-center gap-2 border-b border-border/40 px-4">
           <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
           <input
             ref={inputRef}

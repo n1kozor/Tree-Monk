@@ -26,13 +26,13 @@ export function PersonCollaborations({ personId }: { personId: string }): JSX.El
   if (!items.length) return null
 
   return (
-    <section className="rounded-2xl border border-border bg-card/60 p-4 shadow-sm">
+    <section className="glass rounded-2xl p-4">
       <h4 className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         <MessagesSquare className="h-3.5 w-3.5" /> {t('collaboration.title')} ({items.length})
       </h4>
       <div className="space-y-3">
         {items.map((c) => (
-          <div key={c.id} className="rounded-lg border border-border bg-secondary/30 p-3">
+          <div key={c.id} className="rounded-xl border border-border/40 bg-secondary/40 p-3">
             {(c.title || c.createdAt) && (
               <div className="mb-1 flex items-baseline justify-between gap-2">
                 {c.title && <span className="text-sm font-semibold">{c.title}</span>}

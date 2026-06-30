@@ -236,7 +236,7 @@ function FsCouple({
         {addSide === side && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setAddSide(null)} />
-            <div className="absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-2xl">
+            <div className="glass-strong absolute left-1/2 top-6 z-50 w-40 -translate-x-1/2 overflow-hidden rounded-2xl p-1 text-card-foreground">
               <button onClick={() => { onAddParent(person.id, 'M'); setAddSide(null) }} className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-accent"><UserPlus className="h-3.5 w-3.5 text-sky-500" /> {t('tree.addFather')}</button>
               <button onClick={() => { onAddParent(person.id, 'F'); setAddSide(null) }} className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-xs hover:bg-accent"><UserPlus className="h-3.5 w-3.5 text-pink-500" /> {t('tree.addMother')}</button>
             </div>
@@ -258,7 +258,7 @@ function FsCouple({
         {switchSide === side && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setSwitchSide(null)} />
-            <div className="absolute left-1/2 top-6 z-50 w-52 -translate-x-1/2 overflow-hidden rounded-lg border border-border bg-popover p-1 shadow-2xl">
+            <div className="glass-strong absolute left-1/2 top-6 z-50 w-52 -translate-x-1/2 overflow-hidden rounded-2xl p-1 text-card-foreground">
               <p className="truncate px-2 py-1 text-[10px] uppercase tracking-wide text-muted-foreground">{t('tree.switchUnion')}</p>
               {unions.map((u) => (
                 <button key={u.familyId} onClick={() => { onSwitchInPlace(node.slotId, person.id, u.familyId); setSwitchSide(null) }}
@@ -728,11 +728,11 @@ export function PortraitChart({
     <KinshipContext.Provider value={kinshipNotes ?? null}>
     <CardStyleContext.Provider value={{ bg: layout.cardBg, border: layout.cardBorder, borderWidth: layout.cardBorderWidth, radius: layout.cardRadius, shadow: layout.cardShadow }}>
     <div className="absolute inset-0" style={{ background: layout.background === 'auto' ? 'hsl(var(--background))' : layout.background }}>
-      <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 rounded-lg border border-border bg-card/90 p-1 shadow-xl backdrop-blur">
-        <button onClick={collapseAll} title={t('tree.collapseAll')} className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"><ChevronsDownUp className="h-3.5 w-3.5" /><span className="hidden xl:inline">{t('tree.collapseAll')}</span></button>
+      <div className="glass-subtle absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-0.5 rounded-xl p-1">
+        <button onClick={collapseAll} title={t('tree.collapseAll')} className="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"><ChevronsDownUp className="h-3.5 w-3.5" /><span className="hidden xl:inline">{t('tree.collapseAll')}</span></button>
         <div className="mx-0.5 h-5 w-px bg-border" />
-        <button onClick={() => expandLine('father')} title={t('tree.paternalLine')} className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-sky-500 hover:bg-accent"><span className="text-sm leading-none">♂</span><span className="hidden lg:inline">{t('tree.paternalLine')}</span></button>
-        <button onClick={() => expandLine('mother')} title={t('tree.maternalLine')} className="flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-pink-500 hover:bg-accent"><span className="text-sm leading-none">♀</span><span className="hidden lg:inline">{t('tree.maternalLine')}</span></button>
+        <button onClick={() => expandLine('father')} title={t('tree.paternalLine')} className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-sky-500 hover:bg-accent"><span className="text-sm leading-none">♂</span><span className="hidden lg:inline">{t('tree.paternalLine')}</span></button>
+        <button onClick={() => expandLine('mother')} title={t('tree.maternalLine')} className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-pink-500 hover:bg-accent"><span className="text-sm leading-none">♀</span><span className="hidden lg:inline">{t('tree.maternalLine')}</span></button>
       </div>
 
       <PanZoom

@@ -383,7 +383,7 @@ function FanChartImpl({
           // `position: fixed` would resolve against the scaled/translated canvas
           // and the tooltip would land far from the cursor.
           <div
-            className="pointer-events-none fixed z-[100] rounded-md border border-border bg-popover px-2.5 py-1.5 text-popover-foreground shadow-xl"
+            className="glass-strong pointer-events-none fixed z-[100] rounded-xl px-2.5 py-1.5 text-card-foreground"
             style={{ left: hover.mx + 12, top: hover.my + 12 }}
           >
             <p className="text-xs font-semibold">{hover.label}</p>

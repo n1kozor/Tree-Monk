@@ -89,7 +89,7 @@ function CitationCard({
   }
 
   return (
-    <div className="group relative cursor-text select-text rounded-lg border border-border bg-card/60 p-3">
+    <div className="group relative cursor-text select-text rounded-xl border border-border/40 bg-card/50 p-3">
       <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
         <button
           onClick={copy}
@@ -136,7 +136,7 @@ function CitationCard({
               </span>
             )}
             {c.eventTag && (
-              <span className="rounded bg-secondary px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
+              <span className="rounded bg-secondary/40 px-1.5 py-0.5 text-[10px] font-medium tracking-wide text-muted-foreground">
                 {t(`person.srcEventTags.${c.eventTag}`, { defaultValue: c.eventTag })}
               </span>
             )}
@@ -200,11 +200,11 @@ function CitationForm({
   }
 
   const inputCls =
-    'h-8 w-full rounded-md border border-border bg-background px-2 text-xs outline-none focus:border-primary/60'
+    'h-8 w-full rounded-lg border border-border/40 bg-background/60 px-2 text-xs outline-none focus:border-primary/60'
   const labelCls = 'mb-1 block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground'
 
   return (
-    <div className="space-y-2.5 rounded-lg border border-primary/40 bg-primary/5 p-3">
+    <div className="space-y-2.5 rounded-xl border border-primary/40 bg-primary/5 p-3">
       <div>
         <label className={labelCls}>{t('person.srcTitle')}</label>
         <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('person.srcTitle')} autoFocus />
@@ -422,7 +422,7 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
                 <select
                   value={citeSort}
                   onChange={(e) => setCiteSort(e.target.value as CiteSort)}
-                  className="h-7 rounded-md border border-border bg-background px-1.5 text-[11px] outline-none focus:border-primary/60"
+                  className="h-7 rounded-lg border border-border/40 bg-background/60 px-1.5 text-[11px] outline-none focus:border-primary/60"
                   title={t('person.sortBy')}
                 >
                   <option value="year-asc">{t('person.sortYearAsc')}</option>

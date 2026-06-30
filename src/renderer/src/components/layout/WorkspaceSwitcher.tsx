@@ -52,7 +52,7 @@ export function WorkspaceSwitcher(): JSX.Element | null {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex max-w-[15rem] items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-1.5 text-left transition-colors hover:bg-accent">
+          <button className="glass-subtle flex max-w-[15rem] items-center gap-2 rounded-xl px-3 py-1.5 text-left transition-colors hover:bg-accent">
             <span
               className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-white"
               style={{ backgroundColor: active.color }}

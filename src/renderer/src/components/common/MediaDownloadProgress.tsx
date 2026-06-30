@@ -42,9 +42,9 @@ export function MediaDownloadProgress(): JSX.Element | null {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 24, scale: 0.96 }}
         transition={{ type: 'spring', stiffness: 320, damping: 30 }}
-        className="fixed bottom-24 left-0 right-0 mx-auto z-[78] w-72 overflow-hidden rounded-xl border border-border bg-card/95 shadow-2xl backdrop-blur-md"
+        className="glass fixed bottom-24 left-0 right-0 mx-auto z-[78] w-72 overflow-hidden rounded-2xl text-card-foreground"
       >
-        <div className="flex items-center gap-2 border-b border-border/60 px-3 py-2">
+        <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2">
           <ImageDown className="h-4 w-4 text-primary" />
           <span className="flex-1 text-sm font-semibold">{t('media.downloadTitle')}</span>
           {finished ? (

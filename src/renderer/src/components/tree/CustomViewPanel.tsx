@@ -61,8 +61,8 @@ export function CustomViewPanel({
     <button
       onClick={() => set({ sex: value })}
       className={cn(
-        'flex-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors',
-        config.sex === value ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+        'flex-1 rounded-lg px-2 py-1 text-[11px] font-medium transition-colors',
+        config.sex === value ? 'bg-background text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20' : 'text-muted-foreground hover:text-foreground'
       )}
     >
       {label}
@@ -70,11 +70,11 @@ export function CustomViewPanel({
   )
 
   return (
-    <div className="absolute left-4 top-16 z-10 w-72 overflow-hidden rounded-xl border border-border bg-card/95 text-xs shadow-xl backdrop-blur">
+    <div className="glass-strong absolute left-4 top-16 z-10 w-72 overflow-hidden rounded-2xl text-xs text-card-foreground">
       {/* Header */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 border-b border-border/60 px-3 py-2 text-left"
+        className="flex w-full items-center gap-2 border-b border-border/40 px-3 py-2 text-left"
       >
         <Wand2 className="h-4 w-4 shrink-0 text-primary" />
         <span className="flex-1 text-sm font-semibold">{t('tree.viewCustom')}</span>
@@ -121,7 +121,7 @@ export function CustomViewPanel({
             </div>
             <Input value={config.occupation} onChange={(e) => set({ occupation: e.target.value })} placeholder={t('person.occupation')} className="h-8 text-xs" />
 
-            <div className="flex items-center gap-0.5 rounded-lg bg-secondary p-0.5">
+            <div className="flex items-center gap-0.5 rounded-xl bg-secondary/40 p-0.5">
               {sexBtn('', t('people.anySex'))}
               {sexBtn('M', t('person.male'))}
               {sexBtn('F', t('person.female'))}
@@ -129,7 +129,7 @@ export function CustomViewPanel({
           </section>
 
           {/* ---- Colour-coding ---- */}
-          <section className="space-y-2 border-t border-border/60 pt-3">
+          <section className="space-y-2 border-t border-border/40 pt-3">
             <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
               <Palette className="h-3.5 w-3.5" /> {t('tree.custom.colorBy')}
             </span>
@@ -139,10 +139,10 @@ export function CustomViewPanel({
                   key={cb}
                   onClick={() => set({ colorBy: cb })}
                   className={cn(
-                    'rounded-md border px-2 py-1 text-[11px] font-medium transition-colors',
+                    'rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors',
                     config.colorBy === cb
-                      ? 'border-primary bg-primary/15 text-primary'
-                      : 'border-border text-muted-foreground hover:bg-accent'
+                      ? 'border-primary/40 bg-primary/15 text-primary ring-1 ring-primary/20'
+                      : 'border-border/40 text-muted-foreground hover:bg-accent'
                   )}
                 >
                   {t(`tree.custom.by.${cb}`)}
@@ -152,7 +152,7 @@ export function CustomViewPanel({
 
             {/* Legend */}
             {legend.length > 0 && (
-              <div className="space-y-1 rounded-lg border border-border/60 bg-background/40 p-2">
+              <div className="space-y-1 rounded-xl border border-border/40 bg-background/40 p-2">
                 {legend.map((item) => (
                   <div key={`${item.label}-${item.color}`} className="flex items-center gap-2">
                     <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />

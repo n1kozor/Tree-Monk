@@ -54,10 +54,10 @@ export function TourSetupModal({
               onClick={() => setKind('patriline')}
               className={cn(
                 'flex items-start gap-3 rounded-xl border p-3 text-left transition-colors',
-                kind === 'patriline' ? 'border-primary/60 bg-primary/10' : 'border-border hover:bg-accent'
+                kind === 'patriline' ? 'border-primary/60 bg-primary/10' : 'border-border/40 hover:bg-accent'
               )}
             >
-              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-500/15 text-sky-500">
+              <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-sky-500/15 text-sky-500">
                 <User className="h-5 w-5" />
               </span>
               <span className="min-w-0">
@@ -67,7 +67,7 @@ export function TourSetupModal({
             </button>
 
             {/* More tours coming */}
-            <div className="flex items-center gap-2 rounded-xl border border-dashed border-border/70 p-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 rounded-xl border border-dashed border-border/40 p-3 text-xs text-muted-foreground">
               <Sparkles className="h-4 w-4 shrink-0 text-amber-500" />
               {t('tour.moreSoon')}
             </div>
@@ -78,7 +78,7 @@ export function TourSetupModal({
             <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {t('tour.startPerson')}
             </label>
-            <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm">
+            <div className="flex items-center gap-2 rounded-xl border border-border/40 bg-background px-2.5 py-1.5 text-sm">
               <UserRound className="h-4 w-4 shrink-0 text-muted-foreground" />
               <span className="truncate font-medium">{rootLabel}</span>
             </div>
@@ -86,10 +86,10 @@ export function TourSetupModal({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t('tour.searchPerson')}
-              className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm outline-none focus:border-primary"
+              className="w-full rounded-xl border border-border/40 bg-background px-2.5 py-1.5 text-sm outline-none focus:border-primary"
             />
             {suggestions.length > 0 && (
-              <div className="max-h-40 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg">
+              <div className="glass-strong max-h-40 overflow-y-auto rounded-xl p-1">
                 {suggestions.map((p) => (
                   <button
                     key={p.id}

@@ -87,7 +87,7 @@ const TONE_ORDER: Tone[] = [
 function TimelineList({ items, birthDate }: { items: TItem[]; birthDate: string | null }): JSX.Element {
   const { t } = useTranslation()
   return (
-    <ol className="relative ml-1 space-y-2 border-l border-border pl-4">
+    <ol className="relative ml-1 space-y-2 border-l border-border/40 pl-4">
       {items.map((it) => {
         const { icon: Icon, dot } = META[it.tone]
         // Use the full event date (it.when) so month/day refine the age — e.g. a
@@ -240,8 +240,8 @@ export function PersonTimeline({ person }: { person: Person }): JSX.Element | nu
               type="button"
               onClick={() => setShowWorld((v) => !v)}
               className={cn(
-                'flex w-full items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm transition-colors',
-                showWorld ? 'border-blue-400/50 bg-blue-400/10' : 'border-border hover:bg-accent'
+                'flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition-colors',
+                showWorld ? 'border-blue-400/50 bg-blue-400/10' : 'border-border/40 hover:bg-accent'
               )}
             >
               <Globe2 className={cn('h-4 w-4 shrink-0', showWorld ? 'text-blue-400' : 'text-muted-foreground')} />

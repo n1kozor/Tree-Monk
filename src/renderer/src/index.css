@@ -27,7 +27,24 @@
     --border: 38 16% 82%;
     --input: 38 16% 82%;
     --ring: 175 68% 34%;
-    --radius: 0.65rem;
+    --radius: 0.85rem;
+
+    /* ---- Liquid-glass material (light) ----
+       The glass tints itself toward the card colour but stays translucent so the
+       ambient backdrop refracts through. Highlight = specular top edge; shadow =
+       the soft float beneath. */
+    --glass-bg: 0 0% 100%;
+    --glass-tint: 38 40% 97%;
+    --glass-border: 38 30% 100%;
+    --glass-highlight: 0 0% 100%;
+    --glass-shadow: 30 30% 30%;
+    --glass-opacity: 0.62;
+
+    /* Ambient backdrop blobs — soft pastel light the glass picks up. */
+    --amb-1: 175 70% 70%;
+    --amb-2: 28 90% 78%;
+    --amb-3: 265 70% 80%;
+    --amb-4: 200 80% 78%;
 
     /* Canvas */
     --dots: 38 12% 77%;
@@ -59,6 +76,22 @@
     --input: 240 6% 16%;
     --ring: 175 70% 45%;
 
+    /* ---- Liquid-glass material (dark) ----
+       Frosted dark glass: a faintly-lit pane that lets the ambient glow bleed
+       through. Highlight is a low-alpha white top edge; shadow is deep. */
+    --glass-bg: 240 12% 14%;
+    --glass-tint: 240 14% 17%;
+    --glass-border: 240 10% 40%;
+    --glass-highlight: 0 0% 100%;
+    --glass-shadow: 240 60% 2%;
+    --glass-opacity: 0.55;
+
+    /* Ambient backdrop blobs — deep vibrant glow over near-black. */
+    --amb-1: 175 80% 32%;
+    --amb-2: 265 70% 40%;
+    --amb-3: 205 85% 38%;
+    --amb-4: 320 60% 38%;
+
     --dots: 240 5% 17%;
     --thread: 0 75% 55%;
     --cork-base: 28 28% 19%;
@@ -83,6 +116,42 @@
     font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     user-select: none;
   }
+  /* ---- Ambient liquid backdrop ----
+     Soft, slowly-drifting colour blobs sitting behind the whole app. The glass
+     panels blur and refract this, which is what sells the "liquid glass" look.
+     Fixed + behind #root, and #root/app shell are transparent so it shows. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -20vmax;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(38vmax 38vmax at 12% 18%, hsl(var(--amb-1) / 0.55), transparent 60%),
+      radial-gradient(34vmax 34vmax at 88% 12%, hsl(var(--amb-2) / 0.5), transparent 62%),
+      radial-gradient(40vmax 40vmax at 78% 88%, hsl(var(--amb-3) / 0.5), transparent 60%),
+      radial-gradient(32vmax 32vmax at 20% 92%, hsl(var(--amb-4) / 0.45), transparent 62%);
+    filter: blur(8px) saturate(120%);
+    animation: amb-drift 26s ease-in-out infinite alternate;
+  }
+  @keyframes amb-drift {
+    0% {
+      transform: translate3d(-2%, -1%, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(2%, 1.5%, 0) scale(1.08);
+    }
+    100% {
+      transform: translate3d(-1%, 2%, 0) scale(1.04);
+    }
+  }
+  #root {
+    position: relative;
+    z-index: 1;
+  }
+  .no-anim body::before {
+    animation: none;
+  }
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -91,10 +160,14 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full bg-secondary;
+    border-radius: 9999px;
+    background: hsl(var(--foreground) / 0.18);
+    border: 2px solid transparent;
+    background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-accent;
+    background: hsl(var(--foreground) / 0.32);
+    background-clip: content-box;
   }
 }
 
@@ -205,19 +278,114 @@
   cursor: pointer;
 }
 
-/* ---- Glassmorphism panel ---- */
-.tm-glass {
-  background: linear-gradient(
-    155deg,
-    hsl(var(--card) / 0.82),
-    hsl(var(--card) / 0.62)
-  );
-  backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
-  border: 1px solid hsl(var(--border) / 0.7);
+/* ============================================================================
+   LIQUID GLASS SYSTEM
+   A small family of translucent "material" utilities. They share the same
+   recipe — a tinted translucent fill, a backdrop blur+saturate that refracts
+   the ambient backdrop, a hairline border, a specular top-edge highlight and a
+   soft float shadow — and differ only in strength. Use:
+     .glass         general panel / card material
+     .glass-strong  modal / popover (more opaque, reads over busy content)
+     .glass-subtle  inline chrome (toolbars, list rows)
+     .glass-hover   add to make it lift + brighten on hover
+   ============================================================================
+   Defined inside @layer components so Tailwind utilities (position, bg, border…)
+   still win — e.g. a `.glass.absolute` element stays absolutely positioned. */
+@layer components {
+.glass {
+  position: relative;
+  background:
+    linear-gradient(
+      150deg,
+      hsl(var(--glass-tint) / calc(var(--glass-opacity) + 0.12)),
+      hsl(var(--glass-bg) / calc(var(--glass-opacity) - 0.06))
+    );
+  backdrop-filter: blur(20px) saturate(175%);
+  -webkit-backdrop-filter: blur(20px) saturate(175%);
+  border: 1px solid hsl(var(--glass-border) / 0.22);
+  /* Inline content cards use a gentle, UNIFORM lift — not a dramatic drop —
+     so a page full of glass cards reads clean instead of busy. Floating
+     surfaces use .glass-strong for the deeper shadow. */
   box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 hsl(0 0% 100% / 0.06);
+    0 1px 1px hsl(var(--glass-shadow) / 0.05),
+    0 10px 28px -20px hsl(var(--glass-shadow) / 0.3),
+    inset 0 1px 0 hsl(var(--glass-highlight) / 0.4);
+}
+/* Specular sheen along the top — the tell-tale glass glint. */
+.glass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    hsl(var(--glass-highlight) / 0.14),
+    transparent 32%
+  );
+}
+.glass-strong {
+  background:
+    linear-gradient(
+      150deg,
+      hsl(var(--glass-tint) / calc(var(--glass-opacity) + 0.3)),
+      hsl(var(--glass-bg) / calc(var(--glass-opacity) + 0.18))
+    );
+  backdrop-filter: blur(34px) saturate(190%);
+  -webkit-backdrop-filter: blur(34px) saturate(190%);
+  border: 1px solid hsl(var(--glass-border) / 0.26);
+  box-shadow:
+    0 20px 50px -20px hsl(var(--glass-shadow) / 0.5),
+    0 6px 18px -12px hsl(var(--glass-shadow) / 0.34),
+    inset 0 1px 0 hsl(var(--glass-highlight) / 0.5);
+}
+.glass-subtle {
+  background: hsl(var(--glass-bg) / calc(var(--glass-opacity) - 0.2));
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid hsl(var(--glass-border) / 0.16);
+  box-shadow:
+    0 8px 24px -14px hsl(var(--glass-shadow) / 0.35),
+    inset 0 1px 0 hsl(var(--glass-highlight) / 0.3);
+}
+.glass-hover {
+  transition:
+    box-shadow 0.28s cubic-bezier(0.32, 0.72, 0, 1),
+    transform 0.28s cubic-bezier(0.32, 0.72, 0, 1),
+    background 0.28s ease;
+}
+.glass-hover:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px hsl(var(--glass-shadow) / 0.06),
+    0 16px 34px -20px hsl(var(--glass-shadow) / 0.38),
+    inset 0 1px 0 hsl(var(--glass-highlight) / 0.5);
+}
+
+/* Full-bleed edge chrome (sidebar / top bar / tab strip): translucent frosted
+   fill that refracts the ambient backdrop, no rounding or float shadow — the
+   caller adds whichever border side it needs. */
+.glass-edge {
+  background: hsl(var(--glass-bg) / calc(var(--glass-opacity) - 0.14));
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+}
+
+/* Back-compat: the old class name now maps onto the new material. */
+.tm-glass {
+  background:
+    linear-gradient(
+      150deg,
+      hsl(var(--glass-tint) / calc(var(--glass-opacity) + 0.12)),
+      hsl(var(--glass-bg) / calc(var(--glass-opacity) - 0.06))
+    );
+  backdrop-filter: blur(20px) saturate(175%);
+  -webkit-backdrop-filter: blur(20px) saturate(175%);
+  border: 1px solid hsl(var(--glass-border) / 0.22);
+  box-shadow:
+    0 16px 40px -12px hsl(var(--glass-shadow) / 0.45),
+    inset 0 1px 0 hsl(var(--glass-highlight) / 0.5);
+}
 }
 
 /* ---- MapLibre hover popup (themed) ---- */

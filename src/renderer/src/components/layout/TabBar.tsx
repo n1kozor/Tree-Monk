@@ -61,8 +61,8 @@ function TabPill({
       className={cn(
         'group flex h-8 max-w-[200px] shrink-0 cursor-pointer select-none items-center gap-1.5 rounded-t-lg border-x border-t px-2.5 text-xs transition-colors',
         active
-          ? 'border-border bg-background font-medium text-foreground'
-          : 'border-transparent text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+          ? 'border-border/50 bg-background/70 font-medium text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] backdrop-blur-md'
+          : 'border-transparent text-muted-foreground hover:bg-accent/50 hover:text-foreground'
       )}
     >
       <PersonAvatar
@@ -98,7 +98,7 @@ export function TabBar(): JSX.Element | null {
   if (tabs.length === 0) return null
 
   return (
-    <div className="flex items-end gap-0.5 overflow-x-auto border-b border-border bg-secondary/40 px-1.5 pt-1.5 [scrollbar-width:thin]">
+    <div className="glass-edge flex items-end gap-0.5 overflow-x-auto border-b border-border/40 px-1.5 pt-1.5 [scrollbar-width:thin]">
       {tabs.map((tab) => (
         <TabPill
           key={tab.id}

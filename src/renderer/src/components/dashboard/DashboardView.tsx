@@ -220,7 +220,7 @@ export function DashboardView(): JSX.Element {
               onClick={() => void exportPdf()}
               disabled={exporting}
               title={t('dashboard.exportPdf')}
-              className="flex items-center gap-1.5 rounded-lg border border-border bg-card px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
+              className="glass-subtle flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
             >
               {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5" />}
               <span className="hidden sm:inline">{exporting ? t('dashboard.exporting') : t('dashboard.exportPdf')}</span>
@@ -229,10 +229,10 @@ export function DashboardView(): JSX.Element {
               onClick={() => setSettingsOpen((v) => !v)}
               title={t('dashboard.settings')}
               className={cn(
-                'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
+                'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors',
                 settingsOpen
-                  ? 'border-primary/50 bg-primary/10 text-primary'
-                  : 'border-border bg-card text-muted-foreground hover:text-foreground'
+                  ? 'border border-primary/50 bg-primary/10 text-primary'
+                  : 'glass-subtle text-muted-foreground hover:text-foreground'
               )}
             >
               <SlidersHorizontal className="h-3.5 w-3.5" />
@@ -262,7 +262,7 @@ export function DashboardView(): JSX.Element {
 
         {/* ---- Widgets ---- */}
         {visible.length === 0 ? (
-          <div className="mt-6 rounded-2xl border border-dashed border-border bg-card/40 p-10 text-center">
+          <div className="mt-6 rounded-2xl border border-dashed border-border/40 bg-card/40 p-10 text-center">
             <Network className="mx-auto mb-3 h-9 w-9 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">{t('dashboard.scopeEmpty')}</p>
           </div>
@@ -335,10 +335,10 @@ function ScopeBar({
   const needsRoot = scope !== 'all'
 
   return (
-    <div className="rounded-2xl border border-border bg-card/60 p-3 shadow-sm">
+    <div className="glass rounded-2xl p-3">
       <div className="flex flex-wrap items-center gap-2">
         {/* Scope segmented control */}
-        <div className="flex items-center rounded-lg border border-border bg-background/60 p-0.5">
+        <div className="glass-subtle flex items-center rounded-lg p-0.5">
           {SCOPES.map(({ id, icon: Icon }) => (
             <button
               key={id}
@@ -346,7 +346,7 @@ function ScopeBar({
               title={t(`dashboard.scope.${id}`)}
               className={cn(
                 'flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors',
-                scope === id ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                scope === id ? 'bg-primary text-primary-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20' : 'text-muted-foreground hover:text-foreground'
               )}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -365,10 +365,10 @@ function ScopeBar({
           <button
             onClick={onToggleSpouses}
             className={cn(
-              'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors',
+              'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors',
               includeSpouses
-                ? 'border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-400'
-                : 'border-border bg-background/60 text-muted-foreground hover:text-foreground'
+                ? 'border border-rose-500/50 bg-rose-500/10 text-rose-600 dark:text-rose-400'
+                : 'glass-subtle text-muted-foreground hover:text-foreground'
             )}
             title={t('dashboard.includeSpousesHint')}
           >
@@ -424,7 +424,7 @@ function SettingsPanel({
   const cfg = useDashboardSettings()
 
   return (
-    <div className="mt-3 rounded-2xl border border-border bg-card/80 p-4 shadow-sm">
+    <div className="glass mt-3 rounded-2xl p-4">
       <div className="mb-3 flex items-center justify-between">
         <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           <SlidersHorizontal className="h-3.5 w-3.5" /> {t('dashboard.settings')}
@@ -480,10 +480,10 @@ function SettingsPanel({
                 key={id}
                 onClick={() => cfg.toggleWidget(id)}
                 className={cn(
-                  'flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left text-xs transition-colors',
+                  'flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs transition-colors',
                   shown
-                    ? 'border-border bg-background/60 text-foreground hover:border-primary/40'
-                    : 'border-dashed border-border bg-transparent text-muted-foreground hover:text-foreground'
+                    ? 'glass-subtle text-foreground hover:border-primary/40'
+                    : 'border border-dashed border-border/40 bg-transparent text-muted-foreground hover:text-foreground'
                 )}
               >
                 <Icon className={cn('h-3.5 w-3.5 shrink-0', shown ? 'text-primary' : 'text-muted-foreground/60')} />
@@ -522,8 +522,8 @@ function Widget({
   const { title, icon: Icon } = WIDGET_META[id]
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border bg-card/60 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex items-center gap-2 border-b border-border/60 bg-gradient-to-r from-card to-secondary/20 px-4 py-2.5">
+    <div className="glass glass-hover overflow-hidden rounded-2xl">
+      <div className="flex items-center gap-2 border-b border-border/40 bg-gradient-to-r from-card/40 to-secondary/20 px-4 py-2.5">
         <Icon className="h-4 w-4 text-primary" />
         <h3 className="flex-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           {t(title)}
@@ -608,7 +608,7 @@ function Kpis({ stats, onDrill }: { stats: DashboardStats; onDrill: (f: Facet, t
   return (
     <div className="space-y-3">
       {/* Data-quality gauge — circular, prominent at the very top of the overview. */}
-      <div className="flex items-center gap-4 rounded-xl border border-border bg-gradient-to-br from-card to-secondary/30 p-4">
+      <div className="flex items-center gap-4 rounded-xl border border-border/40 bg-gradient-to-br from-card/40 to-secondary/30 p-4">
         <QualityRing value={stats.qualityScore} size={72} />
         <div className="min-w-0">
           <p className="text-sm font-semibold">{t('quality.title')}</p>
@@ -624,7 +624,7 @@ function Kpis({ stats, onDrill }: { stats: DashboardStats; onDrill: (f: Facet, t
               disabled={!clickable}
               onClick={() => tile.facet && onDrill(tile.facet, tile.label)}
               className={cn(
-                'relative overflow-hidden rounded-xl border border-border bg-gradient-to-br from-card to-secondary/30 p-4 text-left',
+                'relative overflow-hidden rounded-xl border border-border/40 bg-gradient-to-br from-card/40 to-secondary/30 p-4 text-left',
                 clickable && 'cursor-pointer transition-colors hover:border-primary/50'
               )}
             >
@@ -650,7 +650,7 @@ function Demographics({ stats, onDrill }: { stats: DashboardStats; onDrill: (f: 
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <SexDonut stats={stats} onDrill={onDrill} />
       <LivingBar stats={stats} onDrill={onDrill} />
-      <div className="flex flex-col justify-center gap-3 rounded-xl border border-border bg-secondary/20 p-4">
+      <div className="flex flex-col justify-center gap-3 rounded-xl border border-border/40 bg-secondary/20 p-4">
         <Stat
           icon={Hourglass}
           tint="text-amber-500"
@@ -704,7 +704,7 @@ function SexDonut({ stats, onDrill }: { stats: DashboardStats; onDrill: (f: Face
   const C = 2 * Math.PI * R
   let acc = 0
   return (
-    <div className="flex items-center gap-4 rounded-xl border border-border bg-secondary/20 p-4">
+    <div className="flex items-center gap-4 rounded-xl border border-border/40 bg-secondary/20 p-4">
       <div className="relative h-[72px] w-[72px] shrink-0">
         <svg viewBox="0 0 72 72" className="h-full w-full -rotate-90">
           {segs.map((s) => {
@@ -756,7 +756,7 @@ function LivingBar({ stats, onDrill }: { stats: DashboardStats; onDrill: (f: Fac
   const total = stats.total || 1
   const livePct = Math.round((stats.living / total) * 100)
   return (
-    <div className="flex flex-col justify-center gap-3 rounded-xl border border-border bg-secondary/20 p-4">
+    <div className="flex flex-col justify-center gap-3 rounded-xl border border-border/40 bg-secondary/20 p-4">
       <div className="flex h-3 w-full overflow-hidden rounded-full bg-background">
         <div className="bg-emerald-500/80" style={{ width: `${(stats.living / total) * 100}%` }} />
         <div className="bg-slate-500/70" style={{ width: `${(stats.deceased / total) * 100}%` }} />
@@ -808,7 +808,7 @@ function Records({
             disabled={!clickable}
             onClick={() => i.personId && onSelectPerson(i.personId)}
             className={cn(
-              'flex items-start gap-3 rounded-xl border border-border bg-background/40 p-3 text-left transition-colors',
+              'flex items-start gap-3 rounded-xl border border-border/40 bg-background/40 p-3 text-left transition-colors',
               clickable ? 'cursor-pointer hover:border-primary/50 hover:bg-accent' : 'cursor-default'
             )}
           >

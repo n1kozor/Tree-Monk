@@ -93,10 +93,10 @@ export function FeedbackDialog({
                 key={value}
                 onClick={() => setCategory(value)}
                 className={cn(
-                  'flex flex-col items-center gap-1 rounded-lg border px-2 py-2.5 text-xs font-medium transition-colors',
+                  'flex flex-col items-center gap-1 rounded-xl border px-2 py-2.5 text-xs font-medium transition-colors',
                   category === value
                     ? 'border-primary bg-primary/10 text-primary'
-                    : 'border-border text-muted-foreground hover:bg-accent'
+                    : 'border-border/40 text-muted-foreground hover:bg-accent'
                 )}
               >
                 <Icon className="h-4 w-4" />

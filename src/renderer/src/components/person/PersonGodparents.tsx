@@ -18,7 +18,7 @@ function PersonChip({
   onRemove?: () => void
 }): JSX.Element {
   return (
-    <span className="flex items-center gap-1.5 rounded-full border border-border bg-card py-0.5 pl-0.5 pr-1 text-xs">
+    <span className="flex items-center gap-1.5 rounded-full border border-border/40 bg-card/50 py-0.5 pl-0.5 pr-1 text-xs">
       <button onClick={onOpen} className="flex items-center gap-1.5 rounded-full pr-1 hover:text-primary">
         <PersonAvatar personId={person.id} name={fullName(person)} sex={person.sex} className="h-5 w-5 text-[8px]" />
         <span className="max-w-[12rem] truncate font-medium">{fullName(person)}</span>
@@ -84,7 +84,7 @@ export function PersonGodparents({ person }: { person: Person }): JSX.Element {
         </h4>
         <button
           onClick={() => setAdding(true)}
-          className="flex items-center gap-1 rounded-md border border-border px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+          className="flex items-center gap-1 rounded-lg border border-border/40 px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
         >
           <Plus className="h-3 w-3" /> {t('godparents.add')}
         </button>

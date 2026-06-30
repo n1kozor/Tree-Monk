@@ -32,7 +32,8 @@ export function BoardTabs(): JSX.Element {
   }, [loadBoards])
 
   return (
-    <div className="flex h-9 shrink-0 items-center gap-1 border-b border-border bg-card/40 px-2">
+    <>
+      <div className="glass-subtle flex h-9 shrink-0 items-center gap-1 border-b border-border/40 px-2">
       <div className="flex items-center gap-1 overflow-x-auto">
         {boards.map((b) => {
           const active = b.id === currentBoardId
@@ -45,9 +46,9 @@ export function BoardTabs(): JSX.Element {
                 setMenu({ id: b.id, name: b.name, x: e.clientX, y: e.clientY })
               }}
               className={cn(
-                'flex h-7 cursor-pointer items-center gap-1.5 rounded-md px-2.5 text-xs font-medium transition-colors',
+                'flex h-7 cursor-pointer items-center gap-1.5 rounded-xl px-2.5 text-xs font-medium transition-colors',
                 active
-                  ? 'bg-primary/15 text-primary'
+                  ? 'bg-primary/15 text-primary shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
                   : 'text-muted-foreground hover:bg-accent hover:text-foreground'
               )}
             >
@@ -59,10 +60,11 @@ export function BoardTabs(): JSX.Element {
       <button
         onClick={() => setCreateOpen(true)}
         title={t('boards.new')}
-        className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+        className="flex h-7 w-7 items-center justify-center rounded-xl text-muted-foreground hover:bg-accent hover:text-foreground"
       >
         <Plus className="h-4 w-4" />
       </button>
+      </div>
 
       {/* Create board modal */}
       <NameDialog
@@ -97,7 +99,7 @@ export function BoardTabs(): JSX.Element {
             }}
           />
           <div
-            className="fixed z-[61] min-w-[160px] overflow-hidden rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-2xl"
+            className="glass-strong fixed z-[61] min-w-[160px] overflow-hidden rounded-2xl p-1 text-popover-foreground"
             style={{ left: menu.x, top: menu.y }}
           >
             <button
@@ -135,6 +137,6 @@ export function BoardTabs(): JSX.Element {
           </div>
         </>
       )}
-    </div>
+    </>
   )
 }

@@ -22,7 +22,7 @@ export function PedigreeSettingsPanel(): JSX.Element {
       <button
         onClick={() => setOpen(true)}
         title={t('tree.displaySettings')}
-        className="absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card/90 text-muted-foreground shadow-xl backdrop-blur transition-colors hover:text-primary"
+        className="glass-subtle absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:text-primary"
       >
         <Settings2 className="h-4 w-4" />
       </button>
@@ -30,8 +30,8 @@ export function PedigreeSettingsPanel(): JSX.Element {
   }
 
   return (
-    <div className="absolute right-4 top-4 z-30 w-64 overflow-hidden rounded-xl border border-border bg-card/95 shadow-2xl backdrop-blur">
-      <div className="flex items-center justify-between border-b border-border px-3 py-2">
+    <div className="glass-strong absolute right-4 top-4 z-30 w-64 overflow-hidden rounded-2xl text-card-foreground">
+      <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           <Settings2 className="h-3.5 w-3.5" /> {t('tree.displaySettings')}
         </span>
@@ -97,7 +97,7 @@ export function PedigreeSettingsPanel(): JSX.Element {
           onChange={(v) => ped.set({ connectorOpacity: v })}
         />
 
-        <div className="space-y-3 border-t border-border/60 pt-3">
+        <div className="space-y-3 border-t border-border/40 pt-3">
           <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
             {t('tree.cards')}
           </span>
@@ -142,7 +142,7 @@ export function PedigreeSettingsPanel(): JSX.Element {
           />
         </div>
 
-        <div className="border-t border-border/60 pt-3">
+        <div className="border-t border-border/40 pt-3">
           <Swatches
             label={t('tree.canvasBg')}
             options={CANVAS_BACKGROUNDS}

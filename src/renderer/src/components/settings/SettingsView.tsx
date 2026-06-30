@@ -36,15 +36,15 @@ function Segmented<T extends string>({
   onChange: (v: T) => void
 }): JSX.Element {
   return (
-    <div className="flex items-center gap-1 rounded-lg bg-secondary p-0.5">
+    <div className="flex items-center gap-1 rounded-xl bg-secondary/40 p-0.5 backdrop-blur-sm">
       {options.map((o) => (
         <button
           key={o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            'rounded-md px-3 py-1 text-xs font-medium transition-colors',
+            'rounded-lg px-3 py-1 text-xs font-medium transition-colors',
             value === o.value
-              ? 'bg-background text-foreground shadow'
+              ? 'bg-background text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
               : 'text-muted-foreground hover:text-foreground'
           )}
         >
@@ -67,7 +67,7 @@ function Row({
   children: React.ReactNode
 }): JSX.Element {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-card p-3">
+    <div className="glass glass-hover flex items-center justify-between gap-4 rounded-2xl p-3 text-card-foreground">
       <div className="flex items-start gap-3">
         <Icon className="mt-0.5 h-4 w-4 text-primary" />
         <div>
@@ -174,7 +174,7 @@ export function SettingsView(): JSX.Element {
             {t('settings.data')}
           </h3>
           {interrupted && (
-            <div className="flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
+            <div className="flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-600 dark:text-amber-400">
               <AlertTriangle className="h-4 w-4 shrink-0" />
               <span className="flex-1">{t('fs.interrupted')}</span>
             </div>

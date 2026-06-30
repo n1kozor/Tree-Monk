@@ -136,7 +136,7 @@ export function UpdateBadge(): JSX.Element {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-center gap-3 rounded-xl border border-border bg-secondary/30 p-3 text-sm">
+            <div className="flex items-center justify-center gap-3 rounded-xl border border-border/40 bg-secondary/30 p-3 text-sm">
               <span className="rounded-md bg-background px-2.5 py-1 font-mono text-muted-foreground">
                 v{info?.current}
               </span>
@@ -157,7 +157,7 @@ export function UpdateBadge(): JSX.Element {
                 <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                   {t('update.notes')}
                 </p>
-                <div className="max-h-56 overflow-y-auto rounded-lg border border-border bg-background/50 p-3 text-foreground/80">
+                <div className="max-h-56 overflow-y-auto rounded-xl border border-border/40 bg-background/50 p-3 text-foreground/80">
                   <Markdown>{notes}</Markdown>
                 </div>
               </div>

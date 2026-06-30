@@ -193,7 +193,7 @@ export function MergeDialog({
         </DialogHeader>
 
         {/* Survivor / victim headers + swap */}
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-lg border border-border bg-secondary/30 p-2">
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 rounded-xl border border-border/40 bg-secondary/40 p-2 backdrop-blur-sm">
           <Head p={survivor} who={t('issues.survivor')} />
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title={t('issues.swap')} onClick={() => setSurvivorId(victim.id)}>
             <ArrowLeftRight className="h-4 w-4" />
@@ -202,7 +202,7 @@ export function MergeDialog({
         </div>
 
         {parentWarn && (
-          <p className="flex items-center gap-1.5 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-1.5 text-[11px] text-amber-600 dark:text-amber-400">
+          <p className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-2 py-1.5 text-[11px] text-amber-600 dark:text-amber-400">
             <TriangleAlert className="h-3.5 w-3.5 shrink-0" /> {t('issues.mergeWarnParents')}
           </p>
         )}
@@ -218,7 +218,7 @@ export function MergeDialog({
           {inspect ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
         </button>
         {inspect && (
-          <div className="grid grid-cols-2 gap-2 rounded-lg border border-border bg-secondary/20 p-2.5 text-[11px]">
+          <div className="grid grid-cols-2 gap-2 rounded-xl border border-border/40 bg-secondary/30 p-2.5 text-[11px] backdrop-blur-sm">
             {[survivor, victim].map((p, i) => {
               const rel = relationsOf(p.id)
               const line = (label: string, ppl: Person[]): JSX.Element => (
@@ -258,12 +258,12 @@ export function MergeDialog({
                 disabled={!differ}
                 onClick={() => setChoices((c) => ({ ...c, [key]: side }))}
                 className={cn(
-                  'truncate rounded-md border px-2 py-1 text-left text-xs transition-colors',
+                  'truncate rounded-lg border px-2 py-1 text-left text-xs transition-colors',
                   !differ
                     ? 'cursor-default border-transparent text-muted-foreground'
                     : cur === side
                       ? 'border-primary bg-primary/10 font-medium text-foreground'
-                      : 'border-border text-muted-foreground hover:bg-accent'
+                      : 'border-border/40 text-muted-foreground hover:bg-accent'
                 )}
                 title={val}
               >

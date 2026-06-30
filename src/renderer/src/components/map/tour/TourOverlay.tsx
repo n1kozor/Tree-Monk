@@ -38,7 +38,7 @@ export function TourOverlay({
   return (
     <>
       {/* Top bar: exit + progress */}
-      <div className="pointer-events-auto absolute left-1/2 top-4 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-card/85 px-3 py-1.5 shadow-lg backdrop-blur">
+      <div className="glass-strong pointer-events-auto absolute left-1/2 top-4 z-40 flex -translate-x-1/2 items-center gap-3 rounded-full px-3 py-1.5">
         <button onClick={onClose} title={t('tour.exit')} className="text-muted-foreground transition-colors hover:text-foreground">
           <X className="h-4 w-4" />
         </button>
@@ -70,10 +70,10 @@ export function TourOverlay({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -24, scale: 0.97 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="pointer-events-auto w-full max-w-xl overflow-hidden rounded-2xl border border-border bg-card/95 shadow-2xl backdrop-blur"
+            className="glass-strong pointer-events-auto w-full max-w-xl overflow-hidden rounded-2xl"
           >
             {/* Header */}
-            <div className="flex items-center gap-3 border-b border-border bg-gradient-to-r from-primary/10 to-transparent p-4">
+            <div className="flex items-center gap-3 border-b border-border/40 bg-gradient-to-r from-primary/10 to-transparent p-4">
               <button
                 onClick={() => onSelect(step.personId)}
                 title={t('tour.openProfile')}
@@ -120,7 +120,7 @@ export function TourOverlay({
                     </span>
                   )}
                   {step.occupation && (
-                    <span className="flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-[11px] text-muted-foreground">
+                    <span className="flex items-center gap-1 rounded-full bg-secondary/40 px-2 py-0.5 text-[11px] text-muted-foreground">
                       <Briefcase className="h-3 w-3" /> {step.occupation}
                     </span>
                   )}
@@ -149,7 +149,7 @@ export function TourOverlay({
             </div>
 
             {/* Controls */}
-            <div className="flex items-center justify-between gap-2 border-t border-border p-3">
+            <div className="flex items-center justify-between gap-2 border-t border-border/40 p-3">
               <button
                 onClick={onPrev}
                 disabled={atStart}

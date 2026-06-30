@@ -119,8 +119,10 @@ export default function App(): JSX.Element {
     const watchdog = setTimeout(() => setReady(true), 20000)
     void refreshAll().finally(() => {
       clearTimeout(watchdog)
-      // Keep the splash up long enough for its draw-in animation to play out.
-      const wait = Math.max(0, 1200 - (performance.now() - started))
+      // Keep the splash up long enough for its full draw-in animation to play
+      // out AND let the TreeMonk wordmark linger (tree grows ~1.8s, the wordmark
+      // writes + fills by ~3.3s, then it holds on screen for a beat).
+      const wait = Math.max(0, 5500 - (performance.now() - started))
       setTimeout(() => setReady(true), wait)
     })
     return () => clearTimeout(watchdog)
@@ -213,7 +215,7 @@ export default function App(): JSX.Element {
   return (
     <MotionConfig reducedMotion={animations ? 'never' : 'always'}>
       <AnimatePresence>{!ready && <Preloader key="preloader" />}</AnimatePresence>
-      <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+      <div className="flex h-screen w-screen overflow-hidden bg-transparent text-foreground">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />

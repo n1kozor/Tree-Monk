@@ -143,7 +143,7 @@ export function PersonOccupations({ personId }: { personId: string }): JSX.Eleme
           {list.map((o) => (
             <div
               key={o.id}
-              className="flex items-center gap-2 rounded-md border border-border bg-secondary/40 px-2.5 py-1 text-xs"
+              className="flex items-center gap-2 rounded-lg border border-border/40 bg-secondary/40 px-2.5 py-1 text-xs"
             >
               <button
                 onClick={() => setEditing(o)}

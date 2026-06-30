@@ -109,13 +109,13 @@ export function AuditView(): JSX.Element {
   const entityLabel = (e: string): string => t(`audit.entity.${e}`, { defaultValue: e })
   const fieldLabel = (col: string): string => t(`audit.field.${col}`, { defaultValue: col })
   const selectCls =
-    'h-9 rounded-lg border border-border bg-background px-2 text-sm outline-none focus:border-primary/60'
+    'h-9 rounded-xl border border-border/40 bg-secondary/40 backdrop-blur-sm px-2 text-sm outline-none focus:border-primary/60'
   const hasFilters = !!(search || entity || action)
 
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-4 pt-4">
+      <div className="flex items-center justify-between border-b border-border/40 px-4 pt-4">
         <div>
           <h2 className="flex items-center gap-2 text-lg font-semibold">
             <History className="h-5 w-5 text-primary" /> {t('audit.title')}
@@ -129,7 +129,7 @@ export function AuditView(): JSX.Element {
       </div>
 
       {/* Filter toolbar */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border/40 px-4 py-3">
         <div className="relative min-w-[200px] flex-1">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -190,7 +190,7 @@ export function AuditView(): JSX.Element {
                 key={e.seq}
                 data-testid="audit-entry"
                 className={cn(
-                  'flex items-start gap-3 rounded-lg border border-border bg-card p-2.5',
+                  'flex items-start gap-3 rounded-xl border border-border/40 bg-secondary/40 p-2.5 backdrop-blur-sm',
                   e.undone && 'opacity-55'
                 )}
               >
@@ -241,7 +241,7 @@ export function AuditView(): JSX.Element {
                 </div>
 
                 {e.undone ? (
-                  <span className="shrink-0 self-center rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  <span className="shrink-0 self-center rounded-full bg-secondary/40 px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                     {t('audit.undone')}
                   </span>
                 ) : (

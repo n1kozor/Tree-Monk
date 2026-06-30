@@ -70,7 +70,7 @@ export function PersonResearch({ personId }: { personId: string }): JSX.Element 
       </div>
 
       {open && (
-        <div className="space-y-2 rounded-lg border border-border bg-secondary/30 p-3">
+        <div className="space-y-2 rounded-xl border border-border/40 bg-secondary/40 p-3">
           <div className="grid grid-cols-2 gap-2">
             <Field label={t('research.title')}>
               <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="h-8 text-xs" />
@@ -95,8 +95,8 @@ export function PersonResearch({ personId }: { personId: string }): JSX.Element 
                   key={r.key}
                   onClick={() => setForm({ ...form, result: r.key })}
                   className={cn(
-                    'flex flex-1 items-center justify-center gap-1 rounded-md border px-2 py-1 text-[11px] font-medium transition-colors',
-                    form.result === r.key ? r.cls : 'border-border text-muted-foreground hover:bg-accent'
+                    'flex flex-1 items-center justify-center gap-1 rounded-lg border px-2 py-1 text-[11px] font-medium transition-colors',
+                    form.result === r.key ? r.cls : 'border-border/40 text-muted-foreground hover:bg-accent'
                   )}
                 >
                   <r.icon className="h-3.5 w-3.5" /> {t(`research.${r.key}`)}
@@ -123,7 +123,7 @@ export function PersonResearch({ personId }: { personId: string }): JSX.Element 
         {logs.map((l) => {
           const m = meta(l.result)
           return (
-            <div key={l.id} className="group rounded-lg border border-border p-2.5">
+            <div key={l.id} className="group rounded-xl border border-border/40 bg-secondary/40 p-2.5">
               <div className="flex items-start gap-2">
                 <span className={cn('mt-0.5 flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-semibold uppercase', m.cls)}>
                   <m.icon className="h-3 w-3" /> {t(`research.${l.result}`)}
