@@ -13,9 +13,11 @@ import {
   Maximize2,
   Minimize2,
   Plus,
+  TreeDeciduous,
   UserPlus,
   Users
 } from 'lucide-react'
+import { useAppStore } from '@/store/useAppStore'
 import type { PedigreeCouple, PedigreePerson, Sex } from '@shared/types'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { cn, formatName } from '@/lib/utils'
@@ -915,6 +917,9 @@ function PersonRow({
   // Custom view colour-coding (sex / century / surname / place), if active.
   const cardColor = useContext(CardColorContext)
   const kinNote = useKinshipNote(person?.id)
+  const fsChange = useAppStore((s) => (person ? s.fsChanges[person.id] : undefined))
+  const { t: tFs } = useTranslation()
+  const fsTitle = tFs('fs.updateAvailable')
   if (!person) {
     return (
       <div className="flex h-[42px] items-center gap-2 px-2.5 text-xs text-muted-foreground/50">
@@ -974,6 +979,19 @@ function PersonRow({
           {kinNote && (
             <span title={kinNote} aria-label={kinNote} className="flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full bg-amber-500 text-white">
               <Link2 className="h-2.5 w-2.5" />
+            </span>
+          )}
+          {fsChange && (
+            <span
+              role="button"
+              title={fsTitle}
+              onClick={(e) => {
+                e.stopPropagation()
+                window.dispatchEvent(new CustomEvent('fs-open-sync', { detail: { personId: person.id } }))
+              }}
+              className="flex h-3.5 w-3.5 shrink-0 cursor-pointer items-center justify-center rounded-full bg-emerald-500 text-white shadow hover:bg-emerald-600"
+            >
+              <TreeDeciduous className="h-2.5 w-2.5" />
             </span>
           )}
           <span className="truncate text-[13px] font-semibold leading-tight hover:text-primary">

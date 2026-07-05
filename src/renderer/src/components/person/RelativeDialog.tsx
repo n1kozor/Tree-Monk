@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PlaceInput } from '@/components/common/PlaceInput'
 import { DateInput } from '@/components/common/DateInput'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
@@ -107,7 +108,7 @@ export function RelativeDialog({
       </div>
       <div className="space-y-1">
         <Label>{`${t('person.marriage')} · ${t('person.place')}`}</Label>
-        <Input value={marrPlace} onChange={(e) => setMarrPlace(e.target.value)} />
+        <PlaceInput value={marrPlace} onChange={setMarrPlace} />
       </div>
     </div>
   ) : null

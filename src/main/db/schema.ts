@@ -249,6 +249,7 @@ CREATE TABLE IF NOT EXISTS events (
   owner_id        TEXT NOT NULL,
   type            TEXT NOT NULL DEFAULT 'other',    -- 'residence' | 'military' | 'nationality' | …
   date            TEXT,                             -- free-form, like birth/death dates
+  end_date        TEXT,                             -- optional range end (e.g. residence moved-out)
   place           TEXT,
   value           TEXT,                             -- the fact's text value (e.g. "Farmer", description)
   note            TEXT,

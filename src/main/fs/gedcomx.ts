@@ -18,18 +18,23 @@ interface GxConclusionDate {
   formal?: string
 }
 interface GxFact {
+  id?: string
   type?: string
   value?: string
   date?: GxConclusionDate
   place?: { original?: string }
+  attribution?: { changeMessage?: string }
 }
 interface GxNamePart {
   type?: string
   value?: string
 }
 interface GxName {
+  id?: string
+  type?: string
   preferred?: boolean
   nameForms?: { fullText?: string; parts?: GxNamePart[] }[]
+  attribution?: { changeMessage?: string }
 }
 interface GxDisplay {
   name?: string
@@ -54,6 +59,7 @@ interface GxResourceRef {
   resource?: string
 }
 interface GxCoupleRelationship {
+  id?: string
   type?: string
   person1?: GxResourceRef
   person2?: GxResourceRef
@@ -75,11 +81,16 @@ const GX = 'http://gedcomx.org/'
 const refId = (r?: GxResourceRef): string | null =>
   r?.resourceId ?? (r?.resource ? r.resource.replace(/^.*[/#]/, '') : null)
 
-/** GEDCOM-X gender type → our M/F/U. */
+/** GEDCOM-X gender type → our M/F/U. NOTE: test Female BEFORE Male — the
+ *  string "Female" also ends in "male", so a naive suffix test misgenders
+ *  every woman. */
 function sexOf(p: GxPerson): 'M' | 'F' | 'U' {
-  const t = p.gender?.type ?? p.display?.gender ?? ''
-  if (/Male$/i.test(t) || /^male$/i.test(t)) return 'M'
-  if (/Female$/i.test(t) || /^female$/i.test(t)) return 'F'
+  const t = p.gender?.type ?? ''
+  if (t.endsWith('/Female')) return 'F'
+  if (t.endsWith('/Male')) return 'M'
+  const d = (p.display?.gender ?? '').trim().toLowerCase()
+  if (d === 'female') return 'F'
+  if (d === 'male') return 'M'
   return 'U'
 }
 
@@ -159,15 +170,25 @@ export function personToNode(p: GxPerson): FsNode | null {
     bud: factDate(burial),
     bup: factPlace(burial),
     re: religion?.value ?? null,
+    bn: birth?.attribution?.changeMessage ?? null,
+    dn: death?.attribution?.changeMessage ?? null,
+    cn: chr?.attribution?.changeMessage ?? null,
+    un: burial?.attribution?.changeMessage ?? null,
     alt: alt.length ? alt : undefined,
     oc: oc.length ? oc : undefined,
     ev: ev.length ? ev : undefined
   }
 }
 
-/** Couple + child-and-parents relationships → CoupleNode / ChildNode stream. */
+/** Couple + child-and-parents relationships → CoupleNode / ChildNode stream.
+ *  FS parent1/parent2 are NOT sexed slots — parents are re-ordered into
+ *  father/mother by their actual gender from the document. */
 export function relationshipNodes(doc: GxDocument): FsNode[] {
   const out: FsNode[] = []
+  const sexMap = new Map<string, 'M' | 'F' | 'U'>()
+  for (const gp of doc.persons ?? []) {
+    if (gp.id) sexMap.set(gp.id, sexOf(gp))
+  }
   for (const r of doc.relationships ?? []) {
     if (r.type && !/Couple$/i.test(r.type)) continue
     const a = refId(r.person1)
@@ -179,9 +200,25 @@ export function relationshipNodes(doc: GxDocument): FsNode[] {
   for (const cap of doc.childAndParentsRelationships ?? []) {
     const c = refId(cap.child)
     if (!c) continue
-    out.push({ t: 'c', f: refId(cap.parent1), m: refId(cap.parent2), c })
+    let f = refId(cap.parent1)
+    let m = refId(cap.parent2)
+    if ((f && sexMap.get(f) === 'F') || (m && sexMap.get(m) === 'M')) {
+      const tmp = f
+      f = m
+      m = tmp
+    }
+    out.push({ t: 'c', f, m, c })
   }
   return out
+}
+
+/** Find a fact of the given GEDCOM-X type on a raw person (for push updates). */
+export function findRawFact(p: GxPerson, suffix: string): { id?: string; date?: { original?: string }; place?: { original?: string }; value?: string } | undefined {
+  return p.facts?.find((f) => f.type === GX + suffix)
+}
+/** The preferred name conclusion id on a raw person (for push updates). */
+export function preferredNameId(p: GxPerson): string | undefined {
+  return (p.names?.find((n) => n.preferred) ?? p.names?.[0])?.id
 }
 
 /** Stream EVERY node from an ancestry/person document: people first, then edges

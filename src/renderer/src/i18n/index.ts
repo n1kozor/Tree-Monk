@@ -37,6 +37,11 @@ export function setLanguage(lang: AppLanguage): void {
   localStorage.setItem(STORAGE_KEY, lang)
   i18n.changeLanguage(lang)
   document.documentElement.lang = lang
+  // Let the main process know so geocoding returns place names in this language.
+  void window.api?.app?.setLanguage?.(lang)
 }
+
+// Sync the initial language to the main process on startup too.
+void window.api?.app?.setLanguage?.(initialLang())
 
 export default i18n

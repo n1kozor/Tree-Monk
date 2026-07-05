@@ -123,8 +123,10 @@ export function applyFsSources(personId: string, nodes: FsNode[]): void {
         recordDate: n.dt ?? null
       })
       const dup = db
-        .prepare("SELECT 1 FROM citations WHERE owner_type='person' AND owner_id=? AND source_id=?")
-        .get(personId, s.id)
+        .prepare(
+          "SELECT id, note, page, event_tag FROM citations WHERE owner_type='person' AND owner_id=? AND source_id=?"
+        )
+        .get(personId, s.id) as { id: string; note: string | null; page: string | null; event_tag: string | null } | undefined
       if (!dup) {
         Citations.create({
           sourceId: s.id,
@@ -135,6 +137,18 @@ export function applyFsSources(personId: string, nodes: FsNode[]): void {
           quality: null,
           note: n.no || null
         })
+      } else if (
+        (n.no || null) !== dup.note ||
+        (n.pg || null) !== dup.page ||
+        (n.ft || null) !== dup.event_tag
+      ) {
+        // The source's citation changed on FamilySearch → refresh our copy.
+        db.prepare('UPDATE citations SET note=?, page=?, event_tag=? WHERE id=?').run(
+          n.no || null,
+          n.pg || null,
+          n.ft || null,
+          dup.id
+        )
       }
     })()
   }
@@ -503,9 +517,18 @@ export class FsIngester {
   }
 
   /** Couple edge — unordered; guess father/mother by known gender, non-authoritative. */
+  /** Sex of a fid: this run's stream first, then the database (relatives synced
+   *  later reference persons that were ingested in an earlier run). */
+  private sexOfFid(fid: string | null): 'M' | 'F' | 'U' | undefined {
+    if (!fid) return undefined
+    const inRun = this.sexByFid.get(fid)
+    if (inRun) return inRun
+    return People.findByFsId(fid)?.sex
+  }
+
   private ingestCouple(n: CoupleNode): FsIngestEvent {
-    const sexA = this.sexByFid.get(n.a)
-    const sexB = this.sexByFid.get(n.b)
+    const sexA = this.sexOfFid(n.a)
+    const sexB = this.sexOfFid(n.b)
     let father = n.a
     let mother = n.b
     if (sexA === 'F' || sexB === 'M') {
@@ -523,9 +546,43 @@ export class FsIngester {
 
   /** Parent/child edge — father/mother are authoritative; also files the child. */
   private ingestChild(n: ChildNode): FsIngestEvent {
+    // Defensive: make sure the father/mother slots match the persons' sexes.
+    let f = n.f
+    let m = n.m
+    if ((f && this.sexOfFid(f) === 'F') || (m && this.sexOfFid(m) === 'M')) {
+      const tmp = f
+      f = m
+      m = tmp
+    }
     const family = this.db.transaction((): Family => {
-      const fam = this.upsertFamily(n.f, n.m, true)
+      const fam = this.upsertFamily(f, m, true)
       const childId = this.ensurePerson(n.c)
+      // Fold HALF-families away: if this child was filed earlier under a family
+      // that has just ONE of the same parents (the other slot empty — e.g. a
+      // numbering-derived edge before the spouse was known), move the child
+      // into the authoritative two-parent family and drop the empty leftover.
+      if (fam.husbandId && fam.wifeId) {
+        const halves = this.db
+          .prepare(
+            `SELECT f.id, f.husband_id, f.wife_id FROM families f
+             JOIN family_children fc ON fc.family_id = f.id
+             WHERE fc.child_id = ? AND f.id != ?`
+          )
+          .all(childId, fam.id) as { id: string; husband_id: string | null; wife_id: string | null }[]
+        for (const h of halves) {
+          const matchesHalf =
+            (h.husband_id === fam.husbandId && !h.wife_id) ||
+            (h.wife_id === fam.wifeId && !h.husband_id) ||
+            (!h.husband_id && !h.wife_id)
+          if (!matchesHalf) continue
+          this.db.prepare('DELETE FROM family_children WHERE family_id = ? AND child_id = ?').run(h.id, childId)
+          const left = (
+            this.db.prepare('SELECT COUNT(*) AS n FROM family_children WHERE family_id = ?').get(h.id) as { n: number }
+          ).n
+          if (left === 0) this.db.prepare('DELETE FROM families WHERE id = ?').run(h.id)
+          this.famChildren.delete(h.id)
+        }
+      }
       const set = this.famChildren.get(fam.id) ?? new Set<string>()
       if (!set.has(childId)) {
         set.add(childId)
@@ -556,7 +613,10 @@ export class FsIngester {
     // a RE-IMPORT merges into the existing family instead of duplicating it.
     let existingId = this.famByKey.get(key)
     if (!existingId) {
-      const dbFam = Families.findByParents(husbandId, wifeId)
+      // Match the family in EITHER parent order — an earlier run may have stored
+      // the couple swapped (e.g. before sexes were known).
+      const dbFam =
+        Families.findByParents(husbandId, wifeId) ?? Families.findByParents(wifeId, husbandId)
       if (dbFam) {
         existingId = dbFam.id
         this.famByKey.set(key, dbFam.id)

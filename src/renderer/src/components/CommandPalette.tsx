@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { isFsMode } from '@/lib/fsMode'
 import {
   AlertTriangle,
   CornerDownLeft,
@@ -133,7 +134,7 @@ export function CommandPalette(): JSX.Element | null {
       if (s) out.push({ id: `nav_${n.view}`, label, category: t('cmd.navigate'), icon: n.icon, score: s + 0.4, run: () => go(() => setView(n.view)) })
     }
 
-    const ACTIONS: { id: string; label: string; icon: LucideIcon; disabled?: boolean; run: () => void }[] = [
+    const ACTIONS: { id: string; label: string; icon: LucideIcon; disabled?: boolean; hidden?: boolean; run: () => void }[] = [
       {
         id: 'add_child',
         label: activePerson ? t('cmd.addChildTo', { name: fullName(activePerson) }) : t('cmd.addChild'),
@@ -145,6 +146,7 @@ export function CommandPalette(): JSX.Element | null {
       {
         id: 'import',
         label: t('cmd.importGedcom'),
+        hidden: isFsMode(),
         icon: Upload,
         run: () =>
           go(() =>
@@ -165,7 +167,8 @@ export function CommandPalette(): JSX.Element | null {
     ]
     for (const a of ACTIONS) {
       const s = fuzzy(q, a.label)
-      if (s) out.push({ id: `act_${a.id}`, label: a.label, category: t('cmd.action'), icon: a.icon, disabled: a.disabled, score: s, run: a.run })
+      if (s && !a.hidden)
+        out.push({ id: `act_${a.id}`, label: a.label, category: t('cmd.action'), icon: a.icon, disabled: a.disabled, score: s, run: a.run })
     }
 
     if (q) {

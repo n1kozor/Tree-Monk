@@ -17,8 +17,10 @@ import { GlobalSearch } from './GlobalSearch'
 import { ExportGedcomDialog } from '@/components/common/ExportGedcomDialog'
 import { importGedcomWithToast } from '@/lib/importGedcom'
 import { UpdateBadge } from '@/components/common/UpdateBadge'
+import { FamilySearchStatusBadge } from './FamilySearchStatusBadge'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/store/useTheme'
+import { useFsMode } from '@/hooks/useFsMode'
 
 export function Topbar(): JSX.Element {
   const { t } = useTranslation()
@@ -26,6 +28,7 @@ export function Topbar(): JSX.Element {
   const theme = useTheme((s) => s.theme)
   const toggleTheme = useTheme((s) => s.toggle)
   const [exportOpen, setExportOpen] = useState(false)
+  const fsMode = useFsMode()
 
   const onImportGedcom = async (): Promise<void> => {
     const res = await importGedcomWithToast(t)
@@ -63,9 +66,11 @@ export function Topbar(): JSX.Element {
         <RootSwitcher />
         <Separator orientation="vertical" className="h-6" />
         <UpdateBadge />
+        <FamilySearchStatusBadge />
         <Separator orientation="vertical" className="h-6" />
 
-        {/* Import a GEDCOM file. */}
+        {/* Import a GEDCOM file — Manual mode only (FS mode is strictly FS-fed). */}
+        {!fsMode && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="gap-1.5">
@@ -80,6 +85,7 @@ export function Topbar(): JSX.Element {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        )}
 
         {/* Export: GEDCOM, a full JSON snapshot, or the raw database file. */}
         <DropdownMenu>

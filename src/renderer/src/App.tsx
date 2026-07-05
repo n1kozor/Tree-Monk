@@ -25,10 +25,15 @@ import { SettingsView } from '@/components/settings/SettingsView'
 import { MediaDownloadProgress } from '@/components/common/MediaDownloadProgress'
 import { CommandPalette } from '@/components/CommandPalette'
 import { SupportInviteDialog } from '@/components/common/SupportInviteDialog'
+import { StartModeDialog } from '@/components/common/StartModeDialog'
+import { FamilySearchDialog } from '@/components/settings/FamilySearchDialog'
+import { markReimportNoticeSeen, markStartChoiceSeen, setFsMode, startChoiceSeen } from '@/lib/fsMode'
+import { ReimportNoticeDialog } from '@/components/common/ReimportNoticeDialog'
 import { FsAnnounceDialog } from '@/components/common/FsAnnounceDialog'
 import { isDemo } from '@/lib/demo'
 import { PersonPanel } from '@/components/person/PersonPanel'
 import { Preloader } from '@/components/common/Preloader'
+import { FsImportPill } from '@/components/common/FsImportPill'
 
 /** The current sidebar view (a single slot — views are NOT tabs). Tree and board
  *  stay mounted after the first visit so their state survives navigation. */
@@ -108,6 +113,9 @@ export default function App(): JSX.Element {
   const { t } = useTranslation() // re-render on language change
   const [supportInviteOpen, setSupportInviteOpen] = useState(false)
   const [fsAnnounceOpen, setFsAnnounceOpen] = useState(false)
+  const [startOpen, setStartOpen] = useState(false)
+  const [reimportOpen, setReimportOpen] = useState(false)
+  const [fsHubOpen, setFsHubOpen] = useState(false)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
@@ -127,6 +135,23 @@ export default function App(): JSX.Element {
     })
     return () => clearTimeout(watchdog)
   }, [refreshAll])
+
+  // Empty database (first launch, after a wipe, or a brand-new tree) → offer
+  // the mode choice (FamilySearch is greyed out / coming soon). An EXISTING
+  // database (users updating the app) is NEVER touched or nagged: it just keeps
+  // working in Manual mode — no dialog, no wipe.
+  useEffect(() => {
+    if (!ready || isDemo()) return
+    const empty = useAppStore.getState().peopleById.size === 0
+    if (empty && !startChoiceSeen()) {
+      setStartOpen(true)
+    } else if (!empty) {
+      // Existing users: default to Manual, mark everything seen, touch nothing.
+      markStartChoiceSeen()
+      markReimportNoticeSeen()
+      setFsMode(false)
+    }
+  }, [ready])
 
   // One-time notice that the new FamilySearch API connection is in development —
   // shown once shortly after launch, BEFORE the support invitation.
@@ -215,6 +240,7 @@ export default function App(): JSX.Element {
   return (
     <MotionConfig reducedMotion={animations ? 'never' : 'always'}>
       <AnimatePresence>{!ready && <Preloader key="preloader" />}</AnimatePresence>
+      <FsImportPill />
       <div className="flex h-screen w-screen overflow-hidden bg-transparent text-foreground">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
@@ -229,6 +255,9 @@ export default function App(): JSX.Element {
         <CommandPalette />
         <SupportInviteDialog open={supportInviteOpen} onOpenChange={setSupportInviteOpen} />
         <FsAnnounceDialog open={fsAnnounceOpen} onOpenChange={setFsAnnounceOpen} />
+        <StartModeDialog open={startOpen} onOpenChange={setStartOpen} onChooseFs={() => setFsHubOpen(true)} />
+        <ReimportNoticeDialog open={reimportOpen} onOpenChange={setReimportOpen} onChooseFs={() => setFsHubOpen(true)} />
+        <FamilySearchDialog open={fsHubOpen} onOpenChange={setFsHubOpen} mandatory />
         <Toaster theme={theme} position="bottom-right" richColors />
       </div>
     </MotionConfig>

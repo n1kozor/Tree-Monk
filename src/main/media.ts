@@ -1,4 +1,5 @@
 import { dialog, shell, BrowserWindow } from 'electron'
+import { mediaAuthHeaders } from './familysearch'
 import { copyFileSync, readFileSync, writeFileSync, existsSync } from 'fs'
 import { basename, extname, join } from 'path'
 import { randomUUID } from 'crypto'
@@ -177,7 +178,7 @@ export async function downloadRemoteMedia(
       const doc = docs[i]
       try {
         const res = await fetch(doc.filePath, {
-          headers: { 'User-Agent': 'TreeMonk', Accept: 'image/*' },
+          headers: { 'User-Agent': 'TreeMonk', Accept: 'image/*', ...mediaAuthHeaders(doc.filePath) },
           redirect: 'follow'
         })
         if (res.ok) {

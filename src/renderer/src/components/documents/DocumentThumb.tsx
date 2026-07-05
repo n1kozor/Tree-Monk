@@ -10,8 +10,7 @@ import {
   Link2,
   Loader2,
   Trash2,
-  Users
-} from 'lucide-react'
+  Users, Pencil } from 'lucide-react'
 import type { DocumentRecord } from '@shared/types'
 import { mediaThumb } from '@/lib/mediaUrl'
 
@@ -48,11 +47,13 @@ export function DocumentThumb({
   doc,
   onClick,
   onDelete,
+  onRename,
   attachedTo
 }: {
   doc: DocumentRecord
   onClick?: () => void
   onDelete?: () => void
+  onRename?: () => void
   /** Names this document is attached to — when provided, shown as a caption. */
   attachedTo?: string[]
 }): JSX.Element {
@@ -71,6 +72,18 @@ export function DocumentThumb({
 
   return (
     <div className="glass glass-hover group relative block w-full overflow-hidden rounded-2xl text-card-foreground text-left hover:border-primary/50">
+      {onRename && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onRename()
+          }}
+          title={t('common.rename')}
+          className="absolute left-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-xl bg-background/80 text-muted-foreground opacity-0 backdrop-blur transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
       {onDelete && (
         <button
           onClick={(e) => {

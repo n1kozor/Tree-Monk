@@ -6,6 +6,7 @@ import {
   Download,
   Eraser,
   MapPin,
+  TreeDeciduous,
   MessageCircle,
   RotateCcw,
   Sparkles,
@@ -21,6 +22,7 @@ import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { ExportGedcomDialog } from '@/components/common/ExportGedcomDialog'
 import { isDemo } from '@/lib/demo'
+import { useFsMode } from '@/hooks/useFsMode'
 import { runPlaceStandardization } from '@/lib/standardizePlaces'
 import { importGedcomWithToast } from '@/lib/importGedcom'
 import { useAppStore } from '@/store/useAppStore'
@@ -90,6 +92,7 @@ export function SettingsView(): JSX.Element {
   const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
   const [interrupted, setInterrupted] = useState(false)
+  const fsMode = useFsMode()
   const [standardizing, setStandardizing] = useState(false)
 
   // Surface an import that was interrupted (app killed mid-run) so the user can
@@ -214,12 +217,14 @@ export function SettingsView(): JSX.Element {
               {t('gedcom.export')}
             </Button>
           </Row>
+          {!fsMode && (
           <Row icon={Upload} title={t('settings.gedcomImport')} desc={t('settings.gedcomImportDesc')}>
             <Button size="sm" variant="outline" className="gap-2" onClick={importGed}>
               <Upload className="h-4 w-4" />
               {t('gedcom.import')}
             </Button>
           </Row>
+          )}
           <Row icon={Trash2} title={t('settings.reset')} desc={t('settings.resetDesc')}>
             <Button size="sm" variant="destructive" className="gap-2" onClick={() => setResetOpen(true)}>
               <Trash2 className="h-4 w-4" />
@@ -257,6 +262,9 @@ export function SettingsView(): JSX.Element {
         title={t('settings.reset')}
         confirmLabel={t('settings.resetBtn')}
         onConfirm={async () => {
+          // An empty database → offer the FS / Manual start choice again.
+          const { clearStartChoice } = await import('@/lib/fsMode')
+          clearStartChoice()
           await window.api.db.wipe()
         }}
       >

@@ -111,6 +111,7 @@ export const Channels = {
     logsForPerson: 'research:logsForPerson',
     allLogs: 'research:allLogs',
     createLog: 'research:createLog',
+    updateLog: 'research:updateLog',
     removeLog: 'research:removeLog'
   },
   aliases: {
@@ -196,7 +197,15 @@ export const Channels = {
     nodeAdded: 'fs-import-node-added',
     rootSet: 'familysearch:rootSet',
     cancel: 'familysearch:cancel',
-    pending: 'familysearch:pending'
+    pending: 'familysearch:pending',
+    signOut: 'familysearch:signOut',
+    signedIn: 'familysearch:signedIn',
+    configured: 'familysearch:configured',
+    personDiff: 'familysearch:personDiff',
+    syncPreview: 'familysearch:syncPreview',
+    listTrees: 'familysearch:listTrees',
+    lookupPerson: 'familysearch:lookupPerson',
+    normalizeDate: 'familysearch:normalizeDate',
   },
   db: {
     wipe: 'db:wipe',
@@ -217,7 +226,8 @@ export const Channels = {
   },
   app: {
     openExternal: 'app:openExternal',
-    openManual: 'app:openManual'
+    openManual: 'app:openManual',
+    setLanguage: 'app:setLanguage'
   },
   updates: {
     version: 'updates:version',
@@ -330,6 +340,7 @@ export interface TreeMonkApi {
     logsForPerson(personId: string): Promise<ResearchLog[]>
     allLogs(): Promise<ResearchLog[]>
     createLog(input: ResearchLogInput): Promise<ResearchLog>
+    updateLog(id: string, input: Partial<ResearchLogInput>): Promise<ResearchLog | null>
     removeLog(id: string): Promise<void>
   }
   aliases: {
@@ -420,30 +431,51 @@ export interface TreeMonkApi {
     exportDatabase(): Promise<{ path: string } | null>
   }
   familysearch: {
-    /** Opens FamilySearch's own sign-in page in a window (the app never sees the
-     *  password) and caches the resulting OAuth token for the import calls. */
-    login(): Promise<{ ok: boolean; error?: string }>
+    /** True if a FamilySearch AppKey (client_id) is configured in this build. */
+    configured(): Promise<boolean>
+    /** Opens FamilySearch's own sign-in page in the system browser (RFC 8252
+     *  loopback flow; the app never sees the password) and caches the token. */
+    login(lang?: string): Promise<{ ok: boolean; error?: string }>
+    /** True while a valid OAuth session is cached. */
+    signedIn(): Promise<boolean>
+    /** Forget the cached OAuth session. */
+    signOut(): Promise<void>
     import(options: FamilySearchImportOptions): Promise<GedcomImportResult>
     /** Searches FamilySearch for people so the user can pick a starting person. */
-    search(options: {
-      username: string
-      password: string
-      query: string
-    }): Promise<FamilySearchPersonResult[]>
+    search(options: { query: string }): Promise<FamilySearchPersonResult[]>
     /** Confirms a starting person + estimates how many ancestors would download. */
-    preview(options: {
-      username: string
-      password: string
-      root: string
-      ascend?: number
-    }): Promise<FamilySearchPreview>
-    /** Refreshes ONE person from FamilySearch (FS wins). Uses `creds` if given,
-     *  else the cached session login; returns `{ needCreds: true }` when neither
-     *  is available so the UI can prompt for a login. */
+    preview(options: { root?: string; ascend?: number }): Promise<FamilySearchPreview>
+    /** Refreshes ONE person from FamilySearch (FS wins). Returns
+     *  `{ needCreds: true }` if not signed in so the UI can prompt sign-in. */
     syncPerson(
-      fid: string,
-      creds?: { username: string; password: string }
-    ): Promise<{ found: boolean; updated: number } | { needCreds: true }>
+      fid: string
+    ): Promise<
+      | {
+          found: boolean
+          updated: number
+          addedRelatives?: { fid: string; name: string; kind: string }[]
+        }
+      | { needCreds: true }
+    >
+    /** List the trees the user can import from (shared Family Tree + personal
+     *  genealogies trees). */
+    listTrees(): Promise<{ id: string; name: string; kind: 'global' | 'user' }[]>
+    /** Verify a FamilySearch person id before import (exists? who is it?). */
+    lookupPerson(fid: string, treeId?: string): Promise<{ found: boolean; name?: string; lifespan?: string; gender?: string }>
+    /** Normalize a free-text date via the FamilySearch Date authority in the
+     *  given UI language; null when not signed in or unparseable. */
+    normalizeDate(text: string, lang: string): Promise<string | null>
+    /** Full one-person sync preview: field diffs, NEW relatives found on
+     *  FamilySearch (spouse/child/parent/godparent) and content counts
+     *  (notes/sources/photos/occupations, local vs remote). */
+    syncPreview(personId: string): Promise<
+      | {
+          fields: { field: string; local: string | null; remote: string | null }[]
+          newRelatives: { fid: string; name: string; kind: 'spouse' | 'child' | 'parent' | 'godparent' }[]
+          content: Record<'notes' | 'sources' | 'media' | 'occupations' | 'events', { local: number; remote: number }>
+        }
+      | { error: string }
+    >
     /** Last-used import settings (to pre-fill the dialog for an easy re-import). */
     getSettings(): Promise<FamilySearchSavedSettings | null>
     /** Subscribe to live import progress. Returns an unsubscribe function. */
@@ -492,6 +524,8 @@ export interface TreeMonkApi {
     openExternal(url: string): Promise<void>
     /** Open the bundled user-manual PDF in the OS viewer. Resolves false if missing. */
     openManual(): Promise<boolean>
+    /** Tell the main process the current UI language (drives geocoding output). */
+    setLanguage(lang: string): Promise<void>
   }
   updates: {
     /** The running app version (fast, no network). */

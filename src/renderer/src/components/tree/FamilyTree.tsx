@@ -9,8 +9,7 @@ import {
   Plus,
   Printer,
   Sprout,
-  Wand2
-} from 'lucide-react'
+  Wand2, TreeDeciduous } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { usePedigreeSettings, type TreeViewKind } from '@/store/usePedigreeSettings'
 import { FanChart } from './FanChart'
@@ -20,6 +19,11 @@ import { PedigreeChart } from './PedigreeChart'
 import { PortraitChart } from './PortraitChart'
 import { RootPicker } from './RootPicker'
 import { PanZoom } from './PanZoom'
+import { FsPersonSyncDialog } from '@/components/person/FsPersonSyncDialog'
+import { FsScanDialog, FsScanPill } from './FsScanDialog'
+import { useFsMode } from '@/hooks/useFsMode'
+import { useFsChangeWatcher } from '@/hooks/useFsChangeWatcher'
+import { isFamilySearchId } from '@/lib/familySearchSearch'
 import { TreePersonDialog, type PersonDraft } from './TreePersonDialog'
 import { ExportTreeDialog } from './ExportTreeDialog'
 import { PedigreeSettingsPanel } from './PedigreeSettingsPanel'
@@ -43,6 +47,22 @@ const VIEWS: { key: TreeViewKind; icon: typeof LayoutGrid; labelKey: string }[] 
 export function FamilyTree(): JSX.Element {
   const { t } = useTranslation()
   const ped = usePedigreeSettings()
+  // Background FamilySearch change watcher (FS mode only) + card-badge clicks.
+  useFsChangeWatcher(true)
+  const fsMode = useFsMode()
+  const startFsScan = useAppStore((s) => s.startFsScan)
+  const fsScanRunning = useAppStore((s) => s.fsScan?.running ?? false)
+  const [fsSyncTarget, setFsSyncTarget] = useState<{ personId: string; fid: string } | null>(null)
+  useEffect(() => {
+    const onOpen = (e: Event): void => {
+      const personId = (e as CustomEvent<{ personId: string }>).detail?.personId
+      if (!personId) return
+      const p = useAppStore.getState().peopleById.get(personId)
+      if (p && isFamilySearchId(p.fsId)) setFsSyncTarget({ personId, fid: p.fsId! })
+    }
+    window.addEventListener('fs-open-sync', onOpen)
+    return () => window.removeEventListener('fs-open-sync', onOpen)
+  }, [])
   // view + fanGenerations live in the persisted store — survive navigation away/back.
   const view = ped.viewKind
   const setView = (v: TreeViewKind): void => ped.set({ viewKind: v })
@@ -381,7 +401,7 @@ export function FamilyTree(): JSX.Element {
             {generations} {t('tree.generations')}
           </span>
           <button
-            onClick={() => setGenerations((g) => Math.min(6, g + 1))}
+            onClick={() => setGenerations((g) => Math.min(13, g + 1))}
             className="flex h-6 w-6 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
           >
             <Plus className="h-3.5 w-3.5" />
@@ -392,6 +412,20 @@ export function FamilyTree(): JSX.Element {
       {view === 'fan' && <FanOptions />}
 
       <RootPicker rootId={rootId} onPick={setStartPerson} />
+
+      {/* FamilySearch: read-only scan for remote changes across every linked
+          person (deletes, new data, updated facts). Minimizable to background. */}
+      {fsMode && (
+        <button
+          onClick={() => void startFsScan()}
+          disabled={fsScanRunning}
+          title={t('fsScan.title')}
+          className="glass-subtle flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
+        >
+          <TreeDeciduous className="h-4 w-4" />
+          <span className="hidden lg:inline">{t('fsScan.button')}</span>
+        </button>
+      )}
 
       {/* Export the printable tree (vector SVG / single or tiled PDF). */}
       <button
@@ -562,6 +596,21 @@ export function FamilyTree(): JSX.Element {
           <LocateFixed className="h-4 w-4 text-primary" />
           <span className="hidden md:inline">{t('tree.resetToRoot')}</span>
         </button>
+      )}
+      {fsMode && <FsScanDialog onOpenPerson={(pid) => window.dispatchEvent(new CustomEvent('fs-open-sync', { detail: { personId: pid } }))} />}
+      {fsMode && <FsScanPill />}
+      {fsSyncTarget && (
+        <FsPersonSyncDialog
+          open={fsSyncTarget !== null}
+          onOpenChange={(v) => !v && setFsSyncTarget(null)}
+          personId={fsSyncTarget.personId}
+          fid={fsSyncTarget.fid}
+          onApplied={async () => {
+            useAppStore.getState().setFsChange(fsSyncTarget.personId, null)
+            await useAppStore.getState().refreshAll()
+            useAppStore.getState().bumpPersonSync()
+          }}
+        />
       )}
     </div>
   )

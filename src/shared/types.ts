@@ -165,8 +165,13 @@ export interface TreeNodeDatum {
 // ---- FamilySearch importer ----
 
 export interface FamilySearchImportOptions {
-  username: string
-  password: string
+  /** Which FamilySearch tree to import from ('GLOBAL' = shared Family Tree). */
+  treeId?: string
+  /** Hard cap on how many persons to import (priority: direct line first). */
+  maxPersons?: number
+  /** Legacy fields — unused by the official OAuth flow, kept for IPC compat. */
+  username?: string
+  password?: string
   /** Starting person FID; defaults to the logged-in user. */
   root?: string
   /** Ancestor generations to fetch (upward). */
@@ -431,6 +436,7 @@ export type OccupationInput = {
 /** Known event types (free-form `type` also allowed for custom entries). */
 export type EventType =
   | 'residence'
+  | 'divorce'
   | 'military'
   | 'nationality'
   | 'caste'
@@ -449,6 +455,8 @@ export interface EventRecord {
   /** One of EventType, or a free-form custom label. */
   type: string
   date: string | null
+  /** Optional end date — e.g. residence 'moved out', so a range is clear. */
+  endDate: string | null
   place: string | null
   /** The fact's text value (e.g. a description, a nationality). */
   value: string | null
@@ -458,6 +466,7 @@ export interface EventRecord {
 export type EventInput = {
   type?: string
   date?: string | null
+  endDate?: string | null
   place?: string | null
   value?: string | null
   note?: string | null

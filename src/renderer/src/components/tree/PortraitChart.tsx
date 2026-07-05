@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronsDownUp, ChevronUp, Link2, Plus, UserPlus, Users } from 'lucide-react'
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronsDownUp, ChevronUp, Link2, Plus, TreeDeciduous, UserPlus, Users } from 'lucide-react'
+import { useAppStore } from '@/store/useAppStore'
 import type { PedigreeCouple, PedigreePerson, Sex } from '@shared/types'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { cn, formatName } from '@/lib/utils'
@@ -114,6 +115,9 @@ function UprightPerson({
   const w = compact ? SIBC_W : TILE_W
   const h = compact ? SIBC_H : CPL_H
   const kinNote = useKinshipNote(person?.id)
+  const fsChange = useAppStore((s) => (person ? s.fsChanges[person.id] : undefined))
+  const { t: tFs } = useTranslation()
+  const fsTitle = tFs('fs.updateAvailable')
   const cardStyle = useCardStyle()
   if (!person) {
     return (
@@ -136,6 +140,19 @@ function UprightPerson({
       {kinNote && (
         <span title={kinNote} aria-label={kinNote} className="absolute left-1 top-1 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-amber-500 text-white shadow">
           <Link2 className="h-2.5 w-2.5" />
+        </span>
+      )}
+      {fsChange && (
+        <span
+          role="button"
+          title={fsTitle}
+          onClick={(e) => {
+            e.stopPropagation()
+            window.dispatchEvent(new CustomEvent('fs-open-sync', { detail: { personId: person.id } }))
+          }}
+          className="absolute right-1 top-1 z-10 flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-emerald-500 text-white shadow hover:bg-emerald-600"
+        >
+          <TreeDeciduous className="h-2.5 w-2.5" />
         </span>
       )}
       <div className="rounded-full" style={{ boxShadow: `0 0 0 2px ${sexRing(person.sex)}` }}>

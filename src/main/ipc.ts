@@ -32,10 +32,16 @@ import { runPersonQuery, listSavedQueries, saveQuery, removeSavedQuery } from '.
 import { createBackup, restoreBackup } from './backup'
 import {
   cancelFamilySearchImport,
+  familySearchSyncPreview,
+  fillEmptyFsPersons,
+  listFamilySearchTrees,
+  lookupFsPerson,
+  normalizeDateViaFamilySearch,
+  syncPersonRelatives,
   forgetCreds,
-  getCachedCreds,
-  getCachedToken,
   importFromFamilySearch,
+  isFamilySearchConfigured,
+  isSignedIn,
   loginFamilySearchOAuth,
   previewFamilySearch,
   searchFamilySearch,
@@ -255,6 +261,7 @@ export function registerIpc(): void {
   ipcMain.handle(Channels.research.logsForPerson, (_e, pid: string) => ResearchLogs.forPerson(pid))
   ipcMain.handle(Channels.research.allLogs, () => ResearchLogs.all())
   ipcMain.handle(Channels.research.createLog, (_e, input) => ResearchLogs.create(input))
+  ipcMain.handle(Channels.research.updateLog, (_e, id: string, input) => ResearchLogs.update(id, input))
   ipcMain.handle(Channels.research.removeLog, (_e, id: string) => ResearchLogs.remove(id))
 
   // Aliases
@@ -372,26 +379,42 @@ export function registerIpc(): void {
     // As soon as the chosen starting person streams in, make them the app's root
     // (top-bar starting person) — live, without waiting for the whole import.
     let rootApplied = false
+    let resolvedRoot: string | null = null
     try {
-      await importFromFamilySearch(
+      const res = await importFromFamilySearch(
         options,
         (status) => safeSend(e.sender, Channels.familysearch.status, status),
         (node) => {
           const event = ingester.ingest(node)
           if (event) safeSend(e.sender, Channels.familysearch.nodeAdded, event)
+          // Apply the root AS SOON AS the starting person streams in, so the
+          // tree can grow live from the first refresh. With an explicit root we
+          // wait for that fid; otherwise (importing your own tree) the FIRST
+          // person is the ancestry root.
           if (
             !rootApplied &&
             !options.keepRoot &&
-            options.root &&
             node.t === 'i' &&
-            node.fid === options.root &&
             event?.kind === 'person' &&
-            event.person
+            event.person &&
+            (!options.root || node.fid === options.root)
           ) {
             rootApplied = true
             AppSettings.set('default_root_person_id', event.person.id)
             safeSend(e.sender, Channels.familysearch.rootSet, event.person.id)
           }
+        }
+      )
+      resolvedRoot = res.rootFid
+      // Fill any FS-linked person left EMPTY by the import (stubs from
+      // relationship edges whose full record wasn't fetched). These are real
+      // tree members — fill them, never delete them.
+      await fillEmptyFsPersons(
+        options.treeId ?? null,
+        (status) => safeSend(e.sender, Channels.familysearch.status, status),
+        (node) => {
+          const ev = ingester.ingest(node)
+          if (ev) safeSend(e.sender, Channels.familysearch.nodeAdded, ev)
         }
       )
     } finally {
@@ -400,6 +423,18 @@ export function registerIpc(): void {
       removeNamelessStubs()
       AppSettings.set('fs_import_pending', null)
       Audit.setEnabled(true)
+    }
+    // New place names → geocode them for the map automatically (background;
+    // uses the FamilySearch Places authority while signed in).
+    void geocodePlaces(() => undefined).catch(() => undefined)
+    // Anchor the app on the starting person (the signed-in user's FS person)
+    // and tell the renderer so the top bar updates immediately.
+    if (!options.keepRoot && resolvedRoot) {
+      const rootPerson = People.findByFsId(resolvedRoot)
+      if (rootPerson) {
+        AppSettings.set('default_root_person_id', rootPerson.id)
+        safeSend(e.sender, Channels.familysearch.rootSet, rootPerson.id)
+      }
     }
     return {
       people: ingester.created + ingester.updated,
@@ -412,13 +447,22 @@ export function registerIpc(): void {
     }
   })
   // Browser sign-in: opens FamilySearch's own page; the app never sees the password.
-  ipcMain.handle(Channels.familysearch.login, () => loginFamilySearchOAuth())
-  ipcMain.handle(Channels.familysearch.search, (_e, options) => searchFamilySearch(options))
+  ipcMain.handle(Channels.familysearch.login, (_e, lang?: string) => loginFamilySearchOAuth(lang))
+  ipcMain.handle(Channels.familysearch.signOut, () => forgetCreds())
+  ipcMain.handle(Channels.familysearch.signedIn, () => isSignedIn())
+  ipcMain.handle(Channels.familysearch.configured, () => isFamilySearchConfigured())
+  ipcMain.handle(Channels.familysearch.syncPreview, (_e, personId: string) => familySearchSyncPreview(personId))
+  ipcMain.handle(Channels.familysearch.listTrees, () => listFamilySearchTrees())
+  ipcMain.handle(Channels.familysearch.lookupPerson, (_e, fid: string, treeId?: string) => lookupFsPerson(fid, treeId))
+  ipcMain.handle(Channels.familysearch.normalizeDate, (_e, text: string, lang: string) =>
+    normalizeDateViaFamilySearch(text, lang)
+  )
+  ipcMain.handle(Channels.familysearch.search, (_e, options) => searchFamilySearch({ query: options.query }))
   ipcMain.handle(Channels.familysearch.preview, (e, options) =>
     previewFamilySearch({
-      ...options,
-      // Stream the preview's auth / root / ancestor-walk progress to the dialog
-      // over the same channel the full import uses.
+      root: options?.root,
+      ascend: options?.ascend,
+      // Stream the preview's auth / root / ancestor-walk progress to the dialog.
       onStatus: (s) => safeSend(e.sender, Channels.familysearch.status, s)
     })
   )
@@ -449,17 +493,11 @@ export function registerIpc(): void {
   // streamed node is merged NON-destructively (curated fields are preserved).
   ipcMain.handle(
     Channels.familysearch.syncPerson,
-    async (_e, fid: string, creds?: { username: string; password: string }) => {
-      // Prefer a browser-sign-in OAuth token; else the passed-in / cached
-      // username+password. If none, ask the renderer to sign in (clean modal).
-      const c = creds ?? getCachedCreds()
-      const hasToken = !!getCachedToken()
-      if (!hasToken && (!c || !c.username || !c.password)) return { needCreds: true as const }
-      const nodes = await syncPersonFromFamilySearch({
-        username: c?.username ?? '',
-        password: c?.password ?? '',
-        fid
-      })
+    async (_e, fid: string) => {
+      // Requires a browser sign-in (OAuth token). If not signed in, ask the
+      // renderer to prompt sign-in.
+      if (!isSignedIn()) return { needCreds: true as const }
+      const nodes = await syncPersonFromFamilySearch({ fid })
       const node = nodes.find((n) => n.t === 'i')
       if (!node) return { found: false, updated: 0 }
     const existing = People.findByFsId(node.fid)
@@ -494,16 +532,34 @@ export function registerIpc(): void {
     applyFsNotes(existing.id, node.no)
     applyFsSources(existing.id, nodes)
     applyFsGodparents(nodes, node.fid, existing.id)
-    return { found: true, updated: changed ? 1 : 0 }
+    // NEW relatives on FamilySearch (spouse/child/parent/godparent) → pull them
+    // in complete (record + portrait + notes + sources) and wire the families.
+    let addedRelatives: { fid: string; name: string; kind: string }[] = []
+    try {
+      const rel = await syncPersonRelatives(existing.id)
+      if (rel.nodes.length) {
+        Audit.setEnabled(false)
+        try {
+          const ing = new FsIngester()
+          for (const rn of rel.nodes) ing.ingest(rn)
+        } finally {
+          Audit.setEnabled(true)
+        }
+      }
+      addedRelatives = rel.added
+    } catch {
+      /* relative sync is best-effort */
+    }
+    // Geocode any new places this sync brought in (background, best-effort).
+    void geocodePlaces(() => undefined).catch(() => undefined)
+    return { found: true, updated: changed ? 1 : 0, addedRelatives }
   })
 
   // Pre-fill data for an easy re-import: saved settings (no password) plus the
   // in-memory session login when still connected.
   ipcMain.handle(Channels.familysearch.getSettings, () => {
     const raw = AppSettings.get('fs_import_settings')
-    const base = raw ? JSON.parse(raw) : {}
-    const creds = getCachedCreds()
-    return { ...base, username: base.username || creds?.username, password: creds?.password }
+    return raw ? JSON.parse(raw) : {}
   })
 
   // Reload every renderer window in place. Used after wiping data or switching
@@ -524,6 +580,9 @@ export function registerIpc(): void {
   })
 
   // App settings (default root person)
+  ipcMain.handle(Channels.app.setLanguage, (_e, lang: string) => {
+    AppSettings.set('app_language', lang)
+  })
   ipcMain.handle(Channels.settings.getDefaultRoot, () => AppSettings.get('default_root_person_id'))
   ipcMain.handle(Channels.settings.setDefaultRoot, (_e, id: string | null) =>
     AppSettings.set('default_root_person_id', id)

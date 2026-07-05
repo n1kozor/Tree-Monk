@@ -276,6 +276,7 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
   const [docs, setDocs] = useState<DocumentRecord[]>([])
   const [cites, setCites] = useState<CitationDetail[]>([])
   const [linkOpen, setLinkOpen] = useState(false)
+  const [renaming, setRenaming] = useState<DocumentRecord | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [active, setActive] = useState<DocumentRecord | null>(null)
   const [citeSort, setCiteSort] = useState<CiteSort>('year-asc')
@@ -404,7 +405,13 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2.5">
             {docs.map((d) => (
-              <DocumentThumb key={d.id} doc={d} onClick={() => openDoc(d)} onDelete={() => detach(d.id)} />
+              <DocumentThumb
+                key={d.id}
+                doc={d}
+                onClick={() => openDoc(d)}
+                onDelete={() => detach(d.id)}
+                onRename={() => setRenaming(d)}
+              />
             ))}
           </div>
         )}
@@ -480,6 +487,22 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
         placeholder="https://…"
         submitLabel={t('common.add')}
         onSubmit={addLink}
+      />
+
+      <NameDialog
+        open={renaming !== null}
+        onOpenChange={(v) => !v && setRenaming(null)}
+        title={t('common.rename')}
+        initial={renaming?.title ?? ''}
+        placeholder={t('person.srcTitle')}
+        submitLabel={t('common.save')}
+        onSubmit={async (name) => {
+          if (renaming) {
+            await window.api.documents.update(renaming.id, { title: name.trim() })
+            setRenaming(null)
+            await reload()
+          }
+        }}
       />
 
       <DocumentViewerDialog list={viewable} active={active} onActiveChange={setActive} />

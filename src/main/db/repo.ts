@@ -1408,6 +1408,7 @@ interface EventRow {
   owner_id: string
   type: string
   date: string | null
+  end_date: string | null
   place: string | null
   value: string | null
   note: string | null
@@ -1419,6 +1420,7 @@ const mapEvent = (r: EventRow): EventRecord => ({
   ownerId: r.owner_id,
   type: r.type,
   date: r.date,
+  endDate: r.end_date,
   place: r.place,
   value: r.value,
   note: r.note
@@ -1440,8 +1442,8 @@ export const Events = {
   create(ownerType: 'person' | 'family', ownerId: string, input: EventInput, id = uuid()): EventRecord {
     getDb()
       .prepare(
-        `INSERT INTO events (id, owner_type, owner_id, type, date, place, value, note, fs_key)
-         VALUES (@id, @owner_type, @owner_id, @type, @date, @place, @value, @note, @fs_key)`
+        `INSERT INTO events (id, owner_type, owner_id, type, date, end_date, place, value, note, fs_key)
+         VALUES (@id, @owner_type, @owner_id, @type, @date, @end_date, @place, @value, @note, @fs_key)`
       )
       .run({
         id,
@@ -1449,6 +1451,7 @@ export const Events = {
         owner_id: ownerId,
         type: input.type ?? 'other',
         date: input.date ?? null,
+        end_date: input.endDate ?? null,
         place: input.place ?? null,
         value: input.value ?? null,
         note: input.note ?? null,
@@ -1465,8 +1468,8 @@ export const Events = {
     if (!existing) throw new Error(`Event ${id} not found`)
     const merged = { ...existing, ...input }
     getDb()
-      .prepare(`UPDATE events SET type=@type, date=@date, place=@place, value=@value, note=@note WHERE id=@id`)
-      .run({ id, type: merged.type, date: merged.date, place: merged.place, value: merged.value, note: merged.note })
+      .prepare(`UPDATE events SET type=@type, date=@date, end_date=@end_date, place=@place, value=@value, note=@note WHERE id=@id`)
+      .run({ id, type: merged.type, date: merged.date, end_date: merged.endDate ?? null, place: merged.place, value: merged.value, note: merged.note })
     return this.get(id)!
   },
   remove(id: string): void {
@@ -1484,14 +1487,15 @@ export const Events = {
       .get(ownerType, ownerId, fsKey)
     if (dup) return false
     db.prepare(
-      `INSERT INTO events (id, owner_type, owner_id, type, date, place, value, note, fs_key)
-       VALUES (@id, @owner_type, @owner_id, @type, @date, @place, @value, @note, @fs_key)`
+      `INSERT INTO events (id, owner_type, owner_id, type, date, end_date, place, value, note, fs_key)
+       VALUES (@id, @owner_type, @owner_id, @type, @date, @end_date, @place, @value, @note, @fs_key)`
     ).run({
       id: uuid(),
       owner_type: ownerType,
       owner_id: ownerId,
       type: input.type ?? 'other',
       date: input.date ?? null,
+      end_date: input.endDate ?? null,
       place: input.place ?? null,
       value: input.value ?? null,
       note: input.note ?? null,
@@ -1650,6 +1654,28 @@ export const ResearchLogs = {
         result: input.result ?? 'negative',
         detail: input.detail ?? null,
         created_at: createdAt
+      })
+    return mapResearch(getDb().prepare('SELECT * FROM research_logs WHERE id = ?').get(id) as ResearchRow)
+  },
+  update(id: string, input: Partial<ResearchLogInput>): ResearchLog | null {
+    const existing = getDb().prepare('SELECT * FROM research_logs WHERE id = ?').get(id) as ResearchRow | undefined
+    if (!existing) return null
+    getDb()
+      .prepare(
+        `UPDATE research_logs SET
+           date=@date, title=@title, repository=@repository, source_desc=@source_desc,
+           date_range=@date_range, result=@result, detail=@detail
+         WHERE id=@id`
+      )
+      .run({
+        id,
+        date: input.date ?? existing.date,
+        title: input.title ?? existing.title,
+        repository: input.repository ?? existing.repository,
+        source_desc: input.sourceDesc ?? existing.source_desc,
+        date_range: input.dateRange ?? existing.date_range,
+        result: input.result ?? existing.result,
+        detail: input.detail ?? existing.detail
       })
     return mapResearch(getDb().prepare('SELECT * FROM research_logs WHERE id = ?').get(id) as ResearchRow)
   },

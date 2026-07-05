@@ -18,6 +18,7 @@ import type { EventRecord, EventType } from '@shared/types'
 
 const TYPES: EventType[] = [
   'residence',
+  'divorce',
   'military',
   'nationality',
   'caste',
@@ -53,6 +54,7 @@ function EventEditDialog({
   const [value, setValue] = useState('')
   const [place, setPlace] = useState('')
   const [date, setDate] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [note, setNote] = useState('')
 
   useEffect(() => {
@@ -61,6 +63,7 @@ function EventEditDialog({
     setValue(event.value ?? '')
     setPlace(event.place ?? '')
     setDate(event.date ?? '')
+    setDateTo(event.endDate ?? '')
     setNote(event.note ?? '')
   }, [event])
 
@@ -74,6 +77,7 @@ function EventEditDialog({
       value: value.trim() || null,
       place: place.trim() || null,
       date: normalizeDate(date) || null,
+      endDate: normalizeDate(dateTo) || null,
       note: note.trim() || null
     })
     await onChanged()
@@ -116,9 +120,13 @@ function EventEditDialog({
               <span className="text-xs font-medium text-muted-foreground">{t('person.place')}</span>
               <Input value={place} onChange={(e) => setPlace(e.target.value)} className="h-9 text-sm" />
             </label>
-            <label className="block w-32 space-y-1">
-              <span className="text-xs font-medium text-muted-foreground">{t('person.dateHint')}</span>
+            <label className="block w-24 space-y-1">
+              <span className="text-xs font-medium text-muted-foreground">{t('events.from')}</span>
               <DateInput value={date} onValueChange={setDate} className="h-9 text-sm" />
+            </label>
+            <label className="block w-24 space-y-1">
+              <span className="text-xs font-medium text-muted-foreground">{t('events.to')}</span>
+              <DateInput value={dateTo} onValueChange={setDateTo} className="h-9 text-sm" />
             </label>
           </div>
           <label className="block space-y-1">
@@ -150,6 +158,7 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
   const [value, setValue] = useState('')
   const [place, setPlace] = useState('')
   const [date, setDate] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   const load = useCallback(async () => {
     setList(await window.api.events.forPerson(personId))
@@ -167,11 +176,13 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
       type,
       value: value.trim() || null,
       place: place.trim() || null,
-      date: normalizeDate(date) || null
+      date: normalizeDate(date) || null,
+      endDate: normalizeDate(dateTo) || null
     })
     setValue('')
     setPlace('')
     setDate('')
+    setDateTo('')
     await load()
   }
   const remove = async (id: string): Promise<void> => {
@@ -201,7 +212,11 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
               </span>
               <span className="min-w-0 flex-1 truncate">
                 {[e.value, e.place].filter(Boolean).join(' · ') || '—'}
-                {e.date && <span className="ml-1.5 tabular-nums text-muted-foreground">{e.date}</span>}
+                {e.date && (
+                  <span className="ml-1.5 tabular-nums text-muted-foreground">
+                    {e.endDate ? `${e.date}–${e.endDate}` : e.date}
+                  </span>
+                )}
               </span>
               <button
                 onClick={(ev) => {
@@ -245,8 +260,14 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
         <DateInput
           value={date}
           onValueChange={setDate}
-          placeholder={t('person.dateHint')}
-          className="h-8 w-24 text-xs"
+          placeholder={t('events.from')}
+          className="h-8 w-20 text-xs"
+        />
+        <DateInput
+          value={dateTo}
+          onValueChange={setDateTo}
+          placeholder={t('events.to')}
+          className="h-8 w-20 text-xs"
         />
         <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={add} title={t('events.title')}>
           <Plus className="h-4 w-4" />

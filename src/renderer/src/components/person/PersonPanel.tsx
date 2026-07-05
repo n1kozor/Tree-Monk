@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { AlertTriangle, ArrowDownToLine, Camera, ChevronRight, Copy, ExternalLink, Loader2, MapPin, Maximize2, Network, RefreshCw, Route, Search, Trash2, TreeDeciduous, X } from 'lucide-react'
+import { AlertTriangle, ArrowDownToLine, Camera, ChevronRight, Copy, ExternalLink, Loader2, MapPin, Maximize2, Network, Printer, RefreshCw, Route, Search, Trash2, TreeDeciduous, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useFsMode } from '@/hooks/useFsMode'
+import { FsPersonSyncDialog } from '@/components/person/FsPersonSyncDialog'
+import { FsExpandDialog } from '@/components/person/FsExpandDialog'
+import { PersonSheetDialog, FamilySheetDialog } from '@/components/print/PrintSheets'
 import {
   Dialog,
   DialogContent,
@@ -19,7 +23,7 @@ import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAppStore } from '@/store/useAppStore'
 import { fullName, cn } from '@/lib/utils'
-import { normalizeDate } from '@/lib/dates'
+import { smartNormalizeDate } from '@/lib/smartDate'
 import { canSearchFamilySearch, familySearchPersonUrl, familySearchSearchUrl, isFamilySearchId } from '@/lib/familySearchSearch'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { ConfirmDialog, toastUndo } from '@/components/common/ConfirmDialog'
@@ -59,6 +63,15 @@ export function PersonPanel(): JSX.Element | null {
   const [deleting, setDeleting] = useState(false)
   const [framingOpen, setFramingOpen] = useState(false)
   const [person, setPerson] = useState<Person | null>(null)
+  const [fsConfigured, setFsConfigured] = useState(false)
+  const fsMode = useFsMode()
+  const [fsSyncOpen, setFsSyncOpen] = useState(false)
+  const [fsExpandOpen, setFsExpandOpen] = useState(false)
+  const [sheet, setSheet] = useState<'person' | 'family' | null>(null)
+
+  useEffect(() => {
+    void window.api.familysearch.configured().then(setFsConfigured)
+  }, [])
   // Counts shown on the tab labels (so the user sees at a glance how much is
   // attached). Documents + citations make up "sources".
   const [docCount, setDocCount] = useState(0)
@@ -173,10 +186,12 @@ export function PersonPanel(): JSX.Element | null {
   // Standardize a date field on blur (e.g. "7.3.1850" → "1850-03-07").
   const commitDate = (field: 'birthDate' | 'deathDate' | 'christeningDate' | 'burialDate'): void => {
     if (!person) return
-    const norm = normalizeDate(person[field] ?? '')
-    const next = { ...person, [field]: norm || null }
-    setPerson(next)
-    void save(next)
+    // FS mode: the FamilySearch Date authority formats in the UI language.
+    void smartNormalizeDate(person[field] ?? '').then((norm) => {
+      const next = { ...person, [field]: norm || null }
+      setPerson(next)
+      void save(next)
+    })
   }
 
   // One-click: carry the birth date + place over to the christening fields
@@ -320,6 +335,23 @@ export function PersonPanel(): JSX.Element | null {
           {t('person.showOnMap')}
         </button>
 
+        <div className="mx-4 mt-2 grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setSheet('person')}
+            className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2.5 py-2 text-xs font-medium transition-colors hover:bg-accent"
+          >
+            <Printer className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">{t('print.personSheet')}</span>
+          </button>
+          <button
+            onClick={() => setSheet('family')}
+            className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2.5 py-2 text-xs font-medium transition-colors hover:bg-accent"
+          >
+            <Printer className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">{t('print.familySheet')}</span>
+          </button>
+        </div>
+
         {/* FamilySearch: open the person's own page (needs an fsId) + a record
             search. The open button is hidden when there is no FamilySearch id. */}
         <div className={cn('mx-4 mt-2 grid gap-2', fsPersonUrl ? 'grid-cols-2' : 'grid-cols-1')}>
@@ -343,6 +375,28 @@ export function PersonPanel(): JSX.Element | null {
             <span className="truncate">{fsPersonUrl ? t('person.fsSearchShort') : t('person.searchFamilySearch')}</span>
           </button>
         </div>
+
+        {/* FamilySearch refresh (pull) — full preview modal before anything changes. */}
+        {fsMode && fsConfigured && isFamilySearchId(person.fsId) && (
+          <button
+            onClick={() => setFsSyncOpen(true)}
+            title={t('fs.pullBtn')}
+            className="mx-4 mt-2 flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-2 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-500/20 dark:text-emerald-400"
+          >
+            <RefreshCw className="h-4 w-4 shrink-0" />
+            <span className="truncate">{t('fs.pullBtn')}</span>
+          </button>
+        )}
+        {fsMode && fsConfigured && isFamilySearchId(person.fsId) && (
+          <button
+            onClick={() => setFsExpandOpen(true)}
+            title={t('fsExpand.btn')}
+            className="mx-4 mt-2 flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2.5 py-2 text-xs font-medium transition-colors hover:bg-accent"
+          >
+            <Network className="h-4 w-4 shrink-0 text-primary" />
+            <span className="truncate">{t('fsExpand.btn')}</span>
+          </button>
+        )}
 
         {/* Editable FamilySearch ID — add it by hand (e.g. after a GEDCOM import
             with no _FSFTID); a valid id lights up the Open/Search buttons above. */}
@@ -665,6 +719,30 @@ export function PersonPanel(): JSX.Element | null {
         </ConfirmDialog>
       )}
 
+      {sheet === 'person' && person && <PersonSheetDialog personId={person.id} onClose={() => setSheet(null)} />}
+      {sheet === 'family' && person && <FamilySheetDialog personId={person.id} onClose={() => setSheet(null)} />}
+      {fsExpandOpen && person && isFamilySearchId(person.fsId) && (
+        <FsExpandDialog
+          open={fsExpandOpen}
+          onOpenChange={setFsExpandOpen}
+          personName={`${person.givenName ?? ''} ${person.surname ?? ''}`.trim()}
+          fid={person.fsId!}
+        />
+      )}
+      {fsSyncOpen && person && isFamilySearchId(person.fsId) && (
+        <FsPersonSyncDialog
+          open={fsSyncOpen}
+          onOpenChange={setFsSyncOpen}
+          personId={person.id}
+          fid={person.fsId!}
+          onApplied={async () => {
+            await refreshAll()
+            const fresh = await window.api.people.get(person.id)
+            if (fresh) setPerson(fresh)
+            useAppStore.getState().bumpPersonSync()
+          }}
+        />
+      )}
     </>
   )
 }

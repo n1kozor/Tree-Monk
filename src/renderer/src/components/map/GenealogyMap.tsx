@@ -30,6 +30,29 @@ import type { HistEvent, MapEventKind, MapMarker } from '@shared/types'
 // "liberty" carries OpenMapTiles building heights → real 3D city extrusions.
 const STYLE_3D = 'https://tiles.openfreemap.org/styles/liberty'
 const STYLE_FLAT = 'https://tiles.openfreemap.org/styles/positron'
+
+/** Relabel every symbol layer to the UI language (OpenMapTiles carries
+ *  name:de / name:en / name:latin). Falls back gracefully to the local name. */
+function localizeMapLabels(map: maplibregl.Map, lang: string): void {
+  const code = (lang || 'en').slice(0, 2)
+  const field = [
+    'coalesce',
+    ['get', `name:${code}`],
+    ['get', 'name:latin'],
+    ['get', 'name:nonlatin'],
+    ['get', 'name']
+  ]
+  try {
+    for (const layer of map.getStyle().layers ?? []) {
+      if (layer.type !== 'symbol') continue
+      const tf = (layer.layout as { 'text-field'?: unknown } | undefined)?.['text-field']
+      if (tf === undefined) continue
+      map.setLayoutProperty(layer.id, 'text-field', field as unknown as maplibregl.ExpressionSpecification)
+    }
+  } catch {
+    /* some styles have no localizable labels — ignore */
+  }
+}
 // Use the bundled OpenHistoricalMap style as-is. A couple of its asset URLs
 // (a land-cover raster + the font CDN) 404, but those are harmless console noise
 // — the vector base map itself loads fine. The marker-persistence fix lives in
@@ -617,11 +640,15 @@ export function GenealogyMap(): JSX.Element {
 
     map.on('load', () => {
       buildLayers(map)
+      localizeMapLabels(map, i18n.language)
       setReady(true)
     })
     // Re-apply custom layers whenever the base style is swapped.
     map.on('styledata', () => {
-      if (map.isStyleLoaded()) buildLayers(map)
+      if (map.isStyleLoaded()) {
+        buildLayers(map)
+        localizeMapLabels(map, i18n.language)
+      }
     })
     // setStyle() wipes images added via addImage, but `hasImage` can still report
     // them as present — so the pin icons silently vanish after a base-map switch

@@ -69,8 +69,8 @@ function OccupationEditDialog({
         <div className="space-y-2">
           <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t('person.occupation')} />
           <div className="flex items-center gap-2">
-            <DateInput value={from} onValueChange={setFrom} placeholder={t('person.from')} className="flex-1" />
-            <DateInput value={to} onValueChange={setTo} placeholder={t('person.to')} className="flex-1" />
+            <DateInput value={from} onValueChange={setFrom} placeholder={t('person.fromOpt')} className="flex-1" />
+            <DateInput value={to} onValueChange={setTo} placeholder={t('person.toOpt')} className="flex-1" />
           </div>
         </div>
         <DialogFooter className="justify-between gap-2 sm:justify-between">
@@ -171,8 +171,8 @@ export function PersonOccupations({ personId }: { personId: string }): JSX.Eleme
           placeholder={t('person.occupation')}
           className="h-8 flex-[2] text-xs"
         />
-        <DateInput value={from} onValueChange={setFrom} placeholder={t('person.from')} className="h-8 flex-1 text-xs" />
-        <DateInput value={to} onValueChange={setTo} placeholder={t('person.to')} className="h-8 flex-1 text-xs" />
+        <DateInput value={from} onValueChange={setFrom} placeholder={t('person.fromOpt')} className="h-8 flex-1 text-xs" />
+        <DateInput value={to} onValueChange={setTo} placeholder={t('person.toOpt')} className="h-8 flex-1 text-xs" />
         <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={() => void add()} title={t('person.addOccupation')}>
           <Plus className="h-4 w-4" />
         </Button>

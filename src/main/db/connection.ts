@@ -50,6 +50,9 @@ function migrate(database: Database.Database): void {
   // Profile-photo framing (pan/zoom) so a cut-off head can be repositioned. JSON
   // {x,y,scale}; null = centred. Added in 0.17.0.
   add('ALTER TABLE people ADD COLUMN profile_photo_crop TEXT')
+  // Optional END date for life events (e.g. residence "moved out" vs "moved in").
+  // Additive → existing DBs gain it on the next launch, nothing is lost.
+  add('ALTER TABLE events ADD COLUMN end_date TEXT')
   // Per-vital research "reason" notes (FamilySearch change messages, e.g. a cause
   // of death). Additive columns → existing DBs gain them on the next launch.
   add('ALTER TABLE people ADD COLUMN birth_note TEXT')

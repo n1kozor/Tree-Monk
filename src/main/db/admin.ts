@@ -54,6 +54,7 @@ export function removeNamelessStubs(): number {
        WHERE trim(coalesce(given_name, '')) = '' AND trim(coalesce(surname, '')) = ''
          AND coalesce(birth_date, '') = '' AND coalesce(death_date, '') = ''
          AND coalesce(christening_date, '') = ''
+         AND coalesce(fs_id, '') = ''
          AND id NOT IN (SELECT child_id FROM family_children)`
     )
     .run()

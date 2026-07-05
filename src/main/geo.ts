@@ -1,4 +1,5 @@
-import { Families, People, Places } from './db/repo'
+import { AppSettings, Families, People, Places } from './db/repo'
+import { isSignedIn, searchFamilySearchPlaces } from './familysearch'
 import type { GeoResult } from '@shared/types'
 
 // Nominatim's usage policy allows at most ~1 request/second from a single app,
@@ -6,6 +7,13 @@ import type { GeoResult } from '@shared/types'
 // lookup. So we (a) cache results per query, and (b) serialise requests with a
 // >1s gap between them. The UA identifies the app as the policy requires.
 const NOMINATIM_UA = 'TreeMonk/1.3 (+https://treemonk.eu)'
+
+/** UI language → Accept-Language string (the user's language first, English as
+ *  a fallback) so place names come back localized to the app's language. */
+export function placeLang(): string {
+  const l = (AppSettings.get('app_language') || 'en').slice(0, 2)
+  return l === 'en' ? 'en' : `${l},en`
+}
 const MIN_INTERVAL_MS = 1100
 const geoCache = new Map<string, GeoResult[]>()
 let geoChain: Promise<unknown> = Promise.resolve()
@@ -24,13 +32,27 @@ export async function geoSearch(query: string): Promise<GeoResult[]> {
   const run = geoChain.then(async () => {
     const again = geoCache.get(key)
     if (again) return again
+    // FS mode: the FamilySearch Places authority is the primary source — the
+    // same canonical names the FamilySearch tree uses. Public geocoder is only
+    // the fallback (signed out, or the authority has no match).
+    if (isSignedIn()) {
+      try {
+        const fs = await searchFamilySearchPlaces(q)
+        if (fs.length) {
+          geoCache.set(key, fs)
+          return fs
+        }
+      } catch {
+        /* fall through to Nominatim */
+      }
+    }
     const wait = lastFetchAt + MIN_INTERVAL_MS - Date.now()
     if (wait > 0) await new Promise((r) => setTimeout(r, wait))
     lastFetchAt = Date.now()
     const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(q)}`
     try {
       const res = await fetch(url, {
-        headers: { 'User-Agent': NOMINATIM_UA, 'Accept-Language': 'hu,en,de' }
+        headers: { 'User-Agent': NOMINATIM_UA, 'Accept-Language': placeLang() }
       })
       if (!res.ok) return [] // don't cache failures (e.g. a transient 429)
       const data = (await res.json()) as { display_name: string; lat: string; lon: string }[]

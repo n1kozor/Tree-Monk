@@ -21,6 +21,7 @@ import { useAppStore } from '@/store/useAppStore'
 import { cn, fullName } from '@/lib/utils'
 import { canView, fileCategory } from '@/lib/docCategory'
 import { DocumentThumb } from './DocumentThumb'
+import { NameDialog } from '@/components/common/NameDialog'
 import { DocumentViewerDialog } from './DocumentViewerDialog'
 import type { DocumentRecord } from '@shared/types'
 
@@ -48,6 +49,7 @@ export function DocumentsView(): JSX.Element {
   const refreshPeople = useAppStore((s) => s.refreshPeople)
   const [active, setActive] = useState<DocumentRecord | null>(null)
   const [deleting, setDeleting] = useState<DocumentRecord | null>(null)
+  const [renaming, setRenaming] = useState<DocumentRecord | null>(null)
 
   // Open the viewer for a document chosen in the global search.
   const docFocusId = useAppStore((s) => s.documentFocusId)
@@ -276,6 +278,7 @@ export function DocumentsView(): JSX.Element {
                 doc={d}
                 onClick={() => openDoc(d)}
                 onDelete={() => setDeleting(d)}
+                onRename={() => setRenaming(d)}
                 attachedTo={d.personIds.map((id) => nameById.get(id)).filter((n): n is string => !!n)}
               />
             ))}
@@ -315,6 +318,22 @@ export function DocumentsView(): JSX.Element {
           )}
         </ConfirmDialog>
       )}
+
+      <NameDialog
+        open={renaming !== null}
+        onOpenChange={(v) => !v && setRenaming(null)}
+        title={t('common.rename')}
+        initial={renaming?.title ?? ''}
+        placeholder={t('person.srcTitle')}
+        submitLabel={t('common.save')}
+        onSubmit={async (name) => {
+          if (renaming) {
+            await window.api.documents.update(renaming.id, { title: name.trim() })
+            setRenaming(null)
+            await refreshDocuments()
+          }
+        }}
+      />
     </div>
   )
 }

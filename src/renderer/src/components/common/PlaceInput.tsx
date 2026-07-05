@@ -10,11 +10,15 @@ import type { GeoResult } from '@shared/types'
 export function PlaceInput({
   value,
   onChange,
-  onCommit
+  onCommit,
+  placeholder,
+  className
 }: {
   value: string
   onChange: (value: string) => void
   onCommit?: () => void
+  placeholder?: string
+  className?: string
 }): JSX.Element {
   const [results, setResults] = useState<GeoResult[]>([])
   const [open, setOpen] = useState(false)
@@ -61,6 +65,8 @@ export function PlaceInput({
     <div className="relative">
       <Input
         value={query}
+        placeholder={placeholder}
+        className={className}
         onChange={(e) => {
           setQuery(e.target.value)
           onChange(e.target.value)

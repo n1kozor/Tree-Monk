@@ -59,6 +59,7 @@ const api: TreeMonkApi = {
     logsForPerson: (pid) => ipcRenderer.invoke(Channels.research.logsForPerson, pid),
     allLogs: () => ipcRenderer.invoke(Channels.research.allLogs),
     createLog: (input) => ipcRenderer.invoke(Channels.research.createLog, input),
+    updateLog: (id, input) => ipcRenderer.invoke(Channels.research.updateLog, id, input),
     removeLog: (id) => ipcRenderer.invoke(Channels.research.removeLog, id)
   },
   aliases: {
@@ -142,11 +143,18 @@ const api: TreeMonkApi = {
     exportDatabase: () => ipcRenderer.invoke(Channels.data.exportDatabase)
   },
   familysearch: {
-    login: () => ipcRenderer.invoke(Channels.familysearch.login),
+    login: (lang) => ipcRenderer.invoke(Channels.familysearch.login, lang),
+    configured: () => ipcRenderer.invoke(Channels.familysearch.configured),
+    signedIn: () => ipcRenderer.invoke(Channels.familysearch.signedIn),
+    signOut: () => ipcRenderer.invoke(Channels.familysearch.signOut),
+    syncPreview: (personId) => ipcRenderer.invoke(Channels.familysearch.syncPreview, personId),
+    listTrees: () => ipcRenderer.invoke(Channels.familysearch.listTrees),
+    lookupPerson: (fid, treeId) => ipcRenderer.invoke(Channels.familysearch.lookupPerson, fid, treeId),
+    normalizeDate: (text, lang) => ipcRenderer.invoke(Channels.familysearch.normalizeDate, text, lang),
     import: (options) => ipcRenderer.invoke(Channels.familysearch.import, options),
     search: (options) => ipcRenderer.invoke(Channels.familysearch.search, options),
     preview: (options) => ipcRenderer.invoke(Channels.familysearch.preview, options),
-    syncPerson: (fid, creds) => ipcRenderer.invoke(Channels.familysearch.syncPerson, fid, creds),
+    syncPerson: (fid) => ipcRenderer.invoke(Channels.familysearch.syncPerson, fid),
     getSettings: () => ipcRenderer.invoke(Channels.familysearch.getSettings),
     onStatus: (callback) => {
       const listener = (_e: unknown, status: Parameters<typeof callback>[0]): void => callback(status)
@@ -192,6 +200,7 @@ const api: TreeMonkApi = {
     }
   },
   app: {
+    setLanguage: (lang) => ipcRenderer.invoke(Channels.app.setLanguage, lang),
     openExternal: (url) => ipcRenderer.invoke(Channels.app.openExternal, url),
     openManual: () => ipcRenderer.invoke(Channels.app.openManual)
   },

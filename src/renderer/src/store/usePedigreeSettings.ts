@@ -149,8 +149,8 @@ function load(): PedigreeValues {
     // 'custom' is no longer a separate view — it became an in-pedigree filter.
     if (!['landscape', 'portrait', 'fan', 'descendants'].includes(merged.viewKind))
       merged.viewKind = 'landscape'
-    // Fan chart is capped at 6 generations; pull older, larger saved values down.
-    merged.fanGenerations = Math.min(6, Math.max(2, merged.fanGenerations))
+    // Fan chart is capped at 13 generations; pull older, larger saved values down.
+    merged.fanGenerations = Math.min(13, Math.max(2, merged.fanGenerations))
     return merged
   } catch {
     return { ...DEFAULTS }

@@ -1,4 +1,5 @@
 import { protocol, net, nativeImage } from 'electron'
+import { mediaAuthHeaders } from './familysearch'
 import { readFile, writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, statSync } from 'fs'
 import { extname, join } from 'path'
@@ -179,7 +180,7 @@ export function registerMediaProtocol(): void {
       if (/^https?:\/\//i.test(doc.filePath)) {
         try {
           const res = await net.fetch(doc.filePath, {
-            headers: { 'User-Agent': 'TreeMonk', Accept: 'image/*' }
+            headers: { 'User-Agent': 'TreeMonk', Accept: 'image/*', ...mediaAuthHeaders(doc.filePath) }
           })
           if (w > 0 && res.ok) {
             const buf = Buffer.from(await res.arrayBuffer())

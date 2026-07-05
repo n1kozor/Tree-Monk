@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Alias, DocumentRecord, Family, Person, ResearchLog } from '@shared/types'
+import { isFamilySearchId } from '@/lib/familySearchSearch'
 
 export type View =
   | 'board'
@@ -113,6 +114,34 @@ interface AppState {
   refreshAliases: () => Promise<void>
   refreshResearch: () => Promise<void>
   bumpPersonSync: () => void
+  /** FamilySearch background watcher: personId → pending remote change summary. */
+  fsChanges: Record<string, { fields: number; relatives: number; content: number }>
+  setFsChange: (personId: string, summary: { fields: number; relatives: number; content: number } | null) => void
+  /** Read-only FamilySearch change scan (iterates every FS-linked person). */
+  fsScan: {
+    running: boolean
+    total: number
+    done: number
+    results: {
+      personId: string
+      name: string
+      status: 'changed' | 'deleted' | 'ok'
+      fields: number
+      relatives: number
+      content: number
+    }[]
+  } | null
+  fsScanMinimized: boolean
+  startFsScan: () => Promise<void>
+  cancelFsScan: () => void
+  clearFsScan: () => void
+  setFsScanMinimized: (v: boolean) => void
+  /** Background FamilySearch import (minimizable — watch the tree grow live). */
+  fsImport: { running: boolean; phase: string; name: string; count: number; people: number; families: number } | null
+  startFsImport: (opts: { ascend: number; childrenDepth: number; treeId?: string; root?: string; maxPersons?: number; keepRoot?: boolean }) => Promise<void>
+  clearFsImport: () => void
+  fsImportExpanded: boolean
+  setFsImportExpanded: (v: boolean) => void
 }
 
 function indexPeople(people: Person[]): Map<string, Person> {
@@ -378,6 +407,120 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   refreshAliases: async () => set({ aliases: await window.api.aliases.all() }),
   bumpPersonSync: () => set((s) => ({ personSyncNonce: s.personSyncNonce + 1 })),
+  fsChanges: {},
+  setFsChange: (personId, summary) =>
+    set((s) => {
+      const next = { ...s.fsChanges }
+      if (summary) next[personId] = summary
+      else delete next[personId]
+      return { fsChanges: next }
+    }),
+  fsScan: null,
+  fsScanMinimized: false,
+  setFsScanMinimized: (v) => set({ fsScanMinimized: v }),
+  cancelFsScan: () =>
+    set((s) => (s.fsScan ? { fsScan: { ...s.fsScan, running: false } } : {})),
+  clearFsScan: () => set({ fsScan: null, fsScanMinimized: false }),
+  fsImport: null,
+  fsImportExpanded: false,
+  setFsImportExpanded: (v) => set({ fsImportExpanded: v }),
+  clearFsImport: () => set({ fsImport: null, fsImportExpanded: false }),
+  startFsImport: async (opts) => {
+    if (get().fsImport?.running) return
+    set({ fsImport: { running: true, phase: 'auth', name: '', count: 0, people: 0, families: 0 }, fsImportExpanded: false })
+    // Live status → store; the tree view reads it and refreshes as data lands.
+    const off = window.api.familysearch.onStatus?.((st) => {
+      set((s) =>
+        s.fsImport
+          ? { fsImport: { ...s.fsImport, phase: st.phase, name: st.name ?? s.fsImport.name, count: st.count ?? s.fsImport.count } }
+          : {}
+      )
+    })
+    // Periodically refresh so the tree literally grows while importing.
+    const ticker = setInterval(() => {
+      if (get().fsImport?.running) void get().refreshAll()
+    }, 2500)
+    try {
+      const r = await window.api.familysearch.import(opts)
+      const people = (r.peopleCreated ?? 0) + (r.peopleUpdated ?? 0)
+      const families = (r.familiesCreated ?? 0) + (r.familiesUpdated ?? 0)
+      set((s) => (s.fsImport ? { fsImport: { ...s.fsImport, running: false, phase: 'done', people, families } } : {}))
+    } catch {
+      set((s) => (s.fsImport ? { fsImport: { ...s.fsImport, running: false, phase: 'error' } } : {}))
+    } finally {
+      off?.()
+      clearInterval(ticker)
+      await get().refreshAll()
+    }
+  },
+  startFsScan: async () => {
+    const people = Array.from(get().peopleById.values()).filter((p) => isFamilySearchId(p.fsId))
+    set({
+      fsScan: { running: true, total: people.length, done: 0, results: [] },
+      fsScanMinimized: false
+    })
+    const checkOne = async (p: Person): Promise<void> => {
+      const name = `${p.givenName ?? ''} ${p.surname ?? ''}`.trim() || p.id
+      let entry: {
+        personId: string
+        name: string
+        status: 'changed' | 'deleted' | 'ok'
+        fields: number
+        relatives: number
+        content: number
+      } | null = null
+      try {
+        const r = await window.api.familysearch.syncPreview(p.id)
+        if ('error' in r) {
+          if (r.error === 'FS_NOT_FOUND') {
+            entry = { personId: p.id, name, status: 'deleted', fields: 0, relatives: 0, content: 0 }
+            get().setFsChange(p.id, { fields: 0, relatives: 0, content: 1 })
+          }
+        } else {
+          const contentNew = Object.values(r.content).reduce((n, c) => n + Math.max(0, c.remote - c.local), 0)
+          const total = r.fields.length + r.newRelatives.length + contentNew
+          entry = {
+            personId: p.id,
+            name,
+            status: total > 0 ? 'changed' : 'ok',
+            fields: r.fields.length,
+            relatives: r.newRelatives.length,
+            content: contentNew
+          }
+          get().setFsChange(
+            p.id,
+            total > 0 ? { fields: r.fields.length, relatives: r.newRelatives.length, content: contentNew } : null
+          )
+        }
+      } catch {
+        /* skip this person on error */
+      }
+      set((s) => {
+        if (!s.fsScan) return {}
+        return {
+          fsScan: {
+            ...s.fsScan,
+            done: s.fsScan.done + 1,
+            results: entry ? [...s.fsScan.results, entry] : s.fsScan.results
+          }
+        }
+      })
+    }
+    // Parallel worker pool — much faster than one-by-one.
+    const CONCURRENCY = 6
+    let next = 0
+    const worker = async (): Promise<void> => {
+      for (;;) {
+        const scan = get().fsScan
+        if (!scan || !scan.running) return
+        const i = next++
+        if (i >= people.length) return
+        await checkOne(people[i])
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, people.length) }, () => worker()))
+    set((s) => (s.fsScan ? { fsScan: { ...s.fsScan, running: false } } : {}))
+  },
   refreshResearch: async () => {
     const researchLogs = await window.api.research.allLogs()
     set({ researchLogs, researchByPerson: indexResearch(researchLogs) })

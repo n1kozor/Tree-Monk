@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { clearStartChoice } from '@/lib/fsMode'
 import { Check, ChevronDown, Pencil, Plus, Trash2, TreePine } from 'lucide-react'
 import {
   DropdownMenu,
@@ -37,7 +38,11 @@ export function WorkspaceSwitcher(): JSX.Element | null {
 
   if (!active) return null
 
-  const create = (name: string): void => void window.api.workspaces.create(name)
+  const create = (name: string): void => {
+    // A brand-new (empty) tree → offer the FS / Manual start choice again.
+    clearStartChoice()
+    void window.api.workspaces.create(name)
+  }
   const switchTo = (id: string): void => {
     if (id !== active.id) void window.api.workspaces.switch(id)
   }

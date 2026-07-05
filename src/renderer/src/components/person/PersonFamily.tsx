@@ -4,6 +4,7 @@ import { Baby, Check, Heart, Pencil, UserPlus, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/DateInput'
+import { PlaceInput } from '@/components/common/PlaceInput'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { fullName, yearOf } from '@/lib/utils'
 import { useAppStore } from '@/store/useAppStore'
@@ -65,13 +66,9 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
             onKeyDown={(e) => e.key === 'Enter' && void save()}
             autoFocus
           />
-          <Input
-            value={place}
-            onChange={(e) => setPlace(e.target.value)}
-            placeholder={t('person.place')}
-            className="h-7 flex-1 text-xs"
-            onKeyDown={(e) => e.key === 'Enter' && void save()}
-          />
+          <div className="flex-1">
+            <PlaceInput value={place} onChange={setPlace} placeholder={t('person.place')} className="h-7 text-xs" />
+          </div>
           <Button size="icon" className="h-7 w-7 shrink-0" disabled={saving} onClick={() => void save()}>
             <Check className="h-3.5 w-3.5" />
           </Button>

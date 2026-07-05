@@ -17,6 +17,8 @@ import {
   Search,
   Bird,
   Trash2,
+  Printer,
+  Upload,
   UserRound,
   Users
 } from 'lucide-react'
@@ -37,6 +39,10 @@ import { PersonEvents } from '@/components/person/PersonEvents'
 import { PersonCollaborations } from '@/components/person/PersonCollaborations'
 import { PersonTimeline } from '@/components/person/PersonTimeline'
 import { PhotoFrameDialog } from '@/components/person/PhotoFrameDialog'
+import { FsPersonSyncDialog } from '@/components/person/FsPersonSyncDialog'
+import { FsExpandDialog } from '@/components/person/FsExpandDialog'
+import { PersonSheetDialog, FamilySheetDialog } from '@/components/print/PrintSheets'
+import { religionOptions } from '@/lib/religions'
 import { PersonQualityCard } from '@/components/person/PersonQualityCard'
 import { PersonGodparents } from '@/components/person/PersonGodparents'
 import { FactSources, VitalNote } from '@/components/person/FactSources'
@@ -45,8 +51,9 @@ import { personQuality } from '@/lib/completeness'
 import { canSearchFamilySearch, familySearchPersonUrl, familySearchSearchUrl, isFamilySearchId } from '@/lib/familySearchSearch'
 import { PersonAliases } from '@/components/person/PersonAliases'
 import { useAppStore } from '@/store/useAppStore'
+import { useFsMode } from '@/hooks/useFsMode'
 import { cn, fullName, yearOf } from '@/lib/utils'
-import { normalizeDate } from '@/lib/dates'
+import { smartNormalizeDate } from '@/lib/smartDate'
 import type { CitationDetail, Person, PersonInput, SanityIssue, Sex } from '@shared/types'
 
 /**
@@ -80,6 +87,11 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   const [anomalies, setAnomalies] = useState<SanityIssue[]>([])
   const [deleting, setDeleting] = useState(false)
   const [framingOpen, setFramingOpen] = useState(false)
+  const [fsConfigured, setFsConfigured] = useState(false)
+  const fsMode = useFsMode()
+  const [fsSyncOpen, setFsSyncOpen] = useState(false)
+  const [fsExpandOpen, setFsExpandOpen] = useState(false)
+  const [sheet, setSheet] = useState<'person' | 'family' | null>(null)
 
   const reload = useCallback(async () => {
     if (!personId) {
@@ -108,6 +120,10 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   useEffect(() => {
     void reload()
   }, [reload])
+
+  useEffect(() => {
+    void window.api.familysearch.configured().then(setFsConfigured)
+  }, [])
 
   const patch = (field: keyof PersonInput, value: string): void =>
     setPerson((p) => (p ? { ...p, [field]: value } : p))
@@ -163,10 +179,12 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   }
   const commitDate = (field: 'birthDate' | 'deathDate' | 'christeningDate' | 'burialDate'): void => {
     if (!person) return
-    const norm = normalizeDate(person[field] ?? '')
-    const next = { ...person, [field]: norm || null }
-    setPerson(next)
-    void save(next)
+    // FS mode: the FamilySearch Date authority formats in the UI language.
+    void smartNormalizeDate(person[field] ?? '').then((norm) => {
+      const next = { ...person, [field]: norm || null }
+      setPerson(next)
+      void save(next)
+    })
   }
   const copyBirthToChristening = (): void => {
     if (!person) return
@@ -345,6 +363,36 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
             >
               <Search className="h-3.5 w-3.5" />
               {t('person.searchFamilySearch')}
+            </Button>
+            {fsMode && fsConfigured && isFamilySearchId(person.fsId) && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 border-emerald-500/40 bg-emerald-500/10 text-emerald-700 hover:bg-emerald-500/20 dark:text-emerald-400"
+                  onClick={() => setFsSyncOpen(true)}
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  {t('fs.pullBtn')}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => setFsExpandOpen(true)}
+                >
+                  <Network className="h-3.5 w-3.5" />
+                  {t('fsExpand.btn')}
+                </Button>
+              </>
+            )}
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSheet('person')}>
+              <Printer className="h-3.5 w-3.5" />
+              {t('print.personSheet')}
+            </Button>
+            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSheet('family')}>
+              <Printer className="h-3.5 w-3.5" />
+              {t('print.familySheet')}
             </Button>
             {rootPerson && (
               <Button variant="outline" size="sm" className="gap-1.5" onClick={() => openKinship(person.id)}>
@@ -528,7 +576,12 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                   </div>
                   <div className="sm:col-span-2">
                     <Field label={t('person.religion')}>
-                      <Input value={person.religion ?? ''} onChange={(e) => patch('religion', e.target.value)} onBlur={() => save()} />
+                      <Input list="tm-religions" value={person.religion ?? ''} onChange={(e) => patch('religion', e.target.value)} onBlur={() => save()} />
+                      <datalist id="tm-religions">
+                        {religionOptions(i18n.language).map((r) => (
+                          <option key={r} value={r} />
+                        ))}
+                      </datalist>
                     </Field>
                   </div>
                   <div className="sm:col-span-2">
@@ -612,6 +665,29 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
           onReplace={() => {
             setFramingOpen(false)
             void changeAvatar()
+          }}
+        />
+      )}
+
+      {sheet === 'person' && <PersonSheetDialog personId={person.id} onClose={() => setSheet(null)} />}
+      {sheet === 'family' && <FamilySheetDialog personId={person.id} onClose={() => setSheet(null)} />}
+      {fsExpandOpen && isFamilySearchId(person.fsId) && (
+        <FsExpandDialog
+          open={fsExpandOpen}
+          onOpenChange={setFsExpandOpen}
+          personName={`${person.givenName ?? ''} ${person.surname ?? ''}`.trim()}
+          fid={person.fsId!}
+        />
+      )}
+      {fsSyncOpen && isFamilySearchId(person.fsId) && (
+        <FsPersonSyncDialog
+          open={fsSyncOpen}
+          onOpenChange={setFsSyncOpen}
+          personId={person.id}
+          fid={person.fsId!}
+          onApplied={async () => {
+            await Promise.all([refreshAll(), reload()])
+            useAppStore.getState().bumpPersonSync()
           }}
         />
       )}

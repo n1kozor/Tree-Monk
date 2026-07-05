@@ -815,3 +815,28 @@
     stroke-dashoffset: -17;
   }
 }
+
+/* ---- Printable sheets (person / family record sheets, printable tree) ---- */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    box-shadow: none;
+    background: #fff;
+    color: #000;
+  }
+  .no-print {
+    display: none !important;
+  }
+  @page {
+    margin: 14mm;
+  }
+}
