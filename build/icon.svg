@@ -1,28 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="TreeMonk">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#16c2ad"/>
       <stop offset="1" stop-color="#0d7a6e"/>
     </linearGradient>
   </defs>
-  <!-- rounded-square backdrop (squircle), transparent outside -->
-  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#bg)"/>
-  <!-- minimalist pedigree: 1 root → 2 parents → 4 grandparents -->
-  <g stroke="#ffffff" stroke-width="18" stroke-linecap="round" fill="none" opacity="0.95">
-    <path d="M256 380 L170 264"/>
-    <path d="M256 380 L342 264"/>
-    <path d="M170 264 L120 158"/>
-    <path d="M170 264 L216 158"/>
-    <path d="M342 264 L296 158"/>
-    <path d="M342 264 L392 158"/>
-  </g>
-  <g fill="#ffffff">
-    <circle cx="256" cy="388" r="32"/>
-    <circle cx="170" cy="262" r="27"/>
-    <circle cx="342" cy="262" r="27"/>
-    <circle cx="120" cy="152" r="20"/>
-    <circle cx="216" cy="152" r="20"/>
-    <circle cx="296" cy="152" r="20"/>
-    <circle cx="392" cy="152" r="20"/>
-  </g>
+  <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#g)"/>
+  <path d="M256 424 L256 300" stroke="#fff" stroke-width="26" stroke-linecap="round" fill="none"/>
+  <path d="M256 320 C287.5 252.3 219 188.5 182.4 169 C175.2 209.9 183.2 303.1 256 320 Z" fill="#fff"/>
+  <line x1="256" y1="320" x2="210.3" y2="226.4" stroke="#0d7a6e" stroke-opacity=".35" stroke-width="10" stroke-linecap="round"/>
+  <path d="M256 320 C328.8 303.1 336.8 209.9 329.6 169 C293 188.5 224.5 252.3 256 320 Z" fill="#fff" fill-opacity=".92"/>
+  <line x1="256" y1="320" x2="301.7" y2="226.4" stroke="#0d7a6e" stroke-opacity=".3" stroke-width="10" stroke-linecap="round"/>
 </svg>
