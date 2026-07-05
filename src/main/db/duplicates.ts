@@ -1,5 +1,6 @@
 import type Database from 'better-sqlite3'
 import { getDb } from './connection'
+import { repairFamilies } from './familyRepair'
 import { AppSettings, Aliases, Families, People } from './repo'
 import { norm, sameNameForDup } from '@shared/nameMatch'
 import { birthDateRelation } from './dupDate'
@@ -259,6 +260,10 @@ export function mergePeople(survivorId: string, victimId: string, resolution: Me
       if (snapshot.defaultRoot === victimId) AppSettings.set('default_root_person_id', survivorId)
       // 6. Drop the victim.
       db.prepare('DELETE FROM people WHERE id=?').run(victimId)
+      // 6b. Merging two people who shared a spouse leaves the survivor married to
+      // the same partner twice (and any single-partner leftovers). Fold those —
+      // scoped to the survivor so the merge stays fully reversible via undo.
+      moved.families += repairFamilies(db, survivorId)
       // 7. One reversible audit record carrying the whole snapshot.
       const res = db
         .prepare("INSERT INTO audit_log (entity, table_name, entity_id, action, label, before) VALUES ('merge','__merge__',?, 'update', ?, ?)")
@@ -290,7 +295,12 @@ export function undoMerge(snapshot: Row): void {
       if (affected.length) db.prepare(`DELETE FROM families WHERE id IN (${ph(affected)})`).run(...affected)
       for (const r of list('families')) insertRow(db, 'families', r)
 
-      db.prepare('DELETE FROM family_children WHERE child_id IN (?,?)').run(S, V)
+      // Clear every child link in the affected families (not just S/V as a
+      // child) so a merge that de-duplicated couples — moving other children
+      // between those families — restores exactly from the snapshot.
+      if (affected.length)
+        db.prepare(`DELETE FROM family_children WHERE child_id IN (?,?) OR family_id IN (${ph(affected)})`).run(S, V, ...affected)
+      else db.prepare('DELETE FROM family_children WHERE child_id IN (?,?)').run(S, V)
       for (const r of list('familyChildren')) insertRow(db, 'family_children', r)
 
       db.prepare('DELETE FROM person_documents WHERE person_id IN (?,?)').run(S, V)

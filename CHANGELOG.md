@@ -2,6 +2,18 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.4.8]
+
+### Fixed
+- **Duplicate/"Unknown" spouses after merging people.** Merging two people who
+  were both linked to the same partner could leave the shared spouse showing up
+  two or three times — some as a stray "Unknown" — on the Family tab. Merge now
+  folds the duplicated marriage into one, and a **one-time automatic repair runs
+  on launch** to clean up any tree already affected (exact-duplicate couples are
+  merged, empty single-partner "phantom" families are removed). Genuine
+  single-parent families and recorded marriages are left untouched, and merges
+  stay fully undoable.
+
 ## [1.4.7]
 
 ### Added

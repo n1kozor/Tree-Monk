@@ -4,6 +4,7 @@ import { mkdirSync } from 'fs'
 import Database from 'better-sqlite3'
 import { SCHEMA_SQL } from './schema'
 import { applyAuditSchema, Audit } from './audit'
+import { repairFamilies } from './familyRepair'
 import { activeDbFile } from '../workspaces'
 
 let db: Database.Database | null = null
@@ -119,6 +120,22 @@ function migrate(database: Database.Database): void {
     }
   } catch {
     /* events/people not ready yet */
+  }
+
+  // One-time: heal marriage records tangled by older merges/deletes — exact
+  // duplicate couples and phantom single-partner "families" that show up as a
+  // stray "Unknown" spouse. Gated so a genuinely sparse family a user adds later
+  // isn't swept up on the next launch.
+  try {
+    const done = database.prepare("SELECT value FROM settings WHERE key = 'families_repaired_v1'").get()
+    if (!done) {
+      database.transaction(() => repairFamilies(database))()
+      database
+        .prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('families_repaired_v1', '1')")
+        .run()
+    }
+  } catch {
+    /* families/settings not ready yet */
   }
 }
 

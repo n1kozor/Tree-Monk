@@ -84,3 +84,6 @@ kod.py
 
 # generated FamilySearch SDK (reference only — we call the API via fetch)
 .api/
+
+# Local debug screenshots (never publish user data)
+/hiba.png
