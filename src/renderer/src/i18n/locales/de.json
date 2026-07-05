@@ -1738,5 +1738,8 @@
     "male": "Männlich",
     "female": "Weiblich",
     "unknown": "Unbekannt"
+  },
+  "preloader": {
+    "tagline": "Deine Familie, von den Wurzeln bis zur Krone"
   }
 }

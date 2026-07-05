@@ -228,10 +228,20 @@ export function createDemoApi(): TreeMonkApi {
       exportDatabase: async () => blocked()
     },
     familysearch: {
+      // FamilySearch is disabled in the demo — report "not configured" so the
+      // whole integration stays dormant (no sign-in, no sync UI).
+      configured: async () => false,
+      login: async () => ({ ok: false, error: 'DEMO' }),
+      signedIn: async () => false,
+      signOut: async () => {},
       import: async () => blocked(),
       search: async () => blocked(),
       preview: async () => blocked(),
-      syncPerson: async () => blocked(),
+      syncPerson: async () => ({ needCreds: true as const }),
+      syncPreview: async () => ({ error: 'DEMO' }),
+      listTrees: async () => [{ id: 'GLOBAL', name: 'Family Tree', kind: 'global' as const }],
+      lookupPerson: async () => ({ found: false }),
+      normalizeDate: async () => null,
       getSettings: async () => null,
       onStatus: unsubscribe,
       onNode: unsubscribe,
@@ -260,7 +270,8 @@ export function createDemoApi(): TreeMonkApi {
       openExternal: async (url) => {
         window.open(url, '_blank', 'noopener')
       },
-      openManual: async () => false
+      openManual: async () => false,
+      setLanguage: async () => {}
     },
     updates: {
       version: async () => DEMO_VERSION,

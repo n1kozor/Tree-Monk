@@ -1738,5 +1738,8 @@
     "male": "Férfi",
     "female": "Nő",
     "unknown": "Ismeretlen"
+  },
+  "preloader": {
+    "tagline": "A családfád, gyökerektől a lombkoronáig"
   }
 }

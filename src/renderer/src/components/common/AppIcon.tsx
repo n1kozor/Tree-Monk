@@ -1,7 +1,7 @@
 /**
- * The TreeMonk app icon (the same mark used for the build / window / taskbar):
- * a teal squircle with a minimalist white pedigree (1 root → 2 parents → 4
- * grandparents). Inlined as SVG so it scales crisply and needs no asset import.
+ * The TreeMonk app icon — the refined sprout mark (a stem with two pointed
+ * leaves + veins) in white on a teal squircle. Same geometry as the launch
+ * splash sprout. Inlined as SVG so it scales crisply and needs no asset import.
  */
 export function AppIcon({ className }: { className?: string }): JSX.Element {
   return (
@@ -13,23 +13,14 @@ export function AppIcon({ className }: { className?: string }): JSX.Element {
         </linearGradient>
       </defs>
       <rect x="16" y="16" width="480" height="480" rx="116" fill="url(#tmAppIconGrad)" />
-      <g stroke="#ffffff" strokeWidth={18} strokeLinecap="round" fill="none" opacity={0.95}>
-        <path d="M256 380 L170 264" />
-        <path d="M256 380 L342 264" />
-        <path d="M170 264 L120 158" />
-        <path d="M170 264 L216 158" />
-        <path d="M342 264 L296 158" />
-        <path d="M342 264 L392 158" />
-      </g>
-      <g fill="#ffffff">
-        <circle cx="256" cy="388" r="32" />
-        <circle cx="170" cy="262" r="27" />
-        <circle cx="342" cy="262" r="27" />
-        <circle cx="120" cy="152" r="20" />
-        <circle cx="216" cy="152" r="20" />
-        <circle cx="296" cy="152" r="20" />
-        <circle cx="392" cy="152" r="20" />
-      </g>
+      {/* Stem */}
+      <path d="M256 424 L256 300" stroke="#ffffff" strokeWidth="26" strokeLinecap="round" fill="none" />
+      {/* Left leaf */}
+      <path d="M256 320 C287.5 252.3 219 188.5 182.4 169 C175.2 209.9 183.2 303.1 256 320 Z" fill="#ffffff" />
+      <line x1="256" y1="320" x2="210.3" y2="226.4" stroke="#0d7a6e" strokeOpacity="0.35" strokeWidth="10" strokeLinecap="round" />
+      {/* Right leaf */}
+      <path d="M256 320 C328.8 303.1 336.8 209.9 329.6 169 C293 188.5 224.5 252.3 256 320 Z" fill="#ffffff" fillOpacity="0.92" />
+      <line x1="256" y1="320" x2="301.7" y2="226.4" stroke="#0d7a6e" strokeOpacity="0.3" strokeWidth="10" strokeLinecap="round" />
     </svg>
   )
 }

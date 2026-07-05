@@ -164,18 +164,20 @@ export function PersonOccupations({ personId }: { personId: string }): JSX.Eleme
           ))}
         </div>
       )}
-      <div className="flex items-center gap-1.5">
+      <div className="space-y-1.5">
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={t('person.occupation')}
-          className="h-8 flex-[2] text-xs"
+          className="h-8 w-full text-xs"
         />
-        <DateInput value={from} onValueChange={setFrom} placeholder={t('person.fromOpt')} className="h-8 flex-1 text-xs" />
-        <DateInput value={to} onValueChange={setTo} placeholder={t('person.toOpt')} className="h-8 flex-1 text-xs" />
-        <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={() => void add()} title={t('person.addOccupation')}>
-          <Plus className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1.5">
+          <DateInput value={from} onValueChange={setFrom} placeholder={t('person.fromOpt')} className="h-8 flex-1 text-xs" />
+          <DateInput value={to} onValueChange={setTo} placeholder={t('person.toOpt')} className="h-8 flex-1 text-xs" />
+          <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={() => void add()} title={t('person.addOccupation')}>
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       <OccupationEditDialog occ={editing} onClose={() => setEditing(null)} onChanged={changed} />

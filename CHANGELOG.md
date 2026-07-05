@@ -2,6 +2,22 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.4.7]
+
+### Added
+- **All-new launch splash** and a **fresh app logo** — a growing sprout that
+  opens into a canopy, in the TreeMonk teal.
+- **Person picker now disambiguates same-name people** — when choosing an
+  existing person (e.g. a spouse) the list shows birth place, parents and spouse
+  next to each name, so two "same name" people are easy to tell apart.
+
+### Changed
+- **Refreshed teal colour theme** across the whole app.
+- **New standard tree-view look** — frame width 4, corner radius 24, line
+  thickness 5, line opacity 100%. Existing users are switched to it automatically
+  on update (you can still re-tune it afterwards).
+- The occupation title field is now full-width so long job titles are readable.
+
 ## [1.4.6]
 
 ### Added

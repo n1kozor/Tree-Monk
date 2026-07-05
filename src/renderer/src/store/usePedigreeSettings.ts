@@ -106,6 +106,8 @@ export interface PedigreeValues {
   cardRadius: number
   /** Drop shadow under cards. */
   cardShadow: boolean
+  /** Persisted schema version — bump to auto-migrate existing users' defaults. */
+  settingsVersion: number
 }
 
 export interface PedigreeSettings extends PedigreeValues {
@@ -124,8 +126,8 @@ const DEFAULTS: PedigreeValues = {
   colGap: 320,
   rowGap: 188,
   accent: PEDIGREE_ACCENTS[0].color,
-  connectorWidth: 2,
-  connectorOpacity: 0.6,
+  connectorWidth: 5,
+  connectorOpacity: 1,
   // Default to the themed app background so light mode starts light.
   background: 'auto',
   contrast: 1,
@@ -134,9 +136,10 @@ const DEFAULTS: PedigreeValues = {
   sepia: 0,
   cardBg: 'auto',
   cardBorder: 'auto',
-  cardBorderWidth: 1,
-  cardRadius: 12,
-  cardShadow: true
+  cardBorderWidth: 4,
+  cardRadius: 24,
+  cardShadow: true,
+  settingsVersion: 2
 }
 
 function load(): PedigreeValues {
@@ -151,6 +154,21 @@ function load(): PedigreeValues {
       merged.viewKind = 'landscape'
     // Fan chart is capped at 13 generations; pull older, larger saved values down.
     merged.fanGenerations = Math.min(13, Math.max(2, merged.fanGenerations))
+    // v2: standardise the tree-view frame/line look — switch EXISTING users to
+    // the new defaults once (frame 4, corner 24, line 5, opacity 100%). After
+    // this they can freely re-tune; the version stamp stops it re-applying.
+    if ((merged.settingsVersion ?? 0) < 2) {
+      merged.cardBorderWidth = 4
+      merged.cardRadius = 24
+      merged.connectorWidth = 5
+      merged.connectorOpacity = 1
+      merged.settingsVersion = 2
+      try {
+        localStorage.setItem(KEY, JSON.stringify(merged))
+      } catch {
+        /* persistence is best-effort */
+      }
+    }
     return merged
   } catch {
     return { ...DEFAULTS }

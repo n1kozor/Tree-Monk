@@ -14,7 +14,7 @@
     --card-foreground: 30 12% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 30 12% 11%;
-    --primary: 175 68% 34%;
+    --primary: 173 78% 38%;
     --primary-foreground: 0 0% 100%;
     --secondary: 38 16% 89%;
     --secondary-foreground: 30 12% 16%;
@@ -26,7 +26,10 @@
     --destructive-foreground: 0 0% 100%;
     --border: 38 16% 82%;
     --input: 38 16% 82%;
-    --ring: 175 68% 34%;
+    --ring: 173 78% 38%;
+    /* Brand palette (the launch sprout/canopy teal pair) for gradients/highlights. */
+    --brand: 173 80% 42%;
+    --brand-deep: 173 81% 27%;
     --radius: 0.85rem;
 
     /* ---- Liquid-glass material (light) ----
@@ -62,7 +65,7 @@
     --card-foreground: 0 0% 98%;
     --popover: 240 9% 6%;
     --popover-foreground: 0 0% 98%;
-    --primary: 175 70% 45%;
+    --primary: 173 76% 48%;
     --primary-foreground: 240 10% 4%;
     --secondary: 240 5% 14%;
     --secondary-foreground: 0 0% 98%;
@@ -74,7 +77,9 @@
     --destructive-foreground: 0 0% 98%;
     --border: 240 6% 16%;
     --input: 240 6% 16%;
-    --ring: 175 70% 45%;
+    --ring: 173 76% 48%;
+    --brand: 173 80% 46%;
+    --brand-deep: 173 81% 30%;
 
     /* ---- Liquid-glass material (dark) ----
        Frosted dark glass: a faintly-lit pane that lets the ambient glow bleed
