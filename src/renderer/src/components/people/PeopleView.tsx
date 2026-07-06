@@ -13,6 +13,7 @@ export function PeopleView(): JSX.Element {
   const { t } = useTranslation()
   const people = useAppStore((s) => s.people)
   const aliases = useAppStore((s) => s.aliases)
+  const families = useAppStore((s) => s.families)
   const selectPerson = useAppStore((s) => s.selectPerson)
   const refreshPeople = useAppStore((s) => s.refreshPeople)
   const [q, setQ] = useState('')
@@ -20,9 +21,25 @@ export function PeopleView(): JSX.Element {
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [place, setPlace] = useState('')
+  // Missing-data filter: every selected criterion must be missing (AND).
+  const MISSING = ['birthDate', 'birthPlace', 'deathDate', 'deathPlace', 'parents', 'photo'] as const
+  type MissingKey = (typeof MISSING)[number]
+  const [missing, setMissing] = useState<Set<MissingKey>>(new Set())
+  const toggleMissing = (k: MissingKey): void =>
+    setMissing((prev) => {
+      const next = new Set(prev)
+      if (next.has(k)) next.delete(k)
+      else next.add(k)
+      return next
+    })
+  const childOf = useMemo(() => {
+    const set = new Set<string>()
+    for (const f of families) for (const c of f.childIds) set.add(c)
+    return set
+  }, [families])
 
   const aMap = useMemo(() => aliasMap(aliases), [aliases])
-  const hasFilters = !!(q.trim() || sex || from || to || place.trim())
+  const hasFilters = !!(q.trim() || sex || from || to || place.trim() || missing.size)
 
   const filtered = useMemo(() => {
     const fromY = parseInt(from, 10)
@@ -42,6 +59,17 @@ export function PeopleView(): JSX.Element {
         const dp = (p.deathPlace ?? '').toLowerCase()
         if (!bp.includes(placeN) && !dp.includes(placeN)) return false
       }
+      for (const k of missing) {
+        // Death fields only count as "missing" for people recorded as deceased —
+        // a living person having no death date is not a research gap.
+        const dead = p.deceased || !!p.deathDate
+        if (k === 'birthDate' && p.birthDate) return false
+        if (k === 'birthPlace' && p.birthPlace) return false
+        if (k === 'deathDate' && (!dead || p.deathDate)) return false
+        if (k === 'deathPlace' && (!dead || p.deathPlace)) return false
+        if (k === 'parents' && childOf.has(p.id)) return false
+        if (k === 'photo' && p.profilePhotoId) return false
+      }
       return true
     })
     if (q.trim()) {
@@ -52,13 +80,13 @@ export function PeopleView(): JSX.Element {
         .map((x) => x.p)
     }
     return list
-  }, [people, q, aMap, sex, from, to, place])
+  }, [people, q, aMap, sex, from, to, place, missing, childOf])
 
   // Windowed rendering: a tree with thousands of people must not mount thousands
   // of avatar cards (and image decodes) at once. Grow as the user scrolls.
   const PAGE = 120
   const [limit, setLimit] = useState(PAGE)
-  useEffect(() => setLimit(PAGE), [q, sex, from, to, place, people.length])
+  useEffect(() => setLimit(PAGE), [q, sex, from, to, place, missing, people.length])
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
     const el = sentinelRef.current
@@ -78,6 +106,7 @@ export function PeopleView(): JSX.Element {
     setFrom('')
     setTo('')
     setPlace('')
+    setMissing(new Set())
   }
 
   const onAdd = async (): Promise<void> => {
@@ -152,6 +181,25 @@ export function PeopleView(): JSX.Element {
               {t('people.clear')}
             </Button>
           )}
+        </div>
+
+        {/* Missing-data filter — surface the research gaps. */}
+        <div className="flex flex-wrap items-center gap-1.5 text-xs">
+          <span className="text-muted-foreground">{t('people.missingLabel')}:</span>
+          {MISSING.map((k) => (
+            <button
+              key={k}
+              onClick={() => toggleMissing(k)}
+              className={cn(
+                'rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors',
+                missing.has(k)
+                  ? 'border-amber-500/60 bg-amber-500/15 text-amber-700 dark:text-amber-400'
+                  : 'border-border/60 text-muted-foreground hover:bg-accent'
+              )}
+            >
+              {t(`people.missing.${k}`)}
+            </button>
+          ))}
         </div>
       </div>
 

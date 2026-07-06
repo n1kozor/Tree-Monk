@@ -33,6 +33,7 @@ interface PersonRow {
   death_date: string | null
   death_place: string | null
   deceased: number
+  illegitimate: number
   burial_date: string | null
   burial_place: string | null
   christening_date: string | null
@@ -68,6 +69,7 @@ function mapPerson(r: PersonRow): Person {
     deathDate: r.death_date,
     deathPlace: r.death_place,
     deceased: Boolean(r.deceased) || Boolean(r.death_date),
+    illegitimate: Boolean(r.illegitimate),
     burialDate: r.burial_date,
     burialPlace: r.burial_place,
     christeningDate: r.christening_date,
@@ -110,9 +112,9 @@ export const People = {
     getDb()
       .prepare(
         `INSERT INTO people (id, gedcom_id, fs_id, given_name, surname, sex, birth_date, birth_place,
-          death_date, death_place, deceased, burial_date, burial_place, christening_date, christening_place, religion, birth_note, death_note, christening_note, burial_note, occupation, notes, profile_photo_id, profile_photo_crop, created_at, updated_at)
+          death_date, death_place, deceased, illegitimate, burial_date, burial_place, christening_date, christening_place, religion, birth_note, death_note, christening_note, burial_note, occupation, notes, profile_photo_id, profile_photo_crop, created_at, updated_at)
          VALUES (@id, @gedcom_id, @fs_id, @given_name, @surname, @sex, @birth_date, @birth_place,
-          @death_date, @death_place, @deceased, @burial_date, @burial_place, @christening_date, @christening_place, @religion, @birth_note, @death_note, @christening_note, @burial_note, @occupation, @notes, @profile_photo_id, @profile_photo_crop, @created_at, @updated_at)`
+          @death_date, @death_place, @deceased, @illegitimate, @burial_date, @burial_place, @christening_date, @christening_place, @religion, @birth_note, @death_note, @christening_note, @burial_note, @occupation, @notes, @profile_photo_id, @profile_photo_crop, @created_at, @updated_at)`
       )
       .run({
         id,
@@ -126,6 +128,7 @@ export const People = {
         death_date: input.deathDate ?? null,
         death_place: input.deathPlace ?? null,
         deceased: isDeceased(input) ? 1 : 0,
+        illegitimate: input.illegitimate ? 1 : 0,
         burial_date: input.burialDate ?? null,
         burial_place: input.burialPlace ?? null,
         christening_date: input.christeningDate ?? null,
@@ -151,7 +154,7 @@ export const People = {
     getDb()
       .prepare(
         `UPDATE people SET given_name=@given_name, surname=@surname, sex=@sex, birth_date=@birth_date,
-          birth_place=@birth_place, death_date=@death_date, death_place=@death_place, deceased=@deceased,
+          birth_place=@birth_place, death_date=@death_date, death_place=@death_place, deceased=@deceased, illegitimate=@illegitimate,
           burial_date=@burial_date, burial_place=@burial_place,
           christening_date=@christening_date, christening_place=@christening_place, religion=@religion,
           birth_note=@birth_note, death_note=@death_note, christening_note=@christening_note, burial_note=@burial_note,
@@ -170,6 +173,7 @@ export const People = {
         death_date: merged.deathDate,
         death_place: merged.deathPlace,
         deceased: isDeceased(merged) ? 1 : 0,
+        illegitimate: merged.illegitimate ? 1 : 0,
         burial_date: merged.burialDate,
         burial_place: merged.burialPlace,
         christening_date: merged.christeningDate,
@@ -399,8 +403,8 @@ export const People = {
     // re-attaching this person to them below.
     for (const f of snap.emptiedFamilies ?? [])
       db.prepare(
-        'INSERT OR IGNORE INTO families (id, gedcom_id, husband_id, wife_id, marriage_date, marriage_place, notes) VALUES (?, ?, ?, ?, ?, ?, ?)'
-      ).run(f.id, f.gedcomId, null, null, f.marriageDate, f.marriagePlace, f.notes)
+        'INSERT OR IGNORE INTO families (id, gedcom_id, husband_id, wife_id, marriage_date, marriage_place, marriage_order, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+      ).run(f.id, f.gedcomId, null, null, f.marriageDate, f.marriagePlace, f.marriageOrder, f.notes)
     for (const fid of snap.husbandOf)
       db.prepare('UPDATE families SET husband_id = ? WHERE id = ?').run(p.id, fid)
     for (const fid of snap.wifeOf)
@@ -433,6 +437,7 @@ interface FamilyRow {
   wife_id: string | null
   marriage_date: string | null
   marriage_place: string | null
+  marriage_order: number | null
   notes: string | null
 }
 
@@ -451,6 +456,7 @@ function mapFamily(db: Database.Database, r: FamilyRow): Family {
     wifeId: r.wife_id,
     marriageDate: r.marriage_date,
     marriagePlace: r.marriage_place,
+    marriageOrder: r.marriage_order,
     notes: r.notes,
     childIds: childIdsOf(db, r.id)
   }
@@ -482,8 +488,8 @@ export const Families = {
   create(input: FamilyInput, id = uuid()): Family {
     const db = getDb()
     db.prepare(
-      `INSERT INTO families (id, gedcom_id, husband_id, wife_id, marriage_date, marriage_place, notes)
-       VALUES (@id, @gedcom_id, @husband_id, @wife_id, @marriage_date, @marriage_place, @notes)`
+      `INSERT INTO families (id, gedcom_id, husband_id, wife_id, marriage_date, marriage_place, marriage_order, notes)
+       VALUES (@id, @gedcom_id, @husband_id, @wife_id, @marriage_date, @marriage_place, @marriage_order, @notes)`
     ).run({
       id,
       gedcom_id: input.gedcomId ?? null,
@@ -491,6 +497,7 @@ export const Families = {
       wife_id: input.wifeId ?? null,
       marriage_date: input.marriageDate ?? null,
       marriage_place: input.marriagePlace ?? null,
+      marriage_order: input.marriageOrder ?? null,
       notes: input.notes ?? null
     })
     if (input.childIds) writeChildren(db, id, input.childIds)
@@ -503,7 +510,8 @@ export const Families = {
     const merged = { ...existing, ...input }
     db.prepare(
       `UPDATE families SET gedcom_id=@gedcom_id, husband_id=@husband_id, wife_id=@wife_id,
-        marriage_date=@marriage_date, marriage_place=@marriage_place, notes=@notes WHERE id=@id`
+        marriage_date=@marriage_date, marriage_place=@marriage_place, marriage_order=@marriage_order,
+        notes=@notes WHERE id=@id`
     ).run({
       id,
       gedcom_id: merged.gedcomId,
@@ -511,6 +519,7 @@ export const Families = {
       wife_id: merged.wifeId,
       marriage_date: merged.marriageDate,
       marriage_place: merged.marriagePlace,
+      marriage_order: merged.marriageOrder,
       notes: merged.notes
     })
     if (input.childIds) writeChildren(db, id, input.childIds)

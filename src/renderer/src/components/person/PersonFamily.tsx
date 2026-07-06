@@ -36,6 +36,7 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
   const [editing, setEditing] = useState(false)
   const [date, setDate] = useState(family.marriageDate ?? '')
   const [place, setPlace] = useState(family.marriagePlace ?? '')
+  const [order, setOrder] = useState(family.marriageOrder ? String(family.marriageOrder) : '')
   const [note, setNote] = useState(family.notes ?? '')
   const [saving, setSaving] = useState(false)
 
@@ -45,6 +46,7 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
       await window.api.families.update(family.id, {
         marriageDate: date.trim() || null,
         marriagePlace: place.trim() || null,
+        marriageOrder: order ? Number(order) : null,
         notes: note.trim() || null
       })
       await refreshFamilies()
@@ -58,6 +60,20 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
     return (
       <div className="space-y-1.5 px-2 py-1">
         <div className="flex items-center gap-1.5">
+          {/* Which marriage this is for the couple (1st, 2nd, …) — optional. */}
+          <select
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            title={t('person.marriageOrderLabel')}
+            className="h-7 shrink-0 rounded-lg border border-input bg-background/40 px-1 text-xs outline-none"
+          >
+            <option value="">—</option>
+            {[1, 2, 3, 4, 5, 6].map((n) => (
+              <option key={n} value={n}>
+                {n}.
+              </option>
+            ))}
+          </select>
           <DateInput
             value={date}
             onValueChange={setDate}
@@ -84,13 +100,17 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
     )
   }
 
-  const label = [family.marriageDate, family.marriagePlace].filter(Boolean).join(' · ')
+  const ordinal = family.marriageOrder
+    ? t('person.marriageOrdinal', { count: family.marriageOrder, ordinal: true })
+    : ''
+  const label = [ordinal, family.marriageDate, family.marriagePlace].filter(Boolean).join(' · ')
   return (
     <div>
       <button
         onClick={() => {
           setDate(family.marriageDate ?? '')
           setPlace(family.marriagePlace ?? '')
+          setOrder(family.marriageOrder ? String(family.marriageOrder) : '')
           setNote(family.notes ?? '')
           setEditing(true)
         }}
@@ -123,15 +143,15 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
 
   const parentFamily = families.find((f) => f.childIds.includes(person.id))
 
-  // Chronological order for multiple marriages: by marriage year, falling back
-  // to the spouse's birth year when the union has no marriage date, so the
-  // earliest partner is listed first.
+  // Order for multiple marriages: the user-set marriage number wins, then the
+  // marriage year, then the spouse's birth year — earliest partner first.
   const unionSortKey = (f: Family): number => {
+    if (f.marriageOrder) return f.marriageOrder
     const marriage = Number(yearOf(f.marriageDate))
-    if (marriage) return marriage
+    if (marriage) return 100 + marriage
     const spouseId = f.husbandId === person.id ? f.wifeId : f.husbandId
     const spouse = spouseId ? byId.get(spouseId) : undefined
-    return Number(yearOf(spouse?.birthDate)) || 9999
+    return 100 + (Number(yearOf(spouse?.birthDate)) || 9999)
   }
   const unions = families
     .filter((f) => f.husbandId === person.id || f.wifeId === person.id)

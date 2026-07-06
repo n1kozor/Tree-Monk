@@ -25,6 +25,8 @@ export interface Person {
   deathPlace: string | null
   /** Known to have died, even when no death date is recorded (GEDCOM `DEAT`). */
   deceased: boolean
+  /** Marked as born out of wedlock (törvénytelen gyermek). */
+  illegitimate: boolean
   /** Burial / interment (GEDCOM BURI). */
   burialDate: string | null
   burialPlace: string | null
@@ -60,6 +62,8 @@ export interface Family {
   wifeId: string | null
   marriageDate: string | null
   marriagePlace: string | null
+  /** Which marriage this is for the couple (1 = first, 2 = second, …). */
+  marriageOrder: number | null
   notes: string | null
   childIds: string[]
 }
@@ -316,6 +320,8 @@ export interface UnionRef {
   spouseName: string
   spouseGiven: string
   spouseSurname: string
+  /** 1st / 2nd / … marriage badge, when the user set one on the union. */
+  marriageOrder: number | null
 }
 
 /** A couple node = two parents shown together in one card. */
@@ -329,6 +335,8 @@ export interface PedigreeCouple {
   partner: PedigreePerson | null
   marriageDate: string | null
   marriagePlace: string | null
+  /** 1st / 2nd / … marriage badge, when set on the union. */
+  marriageOrder: number | null
   /** Children of this union. */
   children: PedigreePerson[]
   /** All unions of `primary` / `partner` — when >1, the card offers a switcher. */
@@ -653,6 +661,37 @@ export interface GeoResult {
   name: string
   lat: number
   lon: number
+}
+
+// ---- Atlas (map view) ----
+
+/** Every geolocatable life-event kind the atlas can plot. */
+export type AtlasKind =
+  | 'birth'
+  | 'christening'
+  | 'marriage'
+  | 'residence'
+  | 'death'
+  | 'burial'
+  | 'other'
+
+/** One plottable life event: a person, a kind, a place with coordinates. */
+export interface AtlasPoint {
+  kind: AtlasKind
+  personId: string
+  personName: string
+  sex: Sex
+  /** 4-digit year when known (for the time filter + chronological sort). */
+  year: number | null
+  /** Raw date string (finer chronological ordering within a year). */
+  date: string | null
+  /** Optional range end (residences: moved-out year). */
+  endYear: number | null
+  place: string
+  lat: number
+  lon: number
+  /** Extra label for 'other' events (the event's type/value). */
+  detail: string | null
 }
 
 export type MapEventKind = 'birth' | 'death' | 'marriage'

@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS people (
   death_date      TEXT,
   death_place     TEXT,
   deceased        INTEGER NOT NULL DEFAULT 0,
+  illegitimate    INTEGER NOT NULL DEFAULT 0,
   burial_date     TEXT,
   burial_place    TEXT,
   christening_date  TEXT,
@@ -39,6 +40,7 @@ CREATE TABLE IF NOT EXISTS families (
   wife_id         TEXT REFERENCES people(id) ON DELETE SET NULL,
   marriage_date   TEXT,
   marriage_place  TEXT,
+  marriage_order  INTEGER,                  -- 1st / 2nd / … marriage (user-set)
   notes           TEXT
 );
 

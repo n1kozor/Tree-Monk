@@ -60,6 +60,11 @@ function migrate(database: Database.Database): void {
   add('ALTER TABLE people ADD COLUMN death_note TEXT')
   add('ALTER TABLE people ADD COLUMN christening_note TEXT')
   add('ALTER TABLE people ADD COLUMN burial_note TEXT')
+  // Illegitimate-child flag (pipálható jelölés). Additive + defaulted → safe.
+  add('ALTER TABLE people ADD COLUMN illegitimate INTEGER NOT NULL DEFAULT 0')
+  // Which marriage this union is for the couple (1st, 2nd, …) — user-set badge.
+  // Additive + nullable → existing DBs gain it on the next launch, nothing lost.
+  add('ALTER TABLE families ADD COLUMN marriage_order INTEGER')
   // One-time: lift the legacy single people.occupation into the occupations
   // table (the new source of truth). Gated by a settings flag so a user who
   // later deletes those rows doesn't get them re-created on the next launch.

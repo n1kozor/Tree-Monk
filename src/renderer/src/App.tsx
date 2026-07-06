@@ -11,13 +11,14 @@ import { useSettings } from '@/store/useSettings'
 import { InvestigationBoard } from '@/components/board/InvestigationBoard'
 import { DashboardView } from '@/components/dashboard/DashboardView'
 import { FamilyTree } from '@/components/tree/FamilyTree'
-import { GenealogyMap } from '@/components/map/GenealogyMap'
+import { AtlasView } from '@/components/map/AtlasView'
 import { PeopleView } from '@/components/people/PeopleView'
 import { DocumentsView } from '@/components/documents/DocumentsView'
 import { IssuesView } from '@/components/issues/IssuesView'
 import { QueryView } from '@/components/query/QueryView'
 import { RelationshipView } from '@/components/kinship/RelationshipView'
 import { AuditView } from '@/components/audit/AuditView'
+import { ResearchView } from '@/components/research/ResearchView'
 import { CalendarView } from '@/components/calendar/CalendarView'
 import { ChangelogView } from '@/components/changelog/ChangelogView'
 import { ProfileView } from '@/components/profile/ProfileView'
@@ -58,12 +59,13 @@ function ViewRenderer(): JSX.Element {
         </div>
       )}
       {view === 'dashboard' && <DashboardView />}
-      {view === 'map' && <GenealogyMap />}
+      {view === 'map' && <AtlasView />}
       {view === 'people' && <PeopleView />}
       {view === 'documents' && <DocumentsView />}
       {view === 'issues' && <IssuesView />}
       {view === 'query' && <QueryView />}
       {view === 'kinship' && <RelationshipView />}
+      {view === 'research' && <ResearchView />}
       {view === 'audit' && <AuditView />}
       {view === 'calendar' && <CalendarView />}
       {view === 'changelog' && <ChangelogView />}

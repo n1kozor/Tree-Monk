@@ -43,7 +43,7 @@ const OPERATORS: QueryOperator[] = [
 const NO_VALUE: QueryOperator[] = ['isEmpty', 'notEmpty']
 
 const selectCls =
-  'h-9 rounded-xl border border-input bg-transparent px-2 text-sm outline-none focus:ring-1 focus:ring-ring'
+  'h-9 rounded-xl border border-input bg-background/40 px-2 text-sm outline-none backdrop-blur-sm focus:ring-1 focus:ring-ring'
 
 export function QueryView(): JSX.Element {
   const { t } = useTranslation()

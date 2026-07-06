@@ -103,6 +103,9 @@ const api: TreeMonkApi = {
   map: {
     markers: () => ipcRenderer.invoke(Channels.map.markers)
   },
+  atlas: {
+    points: () => ipcRenderer.invoke(Channels.atlas.points)
+  },
   wiki: {
     eventsNear: (lat, lon, fromYear, toYear, lang) =>
       ipcRenderer.invoke(Channels.wiki.eventsNear, lat, lon, fromYear, toYear, lang)

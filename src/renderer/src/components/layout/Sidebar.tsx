@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   BookOpen,
+  ClipboardList,
   Calendar,
   Filter,
   Heart,
@@ -46,6 +47,7 @@ const ITEMS: { view: View; icon: typeof Search; labelKey: string }[] = [
   { view: 'issues', icon: ShieldAlert, labelKey: 'nav.issues' },
   { view: 'query', icon: Filter, labelKey: 'nav.query' },
   { view: 'kinship', icon: Route, labelKey: 'nav.kinship' },
+  { view: 'research', icon: ClipboardList, labelKey: 'nav.research' },
   { view: 'calendar', icon: Calendar, labelKey: 'nav.calendar' },
   { view: 'changelog', icon: Sparkles, labelKey: 'nav.changelog' },
   { view: 'audit', icon: History, labelKey: 'nav.audit' }

@@ -54,6 +54,29 @@ function pedigreeContext() {
       if (!childFamilyOf.has(c)) childFamilyOf.set(c, f)
     }
   }
+  // A person's unions in a sensible order: the user-set marriage number wins,
+  // then the marriage year — so "first union" (spouse switcher default, the
+  // descendant line) is the actual first marriage.
+  const unionKey = (f: Family): number => {
+    if (f.marriageOrder) return f.marriageOrder
+    return 100 + (Number(yearOf(f.marriageDate)) || 9999)
+  }
+  for (const arr of spouseFamiliesOf.values()) arr.sort((a, b) => unionKey(a) - unionKey(b))
+
+  // Children of a union, oldest first: full birth date when known, year as a
+  // fallback; undated children keep their stored (GEDCOM/insertion) order at
+  // the end. Stable sort → equal keys never reshuffle.
+  const byBirth = (a: Person, b: Person): number => {
+    const ya = Number(yearOf(a.birthDate)) || 9999
+    const yb = Number(yearOf(b.birthDate)) || 9999
+    if (ya !== yb) return ya - yb
+    return (a.birthDate ?? '').localeCompare(b.birthDate ?? '')
+  }
+  const childrenOf = (fam: Family): Person[] =>
+    fam.childIds
+      .map((cid) => byId.get(cid))
+      .filter((p): p is Person => !!p)
+      .sort(byBirth)
 
   // A person plus their first-union spouse (one level, no further nesting) — used
   // for collateral people (siblings) so they can be shown beside their partner.
@@ -74,7 +97,8 @@ function pedigreeContext() {
         spouseId: sid ?? null,
         spouseName: sp ? `${sp.givenName} ${sp.surname}`.trim() || '—' : '—',
         spouseGiven: sp?.givenName ?? '',
-        spouseSurname: sp?.surname ?? ''
+        spouseSurname: sp?.surname ?? '',
+        marriageOrder: f.marriageOrder
       }
     })
 
@@ -98,10 +122,8 @@ function pedigreeContext() {
       partner: wife ? toPerson(wife) : null,
       marriageDate: fam.marriageDate,
       marriagePlace: fam.marriagePlace,
-      children: fam.childIds
-        .map((cid) => byId.get(cid))
-        .filter((p): p is Person => !!p)
-        .map(personWithSpouse),
+      marriageOrder: fam.marriageOrder,
+      children: childrenOf(fam).map(personWithSpouse),
       primaryUnions: husband ? unionsOf(husband.id) : [],
       partnerUnions: wife ? unionsOf(wife.id) : [],
       fatherParents: husband ? parentsCouple(husband.id, gen + 1, seen) : null,
@@ -117,7 +139,7 @@ function pedigreeContext() {
     const fam = (spouseFamiliesOf.get(personId) ?? [])[0] ?? null
     const spouseId = fam ? (fam.husbandId === personId ? fam.wifeId : fam.husbandId) : null
     const spouse = spouseId ? byId.get(spouseId) ?? null : null
-    const kids = fam ? fam.childIds.map((c) => byId.get(c)).filter((p): p is Person => !!p) : []
+    const kids = fam ? childrenOf(fam) : []
     const nextSeen = new Set(seen).add(personId)
     if (spouseId) nextSeen.add(spouseId)
     const descendants =
@@ -131,6 +153,7 @@ function pedigreeContext() {
       partner: spouse ? toPerson(spouse) : null,
       marriageDate: fam?.marriageDate ?? null,
       marriagePlace: fam?.marriagePlace ?? null,
+      marriageOrder: fam?.marriageOrder ?? null,
       children: kids.map(toPerson),
       primaryUnions: unionsOf(person.id),
       partnerUnions: spouseId ? unionsOf(spouseId) : [],
@@ -150,6 +173,7 @@ function pedigreeContext() {
     parentIds,
     toPerson,
     unionsOf,
+    childrenOf,
     parentsCouple,
     coupleFromFamily,
     descCouple
@@ -189,12 +213,9 @@ export function buildPedigree(rootId?: string, rootFamilyId?: string): PedigreeC
   }
   if (!proband) return null
 
-  const attachDescendants = (root: PedigreeCouple, childIds: string[], seed: string[]): PedigreeCouple => {
+  const attachDescendants = (root: PedigreeCouple, children: Person[], seed: string[]): PedigreeCouple => {
     const seen = new Set<string>(seed)
-    root.descendants = childIds
-      .map((cid) => byId.get(cid))
-      .filter((p): p is Person => !!p)
-      .map((c) => ctx.descCouple(c.id, 1, seen))
+    root.descendants = children.map((c) => ctx.descCouple(c.id, 1, seen))
     return root
   }
 
@@ -205,7 +226,7 @@ export function buildPedigree(rootId?: string, rootFamilyId?: string): PedigreeC
   if (marriage) {
     const root = ctx.coupleFromFamily(marriage, 1, new Set())
     const seed = [marriage.husbandId, marriage.wifeId].filter((id): id is string => !!id)
-    return attachDescendants(root, marriage.childIds, seed)
+    return attachDescendants(root, ctx.childrenOf(marriage), seed)
   }
   // Unmarried proband: show them alone with their ancestors.
   return {
@@ -215,6 +236,7 @@ export function buildPedigree(rootId?: string, rootFamilyId?: string): PedigreeC
     partner: null,
     marriageDate: null,
     marriagePlace: null,
+    marriageOrder: null,
     children: [],
     primaryUnions: unionsOf(proband.id),
     partnerUnions: [],

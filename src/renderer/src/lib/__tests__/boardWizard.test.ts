@@ -9,7 +9,7 @@ function mk(p: Partial<Person>): Person {
     id: Math.random().toString(36).slice(2),
     gedcomId: null, fsId: null, givenName: '', surname: '', sex: 'U',
     birthDate: null, birthPlace: null, deathDate: null, deathPlace: null,
-    deceased: false, burialDate: null, burialPlace: null, christeningDate: null,
+    deceased: false, illegitimate: false, burialDate: null, burialPlace: null, christeningDate: null,
     christeningPlace: null, religion: null, birthNote: null, deathNote: null, christeningNote: null, burialNote: null, occupation: null, notes: null,
     profilePhotoId: null, profilePhotoCrop: null, createdAt: '', updatedAt: '', ...p
   }
@@ -17,7 +17,7 @@ function mk(p: Partial<Person>): Person {
 const fam = (f: Partial<Family>): Family => ({
   id: Math.random().toString(36).slice(2),
   gedcomId: null, husbandId: null, wifeId: null, marriageDate: null,
-  marriagePlace: null, notes: null, childIds: [], ...f
+  marriagePlace: null, marriageOrder: null, notes: null, childIds: [], ...f
 })
 
 describe('buildInvestigationPlan', () => {

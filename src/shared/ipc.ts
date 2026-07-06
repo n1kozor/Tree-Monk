@@ -1,4 +1,5 @@
 import type {
+  AtlasPoint,
   Alias,
   AliasInput,
   AuditFilter,
@@ -152,6 +153,9 @@ export const Channels = {
   },
   map: {
     markers: 'map:markers'
+  },
+  atlas: {
+    points: 'atlas:points'
   },
   wiki: {
     eventsNear: 'wiki:eventsNear'
@@ -389,6 +393,10 @@ export interface TreeMonkApi {
   }
   map: {
     markers(): Promise<MapMarker[]>
+  }
+  atlas: {
+    /** Every geocoded life event (vitals, marriages, residences, other facts). */
+    points(): Promise<AtlasPoint[]>
   }
   wiki: {
     /** Historical events near a place + era (Wikidata, Hungarian labels). */

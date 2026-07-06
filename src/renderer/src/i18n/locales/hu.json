@@ -268,7 +268,8 @@
     "noStartPerson": "Nincs kezdőszemély!",
     "startPersonHint": "Globális kezdőszemély (én) beállítása",
     "clearStartPerson": "Törlés",
-    "changelog": "Újdonságok"
+    "changelog": "Újdonságok",
+    "research": "Kutatás"
   },
   "calendar": {
     "title": "Naptár",
@@ -365,7 +366,16 @@
   "people": {
     "anySex": "Mind",
     "results": "{{count}} találat",
-    "clear": "Törlés"
+    "clear": "Törlés",
+    "missingLabel": "Hiányzó adat",
+    "missing": {
+      "birthDate": "születési dátum",
+      "birthPlace": "születési hely",
+      "deathDate": "halálozási dátum",
+      "deathPlace": "halálozási hely",
+      "parents": "szülők",
+      "photo": "fénykép"
+    }
   },
   "famous": {
     "title": "Híres rokonok",
@@ -1012,6 +1022,8 @@
     "addOccupation": "Foglalkozás hozzáadása",
     "marriage": "Házasság",
     "addMarriage": "Házasság hozzáadása",
+    "marriageOrderLabel": "Hányadik házasság",
+    "marriageOrdinal_ordinal_other": "{{count}}. házasság",
     "copyFsId": "FamilySearch-azonosító másolása",
     "fsIdCopied": "FamilySearch-azonosító másolva",
     "editOccupation": "Foglalkozás szerkesztése",
@@ -1019,7 +1031,8 @@
     "fsIdInvalid": "Nem érvényes FamilySearch-azonosító formátum (pl. LZ1B-2CD).",
     "fromOpt": "Ettől (opcionális)",
     "toOpt": "Eddig (opcionális)",
-    "name": "Név"
+    "name": "Név",
+    "illegitimate": "Törvénytelen gyermek"
   },
   "research": {
     "history": "Kutatási előzmények",
@@ -1741,5 +1754,47 @@
   },
   "preloader": {
     "tagline": "A családfád, gyökerektől a lombkoronáig"
+  },
+  "atlas": {
+    "flat": "Lapos",
+    "threeD": "3D",
+    "layers": "Rétegek",
+    "markers": "Jelölők",
+    "heatmap": "Hőtérkép",
+    "paths": "Vándorlási utak",
+    "clustering": "Csoportosítás",
+    "events": "Események",
+    "time": "Időszak",
+    "allTime": "Teljes időszak",
+    "journey": "Életút",
+    "searchPerson": "Személy keresése…",
+    "journeyOf": "{{count}} állomás",
+    "noPlaces": "Ehhez a személyhez nincs geokódolt hely.",
+    "emptyTitle": "Még nincs megjeleníthető hely",
+    "emptyHint": "A helységnevekhez koordináták kellenek — indítsd el a geokódolást.",
+    "geocode": "Helyek geokódolása",
+    "base": {
+      "auto": "Auto",
+      "light": "Világos",
+      "dark": "Sötét",
+      "satellite": "Műhold",
+      "historical": "Történelmi"
+    },
+    "kind": {
+      "birth": "Születés",
+      "christening": "Keresztelő",
+      "marriage": "Házasság",
+      "residence": "Lakhely",
+      "death": "Halál",
+      "burial": "Temetés",
+      "other": "Egyéb"
+    }
+  },
+  "researchView": {
+    "title": "Kutatási jegyzetek",
+    "count": "{{count}} bejegyzés",
+    "all": "Mind",
+    "general": "Általános (nem személyhez kötött)",
+    "empty": "Még nincs kutatási jegyzet. A személy panel „Kutatás\" fülén rögzíthetsz."
   }
 }

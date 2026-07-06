@@ -49,6 +49,10 @@ export function PanZoom({
 }): JSX.Element {
   const [t, setT] = useState<T>({ x: 0, y: 0, scale: 1 })
   const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
+  // High-Hz mice fire pointermove far faster than the display refreshes — apply
+  // at most one pan update per frame so dragging a heavy canvas can't flood React.
+  const pendingPan = useRef<{ x: number; y: number } | null>(null)
+  const moveRaf = useRef<number | undefined>(undefined)
   const containerRef = useRef<HTMLDivElement>(null)
   // True during active wheel scrolling so the transform updates instantly (no
   // easing lag); cleared shortly after so fit/focus reframes still animate.
@@ -138,8 +142,14 @@ export function PanZoom({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusKey])
 
-  // Drop the wheel-idle timer on unmount.
-  useEffect(() => () => clearTimeout(wheelTimer.current), [])
+  // Drop the wheel-idle timer / pending pan frame on unmount.
+  useEffect(
+    () => () => {
+      clearTimeout(wheelTimer.current)
+      if (moveRaf.current !== undefined) cancelAnimationFrame(moveRaf.current)
+    },
+    []
+  )
 
   // Briefly flag active wheel scrolling so the transform follows the wheel without
   // the easing lag (re-enabled right after so camera reframes still animate).
@@ -179,9 +189,17 @@ export function PanZoom({
       onPointerMove={(e) => {
         const d = drag.current
         if (!d) return
-        const dx = e.clientX - d.x
-        const dy = e.clientY - d.y
-        setT((prev) => ({ ...prev, x: d.ox + dx, y: d.oy + dy }))
+        // Coalesce to one state update per animation frame (high-Hz mice can
+        // emit several pointermoves per displayed frame).
+        pendingPan.current = { x: d.ox + (e.clientX - d.x), y: d.oy + (e.clientY - d.y) }
+        if (moveRaf.current === undefined) {
+          moveRaf.current = requestAnimationFrame(() => {
+            moveRaf.current = undefined
+            const p = pendingPan.current
+            pendingPan.current = null
+            if (p) setT((prev) => ({ ...prev, x: p.x, y: p.y }))
+          })
+        }
       }}
       onPointerUp={() => (drag.current = null)}
       onDoubleClick={(e) => {
@@ -198,6 +216,11 @@ export function PanZoom({
         style={{
           transform: `translate(${t.x}px, ${t.y}px) scale(${t.scale})`,
           transformOrigin: '0 0',
+          // Promote to a compositor layer ONLY while actively panning/zooming:
+          // the cached GPU texture keeps the interaction smooth, and dropping
+          // the hint at rest forces a re-raster so the content is never left
+          // blurry at the new scale.
+          willChange: drag.current || wheeling ? 'transform' : 'auto',
           transition: drag.current || wheeling ? 'none' : 'transform 0.25s ease-out'
         }}
       >

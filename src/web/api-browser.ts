@@ -18,6 +18,7 @@ import {
 import { buildTree } from '../main/db/tree'
 import { buildPedigree } from '../main/db/pedigree'
 import { buildMapMarkers } from '../main/db/mapData'
+import { buildAtlasPoints } from '../main/db/atlasData'
 import { runSanityCheck } from '../main/db/sanity'
 import { findRelationshipPath } from '../main/db/relationship'
 import { runPersonQuery, listSavedQueries } from '../main/db/query'
@@ -191,6 +192,9 @@ export function createDemoApi(): TreeMonkApi {
     },
     map: {
       markers: async () => buildMapMarkers()
+    },
+    atlas: {
+      points: async () => buildAtlasPoints()
     },
     wiki: {
       eventsNear: async (lat, lon, fromYear, toYear, lang) =>

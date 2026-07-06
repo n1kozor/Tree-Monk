@@ -567,18 +567,18 @@ export function FamilyTree(): JSX.Element {
           <PedigreeSettingsPanel />
         </>
       )}
+      {/* The fan renders on its own canvas with a built-in infinite camera —
+          no PanZoom wrapper (CSS-transform zoom would rasterise it blurry). */}
       {view === 'fan' && root && (
-        <PanZoom>
-          <FanChart
-            data={root}
-            generations={generations}
-            sweep={ped.fanSweep}
-            colorMode={ped.fanColorMode}
-            showYears={ped.fanShowYears}
-            accent={ped.accent}
-            onSelect={selectPerson}
-          />
-        </PanZoom>
+        <FanChart
+          data={root}
+          generations={generations}
+          sweep={ped.fanSweep}
+          colorMode={ped.fanColorMode}
+          showYears={ped.fanShowYears}
+          accent={ped.accent}
+          onSelect={selectPerson}
+        />
       )}
       {view === 'descendants' && root && (
         <PanZoom>

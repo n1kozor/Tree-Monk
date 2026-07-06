@@ -12,6 +12,7 @@ export type View =
   | 'issues'
   | 'query'
   | 'kinship'
+  | 'research'
   | 'audit'
   | 'calendar'
   | 'changelog'

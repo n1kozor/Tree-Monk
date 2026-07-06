@@ -141,6 +141,7 @@ export function PersonPanel(): JSX.Element | null {
       deathDate: next.deathDate,
       deathPlace: next.deathPlace,
       deceased: next.deceased,
+      illegitimate: next.illegitimate,
       christeningDate: next.christeningDate,
       christeningPlace: next.christeningPlace,
       burialDate: next.burialDate,
@@ -172,6 +173,13 @@ export function PersonPanel(): JSX.Element | null {
   const setDeceased = (v: boolean): void => {
     if (!person) return
     const next = { ...person, deceased: v }
+    setPerson(next)
+    void save(next)
+  }
+
+  const setIllegitimate = (v: boolean): void => {
+    if (!person) return
+    const next = { ...person, illegitimate: v }
     setPerson(next)
     void save(next)
   }
@@ -602,6 +610,16 @@ export function PersonPanel(): JSX.Element | null {
                 <span className={person.deathDate ? 'text-muted-foreground' : ''}>
                   {t('person.deceased')}
                 </span>
+              </label>
+              {/* Born out of wedlock — plain user-set flag. */}
+              <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={!!person.illegitimate}
+                  onChange={(e) => setIllegitimate(e.target.checked)}
+                  className="h-4 w-4 accent-[hsl(var(--primary))]"
+                />
+                <span>{t('person.illegitimate')}</span>
               </label>
               <div className="col-span-2 -mb-1 flex justify-end">
                 <button

@@ -106,6 +106,15 @@
 }
 
 @layer base {
+  /* Native widgets (select popups, scrollbars, date inputs) must follow the
+     app theme — without this, dark mode renders select OPTIONS as light text
+     on a light popup (only readable on hover). */
+  :root {
+    color-scheme: light;
+  }
+  .dark {
+    color-scheme: dark;
+  }
   * {
     @apply border-border;
   }

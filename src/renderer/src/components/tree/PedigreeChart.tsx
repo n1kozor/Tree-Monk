@@ -647,6 +647,14 @@ export function CoupleCard({
           addLabel={t('tree.addFather')}
         />
         <div className="flex items-center gap-1 border-y border-border/60 bg-secondary/40 px-2.5 py-0.5">
+          {couple.marriageOrder ? (
+            <span
+              title={t('person.marriageOrdinal', { count: couple.marriageOrder, ordinal: true })}
+              className="shrink-0 rounded bg-primary/15 px-1 text-[9px] font-bold leading-[14px] text-primary"
+            >
+              {couple.marriageOrder}.
+            </span>
+          ) : null}
           <span className="truncate text-[10px] text-muted-foreground">
             {couple.marriageDate || couple.marriagePlace
               ? `⚭ ${[couple.marriageDate, couple.marriagePlace].filter(Boolean).join(' · ')}`
@@ -750,6 +758,7 @@ export function CoupleCard({
                   >
                     <Users className="h-3.5 w-3.5 text-muted-foreground" />
                     <span className="flex-1 truncate">
+                      {u.marriageOrder ? `${u.marriageOrder}. ` : ''}
                       {formatName(u.spouseGiven, u.spouseSurname) || u.spouseName}
                     </span>
                     {u.familyId === couple.familyId && <span className="text-[9px] text-primary">●</span>}

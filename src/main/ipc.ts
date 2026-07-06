@@ -25,6 +25,7 @@ import { buildPedigree, buildPersonDescendants, buildUnionCouple } from './db/pe
 import { detectKinship } from './db/kinship'
 import { exportTreeImage, exportHtmlPdf } from './treeExport'
 import { buildMapMarkers } from './db/mapData'
+import { buildAtlasPoints } from './db/atlasData'
 import { eventsNear as wikiEventsNear } from './wiki'
 import { runSanityCheck } from './db/sanity'
 import { findRelationshipPath } from './db/relationship'
@@ -309,6 +310,7 @@ export function registerIpc(): void {
 
   // Map
   ipcMain.handle(Channels.map.markers, () => buildMapMarkers())
+  ipcMain.handle(Channels.atlas.points, () => buildAtlasPoints())
   ipcMain.handle(
     Channels.wiki.eventsNear,
     (_e, lat: number, lon: number, fromYear: number, toYear: number, lang?: string) =>

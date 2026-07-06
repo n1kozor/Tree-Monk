@@ -32,11 +32,16 @@ const TYPES: EventType[] = [
 ]
 
 type Tr = (key: string) => string
-/** Known types get a translated label; anything else (custom / FS-derived) shows raw. */
+/** Known types get a translated label; anything else (custom / FS-derived)
+ *  shows raw. FS/GEDCOMX types arrive CamelCase ("Residence") — retry the
+ *  lookup lowercased so they translate too. */
 function typeLabel(t: Tr, type: string): string {
-  const key = `events.type.${type}`
-  const label = t(key)
-  return label === key ? type : label
+  for (const candidate of [type, type.toLowerCase()]) {
+    const key = `events.type.${candidate}`
+    const label = t(key)
+    if (label !== key) return label
+  }
+  return type
 }
 
 /** Modal editor for one event — change every field, or delete it. */

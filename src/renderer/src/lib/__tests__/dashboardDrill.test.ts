@@ -15,7 +15,7 @@ function mk(p: Partial<Person>): Person {
     birthPlace: null,
     deathDate: null,
     deathPlace: null,
-    deceased: false,
+    deceased: false, illegitimate: false,
     burialDate: null,
     burialPlace: null,
     christeningDate: null,

@@ -29,11 +29,11 @@ const TABLES: AuditTable[] = [
     pk: ['id'],
     cols: [
       'id', 'gedcom_id', 'fs_id', 'given_name', 'surname', 'sex', 'birth_date', 'birth_place',
-      'death_date', 'death_place', 'deceased', 'burial_date', 'burial_place', 'christening_date',
+      'death_date', 'death_place', 'deceased', 'illegitimate', 'burial_date', 'burial_place', 'christening_date',
       'christening_place', 'religion', 'occupation', 'notes', 'profile_photo_id', 'created_at', 'updated_at'
     ]
   },
-  { table: 'families', entity: 'family', pk: ['id'], cols: ['id', 'gedcom_id', 'husband_id', 'wife_id', 'marriage_date', 'marriage_place', 'notes'] },
+  { table: 'families', entity: 'family', pk: ['id'], cols: ['id', 'gedcom_id', 'husband_id', 'wife_id', 'marriage_date', 'marriage_place', 'marriage_order', 'notes'] },
   { table: 'family_children', entity: 'family_child', pk: ['family_id', 'child_id'], cols: ['family_id', 'child_id', 'ordinal'] },
   { table: 'events', entity: 'event', pk: ['id'], cols: ['id', 'owner_type', 'owner_id', 'type', 'date', 'place', 'value', 'note', 'fs_key', 'ordinal'] },
   { table: 'occupations', entity: 'occupation', pk: ['id'], cols: ['id', 'person_id', 'title', 'start_date', 'end_date', 'note'] },

@@ -153,9 +153,15 @@ export function PersonTimeline({ person }: { person: Person }): JSX.Element | nu
     add(person.christeningDate, t('person.christening'), 'christening', person.christeningPlace)
     occupations.forEach((o, i) => add(o.startDate, o.title, 'occupation', o.note, `occ-${i}`))
     events.forEach((e, i) => {
-      const tone: Tone = e.type === 'residence' ? 'residence' : e.type === 'military' ? 'military' : 'event'
-      const label = e.value || t(`events.type.${e.type}`)
-      add(e.date, label === `events.type.${e.type}` ? e.type : label, tone, e.place, `ev-${i}`)
+      // FS/GEDCOMX types arrive CamelCase ("Residence") — compare and translate
+      // case-insensitively so imported facts get the localized label too.
+      const lower = e.type.toLowerCase()
+      const tone: Tone = lower === 'residence' ? 'residence' : lower === 'military' ? 'military' : 'event'
+      const exact = t(`events.type.${e.type}`)
+      const lowered = t(`events.type.${lower}`)
+      const typeText =
+        exact !== `events.type.${e.type}` ? exact : lowered !== `events.type.${lower}` ? lowered : e.type
+      add(e.date, e.value || typeText, tone, e.place, `ev-${i}`)
     })
     for (const f of families) {
       if (f.husbandId === person.id || f.wifeId === person.id) {

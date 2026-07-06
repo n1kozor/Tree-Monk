@@ -302,6 +302,11 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                 ) : (
                   <Badge className="text-emerald-600 dark:text-emerald-400">{t('tree.living')}</Badge>
                 )}
+                {person.illegitimate && (
+                  <Badge className="text-amber-600 dark:text-amber-400">
+                    {t('person.illegitimate')}
+                  </Badge>
+                )}
                 {person.occupation?.trim() && <Badge>{person.occupation.trim()}</Badge>}
               </div>
             </div>

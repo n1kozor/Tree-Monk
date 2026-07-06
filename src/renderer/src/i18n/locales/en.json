@@ -268,7 +268,8 @@
     "noStartPerson": "No starting person!",
     "startPersonHint": "Set the global starting person (\"me\")",
     "clearStartPerson": "Clear",
-    "changelog": "What's new"
+    "changelog": "What's new",
+    "research": "Research"
   },
   "calendar": {
     "title": "Calendar",
@@ -365,7 +366,16 @@
   "people": {
     "anySex": "Any",
     "results": "{{count}} results",
-    "clear": "Clear"
+    "clear": "Clear",
+    "missingLabel": "Missing data",
+    "missing": {
+      "birthDate": "birth date",
+      "birthPlace": "birth place",
+      "deathDate": "death date",
+      "deathPlace": "death place",
+      "parents": "parents",
+      "photo": "photo"
+    }
   },
   "famous": {
     "title": "Famous relatives",
@@ -1012,6 +1022,11 @@
     "addSpouseTitle": "Add spouse / partner",
     "marriage": "Marriage",
     "addMarriage": "Add marriage",
+    "marriageOrderLabel": "Marriage number",
+    "marriageOrdinal_ordinal_one": "{{count}}st marriage",
+    "marriageOrdinal_ordinal_two": "{{count}}nd marriage",
+    "marriageOrdinal_ordinal_few": "{{count}}rd marriage",
+    "marriageOrdinal_ordinal_other": "{{count}}th marriage",
     "copyFsId": "Copy FamilySearch ID",
     "fsIdCopied": "FamilySearch ID copied",
     "editOccupation": "Edit occupation",
@@ -1019,7 +1034,8 @@
     "fsIdInvalid": "Not a valid FamilySearch ID format (e.g. LZ1B-2CD).",
     "fromOpt": "From (optional)",
     "toOpt": "To (optional)",
-    "name": "Name"
+    "name": "Name",
+    "illegitimate": "Illegitimate child"
   },
   "research": {
     "history": "Research history",
@@ -1741,5 +1757,47 @@
   },
   "preloader": {
     "tagline": "Your family, from roots to canopy"
+  },
+  "atlas": {
+    "flat": "Flat",
+    "threeD": "3D",
+    "layers": "Layers",
+    "markers": "Markers",
+    "heatmap": "Heatmap",
+    "paths": "Migration paths",
+    "clustering": "Clustering",
+    "events": "Events",
+    "time": "Time window",
+    "allTime": "All time",
+    "journey": "Life journey",
+    "searchPerson": "Search a person…",
+    "journeyOf": "{{count}} stops",
+    "noPlaces": "No geocoded places for this person.",
+    "emptyTitle": "Nothing to plot yet",
+    "emptyHint": "Place names need coordinates — run geocoding to pin them.",
+    "geocode": "Geocode places",
+    "base": {
+      "auto": "Auto",
+      "light": "Light",
+      "dark": "Dark",
+      "satellite": "Satellite",
+      "historical": "Historical"
+    },
+    "kind": {
+      "birth": "Birth",
+      "christening": "Christening",
+      "marriage": "Marriage",
+      "residence": "Residence",
+      "death": "Death",
+      "burial": "Burial",
+      "other": "Other"
+    }
+  },
+  "researchView": {
+    "title": "Research notes",
+    "count": "{{count}} entries",
+    "all": "All",
+    "general": "General (not person-specific)",
+    "empty": "No research notes yet. Add them on a person’s \"Research\" tab."
   }
 }

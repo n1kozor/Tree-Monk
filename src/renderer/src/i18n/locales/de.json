@@ -268,7 +268,8 @@
     "noStartPerson": "Keine Startperson!",
     "startPersonHint": "Globale Startperson (ich) festlegen",
     "clearStartPerson": "Entfernen",
-    "changelog": "Neuigkeiten"
+    "changelog": "Neuigkeiten",
+    "research": "Forschung"
   },
   "calendar": {
     "title": "Kalender",
@@ -365,7 +366,16 @@
   "people": {
     "anySex": "Alle",
     "results": "{{count}} Treffer",
-    "clear": "Löschen"
+    "clear": "Löschen",
+    "missingLabel": "Fehlende Daten",
+    "missing": {
+      "birthDate": "Geburtsdatum",
+      "birthPlace": "Geburtsort",
+      "deathDate": "Sterbedatum",
+      "deathPlace": "Sterbeort",
+      "parents": "Eltern",
+      "photo": "Foto"
+    }
   },
   "famous": {
     "title": "Berühmte Verwandte",
@@ -1012,6 +1022,8 @@
     "addOccupation": "Beruf hinzufügen",
     "marriage": "Heirat",
     "addMarriage": "Heirat hinzufügen",
+    "marriageOrderLabel": "Wievielte Ehe",
+    "marriageOrdinal_ordinal_other": "{{count}}. Ehe",
     "copyFsId": "FamilySearch-ID kopieren",
     "fsIdCopied": "FamilySearch-ID kopiert",
     "editOccupation": "Beruf bearbeiten",
@@ -1019,7 +1031,8 @@
     "fsIdInvalid": "Kein gültiges FamilySearch-ID-Format (z. B. LZ1B-2CD).",
     "fromOpt": "Von (optional)",
     "toOpt": "Bis (optional)",
-    "name": "Name"
+    "name": "Name",
+    "illegitimate": "Uneheliches Kind"
   },
   "research": {
     "history": "Rechercheverlauf",
@@ -1741,5 +1754,47 @@
   },
   "preloader": {
     "tagline": "Deine Familie, von den Wurzeln bis zur Krone"
+  },
+  "atlas": {
+    "flat": "Flach",
+    "threeD": "3D",
+    "layers": "Ebenen",
+    "markers": "Markierungen",
+    "heatmap": "Heatmap",
+    "paths": "Wanderwege",
+    "clustering": "Gruppierung",
+    "events": "Ereignisse",
+    "time": "Zeitraum",
+    "allTime": "Gesamter Zeitraum",
+    "journey": "Lebensweg",
+    "searchPerson": "Person suchen…",
+    "journeyOf": "{{count}} Stationen",
+    "noPlaces": "Keine geokodierten Orte für diese Person.",
+    "emptyTitle": "Noch nichts anzuzeigen",
+    "emptyHint": "Ortsnamen brauchen Koordinaten — starte die Geokodierung.",
+    "geocode": "Orte geokodieren",
+    "base": {
+      "auto": "Auto",
+      "light": "Hell",
+      "dark": "Dunkel",
+      "satellite": "Satellit",
+      "historical": "Historisch"
+    },
+    "kind": {
+      "birth": "Geburt",
+      "christening": "Taufe",
+      "marriage": "Heirat",
+      "residence": "Wohnort",
+      "death": "Tod",
+      "burial": "Bestattung",
+      "other": "Sonstiges"
+    }
+  },
+  "researchView": {
+    "title": "Forschungsnotizen",
+    "count": "{{count}} Einträge",
+    "all": "Alle",
+    "general": "Allgemein (nicht personenbezogen)",
+    "empty": "Noch keine Forschungsnotizen. Erfasse sie im Reiter „Forschung\" einer Person."
   }
 }
