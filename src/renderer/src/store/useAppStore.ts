@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Alias, DocumentRecord, Family, Person, ResearchLog } from '@shared/types'
+import type { Alias, DocumentRecord, Family, GedcomImportResult, Person, ResearchLog } from '@shared/types'
 import { isFamilySearchId } from '@/lib/familySearchSearch'
 
 export type View =
@@ -75,6 +75,9 @@ interface AppState {
   mapFocusPersonId: string | undefined
   /** Bumped on each "Show on map" so the (always-checking) map re-applies focus. */
   mapFocusNonce: number
+  /** End-of-GEDCOM-import summary — a dialog shows it until dismissed. */
+  gedcomSummary: GedcomImportResult | null
+  setGedcomSummary: (r: GedcomImportResult | null) => void
   /** Document to open in the viewer (set by the global search). */
   documentFocusId: string | undefined
   /** Bumped each time so the Documents view re-applies the focus. */
@@ -143,6 +146,11 @@ interface AppState {
   clearFsImport: () => void
   fsImportExpanded: boolean
   setFsImportExpanded: (v: boolean) => void
+}
+
+// Exposed for e2e/debug probes (drive store state from Playwright).
+if (typeof window !== 'undefined') {
+  ;(window as unknown as { __appStore?: typeof useAppStore }).__appStore = undefined
 }
 
 function indexPeople(people: Person[]): Map<string, Person> {
@@ -220,6 +228,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   kinshipTo: undefined,
   mapFocusPersonId: undefined,
   mapFocusNonce: 0,
+  gedcomSummary: null,
+  setGedcomSummary: (r) => set({ gedcomSummary: r }),
   documentFocusId: undefined,
   documentFocusNonce: 0,
   loading: false,
@@ -527,3 +537,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ researchLogs, researchByPerson: indexResearch(researchLogs) })
   }
 }))
+
+// e2e/debug handle (assigned after creation so the store object exists).
+;(window as unknown as { __appStore?: typeof useAppStore }).__appStore = useAppStore

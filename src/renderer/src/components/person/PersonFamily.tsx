@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Baby, Check, Heart, Pencil, UserPlus, Users } from 'lucide-react'
+import { Baby, Unlink2, Check, Heart, Pencil, UserPlus, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/DateInput'
 import { PlaceInput } from '@/components/common/PlaceInput'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
+import { ConfirmDialog, toastUndo } from '@/components/common/ConfirmDialog'
 import { fullName, yearOf } from '@/lib/utils'
 import { useAppStore } from '@/store/useAppStore'
 import { RelativeDialog, type MarriageDraft, type RelativeDraft } from './RelativeDialog'
@@ -140,6 +141,7 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
   // Which add-dialog is open: a child of a given family, or a new spouse.
   const [addingChildTo, setAddingChildTo] = useState<string | null>(null)
   const [addingSpouse, setAddingSpouse] = useState(false)
+  const [unlinking, setUnlinking] = useState<Family | null>(null)
 
   const parentFamily = families.find((f) => f.childIds.includes(person.id))
 
@@ -234,6 +236,39 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
   const addSpouse = async (draft: RelativeDraft): Promise<void> => {
     const spouse = await window.api.people.create(draft)
     await linkSpouse(spouse.id, { date: draft.marriageDate ?? null, place: draft.marriagePlace ?? null })
+  }
+
+  // Detach a wrongly-attached spouse WITHOUT deleting the person: only the
+  // couple link is cut. Children stay with the current person (single-parent
+  // family); a union left with no children and no marriage data is removed
+  // entirely so no phantom family lingers. Undo restores the link.
+  const unlinkSpouse = async (f: Family): Promise<void> => {
+    const spouseSide: 'husbandId' | 'wifeId' = f.husbandId === person.id ? 'wifeId' : 'husbandId'
+    const spouseId = f[spouseSide]
+    const spouse = spouseId ? byId.get(spouseId) : undefined
+    const keepFamily =
+      f.childIds.length > 0 || !!f.marriageDate || !!f.marriagePlace || !!f.marriageOrder || !!f.notes
+    if (keepFamily) await window.api.families.update(f.id, { [spouseSide]: null })
+    else await window.api.families.remove(f.id)
+    await refreshFamilies()
+    toastUndo(
+      t('person.spouseUnlinked', { name: spouse ? fullName(spouse) : t('common.unknown') }),
+      t('common.undo'),
+      async () => {
+        if (keepFamily) await window.api.families.update(f.id, { [spouseSide]: spouseId })
+        else
+          await window.api.families.create({
+            husbandId: f.husbandId,
+            wifeId: f.wifeId,
+            childIds: f.childIds,
+            marriageDate: f.marriageDate,
+            marriagePlace: f.marriagePlace,
+            marriageOrder: f.marriageOrder,
+            notes: f.notes
+          })
+        await refreshFamilies()
+      }
+    )
   }
 
   // Exclusions for the existing-person pickers.
@@ -331,7 +366,18 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
             return (
               <div key={f.id} className="rounded-xl border border-border/40 bg-secondary/40 p-2">
                 {spouse ? (
-                  <PersonRow p={spouse} onClick={() => selectPerson(spouse.id)} />
+                  <div className="flex items-center gap-1">
+                    <div className="min-w-0 flex-1">
+                      <PersonRow p={spouse} onClick={() => selectPerson(spouse.id)} />
+                    </div>
+                    <button
+                      onClick={() => setUnlinking(f)}
+                      title={t('person.unlinkSpouse')}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-destructive transition-colors hover:bg-destructive/15"
+                    >
+                      <Unlink2 className="h-5 w-5" />
+                    </button>
+                  </div>
                 ) : (
                   <p className="px-2 py-1.5 text-sm text-muted-foreground">{t('common.unknown')}</p>
                 )}
@@ -381,6 +427,31 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
         onPickExisting={(id, marriage) => void linkSpouse(id, marriage)}
         excludeIds={spouseExclude}
       />
+
+      {unlinking && (() => {
+        const sid = unlinking.husbandId === person.id ? unlinking.wifeId : unlinking.husbandId
+        const sp = sid ? byId.get(sid) : undefined
+        return (
+          <ConfirmDialog
+            open={!!unlinking}
+            onOpenChange={(o) => !o && setUnlinking(null)}
+            title={t('person.unlinkSpouseTitle', { name: sp ? fullName(sp) : t('common.unknown') })}
+            confirmLabel={t('person.unlinkSpouse')}
+            onConfirm={() => {
+              const f = unlinking
+              setUnlinking(null)
+              if (f) void unlinkSpouse(f)
+            }}
+          >
+            <p>{t('person.unlinkSpouseBody')}</p>
+            {unlinking.childIds.length > 0 && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {t('person.unlinkSpouseChildren', { count: unlinking.childIds.length })}
+              </p>
+            )}
+          </ConfirmDialog>
+        )
+      })()}
     </div>
   )
 }

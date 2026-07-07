@@ -1035,7 +1035,12 @@
     "fromOpt": "From (optional)",
     "toOpt": "To (optional)",
     "name": "Name",
-    "illegitimate": "Illegitimate child"
+    "illegitimate": "Illegitimate child",
+    "unlinkSpouse": "Unlink spouse",
+    "unlinkSpouseTitle": "Unlink {{name}} from this marriage?",
+    "unlinkSpouseBody": "Only the marriage link is removed — the person is NOT deleted and can be attached to another marriage afterwards.",
+    "unlinkSpouseChildren": "The {{count}} children stay with this person (as a single-parent family).",
+    "spouseUnlinked": "{{name}} unlinked from the marriage."
   },
   "research": {
     "history": "Research history",
@@ -1154,7 +1159,14 @@
     "dropHere": "Drop a .ged file here",
     "imported": "Imported {{people}} people and {{families}} families",
     "importedDetail": "Done: {{created}} new · {{updated}} updated · {{families}} families",
-    "exported": "Exported to {{path}}"
+    "exported": "Exported to {{path}}",
+    "summaryTitle": "GEDCOM import finished",
+    "summaryCreated": "new people",
+    "summaryUpdated": "updated people",
+    "summaryFamilies": "families",
+    "summaryHint": "Photo downloads and place processing continue in the background.",
+    "summaryOpenPeople": "People",
+    "summaryOpenTree": "Family tree"
   },
   "fs": {
     "interrupted": "A previous import was interrupted. You may want to clean up the empty entries it left.",

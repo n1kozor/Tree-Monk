@@ -1032,7 +1032,12 @@
     "fromOpt": "Von (optional)",
     "toOpt": "Bis (optional)",
     "name": "Name",
-    "illegitimate": "Uneheliches Kind"
+    "illegitimate": "Uneheliches Kind",
+    "unlinkSpouse": "Ehepartner trennen",
+    "unlinkSpouseTitle": "{{name}} von dieser Ehe trennen?",
+    "unlinkSpouseBody": "Nur die Ehe-Verknüpfung wird entfernt — die Person wird NICHT gelöscht und kann danach einer anderen Ehe zugeordnet werden.",
+    "unlinkSpouseChildren": "Die {{count}} Kinder bleiben bei dieser Person (als Ein-Eltern-Familie).",
+    "spouseUnlinked": "{{name}} von der Ehe getrennt."
   },
   "research": {
     "history": "Rechercheverlauf",
@@ -1151,7 +1156,14 @@
     "dropHere": "Lege eine .ged-Datei hier ab",
     "imported": "{{people}} Personen und {{families}} Familien importiert",
     "importedDetail": "Fertig: {{created}} neu · {{updated}} aktualisiert · {{families}} Familien",
-    "exported": "Exportiert nach {{path}}"
+    "exported": "Exportiert nach {{path}}",
+    "summaryTitle": "GEDCOM-Import abgeschlossen",
+    "summaryCreated": "neue Personen",
+    "summaryUpdated": "aktualisierte Personen",
+    "summaryFamilies": "Familien",
+    "summaryHint": "Foto-Downloads und Ortsverarbeitung laufen im Hintergrund weiter.",
+    "summaryOpenPeople": "Personen",
+    "summaryOpenTree": "Stammbaum"
   },
   "fs": {
     "interrupted": "Ein früherer Import wurde unterbrochen. Du solltest die leeren Einträge bereinigen.",

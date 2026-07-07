@@ -23,7 +23,7 @@ import { runSanityCheck } from '../main/db/sanity'
 import { findRelationshipPath } from '../main/db/relationship'
 import { runPersonQuery, listSavedQueries } from '../main/db/query'
 import { scanDuplicates } from '../main/db/duplicates'
-import { surnameVariants } from '../main/db/nameNormalize'
+import { givenNameVariants, surnameVariants } from '../main/db/nameNormalize'
 
 const DEMO_VERSION = '0.19.3 · demo'
 
@@ -313,6 +313,7 @@ export function createDemoApi(): TreeMonkApi {
     },
     names: {
       surnameVariants: async () => surnameVariants(),
+      givenNameVariants: async () => givenNameVariants(),
       normalizeSurname: async () => blocked()
     },
     supportInvite: {

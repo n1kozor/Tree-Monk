@@ -151,7 +151,10 @@ export function CommandPalette(): JSX.Element | null {
         run: () =>
           go(() =>
             void importGedcomWithToast(t).then((r) => {
-              if (r) refreshAll()
+              if (r) {
+                void refreshAll()
+                useAppStore.getState().setGedcomSummary(r)
+              }
             })
           )
       },

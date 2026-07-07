@@ -78,13 +78,23 @@ export function Sidebar(): JSX.Element {
     if (loading) return
     let cancelled = false
     const run = (): void => {
+      const safe = <T,>(fn: (() => Promise<T[]>) | undefined): Promise<T[]> => {
+        try {
+          return fn ? fn().catch(() => []) : Promise.resolve([])
+        } catch {
+          return Promise.resolve([])
+        }
+      }
       void Promise.all([
-        window.api.sanity.check().catch(() => []),
-        window.api.duplicates.scan().catch(() => [])
-      ]).then(([issues, dups]) => {
+        safe(() => window.api.sanity.check()),
+        safe(() => window.api.duplicates.scan()),
+        safe(() => window.api.names?.surnameVariants()),
+        safe(() => window.api.names?.givenNameVariants())
+      ]).then(([issues, dups, surnames, givens]) => {
         if (cancelled) return
-        // The Issues view covers both data problems and possible duplicates.
-        setIssueCount(issues.length + dups.length)
+        // The badge mirrors the Issues view: data problems + possible
+        // duplicates + surname/given-name variant groups.
+        setIssueCount(issues.length + dups.length + surnames.length + givens.length)
       })
     }
     const ric = window.requestIdleCallback

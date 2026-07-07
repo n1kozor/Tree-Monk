@@ -24,6 +24,7 @@ import { ChangelogView } from '@/components/changelog/ChangelogView'
 import { ProfileView } from '@/components/profile/ProfileView'
 import { SettingsView } from '@/components/settings/SettingsView'
 import { MediaDownloadProgress } from '@/components/common/MediaDownloadProgress'
+import { GedcomSummaryDialog } from '@/components/common/GedcomSummaryDialog'
 import { CommandPalette } from '@/components/CommandPalette'
 import { SupportInviteDialog } from '@/components/common/SupportInviteDialog'
 import { StartModeDialog } from '@/components/common/StartModeDialog'
@@ -254,6 +255,7 @@ export default function App(): JSX.Element {
         </div>
         <PersonPanel />
         <MediaDownloadProgress />
+        <GedcomSummaryDialog />
         <CommandPalette />
         <SupportInviteDialog open={supportInviteOpen} onOpenChange={setSupportInviteOpen} />
         <FsAnnounceDialog open={fsAnnounceOpen} onOpenChange={setFsAnnounceOpen} />

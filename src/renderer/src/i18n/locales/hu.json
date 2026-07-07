@@ -1032,7 +1032,12 @@
     "fromOpt": "Ettől (opcionális)",
     "toOpt": "Eddig (opcionális)",
     "name": "Név",
-    "illegitimate": "Törvénytelen gyermek"
+    "illegitimate": "Törvénytelen gyermek",
+    "unlinkSpouse": "Házastárs leválasztása",
+    "unlinkSpouseTitle": "{{name}} leválasztása erről a házasságról?",
+    "unlinkSpouseBody": "Csak a házassági kapcsolat szűnik meg — a személy NEM törlődik, utána másik házassághoz csatolható.",
+    "unlinkSpouseChildren": "A(z) {{count}} gyermek ennél a személynél marad (egyszülős családként).",
+    "spouseUnlinked": "{{name}} leválasztva a házasságról."
   },
   "research": {
     "history": "Kutatási előzmények",
@@ -1151,7 +1156,14 @@
     "dropHere": "Húzd ide a .ged fájlt",
     "imported": "{{people}} személy és {{families}} család importálva",
     "importedDetail": "Kész: {{created}} új · {{updated}} frissítve · {{families}} család",
-    "exported": "Exportálva ide: {{path}}"
+    "exported": "Exportálva ide: {{path}}",
+    "summaryTitle": "GEDCOM-import kész",
+    "summaryCreated": "új személy",
+    "summaryUpdated": "frissített személy",
+    "summaryFamilies": "család",
+    "summaryHint": "A fényképek letöltése és a helységnevek feldolgozása a háttérben folytatódik.",
+    "summaryOpenPeople": "Személyek",
+    "summaryOpenTree": "Családfa"
   },
   "fs": {
     "interrupted": "Egy korábbi importálás megszakadt. Érdemes letakarítani az üres bejegyzéseket.",

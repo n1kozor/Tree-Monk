@@ -87,7 +87,7 @@ export function ExistingPersonPicker({
               <button
                 key={p.id}
                 onClick={() => onPick(p)}
-                className="flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/50"
+                className="flex w-full items-center gap-2.5 overflow-hidden rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-accent/50"
               >
                 <PersonAvatar personId={p.id} name={fullName(p)} sex={p.sex} className="h-8 w-8 shrink-0 text-[10px]" />
                 <span className="min-w-0 flex-1">
@@ -100,17 +100,17 @@ export function ExistingPersonPicker({
                   {hasMeta && (
                     <span className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-muted-foreground">
                       {d.birthPlace && (
-                        <span className="inline-flex items-center gap-0.5">
+                        <span className="inline-flex min-w-0 max-w-full items-center gap-0.5">
                           <MapPin className="h-3 w-3 shrink-0" /> <span className="truncate">{d.birthPlace}</span>
                         </span>
                       )}
                       {d.parents && (
-                        <span className="inline-flex items-center gap-0.5">
+                        <span className="inline-flex min-w-0 max-w-full items-center gap-0.5">
                           <Users className="h-3 w-3 shrink-0" /> <span className="truncate">{d.parents}</span>
                         </span>
                       )}
                       {d.spouse && (
-                        <span className="inline-flex items-center gap-0.5">
+                        <span className="inline-flex min-w-0 max-w-full items-center gap-0.5">
                           <Heart className="h-3 w-3 shrink-0" /> <span className="truncate">{d.spouse}</span>
                         </span>
                       )}

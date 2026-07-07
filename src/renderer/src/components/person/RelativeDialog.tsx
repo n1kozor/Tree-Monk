@@ -102,11 +102,11 @@ export function RelativeDialog({
 
   const marriageFields = withMarriage ? (
     <div className="grid grid-cols-2 gap-3">
-      <div className="space-y-1">
+      <div className="min-w-0 space-y-1">
         <Label>{`${t('person.marriage')} · ${t('person.date')}`}</Label>
         <DateInput value={marrDate} placeholder={t('person.dateHint')} onValueChange={setMarrDate} />
       </div>
-      <div className="space-y-1">
+      <div className="min-w-0 space-y-1">
         <Label>{`${t('person.marriage')} · ${t('person.place')}`}</Label>
         <PlaceInput value={marrPlace} onChange={setMarrPlace} />
       </div>
@@ -115,7 +115,7 @@ export function RelativeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
@@ -172,7 +172,7 @@ export function RelativeDialog({
             {/* Hungarian writes the family name first; other languages given first. */}
             {(i18n.language === 'hu' ? (['surname', 'given'] as const) : (['given', 'surname'] as const)).map(
               (k, idx) => (
-                <div key={k} className="space-y-1">
+                <div key={k} className="min-w-0 space-y-1">
                   <Label>{t(k === 'surname' ? 'person.surname' : 'person.givenName')}</Label>
                   <Input
                     autoFocus={idx === 0}

@@ -33,6 +33,7 @@ export function Topbar(): JSX.Element {
   const onImportGedcom = async (): Promise<void> => {
     const res = await importGedcomWithToast(t)
     if (res) {
+      useAppStore.getState().setGedcomSummary(res)
       await refreshAll()
       // Pull any still-remote photos into local storage in the background.
       void window.api.media.downloadRemote()

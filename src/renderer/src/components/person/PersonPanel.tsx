@@ -454,6 +454,10 @@ export function PersonPanel(): JSX.Element | null {
 
           <TabsContent value="family" className="min-h-0 flex-1 overflow-y-auto p-4">
             <PersonFamily person={person} />
+            {/* Godparents belong with the family — same placement as the full profile. */}
+            <div className="mt-4 border-t border-border/40 pt-4">
+              <PersonGodparents person={person} />
+            </div>
           </TabsContent>
 
           <TabsContent value="sources" className="min-h-0 flex-1 overflow-y-auto p-4">
