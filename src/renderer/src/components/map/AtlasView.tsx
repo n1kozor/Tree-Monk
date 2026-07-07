@@ -337,6 +337,7 @@ export function AtlasView(): JSX.Element {
       'atlas-clusters',
       'atlas-cluster-count',
       'atlas-pts',
+      'atlas-pts-hit',
       'atlas-journey',
       'atlas-journey-dash',
       'atlas-jstops',
@@ -460,9 +461,21 @@ export function AtlasView(): JSX.Element {
       filter: ['!', ['has', 'point_count']],
       paint: {
         'circle-color': ['get', 'color'],
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 4.5, 10, 7],
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 5, 10, 7.5],
         'circle-stroke-width': 1.6,
         'circle-stroke-color': 'rgba(255,255,255,0.9)'
+      }
+    })
+    // Invisible, generous hit-halo so the small dots are easy to hover and click
+    // (the visible circles stay small). All point interactions target this layer.
+    map.addLayer({
+      id: 'atlas-pts-hit',
+      type: 'circle',
+      source: 'points',
+      filter: ['!', ['has', 'point_count']],
+      paint: {
+        'circle-color': 'rgba(0,0,0,0)',
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 4, 12, 10, 16]
       }
     })
     map.addLayer({
@@ -580,8 +593,8 @@ export function AtlasView(): JSX.Element {
         map.easeTo({ center: (f.geometry as GeoJSON.Point).coordinates as [number, number], zoom: z + 0.5 })
       })
     })
-    map.on('click', 'atlas-pts', (e) => {
-      const feats = map.queryRenderedFeatures(e.point, { layers: ['atlas-pts'] })
+    map.on('click', 'atlas-pts-hit', (e) => {
+      const feats = map.queryRenderedFeatures(e.point, { layers: ['atlas-pts-hit'] })
       if (!feats.length) return
       const box = document.createElement('div')
       box.className = 'space-y-1'
@@ -614,14 +627,20 @@ export function AtlasView(): JSX.Element {
         .setDOMContent(box)
         .addTo(map)
     })
-    for (const layer of ['atlas-pts', 'atlas-clusters']) {
+    for (const layer of ['atlas-pts-hit', 'atlas-clusters']) {
       map.on('mouseenter', layer, () => (map.getCanvas().style.cursor = 'pointer'))
       map.on('mouseleave', layer, () => (map.getCanvas().style.cursor = ''))
     }
 
     return () => {
       if (dashRaf.current) cancelAnimationFrame(dashRaf.current)
-      map.remove()
+      try {
+        map.remove()
+      } catch {
+        /* MapLibre can throw an abort DOMException when the map is removed while
+           its style/sprite is still loading (React StrictMode's mount→unmount in
+           dev, or a very fast route switch) — harmless, it's going away anyway. */
+      }
       mapRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

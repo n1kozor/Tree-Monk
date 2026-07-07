@@ -2,6 +2,25 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.2]
+
+### Changed
+- **Redesigned the People page.** Uniform person cards (no more mismatched
+  heights), a clean two-row toolbar, a segmented sex filter, a birth-year range,
+  a place filter, the research-gap criteria tucked into a dropdown, sorting
+  (name / birth year), and an empty state.
+
+### Fixed
+- **Map markers are far easier to hover and click** — an invisible larger
+  hit-area sits under each small dot, so the pointer cursor and popups trigger
+  reliably.
+- **Wrong geocoding for messy place names.** A place like "Budapest X. kerület"
+  could land on an unrelated same-named spot abroad (e.g. Argentina); results are
+  now re-ranked by how well they match the text, so the right place wins. Re-run
+  Settings → *Standardize places* to correct places already stored wrongly.
+- **Map view could crash** while rebuilding its layers (and on a fast view
+  switch); the layer/source teardown and disposal are now safe.
+
 ## [1.4.8]
 
 ### Fixed

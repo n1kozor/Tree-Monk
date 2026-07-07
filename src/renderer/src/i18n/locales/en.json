@@ -375,7 +375,13 @@
       "deathPlace": "death place",
       "parents": "parents",
       "photo": "photo"
-    }
+    },
+    "noMatch": "No people match your filters",
+    "sortLabel": "Sort",
+    "sortName": "Name (A–Z)",
+    "sortBirthAsc": "Birth (old→new)",
+    "sortBirthDesc": "Birth (new→old)",
+    "filters": "Filters"
   },
   "famous": {
     "title": "Famous relatives",

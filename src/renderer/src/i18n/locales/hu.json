@@ -375,7 +375,13 @@
       "deathPlace": "halálozási hely",
       "parents": "szülők",
       "photo": "fénykép"
-    }
+    },
+    "noMatch": "Nincs a szűrőknek megfelelő személy",
+    "sortLabel": "Rendezés",
+    "sortName": "Név (A–Z)",
+    "sortBirthAsc": "Születés (régi→új)",
+    "sortBirthDesc": "Születés (új→régi)",
+    "filters": "Szűrők"
   },
   "famous": {
     "title": "Híres rokonok",

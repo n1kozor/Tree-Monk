@@ -375,7 +375,13 @@
       "deathPlace": "Sterbeort",
       "parents": "Eltern",
       "photo": "Foto"
-    }
+    },
+    "noMatch": "Keine Personen entsprechen den Filtern",
+    "sortLabel": "Sortierung",
+    "sortName": "Name (A–Z)",
+    "sortBirthAsc": "Geburt (alt→neu)",
+    "sortBirthDesc": "Geburt (neu→alt)",
+    "filters": "Filter"
   },
   "famous": {
     "title": "Berühmte Verwandte",

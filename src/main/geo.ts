@@ -21,6 +21,28 @@ let lastFetchAt = 0
 
 /** Nominatim place autocomplete. Returns canonical name + precise lat/lon.
  *  Cached per query and rate-limited to respect Nominatim's usage policy. */
+/**
+ * Re-rank geocoder hits so the one that best matches the query text wins. A
+ * messy place string like "Budapest X. kerület" can make Nominatim's
+ * importance-ranked top hit an unrelated same-named spot abroad (a street named
+ * "Budapest" in Argentina). A hit whose name actually contains more of the
+ * query's words ("budapest" AND "kerület") is almost always the right place.
+ * Sorts in place; V8's stable sort keeps Nominatim's order on ties.
+ */
+function rankByOverlap(query: string, results: GeoResult[]): void {
+  if (results.length < 2) return
+  const tokens = query
+    .toLowerCase()
+    .split(/[\s,.]+/)
+    .filter((w) => w.length >= 3)
+  if (tokens.length === 0) return
+  const score = (name: string): number => {
+    const n = name.toLowerCase()
+    return tokens.reduce((s, w) => s + (n.includes(w) ? 1 : 0), 0)
+  }
+  results.sort((a, b) => score(b.name) - score(a.name))
+}
+
 export async function geoSearch(query: string): Promise<GeoResult[]> {
   const q = query.trim()
   if (q.length < 3) return []
@@ -59,6 +81,7 @@ export async function geoSearch(query: string): Promise<GeoResult[]> {
       const out = data
         .map((d) => ({ name: d.display_name, lat: Number(d.lat), lon: Number(d.lon) }))
         .filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon))
+      rankByOverlap(q, out)
       geoCache.set(key, out)
       return out
     } catch {
