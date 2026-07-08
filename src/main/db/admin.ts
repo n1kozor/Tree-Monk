@@ -1,4 +1,5 @@
-import { getDb } from './connection'
+import { existsSync, unlinkSync } from 'fs'
+import { getDb, mediaDir } from './connection'
 
 // EVERY data table the wipe must clear. The full reset has to leave nothing
 // behind — not just people/families, but also their facts, the boards, the
@@ -115,6 +116,27 @@ export function removeEmptyPeople(): number {
 /** Deletes ALL data (people, families, sources, boards, …). Schema is kept. */
 export function wipeDatabase(): void {
   const db = getDb()
+  // Delete this tree's media files from disk too — otherwise a "wipe" leaves the
+  // photos/documents orphaned in the media folder. That folder is SHARED across
+  // workspaces, so we only remove files THIS tree references (guarded to paths
+  // inside the media dir) — never a blanket wipe of the folder. Done first, while
+  // the document rows still exist.
+  try {
+    const dir = mediaDir()
+    const rows = db.prepare('SELECT file_path FROM documents').all() as { file_path: string | null }[]
+    for (const r of rows) {
+      const p = r.file_path
+      if (p && p.startsWith(dir) && existsSync(p)) {
+        try {
+          unlinkSync(p)
+        } catch {
+          /* file already gone / locked — ignore */
+        }
+      }
+    }
+  } catch {
+    /* documents table not ready — nothing to clean */
+  }
   // The change history is written by SQL triggers gated on `audit_state.enabled`.
   // If audit is left on, deleting people/families would FIRE those triggers and
   // immediately re-fill the audit_log we're trying to clear — so suspend audit

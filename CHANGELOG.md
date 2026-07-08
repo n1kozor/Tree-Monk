@@ -2,6 +2,21 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.3]
+
+### Changed
+- **Completely redesigned Statistics page.** A tidy, tabbed layout — Overview,
+  Population, Names, Places, Life and Migration — with animated KPI cards, a tree
+  health score with quick wins, births/deaths by century, lifespan distribution,
+  top names/places/occupations/religions, and birth→death migration routes.
+  Everything stays clickable to drill into the people behind each number.
+
+### Fixed
+- **Wiping a tree now also deletes its media files** from disk, not just the
+  database rows. Only the wiped tree's own photos/documents are removed (the
+  media folder is shared between trees, so others are untouched); trashing a
+  single document still keeps its file so it can be restored.
+
 ## [1.5.2]
 
 ### Changed
