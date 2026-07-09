@@ -141,6 +141,10 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
   // Which add-dialog is open: a child of a given family, or a new spouse.
   const [addingChildTo, setAddingChildTo] = useState<string | null>(null)
   const [addingSpouse, setAddingSpouse] = useState(false)
+  // Filling the empty partner slot of an EXISTING union (its id) — e.g. after the
+  // other spouse was deleted, so a new/existing spouse can be set back onto the
+  // family WITHOUT losing the children.
+  const [fillSpouseFor, setFillSpouseFor] = useState<string | null>(null)
   const [unlinking, setUnlinking] = useState<Family | null>(null)
 
   const parentFamily = families.find((f) => f.childIds.includes(person.id))
@@ -236,6 +240,33 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
   const addSpouse = async (draft: RelativeDraft): Promise<void> => {
     const spouse = await window.api.people.create(draft)
     await linkSpouse(spouse.id, { date: draft.marriageDate ?? null, place: draft.marriagePlace ?? null })
+  }
+
+  // Set a spouse onto the EMPTY side of an existing union (keeps its children +
+  // marriage data). Used when the previous spouse was deleted, leaving a family
+  // with one partner and the kids but no way to re-add a spouse to it.
+  const fillExistingSpouse = async (
+    familyId: string,
+    spouseId: string,
+    marriage?: MarriageDraft
+  ): Promise<void> => {
+    const f = families.find((x) => x.id === familyId)
+    if (!f) return
+    const side: 'husbandId' | 'wifeId' = f.husbandId === person.id ? 'wifeId' : 'husbandId'
+    await window.api.families.update(f.id, {
+      [side]: spouseId,
+      ...(marriage?.date ? { marriageDate: marriage.date } : {}),
+      ...(marriage?.place ? { marriagePlace: marriage.place } : {})
+    })
+    await refreshFamilies()
+    selectPerson(spouseId)
+  }
+  const fillNewSpouse = async (familyId: string, draft: RelativeDraft): Promise<void> => {
+    const spouse = await window.api.people.create(draft)
+    await fillExistingSpouse(familyId, spouse.id, {
+      date: draft.marriageDate ?? null,
+      place: draft.marriagePlace ?? null
+    })
   }
 
   // Detach a wrongly-attached spouse WITHOUT deleting the person: only the
@@ -379,7 +410,12 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
                     </button>
                   </div>
                 ) : (
-                  <p className="px-2 py-1.5 text-sm text-muted-foreground">{t('common.unknown')}</p>
+                  <button
+                    onClick={() => setFillSpouseFor(f.id)}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+                  >
+                    <UserPlus className="h-4 w-4" /> {t('person.addSpouse')}
+                  </button>
                 )}
                 <MarriageEditor family={f} />
                 <div className="mt-1.5 border-t border-border/40 pt-1.5">
@@ -425,6 +461,21 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
         withMarriage
         onSubmit={(draft) => void addSpouse(draft)}
         onPickExisting={(id, marriage) => void linkSpouse(id, marriage)}
+        excludeIds={spouseExclude}
+      />
+      {/* Fill the empty partner slot of an existing union (keeps its children). */}
+      <RelativeDialog
+        open={fillSpouseFor !== null}
+        onOpenChange={(o) => !o && setFillSpouseFor(null)}
+        title={t('person.addSpouseTitle')}
+        defaultSex={person.sex === 'F' ? 'M' : person.sex === 'M' ? 'F' : 'U'}
+        withMarriage
+        onSubmit={(draft) => {
+          if (fillSpouseFor) void fillNewSpouse(fillSpouseFor, draft)
+        }}
+        onPickExisting={(id, marriage) => {
+          if (fillSpouseFor) void fillExistingSpouse(fillSpouseFor, id, marriage)
+        }}
         excludeIds={spouseExclude}
       />
 

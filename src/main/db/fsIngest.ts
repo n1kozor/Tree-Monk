@@ -612,6 +612,15 @@ export class FsIngester {
     // Resolve the family: in-memory cache first, then the DB by parent pair so
     // a RE-IMPORT merges into the existing family instead of duplicating it.
     let existingId = this.famByKey.get(key)
+    // Guard against a STALE cache entry: half-family folding (or an earlier merge)
+    // can delete a family whose id is still cached here — using it would crash on
+    // a null lookup below. Forget it and re-resolve / re-create instead.
+    if (existingId && !Families.get(existingId)) {
+      this.famByKey.delete(key)
+      this.famChildren.delete(existingId)
+      this.famHasParents.delete(existingId)
+      existingId = undefined
+    }
     if (!existingId) {
       // Match the family in EITHER parent order — an earlier run may have stored
       // the couple swapped (e.g. before sexes were known).

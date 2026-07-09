@@ -2,6 +2,14 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.4]
+
+### Fixed
+- **Re-add a spouse to a family that lost one.** When a spouse is deleted, the
+  family (with its children) stays but with an empty partner slot. You can now
+  set a spouse back onto that exact family — pick an existing person or create a
+  new one — and the children (and any marriage date/place) are kept.
+
 ## [1.5.3]
 
 ### Changed
