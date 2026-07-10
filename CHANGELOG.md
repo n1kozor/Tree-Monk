@@ -2,6 +2,19 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.5]
+
+### Fixed
+- **Duplicate family after deleting + re-creating a spouse.** If a spouse was
+  deleted and then re-created (instead of re-assigned), the children ended up in
+  BOTH the real family and the old partner-less leftover — showing up as both
+  siblings and half-siblings, and the real spouse stopped showing as a parent.
+  A one-time automatic repair on launch now folds those redundant partner-less
+  families away (a child is only removed when it already belongs to another
+  family of the same parent, so nothing is ever orphaned).
+- **Statistics page showed raw `{{…}}` placeholders** on the Generations and
+  Living cards. The labels now render correctly.
+
 ## [1.5.4]
 
 ### Fixed

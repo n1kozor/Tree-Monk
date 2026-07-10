@@ -142,6 +142,22 @@ function migrate(database: Database.Database): void {
   } catch {
     /* families/settings not ready yet */
   }
+
+  // v2: also fold away REDUNDANT partner-less families that still hold children
+  // (a spouse deleted then re-created leaves the kids in both the real family and
+  // the old empty leftover → they show as both siblings and half-siblings, and
+  // the real spouse stops showing as a parent). Re-runs the now-3-pass repair.
+  try {
+    const done = database.prepare("SELECT value FROM settings WHERE key = 'families_repaired_v2'").get()
+    if (!done) {
+      database.transaction(() => repairFamilies(database))()
+      database
+        .prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('families_repaired_v2', '1')")
+        .run()
+    }
+  } catch {
+    /* families/settings not ready yet */
+  }
 }
 
 export function getDb(): Database.Database {

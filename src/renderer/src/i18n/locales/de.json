@@ -227,7 +227,8 @@
     "scopeAll": "Alle",
     "scopeBlood": "Blutlinie",
     "scopeAncestors": "Vorfahren",
-    "scopeDescendants": "Nachkommen"
+    "scopeDescendants": "Nachkommen",
+    "generationsLabel": "Generationen"
   },
   "update": {
     "newVersion": "Neue Version",

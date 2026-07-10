@@ -310,7 +310,7 @@ export function DashboardView(): JSX.Element {
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Kpi icon={Users} label={t('dashboard.kpiPeople')} value={stats.total} accent="hsl(var(--primary))" onClick={() => open({ kind: 'all' }, t('dashboard.kpiPeople'))} />
               <Kpi icon={Heart} label={t('dashboard.kpiFamilies')} value={stats.families} sub={t('dashboard.marriagesN', { count: stats.marriages })} accent="#e0679b" />
-              <Kpi icon={Layers} label={t('dashboard.generations')} value={generations} accent="#35d6c4" />
+              <Kpi icon={Layers} label={t('dashboard.generationsLabel')} value={generations} accent="#35d6c4" />
               <Kpi icon={CalendarRange} label={t('dashboard.kpiTimeSpan')} value={span ? t('dashboard.yearsN', { count: span }) : '—'} sub={stats.minYear ? `${stats.minYear} – ${stats.maxYear}` : undefined} accent="#f5a524" />
             </div>
 
@@ -390,7 +390,7 @@ export function DashboardView(): JSX.Element {
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
               <Kpi icon={Hourglass} label={t('dashboard.avgLifespan')} value={stats.avgLifespan ? t('dashboard.yearsN', { count: stats.avgLifespan }) : '—'} accent="hsl(var(--primary))" />
               <Kpi icon={Baby} label={t('dashboard.avgChildren')} value={stats.avgChildren ?? '—'} accent="#35d6c4" />
-              <Kpi icon={UsersRound} label={t('dashboard.living')} value={stats.living} sub={t('dashboard.livingPct', { count: livePct })} accent="#22c55e" onClick={() => open({ kind: 'living', living: true }, t('dashboard.living'))} />
+              <Kpi icon={UsersRound} label={t('dashboard.living')} value={stats.living} sub={t('dashboard.livingPct', { pct: livePct })} accent="#22c55e" onClick={() => open({ kind: 'living', living: true }, t('dashboard.living'))} />
               <Kpi icon={Hourglass} label={t('dashboard.deceased')} value={stats.deceased} accent="#94a3b8" onClick={() => open({ kind: 'living', living: false }, t('dashboard.deceased'))} />
             </div>
             <div className="grid gap-4 lg:grid-cols-2">

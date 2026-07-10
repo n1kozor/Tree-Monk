@@ -227,7 +227,8 @@
     "scopeAll": "Mind",
     "scopeBlood": "Vérvonal",
     "scopeAncestors": "Felmenők",
-    "scopeDescendants": "Leszármazottak"
+    "scopeDescendants": "Leszármazottak",
+    "generationsLabel": "Generációk"
   },
   "update": {
     "newVersion": "Új verzió",

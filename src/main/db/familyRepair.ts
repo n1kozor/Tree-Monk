@@ -3,12 +3,18 @@ import type Database from 'better-sqlite3'
 /**
  * Heal tangled marriage records left behind by merges and deletes.
  *
- * Two safe passes:
+ * Three safe passes:
  *  1. **De-duplicate the same couple** — when several `families` rows share the
  *     exact same husband_id + wife_id (e.g. after merging two men who were both
  *     linked to the same wife), fold their children and marriage facts into the
  *     single best row and drop the extras.
- *  2. **Drop phantom half-families** — a row with only one partner and nothing
+ *  2. **Drop redundant partner-less families WITH children** — a one-parent
+ *     family whose EVERY child also belongs to another family of that same
+ *     parent. Left behind when a spouse is deleted and then re-created (the kids
+ *     end up in both the real family and the old partner-less leftover, so they
+ *     show as BOTH siblings and half-siblings, and the real spouse stops showing
+ *     as a parent). Safe: no child is orphaned — each stays in the other family.
+ *  3. **Drop phantom half-families** — a row with only one partner and nothing
  *     else (no second partner, no children, no marriage date/place/notes). A
  *     person deletion leaves these behind (the FK is `ON DELETE SET NULL`) and
  *     they render as a stray "Unknown" spouse card on the Family tab.
@@ -68,7 +74,39 @@ export function repairFamilies(db: Database.Database, scopePartnerId?: string): 
     }
   }
 
-  // 2) Drop phantom half-families (one partner, nothing else).
+  // 2) Drop REDUNDANT partner-less families that still hold children — every one
+  //    of which already belongs to another family of the same remaining parent.
+  const singles = db
+    .prepare(
+      `SELECT id, husband_id AS h, wife_id AS w FROM families
+        WHERE ((husband_id IS NULL) <> (wife_id IS NULL))${scopeSql}`
+    )
+    .all(...scopeArgs) as { id: string; h: string | null; w: string | null }[]
+  for (const b of singles) {
+    const parent = b.h ?? b.w
+    if (!parent) continue
+    const kids = db
+      .prepare('SELECT child_id FROM family_children WHERE family_id = ?')
+      .all(b.id) as { child_id: string }[]
+    if (kids.length === 0) continue // childless phantoms are handled by pass 3
+    const allElsewhere = kids.every(
+      (k) =>
+        db
+          .prepare(
+            `SELECT 1 FROM family_children fc JOIN families f ON f.id = fc.family_id
+              WHERE fc.child_id = ? AND fc.family_id <> ? AND (f.husband_id = ? OR f.wife_id = ?)
+              LIMIT 1`
+          )
+          .get(k.child_id, b.id, parent, parent) !== undefined
+    )
+    if (allElsewhere) {
+      db.prepare('DELETE FROM family_children WHERE family_id = ?').run(b.id)
+      db.prepare('DELETE FROM families WHERE id = ?').run(b.id)
+      removed++
+    }
+  }
+
+  // 3) Drop phantom half-families (one partner, nothing else).
   removed += db
     .prepare(
       `DELETE FROM families
