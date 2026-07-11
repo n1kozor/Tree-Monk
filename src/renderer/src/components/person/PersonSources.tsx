@@ -273,6 +273,7 @@ function CitationForm({
 export function PersonSources({ personId }: { personId: string }): JSX.Element {
   const { t } = useTranslation()
   const refreshDocuments = useAppStore((s) => s.refreshDocuments)
+  const bumpSources = useAppStore((s) => s.bumpSources)
   const [docs, setDocs] = useState<DocumentRecord[]>([])
   const [cites, setCites] = useState<CitationDetail[]>([])
   const [linkOpen, setLinkOpen] = useState(false)
@@ -327,6 +328,7 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
   const after = async (): Promise<void> => {
     await reload()
     await refreshDocuments()
+    bumpSources() // refresh the per-person source count on the tree cards
   }
   const addFiles = async (): Promise<void> => {
     await window.api.documents.import(personId)
@@ -362,11 +364,13 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
     await window.api.research.addCitation(personId, edit)
     setAdding(false)
     await reload()
+    bumpSources() // citations count toward the tree card's source badge too
   }
   const removeCite = async (id: string): Promise<void> => {
     await window.api.research.deleteCitation(id)
     setEditingId(null)
     await reload()
+    bumpSources()
   }
 
   return (

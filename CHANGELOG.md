@@ -2,6 +2,14 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.8]
+
+### Fixed
+- **Source counts on the tree cards now update live.** Adding or removing a
+  source (a document/link or a citation) on a profile immediately refreshes the
+  source badge on the family-tree cards, instead of showing a stale count until
+  you reloaded or re-rooted the tree.
+
 ## [1.5.7]
 
 ### Fixed

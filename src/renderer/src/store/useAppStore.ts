@@ -55,6 +55,9 @@ interface AppState {
   /** Bumped after a FamilySearch single-person sync so per-person panels that
    *  fetch their own lists (events, sources) re-load the merged facts. */
   personSyncNonce: number
+  /** Bumped whenever a person's sources (documents OR citations) change, so the
+   *  tree re-fetches its server-computed per-person source count live. */
+  sourcesNonce: number
   selectedPersonId: string | null
   /** Person shown in the full-screen Profile view. */
   profilePersonId: string | undefined
@@ -118,6 +121,7 @@ interface AppState {
   refreshAliases: () => Promise<void>
   refreshResearch: () => Promise<void>
   bumpPersonSync: () => void
+  bumpSources: () => void
   /** FamilySearch background watcher: personId → pending remote change summary. */
   fsChanges: Record<string, { fields: number; relatives: number; content: number }>
   setFsChange: (personId: string, summary: { fields: number; relatives: number; content: number } | null) => void
@@ -218,6 +222,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   researchByPerson: new Map(),
   occupationPersonIds: new Set(),
   personSyncNonce: 0,
+  sourcesNonce: 0,
   selectedPersonId: null,
   profilePersonId: INITIAL_ACTIVE?.ref,
   profileBackView: undefined,
@@ -418,6 +423,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   refreshAliases: async () => set({ aliases: await window.api.aliases.all() }),
   bumpPersonSync: () => set((s) => ({ personSyncNonce: s.personSyncNonce + 1 })),
+  bumpSources: () => set((s) => ({ sourcesNonce: s.sourcesNonce + 1 })),
   fsChanges: {},
   setFsChange: (personId, summary) =>
     set((s) => {

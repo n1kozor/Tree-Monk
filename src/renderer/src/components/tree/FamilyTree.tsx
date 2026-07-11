@@ -87,6 +87,12 @@ export function FamilyTree(): JSX.Element {
   const treeFocusNonce = useAppStore((s) => s.treeFocusNonce)
   const defaultRootId = useAppStore((s) => s.defaultRootId)
   const refreshAll = useAppStore((s) => s.refreshAll)
+  // The tree cards show a per-person source count baked in server-side; re-fetch
+  // when a source changes so adding/removing one updates live. docTotal catches
+  // document (file/link) changes storewide; sourcesNonce catches citations, which
+  // aren't held in the store.
+  const docTotal = useAppStore((s) => s.documents.length)
+  const sourcesNonce = useAppStore((s) => s.sourcesNonce)
   const people = useAppStore((s) => s.people)
   const families = useAppStore((s) => s.families)
 
@@ -120,7 +126,9 @@ export function FamilyTree(): JSX.Element {
     else if (view === 'fan') window.api.tree.build(rootId, 'ancestors').then(setTreeData)
     else if (view === 'descendants') window.api.tree.build(rootId, 'descendants').then(setTreeData)
     // 'insights' reads people/families straight from the store — no fetch needed.
-  }, [people, families, view, rootId, rootFamilyId])
+    // docTotal/sourcesNonce: re-fetch so the per-person source badge updates when
+    // a source (document or citation) is added/removed on a profile.
+  }, [people, families, view, rootId, rootFamilyId, docTotal, sourcesNonce])
 
   // Data-issue markers for the pedigree (same check as the Data Issues view).
   useEffect(() => {
