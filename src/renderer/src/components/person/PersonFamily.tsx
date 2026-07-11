@@ -145,6 +145,8 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
   // other spouse was deleted, so a new/existing spouse can be set back onto the
   // family WITHOUT losing the children.
   const [fillSpouseFor, setFillSpouseFor] = useState<string | null>(null)
+  // Adding a child with no spouse (a single-parent family).
+  const [addingChildLone, setAddingChildLone] = useState(false)
   const [unlinking, setUnlinking] = useState<Family | null>(null)
 
   const parentFamily = families.find((f) => f.childIds.includes(person.id))
@@ -219,6 +221,23 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
   const addChild = async (familyId: string, draft: RelativeDraft): Promise<void> => {
     const child = await window.api.people.create(draft)
     await linkChild(familyId, child.id)
+  }
+
+  // Add a child WITHOUT a spouse — creates a single-parent family with this
+  // person as the sole parent (the other parent unknown). Otherwise a child
+  // could only be added inside an existing union.
+  const linkChildLone = async (childId: string): Promise<void> => {
+    const role =
+      person.sex === 'F'
+        ? { wifeId: person.id, husbandId: null }
+        : { husbandId: person.id, wifeId: null }
+    await window.api.families.create({ ...role, childIds: [childId], marriageDate: null, marriagePlace: null })
+    await refreshFamilies()
+    selectPerson(childId)
+  }
+  const addChildLone = async (draft: RelativeDraft): Promise<void> => {
+    const child = await window.api.people.create(draft)
+    await linkChildLone(child.id)
   }
 
   // Link a person as a new spouse (a fresh union with the proband), optionally
@@ -375,14 +394,24 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
           <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             <Heart className="h-3.5 w-3.5" /> {t('person.spouses')}
           </h4>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 gap-1.5 text-xs"
-            onClick={() => setAddingSpouse(true)}
-          >
-            <UserPlus className="h-3.5 w-3.5" /> {t('person.addSpouse')}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+              onClick={() => setAddingChildLone(true)}
+            >
+              <Baby className="h-3.5 w-3.5" /> {t('person.addChild')}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+              onClick={() => setAddingSpouse(true)}
+            >
+              <UserPlus className="h-3.5 w-3.5" /> {t('person.addSpouse')}
+            </Button>
+          </div>
         </div>
 
         {unions.length === 0 && (
@@ -452,6 +481,16 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
           if (addingChildTo) void linkChild(addingChildTo, id)
         }}
         excludeIds={addingChildTo ? childExclude(addingChildTo) : undefined}
+      />
+      {/* Add a child with no spouse → a single-parent family. */}
+      <RelativeDialog
+        open={addingChildLone}
+        onOpenChange={setAddingChildLone}
+        title={t('person.addChildTitle')}
+        defaultSurname={person.surname}
+        onSubmit={(draft) => void addChildLone(draft)}
+        onPickExisting={(id) => void linkChildLone(id)}
+        excludeIds={new Set([person.id])}
       />
       <RelativeDialog
         open={addingSpouse}

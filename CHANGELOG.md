@@ -2,6 +2,14 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.7]
+
+### Fixed
+- **You can now add a child to a person who has no spouse.** The Family tab
+  gains an *Add child* button that creates a single-parent family (this person as
+  the sole parent, the other parent unknown) — for mother-only or father-only.
+  You can still fill in the missing spouse on that family later.
+
 ## [1.5.6]
 
 ### Added
