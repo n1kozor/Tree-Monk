@@ -27,6 +27,9 @@ export interface Person {
   deceased: boolean
   /** Marked as born out of wedlock (törvénytelen gyermek). */
   illegitimate: boolean
+  /** Manually reviewed & confirmed ("verified") by the user. Off by default;
+   *  surfaced as a green/orange mark when the verification setting is on. */
+  verified: boolean
   /** Burial / interment (GEDCOM BURI). */
   burialDate: string | null
   burialPlace: string | null

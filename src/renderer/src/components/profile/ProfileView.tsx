@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   ArrowDownToLine,
   ArrowLeft,
+  BadgeCheck,
   Camera,
   Copy,
   ExternalLink,
@@ -127,6 +128,15 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
 
   const patch = (field: keyof PersonInput, value: string): void =>
     setPerson((p) => (p ? { ...p, [field]: value } : p))
+
+  // Toggle the manual "verified" review flag (local + store).
+  const toggleVerified = async (): Promise<void> => {
+    if (!person) return
+    const verified = !person.verified
+    setPerson((p) => (p ? { ...p, verified } : p))
+    await window.api.people.update(person.id, { verified })
+    await refreshPeople()
+  }
 
   const save = async (next: Person | null = person): Promise<void> => {
     if (!next) return
@@ -321,6 +331,15 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
 
           {/* Primary actions — own row, wrap freely. */}
           <div className="mt-4 flex flex-wrap gap-2 border-t border-border/40 pt-4">
+            <Button
+              variant={person.verified ? 'default' : 'outline'}
+              size="sm"
+              className={cn('gap-1.5', person.verified && 'bg-emerald-600 text-white hover:bg-emerald-700')}
+              onClick={() => void toggleVerified()}
+            >
+              <BadgeCheck className="h-3.5 w-3.5" />
+              {person.verified ? t('person.verifiedOn') : t('person.markVerified')}
+            </Button>
             <Button
               variant="outline"
               size="sm"

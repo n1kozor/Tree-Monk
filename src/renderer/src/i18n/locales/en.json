@@ -405,7 +405,8 @@
     "sortName": "Name (A–Z)",
     "sortBirthAsc": "Birth (old→new)",
     "sortBirthDesc": "Birth (new→old)",
-    "filters": "Filters"
+    "filters": "Filters",
+    "notVerified": "Not verified"
   },
   "famous": {
     "title": "Famous relatives",
@@ -629,7 +630,7 @@
     }
   },
   "settings": {
-    "subtitle": "Appearance, backups and export",
+    "subtitle": "Personalize, manage your data and backups",
     "appearance": "Appearance",
     "fontSize": "Font size",
     "fontSizeDesc": "Adjust the UI text size",
@@ -658,7 +659,13 @@
     "gedcomExport": "GEDCOM export",
     "gedcomExportDesc": "Write the database to a .ged file",
     "gedcomImport": "GEDCOM import",
-    "gedcomImportDesc": "Load data from a .ged file"
+    "gedcomImportDesc": "Load data from a .ged file",
+    "verification": "Verification marks",
+    "verificationDesc": "A green/orange mark on every person (verified / not verified) — toggle it from any person card",
+    "sectionAppearance": "Appearance",
+    "sectionData": "Data & backup",
+    "sectionTitle": "Settings",
+    "sectionDanger": "Danger zone"
   },
   "common": {
     "copy": "Copy",
@@ -1070,7 +1077,9 @@
     "unlinkSpouseTitle": "Unlink {{name}} from this marriage?",
     "unlinkSpouseBody": "Only the marriage link is removed — the person is NOT deleted and can be attached to another marriage afterwards.",
     "unlinkSpouseChildren": "The {{count}} children stay with this person (as a single-parent family).",
-    "spouseUnlinked": "{{name}} unlinked from the marriage."
+    "spouseUnlinked": "{{name}} unlinked from the marriage.",
+    "verifiedOn": "Verified",
+    "markVerified": "Mark as verified"
   },
   "research": {
     "history": "Research history",

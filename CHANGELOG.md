@@ -2,6 +2,24 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.6]
+
+### Added
+- **Verification marks (optional, off by default).** Turn it on in
+  *Settings → Appearance → Verification marks* to give every person a coloured
+  frame around their photo everywhere — **green = verified, orange = not
+  verified**. Mark a person as verified with the check button on their card or
+  full profile. The People page also gains a verified / not-verified filter (only
+  shown while the setting is on).
+- **Redesigned Settings page** — a wider, tidier, categorised layout.
+
+### Fixed
+- **Multiple residences now all show on the map.** Previously only one appeared
+  (seemingly at random) because residence/life-event places were never geocoded.
+  **What to do:** run *Settings → Standardize places* once — it now geocodes your
+  residence places too, so all of them appear on the map (in date order along the
+  migration path).
+
 ## [1.5.5]
 
 ### Fixed

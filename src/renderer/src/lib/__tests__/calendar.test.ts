@@ -14,7 +14,7 @@ function P(id: string, o: Partial<Person> = {}): Person {
     birthPlace: null,
     deathDate: null,
     deathPlace: null,
-    deceased: false, illegitimate: false,
+    deceased: false, illegitimate: false, verified: false,
     burialDate: null,
     burialPlace: null,
     christeningDate: null,

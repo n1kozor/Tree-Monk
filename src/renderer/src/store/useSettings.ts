@@ -12,13 +12,19 @@ interface SettingsState {
   dateFormat: DateFormat
   /** Whether the left navigation rail is collapsed to icons only (default: open). */
   sidebarCollapsed: boolean
+  /** Show a green/orange "verified" mark on every person (default: OFF). */
+  verificationMarks: boolean
   setFontSize: (f: FontSize) => void
   setAnimations: (v: boolean) => void
   setDateFormat: (d: DateFormat) => void
   setSidebarCollapsed: (v: boolean) => void
+  setVerificationMarks: (v: boolean) => void
 }
 
-type Persisted = Pick<SettingsState, 'fontSize' | 'animations' | 'dateFormat' | 'sidebarCollapsed'>
+type Persisted = Pick<
+  SettingsState,
+  'fontSize' | 'animations' | 'dateFormat' | 'sidebarCollapsed' | 'verificationMarks'
+>
 
 function persist(s: Persisted): void {
   localStorage.setItem(KEY, JSON.stringify(s))
@@ -38,13 +44,14 @@ function load(): Persisted {
         fontSize: p.fontSize ?? 'medium',
         animations: p.animations ?? true,
         dateFormat: p.dateFormat ?? 'iso',
-        sidebarCollapsed: p.sidebarCollapsed ?? false
+        sidebarCollapsed: p.sidebarCollapsed ?? false,
+        verificationMarks: p.verificationMarks ?? false
       }
     }
   } catch {
     /* ignore */
   }
-  return { fontSize: 'medium', animations: true, dateFormat: 'iso', sidebarCollapsed: false }
+  return { fontSize: 'medium', animations: true, dateFormat: 'iso', sidebarCollapsed: false, verificationMarks: false }
 }
 
 export const useSettings = create<SettingsState>((set, get) => ({
@@ -66,6 +73,10 @@ export const useSettings = create<SettingsState>((set, get) => ({
   setSidebarCollapsed: (sidebarCollapsed) => {
     set({ sidebarCollapsed })
     persist({ ...current(get), sidebarCollapsed })
+  },
+  setVerificationMarks: (verificationMarks) => {
+    set({ verificationMarks })
+    persist({ ...current(get), verificationMarks })
   }
 }))
 
@@ -76,7 +87,8 @@ function current(get: () => SettingsState): Persisted {
     fontSize: s.fontSize,
     animations: s.animations,
     dateFormat: s.dateFormat,
-    sidebarCollapsed: s.sidebarCollapsed
+    sidebarCollapsed: s.sidebarCollapsed,
+    verificationMarks: s.verificationMarks
   }
 }
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { AlertTriangle, ArrowDownToLine, Camera, ChevronRight, Copy, ExternalLink, Loader2, MapPin, Maximize2, Network, Printer, RefreshCw, Route, Search, Trash2, TreeDeciduous, X } from 'lucide-react'
+import { AlertTriangle, ArrowDownToLine, BadgeCheck, Camera, ChevronRight, Copy, ExternalLink, Loader2, MapPin, Maximize2, Network, Printer, RefreshCw, Route, Search, Trash2, TreeDeciduous, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useFsMode } from '@/hooks/useFsMode'
 import { FsPersonSyncDialog } from '@/components/person/FsPersonSyncDialog'
@@ -157,6 +157,16 @@ export function PersonPanel(): JSX.Element | null {
     await refreshPeople()
   }
 
+  // Toggle the manual "verified" review flag — updates local state (so the
+  // button flips instantly) and the store (so the avatar marks refresh).
+  const toggleVerified = async (): Promise<void> => {
+    if (!person) return
+    const verified = !person.verified
+    setPerson((p) => (p ? { ...p, verified } : p))
+    await window.api.people.update(person.id, { verified })
+    await refreshPeople()
+  }
+
   // Persist a per-vital reason note straight away (used by the VitalNote modal).
   const saveNote = (
     field: 'birthNote' | 'deathNote' | 'christeningNote' | 'burialNote',
@@ -294,6 +304,15 @@ export function PersonPanel(): JSX.Element | null {
             <QualityRing value={personQuality(person, occPersonIds).score} size={34} title={t('quality.title')} className="ml-1 shrink-0" />
           </div>
           <div className="flex shrink-0 items-center gap-1">
+            <Button
+              variant={person.verified ? 'default' : 'outline'}
+              size="icon"
+              className={cn(person.verified && 'bg-emerald-600 text-white hover:bg-emerald-700')}
+              onClick={() => void toggleVerified()}
+              title={person.verified ? t('person.verifiedOn') : t('person.markVerified')}
+            >
+              <BadgeCheck className="h-4 w-4" />
+            </Button>
             <Button
               variant="outline"
               size="sm"

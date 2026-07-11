@@ -1,4 +1,5 @@
-import { AppSettings, Families, People, Places } from './db/repo'
+import { AppSettings, Events, Families, People, Places } from './db/repo'
+import { getDb } from './db/connection'
 import { isSignedIn, searchFamilySearchPlaces } from './familysearch'
 import type { GeoResult } from '@shared/types'
 
@@ -127,8 +128,12 @@ export async function geocodePlaces(
   for (const p of People.list()) {
     add(p.birthPlace)
     add(p.deathPlace)
+    add(p.burialPlace)
+    add(p.christeningPlace)
   }
   for (const f of Families.list()) add(f.marriagePlace)
+  // Life-event places (residences etc.) so multiple homes all land on the map.
+  for (const s of Events.placeStrings()) add(s)
 
   const list = [...distinct]
   const total = list.length
@@ -198,6 +203,8 @@ export async function standardizePlaces(
     add(p.christeningPlace)
   }
   for (const f of families) add(f.marriagePlace)
+  // Life-event places (residences etc.) — otherwise multiple homes never geocode.
+  for (const s of Events.placeStrings()) add(s)
 
   const list = [...distinct]
   const total = list.length
@@ -255,6 +262,22 @@ export async function standardizePlaces(
     const marriagePlace = mapTo(f.marriagePlace)
     if (marriagePlace !== f.marriagePlace) {
       Families.update(f.id, { marriagePlace })
+      recordsUpdated++
+    }
+  }
+  // Residence / life-event places too — otherwise a canonicalised home would no
+  // longer match the gazetteer key and drop off the map.
+  const db = getDb()
+  const evRows = db
+    .prepare(
+      "SELECT id, place FROM events WHERE owner_type = 'person' AND place IS NOT NULL AND trim(place) <> ''"
+    )
+    .all() as { id: string; place: string }[]
+  const evUpd = db.prepare('UPDATE events SET place = ? WHERE id = ?')
+  for (const e of evRows) {
+    const np = mapTo(e.place)
+    if (np !== e.place) {
+      evUpd.run(np, e.id)
       recordsUpdated++
     }
   }

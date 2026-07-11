@@ -34,6 +34,7 @@ interface PersonRow {
   death_place: string | null
   deceased: number
   illegitimate: number
+  verified: number
   burial_date: string | null
   burial_place: string | null
   christening_date: string | null
@@ -70,6 +71,7 @@ function mapPerson(r: PersonRow): Person {
     deathPlace: r.death_place,
     deceased: Boolean(r.deceased) || Boolean(r.death_date),
     illegitimate: Boolean(r.illegitimate),
+    verified: Boolean(r.verified),
     burialDate: r.burial_date,
     burialPlace: r.burial_place,
     christeningDate: r.christening_date,
@@ -112,9 +114,9 @@ export const People = {
     getDb()
       .prepare(
         `INSERT INTO people (id, gedcom_id, fs_id, given_name, surname, sex, birth_date, birth_place,
-          death_date, death_place, deceased, illegitimate, burial_date, burial_place, christening_date, christening_place, religion, birth_note, death_note, christening_note, burial_note, occupation, notes, profile_photo_id, profile_photo_crop, created_at, updated_at)
+          death_date, death_place, deceased, illegitimate, verified, burial_date, burial_place, christening_date, christening_place, religion, birth_note, death_note, christening_note, burial_note, occupation, notes, profile_photo_id, profile_photo_crop, created_at, updated_at)
          VALUES (@id, @gedcom_id, @fs_id, @given_name, @surname, @sex, @birth_date, @birth_place,
-          @death_date, @death_place, @deceased, @illegitimate, @burial_date, @burial_place, @christening_date, @christening_place, @religion, @birth_note, @death_note, @christening_note, @burial_note, @occupation, @notes, @profile_photo_id, @profile_photo_crop, @created_at, @updated_at)`
+          @death_date, @death_place, @deceased, @illegitimate, @verified, @burial_date, @burial_place, @christening_date, @christening_place, @religion, @birth_note, @death_note, @christening_note, @burial_note, @occupation, @notes, @profile_photo_id, @profile_photo_crop, @created_at, @updated_at)`
       )
       .run({
         id,
@@ -129,6 +131,7 @@ export const People = {
         death_place: input.deathPlace ?? null,
         deceased: isDeceased(input) ? 1 : 0,
         illegitimate: input.illegitimate ? 1 : 0,
+        verified: input.verified ? 1 : 0,
         burial_date: input.burialDate ?? null,
         burial_place: input.burialPlace ?? null,
         christening_date: input.christeningDate ?? null,
@@ -154,7 +157,7 @@ export const People = {
     getDb()
       .prepare(
         `UPDATE people SET given_name=@given_name, surname=@surname, sex=@sex, birth_date=@birth_date,
-          birth_place=@birth_place, death_date=@death_date, death_place=@death_place, deceased=@deceased, illegitimate=@illegitimate,
+          birth_place=@birth_place, death_date=@death_date, death_place=@death_place, deceased=@deceased, illegitimate=@illegitimate, verified=@verified,
           burial_date=@burial_date, burial_place=@burial_place,
           christening_date=@christening_date, christening_place=@christening_place, religion=@religion,
           birth_note=@birth_note, death_note=@death_note, christening_note=@christening_note, burial_note=@burial_note,
@@ -174,6 +177,7 @@ export const People = {
         death_place: merged.deathPlace,
         deceased: isDeceased(merged) ? 1 : 0,
         illegitimate: merged.illegitimate ? 1 : 0,
+        verified: merged.verified ? 1 : 0,
         burial_date: merged.burialDate,
         burial_place: merged.burialPlace,
         christening_date: merged.christeningDate,
@@ -1436,6 +1440,18 @@ const mapEvent = (r: EventRow): EventRecord => ({
 })
 
 export const Events = {
+  /** Distinct non-empty place strings across all person events (residences etc.)
+   *  — used by geocoding/standardization so those places land on the map too. */
+  placeStrings(): string[] {
+    return (
+      getDb()
+        .prepare(
+          `SELECT DISTINCT trim(place) AS p FROM events
+            WHERE owner_type = 'person' AND place IS NOT NULL AND trim(place) <> ''`
+        )
+        .all() as { p: string }[]
+    ).map((r) => r.p)
+  },
   forOwner(ownerType: 'person' | 'family', ownerId: string): EventRecord[] {
     return getDb()
       .prepare(

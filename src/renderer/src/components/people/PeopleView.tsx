@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn, fullName, yearOf } from '@/lib/utils'
 import { useAppStore } from '@/store/useAppStore'
+import { useSettings } from '@/store/useSettings'
 import { aliasMap, personScore } from '@/lib/personSearch'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import type { Person } from '@shared/types'
@@ -35,6 +36,8 @@ export function PeopleView(): JSX.Element {
   const [to, setTo] = useState('')
   const [place, setPlace] = useState('')
   const [sort, setSort] = useState<SortKey>('name')
+  const verificationMarks = useSettings((st) => st.verificationMarks)
+  const [verif, setVerif] = useState<'' | 'yes' | 'no'>('')
   // Missing-data filter: every selected criterion must be missing (AND).
   const MISSING = ['birthDate', 'birthPlace', 'deathDate', 'deathPlace', 'parents', 'photo'] as const
   type MissingKey = (typeof MISSING)[number]
@@ -53,7 +56,7 @@ export function PeopleView(): JSX.Element {
   }, [families])
 
   const aMap = useMemo(() => aliasMap(aliases), [aliases])
-  const hasFilters = !!(q.trim() || sex || from || to || place.trim() || missing.size)
+  const hasFilters = !!(q.trim() || sex || verif || from || to || place.trim() || missing.size)
 
   const filtered = useMemo(() => {
     const fromY = parseInt(from, 10)
@@ -61,6 +64,8 @@ export function PeopleView(): JSX.Element {
     const placeN = place.trim().toLowerCase()
     let list = people.filter((p) => {
       if (sex && p.sex !== sex) return false
+      if (verif === 'yes' && !p.verified) return false
+      if (verif === 'no' && p.verified) return false
       if (!Number.isNaN(fromY) || !Number.isNaN(toY)) {
         const ys = yearOf(p.birthDate)
         const by = ys ? Number(ys) : NaN
@@ -110,13 +115,13 @@ export function PeopleView(): JSX.Element {
       })
     }
     return list
-  }, [people, q, aMap, sex, from, to, place, missing, childOf, sort])
+  }, [people, q, aMap, sex, verif, from, to, place, missing, childOf, sort])
 
   // Windowed rendering: a tree with thousands of people must not mount thousands
   // of avatar cards (and image decodes) at once. Grow as the user scrolls.
   const PAGE = 120
   const [limit, setLimit] = useState(PAGE)
-  useEffect(() => setLimit(PAGE), [q, sex, from, to, place, missing, sort, people.length])
+  useEffect(() => setLimit(PAGE), [q, sex, verif, from, to, place, missing, sort, people.length])
   const sentinelRef = useRef<HTMLDivElement | null>(null)
   useEffect(() => {
     const el = sentinelRef.current
@@ -133,6 +138,7 @@ export function PeopleView(): JSX.Element {
   const clear = (): void => {
     setQ('')
     setSex('')
+    setVerif('')
     setFrom('')
     setTo('')
     setPlace('')
@@ -236,6 +242,42 @@ export function PeopleView(): JSX.Element {
               </button>
             ))}
           </div>
+
+          {/* Verification — only when the mark setting is on. */}
+          {verificationMarks && (
+            <div className="inline-flex rounded-lg border border-border bg-card p-0.5">
+              {([
+                ['', t('people.anySex')],
+                ['yes', t('person.verifiedOn')],
+                ['no', t('people.notVerified')]
+              ] as const).map(([v, label]) => (
+                <button
+                  key={v || 'any'}
+                  onClick={() => setVerif(v)}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-medium transition-colors',
+                    verif === v
+                      ? v === 'yes'
+                        ? 'bg-emerald-500 text-white shadow-sm'
+                        : v === 'no'
+                          ? 'bg-amber-500 text-white shadow-sm'
+                          : 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  )}
+                >
+                  {v !== '' && (
+                    <span
+                      className={cn(
+                        'h-2 w-2 rounded-full',
+                        verif === v ? 'bg-white' : v === 'yes' ? 'bg-emerald-500' : 'bg-amber-500'
+                      )}
+                    />
+                  )}
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Birth-year range. */}
           <div className="flex items-center gap-1 rounded-lg border border-border bg-card px-2 py-0.5">

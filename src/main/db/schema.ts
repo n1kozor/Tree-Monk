@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS people (
   death_place     TEXT,
   deceased        INTEGER NOT NULL DEFAULT 0,
   illegitimate    INTEGER NOT NULL DEFAULT 0,
+  verified        INTEGER NOT NULL DEFAULT 0,
   burial_date     TEXT,
   burial_place    TEXT,
   christening_date  TEXT,

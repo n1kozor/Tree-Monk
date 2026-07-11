@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { mediaThumb } from '@/lib/mediaUrl'
 import { frameStyle, parseFrame } from '@/lib/photoFrame'
 import { useAppStore } from '@/store/useAppStore'
+import { useSettings } from '@/store/useSettings'
 import type { Sex } from '@shared/types'
 
 function tint(sex?: Sex): string {
@@ -13,7 +14,8 @@ function tint(sex?: Sex): string {
 }
 
 /** Shows the person's profile photo when available, otherwise a tinted
- *  silhouette (never initials). */
+ *  silhouette (never initials). When the verification setting is on, the whole
+ *  avatar gets a coloured frame: green (verified) / amber (not verified). */
 function PersonAvatarImpl({
   personId,
   name,
@@ -38,6 +40,20 @@ function PersonAvatarImpl({
   const cropJson = useAppStore((s) =>
     personId ? s.peopleById.get(personId)?.profilePhotoCrop ?? null : null
   )
+  // Verification frame — only when the setting is on. Primitive selectors keep it cheap.
+  const showMarks = useSettings((s) => s.verificationMarks)
+  const verified = useAppStore((s) =>
+    personId ? s.peopleById.get(personId)?.verified ?? false : false
+  )
+  // Coloured ring class (empty when the setting is off). Placed LAST in cn() so
+  // twMerge lets it win over any ring a caller passed.
+  const ring =
+    !showMarks || !personId
+      ? ''
+      : verified
+        ? 'ring-2 ring-emerald-500 ring-offset-1 ring-offset-background'
+        : 'ring-2 ring-amber-500 ring-offset-1 ring-offset-background'
+
   // The photo loads natively via the tmedia:// protocol — no IPC/base64. On a
   // broken/missing file we fall back to the silhouette.
   const [broken, setBroken] = useState(false)
@@ -52,7 +68,8 @@ function PersonAvatarImpl({
       className={cn(
         'relative flex shrink-0 items-center justify-center overflow-hidden rounded-full',
         !url && tint(sex),
-        className
+        className,
+        ring
       )}
     >
       {url ? (

@@ -405,7 +405,8 @@
     "sortName": "Name (A–Z)",
     "sortBirthAsc": "Geburt (alt→neu)",
     "sortBirthDesc": "Geburt (neu→alt)",
-    "filters": "Filter"
+    "filters": "Filter",
+    "notVerified": "Nicht verifiziert"
   },
   "famous": {
     "title": "Berühmte Verwandte",
@@ -629,7 +630,7 @@
     }
   },
   "settings": {
-    "subtitle": "Darstellung, Backups und Export",
+    "subtitle": "Anpassen, Daten verwalten und sichern",
     "appearance": "Darstellung",
     "fontSize": "Schriftgröße",
     "fontSizeDesc": "Textgröße der Oberfläche anpassen",
@@ -658,7 +659,13 @@
     "gedcomExport": "GEDCOM-Export",
     "gedcomExportDesc": "Datenbank in eine .ged-Datei schreiben",
     "gedcomImport": "GEDCOM-Import",
-    "gedcomImportDesc": "Daten aus einer .ged-Datei laden"
+    "gedcomImportDesc": "Daten aus einer .ged-Datei laden",
+    "verification": "Verifizierungs-Markierung",
+    "verificationDesc": "Eine grüne/orange Markierung an jeder Person (verifiziert / nicht) — auf jeder Personenkarte umschaltbar",
+    "sectionAppearance": "Darstellung",
+    "sectionData": "Daten & Sicherung",
+    "sectionTitle": "Einstellungen",
+    "sectionDanger": "Gefahrenzone"
   },
   "common": {
     "copy": "Kopieren",
@@ -1067,7 +1074,9 @@
     "unlinkSpouseTitle": "{{name}} von dieser Ehe trennen?",
     "unlinkSpouseBody": "Nur die Ehe-Verknüpfung wird entfernt — die Person wird NICHT gelöscht und kann danach einer anderen Ehe zugeordnet werden.",
     "unlinkSpouseChildren": "Die {{count}} Kinder bleiben bei dieser Person (als Ein-Eltern-Familie).",
-    "spouseUnlinked": "{{name}} von der Ehe getrennt."
+    "spouseUnlinked": "{{name}} von der Ehe getrennt.",
+    "verifiedOn": "Verifiziert",
+    "markVerified": "Als verifiziert markieren"
   },
   "research": {
     "history": "Rechercheverlauf",

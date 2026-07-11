@@ -62,6 +62,8 @@ function migrate(database: Database.Database): void {
   add('ALTER TABLE people ADD COLUMN burial_note TEXT')
   // Illegitimate-child flag (pipálható jelölés). Additive + defaulted → safe.
   add('ALTER TABLE people ADD COLUMN illegitimate INTEGER NOT NULL DEFAULT 0')
+  // Verified/reviewed flag (manual confirmation). Additive + defaulted → safe.
+  add('ALTER TABLE people ADD COLUMN verified INTEGER NOT NULL DEFAULT 0')
   // Which marriage this union is for the couple (1st, 2nd, …) — user-set badge.
   // Additive + nullable → existing DBs gain it on the next launch, nothing lost.
   add('ALTER TABLE families ADD COLUMN marriage_order INTEGER')

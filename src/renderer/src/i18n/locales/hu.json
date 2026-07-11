@@ -405,7 +405,8 @@
     "sortName": "Név (A–Z)",
     "sortBirthAsc": "Születés (régi→új)",
     "sortBirthDesc": "Születés (új→régi)",
-    "filters": "Szűrők"
+    "filters": "Szűrők",
+    "notVerified": "Nem ellenőrzött"
   },
   "famous": {
     "title": "Híres rokonok",
@@ -629,7 +630,7 @@
     }
   },
   "settings": {
-    "subtitle": "Megjelenés, biztonsági mentés és export",
+    "subtitle": "Testreszabás, adatkezelés és mentés",
     "appearance": "Megjelenés",
     "fontSize": "Betűméret",
     "fontSizeDesc": "A felület szövegméretének állítása",
@@ -658,7 +659,13 @@
     "gedcomExport": "GEDCOM exportálás",
     "gedcomExportDesc": "Az adatbázis kiírása .ged fájlba",
     "gedcomImport": "GEDCOM importálás",
-    "gedcomImportDesc": "Adatok betöltése .ged fájlból"
+    "gedcomImportDesc": "Adatok betöltése .ged fájlból",
+    "verification": "Ellenőrzés-jelölés",
+    "verificationDesc": "Zöld/narancs pipa minden személyen (ellenőrzött / nem ellenőrzött) — a személylapon egy gombbal jelölhető",
+    "sectionAppearance": "Megjelenés",
+    "sectionData": "Adatok & mentés",
+    "sectionTitle": "Beállítások",
+    "sectionDanger": "Veszélyzóna"
   },
   "common": {
     "copy": "Másolás",
@@ -1067,7 +1074,9 @@
     "unlinkSpouseTitle": "{{name}} leválasztása erről a házasságról?",
     "unlinkSpouseBody": "Csak a házassági kapcsolat szűnik meg — a személy NEM törlődik, utána másik házassághoz csatolható.",
     "unlinkSpouseChildren": "A(z) {{count}} gyermek ennél a személynél marad (egyszülős családként).",
-    "spouseUnlinked": "{{name}} leválasztva a házasságról."
+    "spouseUnlinked": "{{name}} leválasztva a házasságról.",
+    "verifiedOn": "Ellenőrizve",
+    "markVerified": "Ellenőrzöttnek jelöl"
   },
   "research": {
     "history": "Kutatási előzmények",
