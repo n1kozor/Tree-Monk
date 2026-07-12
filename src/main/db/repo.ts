@@ -1279,6 +1279,33 @@ export const Godparents = {
   }
 }
 
+// Where a new row should land in a hand-ordered list. A DATED row slots into its
+// chronological place (before the first later-dated row, using the same string
+// compare the list is sorted by); an UNDATED row appends to the end. Callers then
+// shift `ordinal >= result` up by one and insert at `result`. `whereSql`/`params`
+// scope it to one owner (a person, or an event owner). Table/column names are
+// internal constants — never user input — so string-building the SQL is safe.
+function insertOrdinal(
+  db: Database.Database,
+  table: string,
+  whereSql: string,
+  params: unknown[],
+  dateCol: string,
+  date: string | null
+): number {
+  const rows = db
+    .prepare(`SELECT ${dateCol} AS d, ordinal FROM ${table} WHERE ${whereSql} ORDER BY ordinal`)
+    .all(...params) as { d: string | null; ordinal: number }[]
+  const maxOrd = rows.length ? rows[rows.length - 1].ordinal : -1
+  const nd = (date ?? '').trim()
+  if (!nd) return maxOrd + 1 // undated → append to the end
+  for (const r of rows) {
+    const rd = (r.d ?? '').trim()
+    if (rd && rd > nd) return r.ordinal // slot before the first later-dated row
+  }
+  return maxOrd + 1
+}
+
 // ---------- Occupations ----------
 
 interface OccupationRow {
@@ -1303,24 +1330,26 @@ export const Occupations = {
     return getDb().prepare('SELECT * FROM occupations').all().map((r) => mapOccupation(r as OccupationRow))
   },
   forPerson(personId: string): Occupation[] {
-    // Dated entries stay chronological by start date; undated ones fall to the
-    // user's manual order (ordinal), then title. So you can hand-sequence
-    // occupations whose dates you don't know instead of getting alphabetical.
+    // Fully manual order: `ordinal` is authoritative, so any entry — dated or not
+    // — can be dragged anywhere (e.g. an undated job between two dated ones). The
+    // ordinals are seeded from the chronological order on first launch, so the
+    // default stays date-sorted until the user rearranges. start_date/title only
+    // break ties between equal ordinals.
     return getDb()
       .prepare(
-        'SELECT * FROM occupations WHERE person_id = ? ORDER BY (start_date IS NULL), start_date, ordinal, title'
+        'SELECT * FROM occupations WHERE person_id = ? ORDER BY ordinal, (start_date IS NULL), start_date, title'
       )
       .all(personId)
       .map((r) => mapOccupation(r as OccupationRow))
   },
   create(personId: string, input: OccupationInput, id = uuid()): Occupation {
     const db = getDb()
-    // Append after the person's existing entries so a new (undated) one lands at
-    // the end of the manual list rather than jumping into the alphabetical middle.
-    const nextOrdinal =
-      ((db.prepare('SELECT MAX(ordinal) AS m FROM occupations WHERE person_id = ?').get(personId) as {
-        m: number | null
-      }).m ?? -1) + 1
+    // A dated entry slots into its chronological place (so adding one keeps the
+    // list sorted); an undated entry appends to the end, ready to drag into place.
+    const ord = insertOrdinal(db, 'occupations', 'person_id = ?', [personId], 'start_date', input.startDate ?? null)
+    db.prepare(
+      'UPDATE occupations SET ordinal = ordinal + 1 WHERE person_id = ? AND ordinal >= ?'
+    ).run(personId, ord)
     db.prepare(
       `INSERT INTO occupations (id, person_id, title, start_date, end_date, note, ordinal)
          VALUES (@id, @person_id, @title, @start_date, @end_date, @note, @ordinal)`
@@ -1331,7 +1360,7 @@ export const Occupations = {
       start_date: input.startDate ?? null,
       end_date: input.endDate ?? null,
       note: input.note ?? null,
-      ordinal: nextOrdinal
+      ordinal: ord
     })
     return this.get(id)!
   },
@@ -1469,10 +1498,14 @@ export const Events = {
     ).map((r) => r.p)
   },
   forOwner(ownerType: 'person' | 'family', ownerId: string): EventRecord[] {
+    // Fully manual order: `ordinal` is authoritative, so any event — dated or not
+    // — can be dragged anywhere (e.g. an undated event between two dated ones).
+    // Ordinals are seeded from the chronological order on first launch, so the
+    // default stays date-sorted until rearranged. date/type only break ties.
     return getDb()
       .prepare(
         `SELECT * FROM events WHERE owner_type = ? AND owner_id = ?
-         ORDER BY (date IS NULL OR date = ''), date, ordinal, type`
+         ORDER BY ordinal, (date IS NULL OR date = ''), date, type`
       )
       .all(ownerType, ownerId)
       .map((r) => mapEvent(r as EventRow))
@@ -1482,12 +1515,21 @@ export const Events = {
   },
   create(ownerType: 'person' | 'family', ownerId: string, input: EventInput, id = uuid()): EventRecord {
     const db = getDb()
-    // Append after the owner's existing events so a new (undated) one lands at the
-    // end of the manual list rather than jumping into the alphabetical middle.
-    const nextOrdinal =
-      ((db
-        .prepare('SELECT MAX(ordinal) AS m FROM events WHERE owner_type = ? AND owner_id = ?')
-        .get(ownerType, ownerId) as { m: number | null }).m ?? -1) + 1
+    // A dated event slots into its chronological place; an undated one appends to
+    // the end, ready to drag into position.
+    const nextOrdinal = insertOrdinal(
+      db,
+      'events',
+      'owner_type = ? AND owner_id = ?',
+      [ownerType, ownerId],
+      'date',
+      input.date ?? null
+    )
+    db.prepare('UPDATE events SET ordinal = ordinal + 1 WHERE owner_type = ? AND owner_id = ? AND ordinal >= ?').run(
+      ownerType,
+      ownerId,
+      nextOrdinal
+    )
     db.prepare(
         `INSERT INTO events (id, owner_type, owner_id, type, date, end_date, place, value, note, fs_key, ordinal)
          VALUES (@id, @owner_type, @owner_id, @type, @date, @end_date, @place, @value, @note, @fs_key, @ordinal)`
@@ -1540,9 +1582,24 @@ export const Events = {
       .prepare('SELECT 1 FROM events WHERE owner_type = ? AND owner_id = ? AND fs_key = ? LIMIT 1')
       .get(ownerType, ownerId, fsKey)
     if (dup) return false
+    // Slot the imported event chronologically (undated → end), same as a hand-add,
+    // so imports land in date order under the manual-ordinal sort.
+    const ord = insertOrdinal(
+      db,
+      'events',
+      'owner_type = ? AND owner_id = ?',
+      [ownerType, ownerId],
+      'date',
+      input.date ?? null
+    )
+    db.prepare('UPDATE events SET ordinal = ordinal + 1 WHERE owner_type = ? AND owner_id = ? AND ordinal >= ?').run(
+      ownerType,
+      ownerId,
+      ord
+    )
     db.prepare(
-      `INSERT INTO events (id, owner_type, owner_id, type, date, end_date, place, value, note, fs_key)
-       VALUES (@id, @owner_type, @owner_id, @type, @date, @end_date, @place, @value, @note, @fs_key)`
+      `INSERT INTO events (id, owner_type, owner_id, type, date, end_date, place, value, note, fs_key, ordinal)
+       VALUES (@id, @owner_type, @owner_id, @type, @date, @end_date, @place, @value, @note, @fs_key, @ordinal)`
     ).run({
       id: uuid(),
       owner_type: ownerType,
@@ -1553,7 +1610,8 @@ export const Events = {
       place: input.place ?? null,
       value: input.value ?? null,
       note: input.note ?? null,
-      fs_key: fsKey
+      fs_key: fsKey,
+      ordinal: ord
     })
     return true
   }

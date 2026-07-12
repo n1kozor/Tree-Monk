@@ -2,6 +2,16 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.10]
+
+### Changed
+- **Manual ordering now works on every row.** You can drag any occupation or life
+  event anywhere — including dropping an undated entry *between* two dated ones,
+  which the first version didn't allow. Dated entries still default to
+  chronological order (a new dated entry auto-slots into its place; a new undated
+  entry appends to the end). On this update the order is re-seeded chronologically
+  once.
+
 ## [1.5.9]
 
 ### Added

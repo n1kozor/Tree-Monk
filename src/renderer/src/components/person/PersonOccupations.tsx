@@ -6,6 +6,7 @@ import { DateInput } from '@/components/common/DateInput'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { normalizeDate } from '@/lib/dates'
+import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store/useAppStore'
 import type { Occupation } from '@shared/types'
 
@@ -159,25 +160,25 @@ export function PersonOccupations({ personId }: { personId: string }): JSX.Eleme
       {list.length > 0 && (
         <div className="space-y-1">
           {list.map((o) => {
-            const manual = !o.startDate // dated rows stay date-sorted; only these reorder
             return (
               <div
                 key={o.id}
-                onDragOver={manual ? (e) => e.preventDefault() : undefined}
-                onDrop={manual ? (e) => { e.preventDefault(); void reorderTo(o.id) } : undefined}
-                className="flex items-center gap-2 rounded-lg border border-border/40 bg-secondary/40 px-2.5 py-1 text-xs"
-              >
-                {manual && (
-                  <span
-                    draggable
-                    onDragStart={() => setDragId(o.id)}
-                    onDragEnd={() => setDragId(null)}
-                    title={t('common.dragToReorder')}
-                    className="shrink-0 cursor-grab text-muted-foreground/40 transition-colors hover:text-muted-foreground active:cursor-grabbing"
-                  >
-                    <GripVertical className="h-3.5 w-3.5" />
-                  </span>
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => { e.preventDefault(); void reorderTo(o.id) }}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border border-border/40 bg-secondary/40 px-2.5 py-1 text-xs',
+                  dragId === o.id && 'opacity-50'
                 )}
+              >
+                <span
+                  draggable
+                  onDragStart={() => setDragId(o.id)}
+                  onDragEnd={() => setDragId(null)}
+                  title={t('common.dragToReorder')}
+                  className="shrink-0 cursor-grab text-muted-foreground/40 transition-colors hover:text-muted-foreground active:cursor-grabbing"
+                >
+                  <GripVertical className="h-3.5 w-3.5" />
+                </span>
                 <button
                   onClick={() => setEditing(o)}
                   title={t('person.editOccupation')}

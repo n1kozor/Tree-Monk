@@ -14,6 +14,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { normalizeDate } from '@/lib/dates'
+import { cn } from '@/lib/utils'
 import type { EventRecord, EventType } from '@shared/types'
 
 const TYPES: EventType[] = [
@@ -221,7 +222,6 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
       {list.length > 0 && (
         <div className="space-y-1">
           {list.map((e) => {
-            const manual = !e.date // dated events stay date-sorted; only these reorder
             return (
             <div
               key={e.id}
@@ -229,22 +229,23 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
               tabIndex={0}
               onClick={() => setEditing(e)}
               onKeyDown={(ev) => (ev.key === 'Enter' || ev.key === ' ') && setEditing(e)}
-              onDragOver={manual ? (ev) => ev.preventDefault() : undefined}
-              onDrop={manual ? (ev) => { ev.preventDefault(); void reorderTo(e.id) } : undefined}
-              className="group flex cursor-pointer items-center gap-2 rounded-lg border border-border/40 bg-secondary/40 px-2.5 py-1 text-xs transition-colors hover:border-primary/40 hover:bg-accent"
-            >
-              {manual && (
-                <span
-                  draggable
-                  onClick={(ev) => ev.stopPropagation()}
-                  onDragStart={() => setDragId(e.id)}
-                  onDragEnd={() => setDragId(null)}
-                  title={t('common.dragToReorder')}
-                  className="-ml-0.5 shrink-0 cursor-grab text-muted-foreground/40 transition-colors hover:text-muted-foreground active:cursor-grabbing"
-                >
-                  <GripVertical className="h-3.5 w-3.5" />
-                </span>
+              onDragOver={(ev) => ev.preventDefault()}
+              onDrop={(ev) => { ev.preventDefault(); void reorderTo(e.id) }}
+              className={cn(
+                'group flex cursor-pointer items-center gap-2 rounded-lg border border-border/40 bg-secondary/40 px-2.5 py-1 text-xs transition-colors hover:border-primary/40 hover:bg-accent',
+                dragId === e.id && 'opacity-50'
               )}
+            >
+              <span
+                draggable
+                onClick={(ev) => ev.stopPropagation()}
+                onDragStart={() => setDragId(e.id)}
+                onDragEnd={() => setDragId(null)}
+                title={t('common.dragToReorder')}
+                className="-ml-0.5 shrink-0 cursor-grab text-muted-foreground/40 transition-colors hover:text-muted-foreground active:cursor-grabbing"
+              >
+                <GripVertical className="h-3.5 w-3.5" />
+              </span>
               <span className="shrink-0 rounded bg-secondary/40 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {typeLabel(t, e.type)}
               </span>

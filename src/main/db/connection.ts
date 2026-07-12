@@ -165,6 +165,42 @@ function migrate(database: Database.Database): void {
   } catch {
     /* families/settings not ready yet */
   }
+
+  // One-time: seed a dense manual `ordinal` for occupations and life events from
+  // their current chronological order. The lists now sort purely by ordinal so any
+  // row — even an undated one — can be dragged anywhere; seeding keeps the default
+  // order identical to the old date-based one until the user rearranges. Gated so
+  // a later hand-drag is never overwritten on the next launch.
+  try {
+    const done = database.prepare("SELECT value FROM settings WHERE key = 'lists_ordinal_seeded_v1'").get()
+    if (!done) {
+      database.exec(`
+        WITH r AS (
+          SELECT id, ROW_NUMBER() OVER (
+            PARTITION BY owner_type, owner_id
+            ORDER BY (date IS NULL OR date = ''), date, type, id
+          ) - 1 AS rn FROM events
+        )
+        UPDATE events SET ordinal = (SELECT rn FROM r WHERE r.id = events.id)
+        WHERE id IN (SELECT id FROM r)
+      `)
+      database.exec(`
+        WITH r AS (
+          SELECT id, ROW_NUMBER() OVER (
+            PARTITION BY person_id
+            ORDER BY (start_date IS NULL OR start_date = ''), start_date, title, id
+          ) - 1 AS rn FROM occupations
+        )
+        UPDATE occupations SET ordinal = (SELECT rn FROM r WHERE r.id = occupations.id)
+        WHERE id IN (SELECT id FROM r)
+      `)
+      database
+        .prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('lists_ordinal_seeded_v1', '1')")
+        .run()
+    }
+  } catch {
+    /* events/occupations/settings not ready yet */
+  }
 }
 
 export function getDb(): Database.Database {
