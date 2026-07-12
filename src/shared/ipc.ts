@@ -125,14 +125,16 @@ export const Channels = {
     forPerson: 'events:forPerson',
     create: 'events:create',
     update: 'events:update',
-    remove: 'events:remove'
+    remove: 'events:remove',
+    reorder: 'events:reorder'
   },
   occupations: {
     listForPerson: 'occupations:listForPerson',
     all: 'occupations:all',
     create: 'occupations:create',
     update: 'occupations:update',
-    remove: 'occupations:remove'
+    remove: 'occupations:remove',
+    reorder: 'occupations:reorder'
   },
   collaborations: {
     listForPerson: 'collaborations:listForPerson'
@@ -359,6 +361,8 @@ export interface TreeMonkApi {
     create(personId: string, input: OccupationInput): Promise<Occupation>
     update(id: string, input: OccupationInput): Promise<Occupation>
     remove(id: string): Promise<void>
+    /** Persist a manual order (ids in the desired display order). */
+    reorder(ids: string[]): Promise<void>
   }
   collaborations: {
     /** FamilySearch collaboration discussions imported for a person (read-only). */
@@ -378,14 +382,18 @@ export interface TreeMonkApi {
     create(personId: string, input: EventInput): Promise<EventRecord>
     update(id: string, input: EventInput): Promise<EventRecord>
     remove(id: string): Promise<void>
+    /** Persist a manual order (ids in the desired display order). */
+    reorder(ids: string[]): Promise<void>
   }
   tree: {
     build(rootId?: string, mode?: 'ancestors' | 'descendants'): Promise<TreeNodeDatum[]>
     pedigree(rootId?: string, rootFamilyId?: string): Promise<PedigreeCouple | null>
     /** A single union's couple node (both spouses' ancestors) — in-place spouse switch. */
     unionCouple(familyId: string): Promise<PedigreeCouple | null>
-    /** A person's own union + descendants downward — inline collateral expansion. */
-    personDescendants(personId: string): Promise<PedigreeCouple | null>
+    /** A person's own union + descendants downward — inline collateral expansion.
+     *  `familyId` picks which union to descend (default: first) so a switched
+     *  spouse shows that marriage's children. */
+    personDescendants(personId: string, familyId?: string): Promise<PedigreeCouple | null>
     /** Per-person flags for unusual marriages (consanguinity / step-sibling). */
     kinship(): Promise<Record<string, KinshipFlag[]>>
     /** Saves a print-ready family tree (vector SVG or single/tiled PDF). */

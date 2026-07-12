@@ -345,7 +345,7 @@ export function PortraitChart({
   onAddSpouse: (familyId: string, role: 'husband' | 'wife') => void
   onSwitchUnion: (personId: string, familyId: string) => void
   fetchUnionCouple: (familyId: string) => Promise<PedigreeCouple | null>
-  fetchPersonDescendants: (personId: string) => Promise<PedigreeCouple | null>
+  fetchPersonDescendants: (personId: string, familyId?: string) => Promise<PedigreeCouple | null>
   layout: PedigreeLayout
   highlightIds?: Set<string>
   kinshipNotes?: Map<string, string>
@@ -688,6 +688,18 @@ export function PortraitChart({
   // Switch shows the chosen spouse IN the couple tile (replacing the displayed
   // partner). `personId` is the person we keep (the blood ancestor) → the other
   // tile's fork is drawn dashed (non-lineage spouse).
+  // When the proband's OWN union is switched at the root, the descendants shown
+  // downward (fetched separately from the couple card) must follow to the chosen
+  // marriage's children — otherwise a switched 2nd spouse keeps the 1st's kids.
+  const syncProbandDescendants = async (
+    slotId: string,
+    personId: string,
+    familyId?: string
+  ): Promise<void> => {
+    if (slotId !== root.id || personId !== rootProbandPid || !sibDown.has(rootProbandPid)) return
+    const kids = await fetchPersonDescendants(rootProbandPid, familyId)
+    setSibDown((prev) => new Map(prev).set(rootProbandPid, kids))
+  }
   const switchInPlace = async (slotId: string, personId: string, familyId: string): Promise<void> => {
     // Switching back to the original (blood) union → drop the override entirely,
     // so the lineage couple returns and its connectors go solid again.
@@ -703,6 +715,7 @@ export function PortraitChart({
         return n
       })
       focusCamera(slotId)
+      await syncProbandDescendants(slotId, personId, root.familyId ?? undefined)
       return
     }
     const fetched = await fetchUnionCouple(familyId)
@@ -710,12 +723,15 @@ export function PortraitChart({
     setOverrides((prev) => new Map(prev).set(slotId, fetched))
     setOverrideBlood((prev) => new Map(prev).set(slotId, personId))
     focusCamera(fetched.id)
+    await syncProbandDescendants(slotId, personId, familyId)
   }
-  const toggleSibDown = async (personId: string): Promise<void> => {
+  // `familyId` (proband only) selects which union's children to show downward, so
+  // switching to a later spouse reveals THAT marriage's descendants.
+  const toggleSibDown = async (personId: string, familyId?: string): Promise<void> => {
     focusCamera(personId)
     if (sibDown.has(personId)) { setSibDown((prev) => { const n = new Map(prev); n.delete(personId); return n }); return }
     setSibLoading((p) => new Set(p).add(personId))
-    const fetched = await fetchPersonDescendants(personId)
+    const fetched = await fetchPersonDescendants(personId, familyId)
     setSibLoading((p) => { const n = new Set(p); n.delete(personId); return n })
     setSibDown((prev) => new Map(prev).set(personId, fetched))
   }
@@ -730,6 +746,10 @@ export function PortraitChart({
   const probandParents = probandIsPartner ? root.motherParents : root.fatherParents
   // The proband person id — used to expand the starting person's own descendants.
   const rootProbandPid = probandId ?? root.primary?.id ?? root.partner?.id ?? ''
+  // Which union is displayed at the root couple right now (after any spouse
+  // switch) → the proband's descendants follow the shown marriage, not just the
+  // first one, so a switched 2nd spouse shows THEIR children.
+  const rootFamilyEff = (overrides.get(root.id) ?? root).familyId ?? undefined
   const expandLine = (side: 'father' | 'mother'): void => {
     fitCamera()
     const s = new Set<string>()
@@ -779,7 +799,7 @@ export function PortraitChart({
                 onToggleAncSide={(side) => toggleAncSide(n.couple, side)} onToggleSibSide={(side) => toggleSibSide(n.couple, side)}
                 onSwitchInPlace={switchInPlace} onSelectPerson={onSelectPerson} onRecenter={onRecenter} onAddParent={onAddParent} onAddSpouse={onAddSpouse}
                 living={t('tree.living')} deceased={t('tree.deceased')} highlightIds={highlightIds}
-                onToggleDesc={(n.couple.id === root.id || n.slotId === root.id) && rootProbandPid ? () => void toggleSibDown(rootProbandPid) : undefined}
+                onToggleDesc={(n.couple.id === root.id || n.slotId === root.id) && rootProbandPid ? () => void toggleSibDown(rootProbandPid, rootFamilyEff) : undefined}
                 descOpen={!!rootProbandPid && sibDown.has(rootProbandPid)}
                 descLoading={!!rootProbandPid && sibLoading.has(rootProbandPid)} />
             ))}

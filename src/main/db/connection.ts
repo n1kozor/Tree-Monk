@@ -67,6 +67,11 @@ function migrate(database: Database.Database): void {
   // Which marriage this union is for the couple (1st, 2nd, …) — user-set badge.
   // Additive + nullable → existing DBs gain it on the next launch, nothing lost.
   add('ALTER TABLE families ADD COLUMN marriage_order INTEGER')
+  // Manual ordering for occupations and life events: a user can drag undated
+  // entries into the sequence they know, instead of the default alphabetical
+  // fallback. Additive + defaulted → existing DBs gain it on the next launch.
+  add('ALTER TABLE occupations ADD COLUMN ordinal INTEGER NOT NULL DEFAULT 0')
+  add('ALTER TABLE events ADD COLUMN ordinal INTEGER NOT NULL DEFAULT 0')
   // One-time: lift the legacy single people.occupation into the occupations
   // table (the new source of truth). Gated by a settings flag so a user who
   // later deletes those rows doesn't get them re-created on the next launch.

@@ -187,7 +187,8 @@ CREATE TABLE IF NOT EXISTS occupations (
   title           TEXT NOT NULL DEFAULT '',
   start_date      TEXT,                     -- free-form, like birth/death dates
   end_date        TEXT,
-  note            TEXT
+  note            TEXT,
+  ordinal         INTEGER NOT NULL DEFAULT 0 -- manual order for undated entries
 );
 
 -- FamilySearch "Collaboration" (Együttműködés) discussions imported per person.

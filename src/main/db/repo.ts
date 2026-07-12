@@ -1303,27 +1303,43 @@ export const Occupations = {
     return getDb().prepare('SELECT * FROM occupations').all().map((r) => mapOccupation(r as OccupationRow))
   },
   forPerson(personId: string): Occupation[] {
-    // Undated entries sort last; otherwise chronological by start date.
+    // Dated entries stay chronological by start date; undated ones fall to the
+    // user's manual order (ordinal), then title. So you can hand-sequence
+    // occupations whose dates you don't know instead of getting alphabetical.
     return getDb()
-      .prepare('SELECT * FROM occupations WHERE person_id = ? ORDER BY (start_date IS NULL), start_date, title')
+      .prepare(
+        'SELECT * FROM occupations WHERE person_id = ? ORDER BY (start_date IS NULL), start_date, ordinal, title'
+      )
       .all(personId)
       .map((r) => mapOccupation(r as OccupationRow))
   },
   create(personId: string, input: OccupationInput, id = uuid()): Occupation {
-    getDb()
-      .prepare(
-        `INSERT INTO occupations (id, person_id, title, start_date, end_date, note)
-         VALUES (@id, @person_id, @title, @start_date, @end_date, @note)`
-      )
-      .run({
-        id,
-        person_id: personId,
-        title: input.title ?? '',
-        start_date: input.startDate ?? null,
-        end_date: input.endDate ?? null,
-        note: input.note ?? null
-      })
+    const db = getDb()
+    // Append after the person's existing entries so a new (undated) one lands at
+    // the end of the manual list rather than jumping into the alphabetical middle.
+    const nextOrdinal =
+      ((db.prepare('SELECT MAX(ordinal) AS m FROM occupations WHERE person_id = ?').get(personId) as {
+        m: number | null
+      }).m ?? -1) + 1
+    db.prepare(
+      `INSERT INTO occupations (id, person_id, title, start_date, end_date, note, ordinal)
+         VALUES (@id, @person_id, @title, @start_date, @end_date, @note, @ordinal)`
+    ).run({
+      id,
+      person_id: personId,
+      title: input.title ?? '',
+      start_date: input.startDate ?? null,
+      end_date: input.endDate ?? null,
+      note: input.note ?? null,
+      ordinal: nextOrdinal
+    })
     return this.get(id)!
+  },
+  /** Persist a manual order: writes ordinal = index for the given ids. */
+  reorder(ids: string[]): void {
+    const db = getDb()
+    const upd = db.prepare('UPDATE occupations SET ordinal = ? WHERE id = ?')
+    db.transaction((list: string[]) => list.forEach((id, i) => upd.run(i, id)))(ids)
   },
   get(id: string): Occupation | null {
     const row = getDb().prepare('SELECT * FROM occupations WHERE id = ?').get(id) as
@@ -1465,10 +1481,16 @@ export const Events = {
     return this.forOwner('person', personId)
   },
   create(ownerType: 'person' | 'family', ownerId: string, input: EventInput, id = uuid()): EventRecord {
-    getDb()
-      .prepare(
-        `INSERT INTO events (id, owner_type, owner_id, type, date, end_date, place, value, note, fs_key)
-         VALUES (@id, @owner_type, @owner_id, @type, @date, @end_date, @place, @value, @note, @fs_key)`
+    const db = getDb()
+    // Append after the owner's existing events so a new (undated) one lands at the
+    // end of the manual list rather than jumping into the alphabetical middle.
+    const nextOrdinal =
+      ((db
+        .prepare('SELECT MAX(ordinal) AS m FROM events WHERE owner_type = ? AND owner_id = ?')
+        .get(ownerType, ownerId) as { m: number | null }).m ?? -1) + 1
+    db.prepare(
+        `INSERT INTO events (id, owner_type, owner_id, type, date, end_date, place, value, note, fs_key, ordinal)
+         VALUES (@id, @owner_type, @owner_id, @type, @date, @end_date, @place, @value, @note, @fs_key, @ordinal)`
       )
       .run({
         id,
@@ -1480,9 +1502,16 @@ export const Events = {
         place: input.place ?? null,
         value: input.value ?? null,
         note: input.note ?? null,
-        fs_key: null
+        fs_key: null,
+        ordinal: nextOrdinal
       })
     return this.get(id)!
+  },
+  /** Persist a manual order: writes ordinal = index for the given ids. */
+  reorder(ids: string[]): void {
+    const db = getDb()
+    const upd = db.prepare('UPDATE events SET ordinal = ? WHERE id = ?')
+    db.transaction((list: string[]) => list.forEach((id, i) => upd.run(i, id)))(ids)
   },
   get(id: string): EventRecord | null {
     const row = getDb().prepare('SELECT * FROM events WHERE id = ?').get(id) as EventRow | undefined

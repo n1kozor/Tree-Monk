@@ -2,6 +2,18 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.5.9]
+
+### Added
+- **Manual ordering for occupations and life events.** Undated entries can be
+  dragged into a hand-set sequence (grab the handle on the row) when you know the
+  order but not the dates. Dated entries still sort chronologically on their own.
+
+### Fixed
+- **Portrait tree view: switching a husband to a later wife now shows that
+  marriage's children.** Previously the children below kept showing the first
+  wife's, unless you re-picked the second wife as the start person.
+
 ## [1.5.8]
 
 ### Fixed

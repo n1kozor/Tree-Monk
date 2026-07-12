@@ -669,6 +669,7 @@
   },
   "common": {
     "copy": "Copy",
+    "dragToReorder": "Drag to reorder",
     "back": "Back",
     "next": "Next",
     "save": "Save",

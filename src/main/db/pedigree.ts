@@ -134,9 +134,18 @@ function pedigreeContext() {
 
   // Descendants: each person's OWN union, recursing DOWN the tree. The lineage
   // person stays `primary` so the card layout matches the ancestor cards.
-  const descCouple = (personId: string, gen: number, seen: Set<string>): PedigreeCouple => {
+  // `preferFamilyId` (top level only) picks a SPECIFIC union instead of the first
+  // one — so switching to a later spouse shows THAT marriage's children, not the
+  // first marriage's. Deeper generations keep using each person's first union.
+  const descCouple = (
+    personId: string,
+    gen: number,
+    seen: Set<string>,
+    preferFamilyId?: string
+  ): PedigreeCouple => {
     const person = byId.get(personId)!
-    const fam = (spouseFamiliesOf.get(personId) ?? [])[0] ?? null
+    const fams = spouseFamiliesOf.get(personId) ?? []
+    const fam = (preferFamilyId ? fams.find((f) => f.id === preferFamilyId) : null) ?? fams[0] ?? null
     const spouseId = fam ? (fam.husbandId === personId ? fam.wifeId : fam.husbandId) : null
     const spouse = spouseId ? byId.get(spouseId) ?? null : null
     const kids = fam ? childrenOf(fam) : []
@@ -261,10 +270,15 @@ export function buildUnionCouple(familyId: string): PedigreeCouple | null {
 /**
  * Builds a person's OWN union couple plus their descendants (downward), so a
  * sibling/collateral person can be expanded in place to reveal their children.
+ * `familyId` selects WHICH union to descend (default: the person's first) — used
+ * by the portrait view so switching to a later spouse shows that marriage's kids.
  * Returns null if the person is unknown.
  */
-export function buildPersonDescendants(personId: string): PedigreeCouple | null {
+export function buildPersonDescendants(
+  personId: string,
+  familyId?: string
+): PedigreeCouple | null {
   const ctx = pedigreeContext()
   if (!ctx.byId.has(personId)) return null
-  return ctx.descCouple(personId, 1, new Set())
+  return ctx.descCouple(personId, 1, new Set(), familyId)
 }

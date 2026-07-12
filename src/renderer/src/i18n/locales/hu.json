@@ -669,6 +669,7 @@
   },
   "common": {
     "copy": "Másolás",
+    "dragToReorder": "Húzd a sorrend átrendezéséhez",
     "back": "Vissza",
     "next": "Tovább",
     "save": "Mentés",

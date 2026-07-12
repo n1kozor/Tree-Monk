@@ -277,6 +277,7 @@ export function registerIpc(): void {
   ipcMain.handle(Channels.occupations.create, (_e, pid: string, input) => Occupations.create(pid, input))
   ipcMain.handle(Channels.occupations.update, (_e, id: string, input) => Occupations.update(id, input))
   ipcMain.handle(Channels.occupations.remove, (_e, id: string) => Occupations.remove(id))
+  ipcMain.handle(Channels.occupations.reorder, (_e, ids: string[]) => Occupations.reorder(ids))
   ipcMain.handle(Channels.collaborations.listForPerson, (_e, pid: string) => Collaborations.forPerson(pid))
 
   // Godparents (keresztszülők) — a person may have one or more.
@@ -290,6 +291,7 @@ export function registerIpc(): void {
   ipcMain.handle(Channels.events.create, (_e, pid: string, input) => Events.create('person', pid, input))
   ipcMain.handle(Channels.events.update, (_e, id: string, input) => Events.update(id, input))
   ipcMain.handle(Channels.events.remove, (_e, id: string) => Events.remove(id))
+  ipcMain.handle(Channels.events.reorder, (_e, ids: string[]) => Events.reorder(ids))
 
   // Tree
   ipcMain.handle(
@@ -301,8 +303,8 @@ export function registerIpc(): void {
   )
   ipcMain.handle(Channels.tree.kinship, () => detectKinship())
   ipcMain.handle(Channels.tree.unionCouple, (_e, familyId: string) => buildUnionCouple(familyId))
-  ipcMain.handle(Channels.tree.personDescendants, (_e, personId: string) =>
-    buildPersonDescendants(personId)
+  ipcMain.handle(Channels.tree.personDescendants, (_e, personId: string, familyId?: string) =>
+    buildPersonDescendants(personId, familyId)
   )
   ipcMain.handle(Channels.tree.exportImage, (e, payload: TreeExportPayload) =>
     exportTreeImage(BrowserWindow.fromWebContents(e.sender), payload)

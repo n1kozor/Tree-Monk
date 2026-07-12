@@ -551,7 +551,7 @@ export function FamilyTree(): JSX.Element {
             onAddSpouse={addSpouse}
             onSwitchUnion={switchUnion}
             fetchUnionCouple={(familyId) => window.api.tree.unionCouple(familyId)}
-            fetchPersonDescendants={(personId) => window.api.tree.personDescendants(personId)}
+            fetchPersonDescendants={(personId, familyId) => window.api.tree.personDescendants(personId, familyId)}
             highlightIds={highlightIds}
             refitSignal={refitNonce}
             layout={{

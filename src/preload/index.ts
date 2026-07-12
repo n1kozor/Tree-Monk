@@ -73,7 +73,8 @@ const api: TreeMonkApi = {
     all: () => ipcRenderer.invoke(Channels.occupations.all),
     create: (pid, input) => ipcRenderer.invoke(Channels.occupations.create, pid, input),
     update: (id, input) => ipcRenderer.invoke(Channels.occupations.update, id, input),
-    remove: (id) => ipcRenderer.invoke(Channels.occupations.remove, id)
+    remove: (id) => ipcRenderer.invoke(Channels.occupations.remove, id),
+    reorder: (ids) => ipcRenderer.invoke(Channels.occupations.reorder, ids)
   },
   collaborations: {
     listForPerson: (pid) => ipcRenderer.invoke(Channels.collaborations.listForPerson, pid)
@@ -88,15 +89,16 @@ const api: TreeMonkApi = {
     forPerson: (pid) => ipcRenderer.invoke(Channels.events.forPerson, pid),
     create: (pid, input) => ipcRenderer.invoke(Channels.events.create, pid, input),
     update: (id, input) => ipcRenderer.invoke(Channels.events.update, id, input),
-    remove: (id) => ipcRenderer.invoke(Channels.events.remove, id)
+    remove: (id) => ipcRenderer.invoke(Channels.events.remove, id),
+    reorder: (ids) => ipcRenderer.invoke(Channels.events.reorder, ids)
   },
   tree: {
     build: (rootId, mode) => ipcRenderer.invoke(Channels.tree.build, rootId, mode),
     pedigree: (rootId, rootFamilyId) =>
       ipcRenderer.invoke(Channels.tree.pedigree, rootId, rootFamilyId),
     unionCouple: (familyId) => ipcRenderer.invoke(Channels.tree.unionCouple, familyId),
-    personDescendants: (personId) =>
-      ipcRenderer.invoke(Channels.tree.personDescendants, personId),
+    personDescendants: (personId, familyId) =>
+      ipcRenderer.invoke(Channels.tree.personDescendants, personId, familyId),
     kinship: () => ipcRenderer.invoke(Channels.tree.kinship),
     exportImage: (payload) => ipcRenderer.invoke(Channels.tree.exportImage, payload)
   },

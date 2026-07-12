@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Briefcase, Plus, X } from 'lucide-react'
+import { Briefcase, GripVertical, Plus, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/DateInput'
 import { Button } from '@/components/ui/button'
@@ -97,6 +97,7 @@ export function PersonOccupations({ personId }: { personId: string }): JSX.Eleme
   const { t } = useTranslation()
   const [list, setList] = useState<Occupation[]>([])
   const [editing, setEditing] = useState<Occupation | null>(null)
+  const [dragId, setDragId] = useState<string | null>(null)
   const [title, setTitle] = useState('')
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
@@ -132,6 +133,23 @@ export function PersonOccupations({ personId }: { personId: string }): JSX.Eleme
     await window.api.occupations.remove(id)
     await changed()
   }
+  // Drop the dragged (undated) occupation just before the target row and persist
+  // the new manual order. Dated entries stay date-sorted, so only undated rows
+  // carry a drag handle.
+  const reorderTo = async (targetId: string): Promise<void> => {
+    const id = dragId
+    setDragId(null)
+    if (!id || id === targetId) return
+    const next = [...list]
+    const from = next.findIndex((o) => o.id === id)
+    if (from < 0) return
+    const [moved] = next.splice(from, 1)
+    const to = next.findIndex((o) => o.id === targetId)
+    if (to < 0) return
+    next.splice(to, 0, moved)
+    setList(next)
+    await window.api.occupations.reorder(next.map((o) => o.id))
+  }
 
   return (
     <div className="space-y-2">
@@ -140,28 +158,44 @@ export function PersonOccupations({ personId }: { personId: string }): JSX.Eleme
       </h4>
       {list.length > 0 && (
         <div className="space-y-1">
-          {list.map((o) => (
-            <div
-              key={o.id}
-              className="flex items-center gap-2 rounded-lg border border-border/40 bg-secondary/40 px-2.5 py-1 text-xs"
-            >
-              <button
-                onClick={() => setEditing(o)}
-                title={t('person.editOccupation')}
-                className="flex flex-1 items-center gap-1.5 truncate text-left transition-colors hover:text-primary"
+          {list.map((o) => {
+            const manual = !o.startDate // dated rows stay date-sorted; only these reorder
+            return (
+              <div
+                key={o.id}
+                onDragOver={manual ? (e) => e.preventDefault() : undefined}
+                onDrop={manual ? (e) => { e.preventDefault(); void reorderTo(o.id) } : undefined}
+                className="flex items-center gap-2 rounded-lg border border-border/40 bg-secondary/40 px-2.5 py-1 text-xs"
               >
-                <span className="font-medium">{o.title || '—'}</span>
-                {interval(o) && <span className="text-muted-foreground tabular-nums">{interval(o)}</span>}
-              </button>
-              <button
-                onClick={() => void remove(o.id)}
-                className="rounded-full p-0.5 text-muted-foreground hover:text-destructive"
-                title={t('common.delete')}
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </div>
-          ))}
+                {manual && (
+                  <span
+                    draggable
+                    onDragStart={() => setDragId(o.id)}
+                    onDragEnd={() => setDragId(null)}
+                    title={t('common.dragToReorder')}
+                    className="shrink-0 cursor-grab text-muted-foreground/40 transition-colors hover:text-muted-foreground active:cursor-grabbing"
+                  >
+                    <GripVertical className="h-3.5 w-3.5" />
+                  </span>
+                )}
+                <button
+                  onClick={() => setEditing(o)}
+                  title={t('person.editOccupation')}
+                  className="flex flex-1 items-center gap-1.5 truncate text-left transition-colors hover:text-primary"
+                >
+                  <span className="font-medium">{o.title || '—'}</span>
+                  {interval(o) && <span className="text-muted-foreground tabular-nums">{interval(o)}</span>}
+                </button>
+                <button
+                  onClick={() => void remove(o.id)}
+                  className="rounded-full p-0.5 text-muted-foreground hover:text-destructive"
+                  title={t('common.delete')}
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            )
+          })}
         </div>
       )}
       <div className="space-y-1.5">

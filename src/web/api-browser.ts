@@ -171,7 +171,8 @@ export function createDemoApi(): TreeMonkApi {
       all: async () => Occupations.all(),
       create: async () => blocked(),
       update: async () => blocked(),
-      remove: async () => blocked()
+      remove: async () => blocked(),
+      reorder: async () => blocked()
     },
     godparents: {
       listForPerson: async (pid) => Godparents.forPerson(pid),
@@ -183,7 +184,8 @@ export function createDemoApi(): TreeMonkApi {
       forPerson: async (pid) => Events.forPerson(pid),
       create: async () => blocked(),
       update: async () => blocked(),
-      remove: async () => blocked()
+      remove: async () => blocked(),
+      reorder: async () => blocked()
     },
     tree: {
       build: async (rootId, mode) => buildTree(rootId, mode),
