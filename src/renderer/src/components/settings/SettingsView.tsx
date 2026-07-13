@@ -30,6 +30,7 @@ import { runPlaceStandardization } from '@/lib/standardizePlaces'
 import { importGedcomWithToast } from '@/lib/importGedcom'
 import { useAppStore } from '@/store/useAppStore'
 import { useSettings, type DateFormat, type FontSize } from '@/store/useSettings'
+import { ApiServerSettings } from './ApiServerSettings'
 
 function Segmented<T extends string>({
   value,
@@ -274,6 +275,8 @@ export function SettingsView(): JSX.Element {
           </Category>
 
           {/* Feedback */}
+          <ApiServerSettings />
+
           <Category icon={MessageCircle} title={t('feedback.section')}>
             <Row icon={MessageCircle} title={t('feedback.title')} desc={t('feedback.desc')}>
               <Button size="sm" className="gap-2" onClick={() => setFeedbackOpen(true)}>

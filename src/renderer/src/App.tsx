@@ -194,6 +194,19 @@ export default function App(): JSX.Element {
     }
   }, [])
 
+  // External API/MCP writes → refresh the stores (debounced; scripts can burst).
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const unsub = window.api.apiServer?.onExternalChange?.(() => {
+      if (timer) clearTimeout(timer)
+      timer = setTimeout(() => void useAppStore.getState().refreshAll(), 400)
+    })
+    return () => {
+      if (timer) clearTimeout(timer)
+      unsub?.()
+    }
+  }, [])
+
   // Browser-style Ctrl/⌘+Tab cycling between open tabs.
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {

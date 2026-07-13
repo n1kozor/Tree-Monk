@@ -87,3 +87,7 @@ kod.py
 
 # Local debug screenshots (never publish user data)
 /hiba.png
+
+# Local API test token (never commit)
+.api-token-local
+start-with-api.ps1

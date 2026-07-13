@@ -725,6 +725,20 @@ export interface HistEvent {
   url: string
 }
 
+// ---- Local API server (Settings-toggled, 127.0.0.1-only) ----
+export interface ApiServerConfig {
+  enabled: boolean
+  port: number
+  token: string
+  allowWrites: boolean
+  mcpEnabled: boolean
+}
+export interface ApiServerStatus {
+  running: boolean
+  port: number
+  error: string | null
+}
+
 export type AppLanguage = 'hu' | 'en' | 'de'
 
 // ---- Printable tree export ----

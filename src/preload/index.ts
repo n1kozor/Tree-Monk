@@ -108,6 +108,17 @@ const api: TreeMonkApi = {
   atlas: {
     points: () => ipcRenderer.invoke(Channels.atlas.points)
   },
+  apiServer: {
+    getConfig: () => ipcRenderer.invoke(Channels.apiServer.getConfig),
+    setConfig: (patch) => ipcRenderer.invoke(Channels.apiServer.setConfig, patch),
+    regenerateToken: () => ipcRenderer.invoke(Channels.apiServer.regenerateToken),
+    status: () => ipcRenderer.invoke(Channels.apiServer.status),
+    onExternalChange: (cb) => {
+      const h = (): void => cb()
+      ipcRenderer.on(Channels.apiServer.onExternalChange, h)
+      return () => ipcRenderer.removeListener(Channels.apiServer.onExternalChange, h)
+    }
+  },
   wiki: {
     eventsNear: (lat, lon, fromYear, toYear, lang) =>
       ipcRenderer.invoke(Channels.wiki.eventsNear, lat, lon, fromYear, toYear, lang)

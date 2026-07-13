@@ -665,7 +665,31 @@
     "sectionAppearance": "Megjelenés",
     "sectionData": "Adatok & mentés",
     "sectionTitle": "Beállítások",
-    "sectionDanger": "Veszélyzóna"
+    "sectionDanger": "Veszélyzóna",
+    "api": {
+      "title": "Helyi API és MCP",
+      "enable": "API-szerver bekapcsolása",
+      "enableDesc": "HTTP-hozzáférés a családfádhoz — kizárólag ezen a gépen (127.0.0.1), tokennel védve.",
+      "port": "Port",
+      "token": "Hozzáférési token",
+      "tokenDesc": "Minden kéréshez kötelező: Authorization: Bearer <token>",
+      "writes": "Írás engedélyezése",
+      "writesDesc": "API-n és MCP-n keresztüli módosítás (létrehozás, szerkesztés, törlés). Óvatosan!",
+      "mcp": "MCP-szerver",
+      "mcpDesc": "Kösd össze a Claude-ot vagy más MCP-klienst a családfáddal — beszélgess az adataiddal.",
+      "docs": "Dokumentáció",
+      "docsDesc": "Beépített API-referencia és példák (offline is működik).",
+      "running": "fut · {{port}}",
+      "stopped": "kikapcsolva",
+      "failed": "hiba",
+      "copied": "Vágólapra másolva.",
+      "copy": "Másolás",
+      "show": "Megjelenítés",
+      "hide": "Elrejtés",
+      "regenerate": "Új token",
+      "regenerated": "Új token generálva — a régi érvénytelen.",
+      "error": "A beállítás mentése nem sikerült."
+    }
   },
   "common": {
     "copy": "Másolás",

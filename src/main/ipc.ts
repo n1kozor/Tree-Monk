@@ -26,6 +26,7 @@ import { detectKinship } from './db/kinship'
 import { exportTreeImage, exportHtmlPdf } from './treeExport'
 import { buildMapMarkers } from './db/mapData'
 import { buildAtlasPoints } from './db/atlasData'
+import { getApiConfig, getApiStatus, regenerateApiToken, restartApiServer, setApiConfig } from './api/server'
 import { eventsNear as wikiEventsNear } from './wiki'
 import { runSanityCheck } from './db/sanity'
 import { findRelationshipPath } from './db/relationship'
@@ -313,6 +314,14 @@ export function registerIpc(): void {
   // Map
   ipcMain.handle(Channels.map.markers, () => buildMapMarkers())
   ipcMain.handle(Channels.atlas.points, () => buildAtlasPoints())
+  ipcMain.handle(Channels.apiServer.getConfig, () => getApiConfig())
+  ipcMain.handle(Channels.apiServer.setConfig, (_e, patch) => setApiConfig(patch))
+  ipcMain.handle(Channels.apiServer.regenerateToken, () => {
+    const t = regenerateApiToken()
+    restartApiServer()
+    return t
+  })
+  ipcMain.handle(Channels.apiServer.status, () => getApiStatus())
   ipcMain.handle(
     Channels.wiki.eventsNear,
     (_e, lat: number, lon: number, fromYear: number, toYear: number, lang?: string) =>

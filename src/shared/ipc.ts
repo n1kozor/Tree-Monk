@@ -1,4 +1,6 @@
 import type {
+  ApiServerConfig,
+  ApiServerStatus,
   AtlasPoint,
   Alias,
   AliasInput,
@@ -158,6 +160,13 @@ export const Channels = {
   },
   atlas: {
     points: 'atlas:points'
+  },
+  apiServer: {
+    getConfig: 'apiServer:getConfig',
+    setConfig: 'apiServer:setConfig',
+    regenerateToken: 'apiServer:regenerateToken',
+    status: 'apiServer:status',
+    onExternalChange: 'apiServer:externalChange'
   },
   wiki: {
     eventsNear: 'wiki:eventsNear'
@@ -405,6 +414,14 @@ export interface TreeMonkApi {
   atlas: {
     /** Every geocoded life event (vitals, marriages, residences, other facts). */
     points(): Promise<AtlasPoint[]>
+  }
+  apiServer: {
+    getConfig(): Promise<ApiServerConfig>
+    setConfig(patch: Partial<Omit<ApiServerConfig, 'token'>>): Promise<ApiServerConfig>
+    regenerateToken(): Promise<string>
+    status(): Promise<ApiServerStatus>
+    /** Fires when an external API/MCP client changed the data — refresh. */
+    onExternalChange(cb: () => void): () => void
   }
   wiki: {
     /** Historical events near a place + era (Wikidata, Hungarian labels). */

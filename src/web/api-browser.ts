@@ -198,6 +198,13 @@ export function createDemoApi(): TreeMonkApi {
     atlas: {
       points: async () => buildAtlasPoints()
     },
+    apiServer: {
+      getConfig: async () => ({ enabled: false, port: 27007, token: '', allowWrites: false, mcpEnabled: false }),
+      setConfig: async () => blocked(),
+      regenerateToken: async () => blocked(),
+      status: async () => ({ running: false, port: 27007, error: null }),
+      onExternalChange: () => () => {}
+    },
     wiki: {
       eventsNear: async (lat, lon, fromYear, toYear, lang) =>
         eventsNear(lat, lon, fromYear, toYear, lang)

@@ -665,7 +665,31 @@
     "sectionAppearance": "Appearance",
     "sectionData": "Data & backup",
     "sectionTitle": "Settings",
-    "sectionDanger": "Danger zone"
+    "sectionDanger": "Danger zone",
+    "api": {
+      "title": "Local API & MCP",
+      "enable": "Enable API server",
+      "enableDesc": "HTTP access to your family tree — strictly on this machine (127.0.0.1), token-protected.",
+      "port": "Port",
+      "token": "Access token",
+      "tokenDesc": "Required on every request: Authorization: Bearer <token>",
+      "writes": "Allow writes",
+      "writesDesc": "Create, edit and delete through the API and MCP. Use with care!",
+      "mcp": "MCP server",
+      "mcpDesc": "Connect Claude or any MCP client to your family tree — talk to your data.",
+      "docs": "Documentation",
+      "docsDesc": "Built-in API reference and examples (works offline).",
+      "running": "running · {{port}}",
+      "stopped": "off",
+      "failed": "error",
+      "copied": "Copied to clipboard.",
+      "copy": "Copy",
+      "show": "Show",
+      "hide": "Hide",
+      "regenerate": "New token",
+      "regenerated": "New token generated — the old one is now invalid.",
+      "error": "Saving the setting failed."
+    }
   },
   "common": {
     "copy": "Copy",

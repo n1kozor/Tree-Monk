@@ -2,6 +2,23 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.6.0]
+
+### Added
+- **Local API server (opt-in, mainly for advanced users).** TreeMonk can serve
+  your tree over HTTP, strictly on 127.0.0.1 and protected by a Bearer token
+  generated in Settings. Reads and writes (writes behind a second toggle) go
+  through the same repository layer as the UI, so audit history is kept and open
+  windows refresh live. Off by default — no online features and no built-in AI
+  were added; nothing changes unless you enable it.
+- **MCP server.** Connect an MCP-compatible assistant (e.g. Claude) to your tree:
+  search people, walk relations/ancestors/timelines, get statistics, and — if
+  writes are enabled — create and edit people, families and life events. Attached
+  document images (photos, scanned certificates) can be opened by the assistant
+  for reading and cross-checking.
+- **Built-in offline docs** at `/docs` (hu/en/de) plus an OpenAPI 3.1 description
+  at `/api/v1/openapi.json`.
+
 ## [1.5.10]
 
 ### Changed

@@ -3,6 +3,8 @@ import { join } from 'path'
 import { existsSync } from 'fs'
 import { getDb, closeDb } from './db/connection'
 import { registerIpc } from './ipc'
+import { setApiChangeBroadcaster, startApiIfEnabled, stopApiServer } from './api/server'
+import { Channels } from '@shared/ipc'
 import { destroyExportWindow } from './treeExport'
 import { registerMediaScheme, registerMediaProtocol } from './mediaProtocol'
 
@@ -93,6 +95,11 @@ if (!app.requestSingleInstanceLock()) {
     }
     registerMediaProtocol()
     registerIpc()
+    // Local API server (Settings-toggled): external writes refresh open windows.
+    setApiChangeBroadcaster(() => {
+      for (const w of BrowserWindow.getAllWindows()) w.webContents.send(Channels.apiServer.onExternalChange)
+    })
+    startApiIfEnabled()
     createWindow()
 
     app.on('activate', () => {
@@ -100,7 +107,9 @@ if (!app.requestSingleInstanceLock()) {
     })
   })
 
-  app.on('window-all-closed', () => {
+  app.on('will-quit', () => stopApiServer())
+
+app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
   })
 
