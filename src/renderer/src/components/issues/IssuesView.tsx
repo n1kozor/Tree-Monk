@@ -17,6 +17,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { normalizeDate } from '@/lib/dates'
+import { useDatePlaceholder } from '@/hooks/useDateFormat'
 import { useAppStore } from '@/store/useAppStore'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { fullName, yearOf } from '@/lib/utils'
@@ -40,6 +41,7 @@ function MarkDeceasedDialog({
   onApplied: () => void
 }): JSX.Element {
   const { t } = useTranslation()
+  const datePlaceholder = useDatePlaceholder()
   const [date, setDate] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -73,7 +75,7 @@ function MarkDeceasedDialog({
           </p>
           <div className="space-y-1">
             <Label>{t('issues.fix.deathDateOptional')}</Label>
-            <Input value={date} onChange={(e) => setDate(e.target.value)} placeholder={t('person.dateHint')} />
+            <Input value={date} onChange={(e) => setDate(e.target.value)} placeholder={datePlaceholder} />
           </div>
         </div>
         <DialogFooter>

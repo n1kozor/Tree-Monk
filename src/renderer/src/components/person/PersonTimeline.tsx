@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog'
 import { useAppStore } from '@/store/useAppStore'
 import { ageAt } from '@/lib/dates'
+import { useDateFormat } from '@/hooks/useDateFormat'
 import { cn, fullName } from '@/lib/utils'
 import { worldEventsInRange, worldEventTitle, worldEventYears } from '@/lib/worldEvents'
 import type { EventRecord, Occupation, Person } from '@shared/types'
@@ -86,6 +87,7 @@ const TONE_ORDER: Tone[] = [
 /** The vertical timeline list itself, shared by the inline preview and the modal. */
 function TimelineList({ items, birthDate }: { items: TItem[]; birthDate: string | null }): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   return (
     <ol className="relative ml-1 space-y-2 border-l border-border/40 pl-4">
       {items.map((it) => {
@@ -100,7 +102,7 @@ function TimelineList({ items, birthDate }: { items: TItem[]; birthDate: string 
               <Icon className={cn('mt-0.5 h-3.5 w-3.5 shrink-0', it.tone === 'world' ? 'text-blue-400' : 'text-muted-foreground')} />
               <div className="min-w-0 flex-1">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="shrink-0 font-semibold tabular-nums">{it.when}</span>
+                  <span className="shrink-0 font-semibold tabular-nums">{fmtDate(it.when)}</span>
                   {age != null && age >= 0 && (
                     <span className="shrink-0 text-[10px] text-muted-foreground">· {t('timeline.age', { n: age })}</span>
                   )}

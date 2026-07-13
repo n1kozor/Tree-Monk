@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PlaceInput } from '@/components/common/PlaceInput'
 import { DateInput } from '@/components/common/DateInput'
+import { useDatePlaceholder } from '@/hooks/useDateFormat'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { normalizeDate } from '@/lib/dates'
@@ -66,6 +67,7 @@ export function RelativeDialog({
   withMarriage?: boolean
 }): JSX.Element {
   const { t, i18n } = useTranslation()
+  const datePlaceholder = useDatePlaceholder()
   const [mode, setMode] = useState<'create' | 'existing'>(defaultMode)
   const [given, setGiven] = useState('')
   const [surname, setSurname] = useState(defaultSurname)
@@ -104,7 +106,7 @@ export function RelativeDialog({
     <div className="grid grid-cols-2 gap-3">
       <div className="min-w-0 space-y-1">
         <Label>{`${t('person.marriage')} · ${t('person.date')}`}</Label>
-        <DateInput value={marrDate} placeholder={t('person.dateHint')} onValueChange={setMarrDate} />
+        <DateInput value={marrDate} placeholder={datePlaceholder} onValueChange={setMarrDate} />
       </div>
       <div className="min-w-0 space-y-1">
         <Label>{`${t('person.marriage')} · ${t('person.place')}`}</Label>
@@ -211,7 +213,7 @@ export function RelativeDialog({
             <Label>{`${t('person.birth')} · ${t('person.date')}`}</Label>
             <DateInput
               value={birth}
-              placeholder={t('person.dateHint')}
+              placeholder={datePlaceholder}
               onValueChange={setBirth}
             />
           </div>

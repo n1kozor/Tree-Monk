@@ -1,7 +1,8 @@
 import * as React from 'react'
 import { Input } from '@/components/ui/input'
-import { maskDateTyping } from '@/lib/dates'
+import { formatDisplayDate, maskDateTyping } from '@/lib/dates'
 import { smartNormalizeDate } from '@/lib/smartDate'
+import { useSettings } from '@/store/useSettings'
 
 interface DateInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
@@ -25,8 +26,13 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
   ({ value, onValueChange, onCommit, onBlur, onFocus, ...rest }, ref) => {
     const [suggestion, setSuggestion] = React.useState<string | null>(null)
     const [open, setOpen] = React.useState(false)
+    const [focused, setFocused] = React.useState(false)
+    const dateFormat = useSettings((s) => s.dateFormat)
     const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     const seq = React.useRef(0)
+    // Edit on the canonical ISO string; when not editing, show it in the user's
+    // chosen display format (Settings → Date format). Storage stays ISO.
+    const shown = focused ? value : formatDisplayDate(value, dateFormat)
 
     const lookup = (raw: string): void => {
       if (timer.current) clearTimeout(timer.current)
@@ -48,7 +54,7 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         <Input
           ref={ref}
           inputMode="numeric"
-          value={value}
+          value={shown}
           onChange={(e) => {
             const v = maskDateTyping(e.target.value)
             onValueChange(v)
@@ -56,10 +62,12 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
             setOpen(true)
           }}
           onFocus={(e) => {
+            setFocused(true)
             setOpen(true)
             onFocus?.(e)
           }}
           onBlur={(e) => {
+            setFocused(false)
             // Let a click on the suggestion land before closing.
             setTimeout(() => setOpen(false), 150)
             onCommit?.()

@@ -13,6 +13,7 @@ import {
   Users, Pencil } from 'lucide-react'
 import type { DocumentRecord } from '@shared/types'
 import { mediaThumb } from '@/lib/mediaUrl'
+import { useDateFormat } from '@/hooks/useDateFormat'
 
 const ext = (s: string): string => {
   const m = /\.([a-z0-9]+)(?:[?#].*)?$/i.exec(s.trim())
@@ -58,6 +59,7 @@ export function DocumentThumb({
   attachedTo?: string[]
 }): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   const [broken, setBroken] = useState(false)
   const [loading, setLoading] = useState(true)
   const remote = /^https?:\/\//i.test(doc.filePath)
@@ -140,7 +142,7 @@ export function DocumentThumb({
           <p className="truncate text-xs font-medium">{doc.title || t('common.untitled')}</p>
           <p className="mt-0.5 flex items-center gap-1 text-[10px] capitalize text-muted-foreground">
             <span>{t(`documents.kinds.${doc.kind}`)}</span>
-            {doc.date && <span>· {doc.date}</span>}
+            {doc.date && <span>· {fmtDate(doc.date)}</span>}
           </p>
           {attachedTo && (
             <p className="mt-1 flex items-start gap-1 text-[10px] text-muted-foreground">

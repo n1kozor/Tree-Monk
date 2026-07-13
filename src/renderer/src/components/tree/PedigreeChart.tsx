@@ -21,6 +21,7 @@ import { useAppStore } from '@/store/useAppStore'
 import type { PedigreeCouple, PedigreePerson, Sex } from '@shared/types'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { cn, formatName } from '@/lib/utils'
+import { useDateFormat } from '@/hooks/useDateFormat'
 import { KinshipContext, useKinshipNote } from './kinshipContext'
 import { PanZoom, useTreeLod } from './PanZoom'
 
@@ -587,6 +588,7 @@ export function CoupleCard({
   onToggleAncSide?: (side: 'father' | 'mother') => void
 }): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   const { couple, x, y, kind } = box
   const [showKids, setShowKids] = useState(false)
   const [addMenu, setAddMenu] = useState<'primary' | 'partner' | null>(null)
@@ -657,7 +659,7 @@ export function CoupleCard({
           ) : null}
           <span className="truncate text-[10px] text-muted-foreground">
             {couple.marriageDate || couple.marriagePlace
-              ? `⚭ ${[couple.marriageDate, couple.marriagePlace].filter(Boolean).join(' · ')}`
+              ? `⚭ ${[fmtDate(couple.marriageDate), couple.marriagePlace].filter(Boolean).join(' · ')}`
               : '⚭'}
           </span>
         </div>

@@ -6,15 +6,17 @@ import { DateInput } from '@/components/common/DateInput'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { normalizeDate } from '@/lib/dates'
+import { useDateFormat } from '@/hooks/useDateFormat'
 import { cn } from '@/lib/utils'
 import { useAppStore } from '@/store/useAppStore'
 import type { Occupation } from '@shared/types'
 
-/** Formats an occupation's interval: "1900–1910" / "1900–" / "–1910" / "". */
-function interval(o: Occupation): string {
-  if (o.startDate && o.endDate) return `${o.startDate}–${o.endDate}`
-  if (o.startDate) return `${o.startDate}–`
-  if (o.endDate) return `–${o.endDate}`
+/** Formats an occupation's interval: "1900–1910" / "1900–" / "–1910" / "".
+ *  `fmt` renders each date in the user's chosen display format. */
+function interval(o: Occupation, fmt: (d: string | null | undefined) => string): string {
+  if (o.startDate && o.endDate) return `${fmt(o.startDate)}–${fmt(o.endDate)}`
+  if (o.startDate) return `${fmt(o.startDate)}–`
+  if (o.endDate) return `–${fmt(o.endDate)}`
   return ''
 }
 
@@ -96,6 +98,7 @@ function OccupationEditDialog({
  *  Click a row to edit it in a modal; the inline row adds new ones. */
 export function PersonOccupations({ personId }: { personId: string }): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   const [list, setList] = useState<Occupation[]>([])
   const [editing, setEditing] = useState<Occupation | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
@@ -185,7 +188,9 @@ export function PersonOccupations({ personId }: { personId: string }): JSX.Eleme
                   className="flex flex-1 items-center gap-1.5 truncate text-left transition-colors hover:text-primary"
                 >
                   <span className="font-medium">{o.title || '—'}</span>
-                  {interval(o) && <span className="text-muted-foreground tabular-nums">{interval(o)}</span>}
+                  {interval(o, fmtDate) && (
+                    <span className="text-muted-foreground tabular-nums">{interval(o, fmtDate)}</span>
+                  )}
                 </button>
                 <button
                   onClick={() => void remove(o.id)}

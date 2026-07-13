@@ -9,6 +9,10 @@ const FONT_PX: Record<FontSize, string> = { small: '14px', medium: '16px', large
 interface SettingsState {
   fontSize: FontSize
   animations: boolean
+  /** Drop the frosted-glass blur (backdrop-filter) for a solid, much lighter UI.
+   *  A big CPU win on machines without GPU acceleration, where the blur is
+   *  software-rendered on every panel. Default: OFF (keep the glass look). */
+  reduceEffects: boolean
   dateFormat: DateFormat
   /** Whether the left navigation rail is collapsed to icons only (default: open). */
   sidebarCollapsed: boolean
@@ -16,6 +20,7 @@ interface SettingsState {
   verificationMarks: boolean
   setFontSize: (f: FontSize) => void
   setAnimations: (v: boolean) => void
+  setReduceEffects: (v: boolean) => void
   setDateFormat: (d: DateFormat) => void
   setSidebarCollapsed: (v: boolean) => void
   setVerificationMarks: (v: boolean) => void
@@ -23,16 +28,17 @@ interface SettingsState {
 
 type Persisted = Pick<
   SettingsState,
-  'fontSize' | 'animations' | 'dateFormat' | 'sidebarCollapsed' | 'verificationMarks'
+  'fontSize' | 'animations' | 'reduceEffects' | 'dateFormat' | 'sidebarCollapsed' | 'verificationMarks'
 >
 
 function persist(s: Persisted): void {
   localStorage.setItem(KEY, JSON.stringify(s))
 }
 
-function apply(s: Pick<SettingsState, 'fontSize' | 'animations'>): void {
+function apply(s: Pick<SettingsState, 'fontSize' | 'animations' | 'reduceEffects'>): void {
   document.documentElement.style.fontSize = FONT_PX[s.fontSize]
   document.documentElement.classList.toggle('no-anim', !s.animations)
+  document.documentElement.classList.toggle('no-glass', s.reduceEffects)
 }
 
 function load(): Persisted {
@@ -43,6 +49,7 @@ function load(): Persisted {
       return {
         fontSize: p.fontSize ?? 'medium',
         animations: p.animations ?? true,
+        reduceEffects: p.reduceEffects ?? false,
         dateFormat: p.dateFormat ?? 'iso',
         sidebarCollapsed: p.sidebarCollapsed ?? false,
         verificationMarks: p.verificationMarks ?? false
@@ -51,20 +58,32 @@ function load(): Persisted {
   } catch {
     /* ignore */
   }
-  return { fontSize: 'medium', animations: true, dateFormat: 'iso', sidebarCollapsed: false, verificationMarks: false }
+  return {
+    fontSize: 'medium',
+    animations: true,
+    reduceEffects: false,
+    dateFormat: 'iso',
+    sidebarCollapsed: false,
+    verificationMarks: false
+  }
 }
 
 export const useSettings = create<SettingsState>((set, get) => ({
   ...load(),
   setFontSize: (fontSize) => {
     set({ fontSize })
-    apply({ fontSize, animations: get().animations })
+    apply({ fontSize, animations: get().animations, reduceEffects: get().reduceEffects })
     persist({ ...current(get), fontSize })
   },
   setAnimations: (animations) => {
     set({ animations })
-    apply({ fontSize: get().fontSize, animations })
+    apply({ fontSize: get().fontSize, animations, reduceEffects: get().reduceEffects })
     persist({ ...current(get), animations })
+  },
+  setReduceEffects: (reduceEffects) => {
+    set({ reduceEffects })
+    apply({ fontSize: get().fontSize, animations: get().animations, reduceEffects })
+    persist({ ...current(get), reduceEffects })
   },
   setDateFormat: (dateFormat) => {
     set({ dateFormat })
@@ -86,6 +105,7 @@ function current(get: () => SettingsState): Persisted {
   return {
     fontSize: s.fontSize,
     animations: s.animations,
+    reduceEffects: s.reduceEffects,
     dateFormat: s.dateFormat,
     sidebarCollapsed: s.sidebarCollapsed,
     verificationMarks: s.verificationMarks

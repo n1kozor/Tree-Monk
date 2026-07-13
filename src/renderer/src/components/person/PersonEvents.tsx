@@ -14,6 +14,7 @@ import {
   DialogTitle
 } from '@/components/ui/dialog'
 import { normalizeDate } from '@/lib/dates'
+import { useDateFormat } from '@/hooks/useDateFormat'
 import { cn } from '@/lib/utils'
 import type { EventRecord, EventType } from '@shared/types'
 
@@ -158,6 +159,7 @@ function EventEditDialog({
  */
 export function PersonEvents({ personId }: { personId: string }): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   const [list, setList] = useState<EventRecord[]>([])
   const [editing, setEditing] = useState<EventRecord | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
@@ -253,7 +255,7 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
                 {[e.value, e.place].filter(Boolean).join(' · ') || '—'}
                 {e.date && (
                   <span className="ml-1.5 tabular-nums text-muted-foreground">
-                    {e.endDate ? `${e.date}–${e.endDate}` : e.date}
+                    {e.endDate ? `${fmtDate(e.date)}–${fmtDate(e.endDate)}` : fmtDate(e.date)}
                   </span>
                 )}
               </span>

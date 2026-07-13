@@ -2,6 +2,22 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.6.1]
+
+### Fixed
+- **The date format setting now actually works.** *Settings → Appearance → Date
+  format* (ISO / European / US) was previously ignored; dates are now shown in
+  the chosen format everywhere — profile fields, events, occupations, timeline,
+  tree marriage lines, research, documents and print sheets. Editable fields show
+  the format when not being edited and the plain ISO value while you type; storage
+  stays ISO, and textual dates ("abt 1850") and bare years are left untouched. The
+  date-input placeholders follow the format too.
+
+### Added
+- **Reduce effects (Settings → Appearance).** Turns off the frosted-glass blur
+  for solid surfaces — a big CPU drop on machines without GPU acceleration, where
+  the blur is otherwise software-rendered on every panel. Off by default.
+
 ## [1.6.0]
 
 ### Added

@@ -26,6 +26,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/DateInput'
+import { useDatePlaceholder } from '@/hooks/useDateFormat'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -64,6 +65,7 @@ import type { CitationDetail, Person, PersonInput, SanityIssue, Sex } from '@sha
  */
 export function ProfileView({ personId: personIdProp }: { personId?: string } = {}): JSX.Element | null {
   const { t, i18n } = useTranslation()
+  const datePlaceholder = useDatePlaceholder()
   // Each profile tab passes its own id; falls back to the active profile slot.
   const activeProfileId = useAppStore((s) => s.profilePersonId)
   const personId = personIdProp ?? activeProfileId
@@ -514,7 +516,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                   >
                     <DateInput
                       value={person.birthDate ?? ''}
-                      placeholder={t('person.dateHint')}
+                      placeholder={datePlaceholder}
                       onValueChange={(v) => patch('birthDate', v)}
                       onCommit={() => commitDate('birthDate')}
                     />
@@ -531,7 +533,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                   >
                     <DateInput
                       value={person.deathDate ?? ''}
-                      placeholder={t('person.dateHint')}
+                      placeholder={datePlaceholder}
                       onValueChange={(v) => patch('deathDate', v)}
                       onCommit={() => commitDate('deathDate')}
                     />
@@ -570,7 +572,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                   >
                     <DateInput
                       value={person.christeningDate ?? ''}
-                      placeholder={t('person.dateHint')}
+                      placeholder={datePlaceholder}
                       onValueChange={(v) => patch('christeningDate', v)}
                       onCommit={() => commitDate('christeningDate')}
                     />
@@ -587,7 +589,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                   >
                     <DateInput
                       value={person.burialDate ?? ''}
-                      placeholder={t('person.dateHint')}
+                      placeholder={datePlaceholder}
                       onValueChange={(v) => patch('burialDate', v)}
                       onCommit={() => commitDate('burialDate')}
                     />

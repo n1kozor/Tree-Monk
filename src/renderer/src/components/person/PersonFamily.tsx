@@ -4,6 +4,7 @@ import { Baby, Unlink2, Check, Heart, Pencil, UserPlus, Users } from 'lucide-rea
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/DateInput'
+import { useDatePlaceholder } from '@/hooks/useDateFormat'
 import { PlaceInput } from '@/components/common/PlaceInput'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { ConfirmDialog, toastUndo } from '@/components/common/ConfirmDialog'
@@ -33,6 +34,7 @@ function PersonRow({ p, onClick }: { p: Person; onClick: () => void }): JSX.Elem
 /** Inline editor for a union's marriage date + place — set or clear them by hand. */
 function MarriageEditor({ family }: { family: Family }): JSX.Element {
   const { t } = useTranslation()
+  const datePlaceholder = useDatePlaceholder()
   const refreshFamilies = useAppStore((s) => s.refreshFamilies)
   const [editing, setEditing] = useState(false)
   const [date, setDate] = useState(family.marriageDate ?? '')
@@ -78,7 +80,7 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
           <DateInput
             value={date}
             onValueChange={setDate}
-            placeholder={t('person.dateHint')}
+            placeholder={datePlaceholder}
             className="h-7 flex-1 text-xs"
             onKeyDown={(e) => e.key === 'Enter' && void save()}
             autoFocus

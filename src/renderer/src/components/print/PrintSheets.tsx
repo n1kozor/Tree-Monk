@@ -4,6 +4,7 @@ import { Printer, X } from 'lucide-react'
 import type { EventRecord, Family, Occupation, Person } from '@shared/types'
 import { useAppStore } from '@/store/useAppStore'
 import { formatName, yearOf } from '@/lib/utils'
+import { useDateFormat } from '@/hooks/useDateFormat'
 
 /* ------------------------------------------------------------------ helpers */
 
@@ -116,6 +117,7 @@ export function PersonSheetDialog({
   onClose: () => void
 }): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   const { person, father, mother, unions } = useRelatives(personId)
   const [occupations, setOccupations] = useState<Occupation[]>([])
   const [events, setEvents] = useState<EventRecord[]>([])
@@ -129,7 +131,7 @@ export function PersonSheetDialog({
 
   const sex = person.sex === 'M' ? t('sex.male') : person.sex === 'F' ? t('sex.female') : t('sex.unknown')
   const vital = (d?: string | null, p?: string | null): string =>
-    [d, p].filter(Boolean).join(' · ')
+    [fmtDate(d), p].filter(Boolean).join(' · ')
 
   return (
     <SheetShell onClose={onClose}>
@@ -187,7 +189,7 @@ export function PersonSheetDialog({
                 {(o.startDate || o.endDate) && (
                   <span className="text-gray-500">
                     {' '}
-                    ({[o.startDate, o.endDate].filter(Boolean).join('–')})
+                    ({[o.startDate, o.endDate].map(fmtDate).filter(Boolean).join('–')})
                   </span>
                 )}
               </li>
@@ -203,7 +205,7 @@ export function PersonSheetDialog({
             {events.map((e) => (
               <li key={e.id}>
                 {e.type}
-                {(e.date || e.place) && <span className="text-gray-500"> — {[e.date, e.place].filter(Boolean).join(', ')}</span>}
+                {(e.date || e.place) && <span className="text-gray-500"> — {[fmtDate(e.date), e.place].filter(Boolean).join(', ')}</span>}
               </li>
             ))}
           </ul>
@@ -232,6 +234,7 @@ export function FamilySheetDialog({
   onClose: () => void
 }): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   const { person, unions } = useRelatives(personId)
   // Use the first union as the family group (the common case).
   const union = unions[0]
@@ -241,7 +244,7 @@ export function FamilySheetDialog({
       <div className="text-xs uppercase tracking-wide text-gray-500">{label}</div>
       <div className="text-lg font-bold">{nameOf(p)}</div>
       <div className="mt-1 text-xs text-gray-600">
-        {[p?.birthDate && `* ${p.birthDate}`, p?.birthPlace, p?.deathDate && `† ${p.deathDate}`]
+        {[p?.birthDate && `* ${fmtDate(p.birthDate)}`, p?.birthPlace, p?.deathDate && `† ${fmtDate(p.deathDate)}`]
           .filter(Boolean)
           .join(' · ')}
       </div>
@@ -266,7 +269,7 @@ export function FamilySheetDialog({
           {(union.family.marriageDate || union.family.marriagePlace) && (
             <div className="mb-3 text-sm">
               <span className="font-semibold text-gray-600">{t('person.marriage')}: </span>
-              {[union.family.marriageDate, union.family.marriagePlace].filter(Boolean).join(' · ')}
+              {[fmtDate(union.family.marriageDate), union.family.marriagePlace].filter(Boolean).join(' · ')}
             </div>
           )}
 
@@ -285,8 +288,8 @@ export function FamilySheetDialog({
                 <tr key={c.id} className="border-b border-gray-200">
                   <td className="py-1">{i + 1}</td>
                   <td className="py-1">{nameOf(c)}</td>
-                  <td className="py-1">{[c.birthDate, c.birthPlace].filter(Boolean).join(', ')}</td>
-                  <td className="py-1">{[c.deathDate, c.deathPlace].filter(Boolean).join(', ')}</td>
+                  <td className="py-1">{[fmtDate(c.birthDate), c.birthPlace].filter(Boolean).join(', ')}</td>
+                  <td className="py-1">{[fmtDate(c.deathDate), c.deathPlace].filter(Boolean).join(', ')}</td>
                 </tr>
               ))}
               {union.children.length === 0 && (

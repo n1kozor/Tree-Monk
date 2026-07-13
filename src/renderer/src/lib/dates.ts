@@ -55,6 +55,30 @@ export function normalizeDate(raw: string): string {
   return s
 }
 
+export type DateDisplayFormat = 'iso' | 'eu' | 'us'
+
+/**
+ * Render a STORED (ISO-ish) date in the user's chosen display format. Only a
+ * clean numeric date — `YYYY`, `YYYY-MM` or `YYYY-MM-DD` and nothing else — is
+ * reformatted; anything qualified or textual ("abt 1850", "before 1900") is
+ * returned exactly as stored, since it can't be safely re-arranged. A bare year
+ * is a year in every format. Storage stays ISO; this is display-only.
+ *
+ *   1885-03-07  →  iso 1885-03-07 · eu 07.03.1885 · us 03/07/1885
+ *   1885-03     →  iso 1885-03    · eu 03.1885    · us 03/1885
+ *   1885 / "abt 1850"  →  unchanged in every format
+ */
+export function formatDisplayDate(raw: string | null | undefined, fmt: DateDisplayFormat): string {
+  const s = (raw ?? '').trim()
+  if (!s) return ''
+  const m = /^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/.exec(s)
+  if (!m || fmt === 'iso') return s
+  const [, y, mo, d] = m
+  if (!mo) return y
+  if (fmt === 'eu') return d ? `${d}.${mo}.${y}` : `${mo}.${y}`
+  return d ? `${mo}/${d}/${y}` : `${mo}/${y}` // us
+}
+
 /**
  * Live input mask for ISO date typing: as the user types digits, the `-`
  * separators appear automatically. `20220112` → `2022-01-12`, `202203` →

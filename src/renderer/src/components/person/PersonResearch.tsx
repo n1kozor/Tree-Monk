@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
+import { useDateFormat } from '@/hooks/useDateFormat'
 import { useAppStore } from '@/store/useAppStore'
 import type { ResearchLog, ResearchResult } from '@shared/types'
 
@@ -22,6 +23,7 @@ const todayISO = (): string => new Date().toISOString().slice(0, 10)
  *  re-search the same place twice. */
 export function PersonResearch({ personId }: { personId: string }): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   const refreshResearch = useAppStore((s) => s.refreshResearch)
   const [logs, setLogs] = useState<ResearchLog[]>([])
   const [open, setOpen] = useState(false)
@@ -158,7 +160,7 @@ export function PersonResearch({ personId }: { personId: string }): JSX.Element 
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{l.title || l.sourceDesc || '—'}</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {[l.repository, l.dateRange, l.date].filter(Boolean).join(' · ')}
+                    {[l.repository, l.dateRange, fmtDate(l.date)].filter(Boolean).join(' · ')}
                   </p>
                   {l.detail && <p className="mt-1 whitespace-pre-wrap text-xs text-muted-foreground">{l.detail}</p>}
                 </div>

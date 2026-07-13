@@ -10,6 +10,7 @@ import {
   MapPin,
   MessageCircle,
   Palette,
+  Gauge,
   RotateCcw,
   Settings2,
   Sparkles,
@@ -125,10 +126,12 @@ export function SettingsView(): JSX.Element {
   const {
     fontSize,
     animations,
+    reduceEffects,
     dateFormat,
     verificationMarks,
     setFontSize,
     setAnimations,
+    setReduceEffects,
     setDateFormat,
     setVerificationMarks
   } = useSettings()
@@ -215,6 +218,9 @@ export function SettingsView(): JSX.Element {
             </Row>
             <Row icon={Sparkles} title={t('settings.animations')} desc={t('settings.animationsDesc')}>
               <Segmented value={animations ? 'on' : 'off'} onChange={(v) => setAnimations(v === 'on')} options={yesNo} />
+            </Row>
+            <Row icon={Gauge} title={t('settings.reduceEffects')} desc={t('settings.reduceEffectsDesc')}>
+              <Segmented value={reduceEffects ? 'on' : 'off'} onChange={(v) => setReduceEffects(v === 'on')} options={yesNo} />
             </Row>
             <Row icon={Type} title={t('settings.dateFormat')} desc={t('settings.dateFormatDesc')}>
               <Segmented<DateFormat>

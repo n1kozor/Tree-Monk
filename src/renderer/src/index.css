@@ -437,6 +437,25 @@
   animation-iteration-count: 1 !important;
 }
 
+/* ---- Reduce effects (Settings) ----
+   Drops the frosted-glass `backdrop-filter: blur()` — the single most expensive
+   compositor op, on a panel on every page — for a solid, opaque fill. A big CPU
+   win on machines without GPU acceleration, where the blur is software-rendered.
+   Two-class specificity + !important beats the @layer components rules. */
+.no-glass .glass,
+.no-glass .glass-strong,
+.no-glass .glass-subtle,
+.no-glass .glass-edge,
+.no-glass .tm-glass {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  background: hsl(var(--glass-bg)) !important;
+}
+.no-glass .glass::after,
+.no-glass .tm-glass::after {
+  display: none;
+}
+
 /* ---- Context menu items ---- */
 @layer components {
   .ctx-item {

@@ -4,6 +4,7 @@ import { ClipboardList, Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn, fullName, yearOf } from '@/lib/utils'
+import { useDateFormat } from '@/hooks/useDateFormat'
 import { useAppStore } from '@/store/useAppStore'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import type { ResearchLog, ResearchResult } from '@shared/types'
@@ -23,6 +24,7 @@ const RESULT_TONE: Record<ResearchResult, string> = {
 
 export function ResearchView(): JSX.Element {
   const { t } = useTranslation()
+  const fmtDate = useDateFormat()
   const logs = useAppStore((s) => s.researchLogs)
   const peopleById = useAppStore((s) => s.peopleById)
   const selectPerson = useAppStore((s) => s.selectPerson)
@@ -170,7 +172,7 @@ export function ResearchView(): JSX.Element {
                 {g.list.map((l) => (
                   <div key={l.id} className="px-3.5 py-2">
                     <div className="flex items-baseline gap-2">
-                      <span className="text-[11px] tabular-nums text-muted-foreground">{l.date}</span>
+                      <span className="text-[11px] tabular-nums text-muted-foreground">{fmtDate(l.date)}</span>
                       <span className="min-w-0 flex-1 truncate text-sm font-medium">{l.title || '—'}</span>
                       <span
                         className={cn(
