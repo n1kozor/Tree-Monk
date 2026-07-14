@@ -170,7 +170,7 @@ export function CalendarView(): JSX.Element {
                   key={i}
                   onClick={() => setSelected(day)}
                   className={cn(
-                    'flex min-h-[72px] flex-col rounded-2xl p-1.5 text-left transition-colors',
+                    'flex min-h-[72px] min-w-0 flex-col overflow-hidden rounded-2xl p-1.5 text-left transition-colors',
                     evs.length ? 'glass glass-hover' : 'border border-border/40 bg-background/40 hover:border-primary/40 hover:bg-accent/40',
                     isSel && 'ring-2 ring-primary'
                   )}
@@ -187,9 +187,9 @@ export function CalendarView(): JSX.Element {
                     {evs.slice(0, 3).map((ev, j) => {
                       const M = KIND_META[ev.kind]
                       return (
-                        <span key={j} className={cn('flex items-center gap-1 rounded px-1 py-0.5 text-[10.5px] leading-tight', M.chip)}>
+                        <span key={j} className={cn('flex min-w-0 items-center gap-1 rounded px-1 py-0.5 text-[10.5px] leading-tight', M.chip)}>
                           <M.Icon className={cn('h-2.5 w-2.5 shrink-0', M.dot)} />
-                          <span className="truncate">{fullName(ev.primary) || '?'}</span>
+                          <span className="min-w-0 truncate">{fullName(ev.primary) || '?'}</span>
                         </span>
                       )
                     })}

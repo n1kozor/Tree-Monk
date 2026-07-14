@@ -1110,6 +1110,30 @@ export const Citations = {
       })
     return { ...c, id }
   },
+  /** Attach an EXISTING source to another person (a second citation for the same
+   *  source). Idempotent: no-op if that person already cites this source. */
+  attachSource(sourceId: string, personId: string, eventTag: string | null): void {
+    const dup = getDb()
+      .prepare("SELECT 1 FROM citations WHERE owner_type = 'person' AND owner_id = ? AND source_id = ? LIMIT 1")
+      .get(personId, sourceId)
+    if (dup) return
+    this.create({ sourceId, ownerType: 'person', ownerId: personId, eventTag, page: null, quality: null, note: null })
+  },
+  /** Person ids that cite a given source — "who is this source attached to". */
+  peopleForSource(sourceId: string): string[] {
+    return (
+      getDb()
+        .prepare("SELECT DISTINCT owner_id FROM citations WHERE owner_type = 'person' AND source_id = ?")
+        .all(sourceId) as { owner_id: string }[]
+    ).map((r) => r.owner_id)
+  },
+  /** Remove a person's citation(s) for a given source (detach without deleting
+   *  the source, which other people may still cite). */
+  detachSource(sourceId: string, personId: string): void {
+    getDb()
+      .prepare("DELETE FROM citations WHERE owner_type = 'person' AND owner_id = ? AND source_id = ?")
+      .run(personId, sourceId)
+  },
   forOwner(ownerType: string, ownerId: string): CitationDetail[] {
     return getDb()
       .prepare(

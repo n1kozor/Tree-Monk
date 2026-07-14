@@ -19,6 +19,7 @@ export function ImageViewer({
   const [offset, setOffset] = useState({ x: 0, y: 0 })
   const [loading, setLoading] = useState(true)
   const drag = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null)
+  const paneRef = useRef<HTMLDivElement>(null)
 
   const reset = useCallback(() => {
     setScale(1)
@@ -32,10 +33,19 @@ export function ImageViewer({
     setLoading(true)
   }, [src, reset])
 
-  const onWheel = (e: React.WheelEvent): void => {
-    e.preventDefault()
-    setScale((s) => Math.min(8, Math.max(0.2, s - e.deltaY * 0.0015 * s)))
-  }
+  // Wheel-to-zoom via a NATIVE non-passive listener — React's onWheel is passive,
+  // so preventDefault() there is ignored (and warns). This stops the page/dialog
+  // from scrolling while zooming the image.
+  useEffect(() => {
+    const el = paneRef.current
+    if (!el) return
+    const onWheel = (e: WheelEvent): void => {
+      e.preventDefault()
+      setScale((s) => Math.min(8, Math.max(0.2, s - e.deltaY * 0.0015 * s)))
+    }
+    el.addEventListener('wheel', onWheel, { passive: false })
+    return () => el.removeEventListener('wheel', onWheel)
+  }, [])
 
   const onPointerDown = (e: React.PointerEvent): void => {
     ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
@@ -55,8 +65,8 @@ export function ImageViewer({
   return (
     <div className="relative h-full w-full overflow-hidden rounded-lg bg-black/40">
       <div
+        ref={paneRef}
         className="h-full w-full cursor-grab active:cursor-grabbing"
-        onWheel={onWheel}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

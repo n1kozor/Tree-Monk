@@ -7,15 +7,19 @@ import {
   Copy,
   ExternalLink,
   FilePlus,
+  Library,
   Link2,
   Pencil,
   Plus,
   Quote,
   Trash2,
-  Upload
+  Upload,
+  Users
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { NameDialog } from '@/components/common/NameDialog'
+import { AttachToPeopleDialog } from '@/components/person/AttachToPeopleDialog'
+import { PickDocumentDialog } from '@/components/person/PickDocumentDialog'
 import { DocumentThumb } from '@/components/documents/DocumentThumb'
 import { DocumentViewerDialog } from '@/components/documents/DocumentViewerDialog'
 import { useAppStore } from '@/store/useAppStore'
@@ -68,11 +72,14 @@ function Linkify({ text }: { text: string }): JSX.Element {
 function CitationCard({
   c,
   onEdit,
-  onDelete
+  onDelete,
+  onManagePeople
 }: {
   c: CitationDetail
   onEdit: () => void
   onDelete: () => void
+  /** Manage which people this source is attached to (only when it has a source). */
+  onManagePeople?: () => void
 }): JSX.Element {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
@@ -98,6 +105,15 @@ function CitationCard({
         >
           {copied ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
         </button>
+        {onManagePeople && (
+          <button
+            onClick={onManagePeople}
+            title={t('attach.manageTitle')}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
+          >
+            <Users className="h-3.5 w-3.5" />
+          </button>
+        )}
         <button
           onClick={onEdit}
           title={t('common.edit')}
@@ -277,12 +293,45 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
   const [docs, setDocs] = useState<DocumentRecord[]>([])
   const [cites, setCites] = useState<CitationDetail[]>([])
   const [linkOpen, setLinkOpen] = useState(false)
+  const [pickOpen, setPickOpen] = useState(false)
   const [renaming, setRenaming] = useState<DocumentRecord | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [active, setActive] = useState<DocumentRecord | null>(null)
   const [citeSort, setCiteSort] = useState<CiteSort>('year-asc')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  // After an add, offer to attach the same item to relatives / others. `attach`
+  // does the per-person link — documents via person_documents, citations via a
+  // second citation for the same source.
+  const [attachTarget, setAttachTarget] = useState<{
+    label: string
+    attach: (personId: string) => Promise<void>
+  } | null>(null)
+  // Manage which people an EXISTING document is attached to (edit afterwards).
+  const [managing, setManaging] = useState<DocumentRecord | null>(null)
+  // Same for a citation's SOURCE — which people cite it.
+  const [managingCite, setManagingCite] = useState<{
+    sourceId: string
+    eventTag: string | null
+    label: string
+    personIds: string[]
+  } | null>(null)
+
+  const offerAttachDocs = (created: DocumentRecord[] | DocumentRecord | null): void => {
+    const list = (Array.isArray(created) ? created : created ? [created] : []).filter(Boolean)
+    if (!list.length) return
+    const label =
+      list.length === 1
+        ? list[0].title?.trim() || list[0].filePath || t('person.sources')
+        : t('attach.nItems', { count: list.length })
+    const docIds = list.map((d) => d.id)
+    setAttachTarget({
+      label,
+      attach: async (pid) => {
+        for (const id of docIds) await window.api.documents.attach(id, pid)
+      }
+    })
+  }
 
   // Imported citations arrive in an arbitrary order — sort them by the source's
   // own date (chronological by default, like FamilySearch). Sources with no
@@ -331,12 +380,14 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
     bumpSources() // refresh the per-person source count on the tree cards
   }
   const addFiles = async (): Promise<void> => {
-    await window.api.documents.import(personId)
+    const created = await window.api.documents.import(personId)
     await after()
+    offerAttachDocs(created)
   }
   const addLink = async (url: string): Promise<void> => {
-    await window.api.documents.createLink(url, '', personId)
+    const created = await window.api.documents.createLink(url, '', personId)
     await after()
+    offerAttachDocs(created)
   }
   const detach = async (docId: string): Promise<void> => {
     await window.api.documents.detach(docId, personId)
@@ -349,8 +400,9 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
       .map((f) => f.path)
       .filter((p): p is string => !!p)
     if (paths.length) {
-      await window.api.documents.importPaths(paths, personId)
+      const created = await window.api.documents.importPaths(paths, personId)
       await after()
+      offerAttachDocs(created)
     }
   }
 
@@ -361,16 +413,36 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
     await reload()
   }
   const saveNew = async (edit: CitationEdit): Promise<void> => {
-    await window.api.research.addCitation(personId, edit)
+    const created = await window.api.research.addCitation(personId, edit)
     setAdding(false)
     await reload()
     bumpSources() // citations count toward the tree card's source badge too
+    // Offer to attach the SAME source to others (a second citation per person).
+    if (created?.sourceId) {
+      const sourceId = created.sourceId
+      const eventTag = created.eventTag ?? null
+      setAttachTarget({
+        label: edit.sourceTitle?.trim() || t('person.addSource'),
+        attach: (pid) => window.api.research.attachSourceToPerson(sourceId, pid, eventTag)
+      })
+    }
   }
   const removeCite = async (id: string): Promise<void> => {
     await window.api.research.deleteCitation(id)
     setEditingId(null)
     await reload()
     bumpSources()
+  }
+  // Open the "who cites this source?" manager for a citation.
+  const openManageCite = async (c: CitationDetail): Promise<void> => {
+    if (!c.sourceId) return
+    const personIds = await window.api.research.peopleForSource(c.sourceId)
+    setManagingCite({
+      sourceId: c.sourceId,
+      eventTag: c.eventTag ?? null,
+      label: stripHtml(c.sourceTitle) || t('person.addSource'),
+      personIds
+    })
   }
 
   return (
@@ -380,6 +452,9 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
           {t('person.sources')} ({docs.length})
         </h4>
         <div className="flex items-center gap-1">
+          <Button size="sm" variant="ghost" className="h-7 gap-1.5 text-xs" onClick={() => setPickOpen(true)}>
+            <Library className="h-3.5 w-3.5" /> {t('attach.linkExisting')}
+          </Button>
           <Button size="sm" variant="ghost" className="h-7 gap-1.5 text-xs" onClick={() => setLinkOpen(true)}>
             <Link2 className="h-3.5 w-3.5" /> {t('person.addLink')}
           </Button>
@@ -415,6 +490,7 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
                 onClick={() => openDoc(d)}
                 onDelete={() => detach(d.id)}
                 onRename={() => setRenaming(d)}
+                onManagePeople={() => setManaging(d)}
               />
             ))}
           </div>
@@ -475,6 +551,7 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
                 setEditingId(c.id)
               }}
               onDelete={() => void removeCite(c.id)}
+              onManagePeople={c.sourceId ? () => void openManageCite(c) : undefined}
             />
           )
         )}
@@ -510,6 +587,52 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
       />
 
       <DocumentViewerDialog list={viewable} active={active} onActiveChange={setActive} />
+
+      {attachTarget && (
+        <AttachToPeopleDialog
+          open
+          onClose={() => setAttachTarget(null)}
+          sourcePersonId={personId}
+          attach={attachTarget.attach}
+          label={attachTarget.label}
+          onAttached={after}
+        />
+      )}
+
+      {managing && (
+        <AttachToPeopleDialog
+          open
+          onClose={() => setManaging(null)}
+          sourcePersonId={personId}
+          label={managing.title?.trim() || managing.filePath}
+          currentIds={managing.personIds}
+          attach={(pid) => window.api.documents.attach(managing.id, pid)}
+          onDetach={(pid) => window.api.documents.detach(managing.id, pid)}
+          onAttached={after}
+        />
+      )}
+
+      <PickDocumentDialog
+        open={pickOpen}
+        onClose={() => setPickOpen(false)}
+        personId={personId}
+        onPicked={after}
+      />
+
+      {managingCite && (
+        <AttachToPeopleDialog
+          open
+          onClose={() => setManagingCite(null)}
+          sourcePersonId={personId}
+          label={managingCite.label}
+          currentIds={managingCite.personIds}
+          attach={(pid) =>
+            window.api.research.attachSourceToPerson(managingCite.sourceId, pid, managingCite.eventTag)
+          }
+          onDetach={(pid) => window.api.research.detachSourceFromPerson(managingCite.sourceId, pid)}
+          onAttached={after}
+        />
+      )}
     </div>
   )
 }

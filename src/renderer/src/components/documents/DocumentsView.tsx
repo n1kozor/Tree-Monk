@@ -22,6 +22,7 @@ import { cn, fullName } from '@/lib/utils'
 import { canView, fileCategory } from '@/lib/docCategory'
 import { DocumentThumb } from './DocumentThumb'
 import { NameDialog } from '@/components/common/NameDialog'
+import { AttachToPeopleDialog } from '@/components/person/AttachToPeopleDialog'
 import { DocumentViewerDialog } from './DocumentViewerDialog'
 import type { DocumentRecord } from '@shared/types'
 
@@ -47,9 +48,11 @@ export function DocumentsView(): JSX.Element {
   const people = useAppStore((s) => s.people)
   const refreshDocuments = useAppStore((s) => s.refreshDocuments)
   const refreshPeople = useAppStore((s) => s.refreshPeople)
+  const bumpSources = useAppStore((s) => s.bumpSources)
   const [active, setActive] = useState<DocumentRecord | null>(null)
   const [deleting, setDeleting] = useState<DocumentRecord | null>(null)
   const [renaming, setRenaming] = useState<DocumentRecord | null>(null)
+  const [managing, setManaging] = useState<DocumentRecord | null>(null)
 
   // Open the viewer for a document chosen in the global search.
   const docFocusId = useAppStore((s) => s.documentFocusId)
@@ -279,6 +282,7 @@ export function DocumentsView(): JSX.Element {
                 onClick={() => openDoc(d)}
                 onDelete={() => setDeleting(d)}
                 onRename={() => setRenaming(d)}
+                onManagePeople={() => setManaging(d)}
                 attachedTo={d.personIds.map((id) => nameById.get(id)).filter((n): n is string => !!n)}
               />
             ))}
@@ -334,6 +338,22 @@ export function DocumentsView(): JSX.Element {
           }
         }}
       />
+
+      {managing && (
+        <AttachToPeopleDialog
+          open
+          onClose={() => setManaging(null)}
+          sourcePersonId={managing.personIds[0]}
+          label={managing.title?.trim() || managing.filePath}
+          currentIds={managing.personIds}
+          attach={(pid) => window.api.documents.attach(managing.id, pid)}
+          onDetach={(pid) => window.api.documents.detach(managing.id, pid)}
+          onAttached={async () => {
+            await refreshDocuments()
+            bumpSources()
+          }}
+        />
+      )}
     </div>
   )
 }

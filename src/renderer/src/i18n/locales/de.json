@@ -107,6 +107,28 @@
     "searchPlaceholder": "Personen suchen…",
     "noResults": "Keine Treffer"
   },
+  "attach": {
+    "title": "Auch an andere anhängen?",
+    "manageTitle": "Wem ist es zugeordnet?",
+    "currentLabel": "Aktuell zugeordnet",
+    "remove": "Entfernen",
+    "done": "Fertig",
+    "subtitle": "Angehängt:",
+    "spouse": "Ehepartner",
+    "parents": "Eltern",
+    "children": "Kinder",
+    "noRelatives": "Keine nahen Verwandten für die Schnellauswahl — nutze die Suche.",
+    "searchLabel": "Suche",
+    "searchPlaceholder": "Beliebige Person suchen…",
+    "skip": "Überspringen",
+    "confirm": "Anhängen",
+    "confirmN": "Anhängen ({{count}})",
+    "nItems": "{{count}} Elemente",
+    "linkExisting": "Vorhandenes",
+    "pickTitle": "Vorhandenes Dokument verknüpfen",
+    "pickSubtitle": "Wähle ein Dokument aus der Sammlung, das dieser Person zugeordnet wird.",
+    "pickEmpty": "Keine Dokumente zum Verknüpfen (alles ist bereits zugeordnet oder nichts passt zur Suche)."
+  },
   "quality": {
     "title": "Datenqualität",
     "complete": "Alle Daten ausgefüllt",

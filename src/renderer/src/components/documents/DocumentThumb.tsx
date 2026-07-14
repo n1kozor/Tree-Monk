@@ -49,12 +49,15 @@ export function DocumentThumb({
   onClick,
   onDelete,
   onRename,
+  onManagePeople,
   attachedTo
 }: {
   doc: DocumentRecord
   onClick?: () => void
   onDelete?: () => void
   onRename?: () => void
+  /** Opens the "who is this attached to?" manager. */
+  onManagePeople?: () => void
   /** Names this document is attached to — when provided, shown as a caption. */
   attachedTo?: string[]
 }): JSX.Element {
@@ -84,6 +87,18 @@ export function DocumentThumb({
           className="absolute left-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-xl bg-background/80 text-muted-foreground opacity-0 backdrop-blur transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
         >
           <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
+      {onManagePeople && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onManagePeople()
+          }}
+          title={t('attach.manageTitle')}
+          className="absolute right-9 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-xl bg-background/80 text-muted-foreground opacity-0 backdrop-blur transition-opacity hover:bg-accent hover:text-foreground group-hover:opacity-100"
+        >
+          <Users className="h-3.5 w-3.5" />
         </button>
       )}
       {onDelete && (

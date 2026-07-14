@@ -210,7 +210,7 @@ export function registerIpc(): void {
       text: edit.sourceText ?? null,
       recordDate: edit.recordDate ?? null
     })
-    Citations.create({
+    return Citations.create({
       sourceId: s.id,
       ownerType: 'person',
       ownerId: personId,
@@ -220,6 +220,19 @@ export function registerIpc(): void {
       note: edit.note ?? null
     })
   })
+  // Attach an existing source (from a citation) to another person — used by the
+  // "attach to others" flow so one source can back several people. Idempotent.
+  ipcMain.handle(
+    Channels.research.attachSourceToPerson,
+    (_e, sourceId: string, personId: string, eventTag: string | null) =>
+      Citations.attachSource(sourceId, personId, eventTag)
+  )
+  ipcMain.handle(Channels.research.peopleForSource, (_e, sourceId: string) =>
+    Citations.peopleForSource(sourceId)
+  )
+  ipcMain.handle(Channels.research.detachSourceFromPerson, (_e, sourceId: string, personId: string) =>
+    Citations.detachSource(sourceId, personId)
+  )
   // Edit a citation AND its underlying source (e.g. give a FamilySearch source a
   // date). Only the provided keys are written; the source is created on the fly
   // if the citation had none.

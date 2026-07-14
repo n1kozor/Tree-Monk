@@ -634,6 +634,10 @@ export function AtlasView(): JSX.Element {
 
     return () => {
       if (dashRaf.current) cancelAnimationFrame(dashRaf.current)
+      // Null the ref FIRST so any concurrent effect (basemap swap, rebuild) bails
+      // instead of touching a map mid-teardown.
+      mapRef.current = null
+      ;(window as unknown as { __atlasMap?: MLMap }).__atlasMap = undefined
       try {
         map.remove()
       } catch {
@@ -641,7 +645,6 @@ export function AtlasView(): JSX.Element {
            its style/sprite is still loading (React StrictMode's mount→unmount in
            dev, or a very fast route switch) — harmless, it's going away anyway. */
       }
-      mapRef.current = null
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -652,7 +655,12 @@ export function AtlasView(): JSX.Element {
     const map = mapRef.current
     if (!map || !ready || styleKey.current === resolved.key) return
     styleKey.current = resolved.key
-    map.setStyle(resolved.style as StyleSpecification)
+    try {
+      map.setStyle(resolved.style as StyleSpecification)
+    } catch {
+      /* MapLibre throws "signal is aborted" if a basemap/theme swap lands while
+         the previous style is still loading — the swap still applies, harmless. */
+    }
   }, [resolved, ready])
 
   // Any data / visibility / cluster / focus change → rebuild the atlas layers.

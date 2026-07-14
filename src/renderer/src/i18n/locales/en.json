@@ -107,6 +107,28 @@
     "searchPlaceholder": "Search people…",
     "noResults": "No matching people"
   },
+  "attach": {
+    "title": "Attach to others too?",
+    "manageTitle": "Who is it attached to?",
+    "currentLabel": "Currently attached",
+    "remove": "Remove",
+    "done": "Done",
+    "subtitle": "Attached:",
+    "spouse": "Spouse",
+    "parents": "Parents",
+    "children": "Children",
+    "noRelatives": "No close relatives to quick-pick — use the search.",
+    "searchLabel": "Search",
+    "searchPlaceholder": "Search any person…",
+    "skip": "Skip",
+    "confirm": "Attach",
+    "confirmN": "Attach ({{count}})",
+    "nItems": "{{count}} items",
+    "linkExisting": "Existing",
+    "pickTitle": "Link an existing document",
+    "pickSubtitle": "Pick a document from the library to attach to this person.",
+    "pickEmpty": "No documents to link (everything is already attached, or nothing matches the search)."
+  },
   "quality": {
     "title": "Data quality",
     "complete": "All data filled in",

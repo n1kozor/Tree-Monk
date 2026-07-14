@@ -107,6 +107,28 @@
     "searchPlaceholder": "Személyek keresése…",
     "noResults": "Nincs találat"
   },
+  "attach": {
+    "title": "Csatolás máshoz is?",
+    "manageTitle": "Kihez van csatolva?",
+    "currentLabel": "Jelenleg csatolva",
+    "remove": "Levétel",
+    "done": "Kész",
+    "subtitle": "Csatolva:",
+    "spouse": "Házastárs",
+    "parents": "Szülők",
+    "children": "Gyermekek",
+    "noRelatives": "Nincs közeli rokon a gyorsválasztáshoz — használd a keresőt.",
+    "searchLabel": "Keresés",
+    "searchPlaceholder": "Bármely személy keresése…",
+    "skip": "Kihagyom",
+    "confirm": "Csatolás",
+    "confirmN": "Csatolás ({{count}})",
+    "nItems": "{{count}} elem",
+    "linkExisting": "Meglévő",
+    "pickTitle": "Meglévő dokumentum összekötése",
+    "pickSubtitle": "Válassz a könyvtárból egy dokumentumot, amit ehhez a személyhez csatolsz.",
+    "pickEmpty": "Nincs csatolható dokumentum (minden már csatolva van, vagy nincs a keresésre találat)."
+  },
   "quality": {
     "title": "Adatminőség",
     "complete": "Minden adat kitöltve",

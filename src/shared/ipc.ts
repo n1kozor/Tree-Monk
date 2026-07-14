@@ -14,6 +14,7 @@ import type {
   BoardMeta,
   BoardNode,
   BoardState,
+  Citation,
   CitationDetail,
   CitationEdit,
   Collaboration,
@@ -108,6 +109,9 @@ export const Channels = {
   research: {
     citationsForPerson: 'research:citationsForPerson',
     addCitation: 'research:addCitation',
+    attachSourceToPerson: 'research:attachSourceToPerson',
+    peopleForSource: 'research:peopleForSource',
+    detachSourceFromPerson: 'research:detachSourceFromPerson',
     updateCitation: 'research:updateCitation',
     deleteCitation: 'research:deleteCitation',
     notesForPerson: 'research:notesForPerson',
@@ -345,8 +349,14 @@ export interface TreeMonkApi {
   }
   research: {
     citationsForPerson(personId: string): Promise<CitationDetail[]>
-    /** Add a source + citation to a person by hand. */
-    addCitation(personId: string, edit: CitationEdit): Promise<void>
+    /** Add a source + citation to a person by hand. Returns the created citation. */
+    addCitation(personId: string, edit: CitationEdit): Promise<Citation>
+    /** Attach an EXISTING source to another person (a second citation, same source). */
+    attachSourceToPerson(sourceId: string, personId: string, eventTag: string | null): Promise<void>
+    /** Person ids that cite a given source ("who is this source attached to"). */
+    peopleForSource(sourceId: string): Promise<string[]>
+    /** Remove a person's citation(s) for a source (source kept for others). */
+    detachSourceFromPerson(sourceId: string, personId: string): Promise<void>
     /** Edit a citation and its underlying source (e.g. give a FS source a date). */
     updateCitation(citationId: string, edit: CitationEdit): Promise<void>
     /** Remove a citation (the source row is kept — it may be shared). */

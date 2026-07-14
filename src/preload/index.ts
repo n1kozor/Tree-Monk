@@ -53,6 +53,11 @@ const api: TreeMonkApi = {
   research: {
     citationsForPerson: (pid) => ipcRenderer.invoke(Channels.research.citationsForPerson, pid),
     addCitation: (pid, edit) => ipcRenderer.invoke(Channels.research.addCitation, pid, edit),
+    attachSourceToPerson: (sourceId, pid, eventTag) =>
+      ipcRenderer.invoke(Channels.research.attachSourceToPerson, sourceId, pid, eventTag),
+    peopleForSource: (sourceId) => ipcRenderer.invoke(Channels.research.peopleForSource, sourceId),
+    detachSourceFromPerson: (sourceId, pid) =>
+      ipcRenderer.invoke(Channels.research.detachSourceFromPerson, sourceId, pid),
     updateCitation: (id, edit) => ipcRenderer.invoke(Channels.research.updateCitation, id, edit),
     deleteCitation: (id) => ipcRenderer.invoke(Channels.research.deleteCitation, id),
     notesForPerson: (pid) => ipcRenderer.invoke(Channels.research.notesForPerson, pid),

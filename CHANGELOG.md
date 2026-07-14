@@ -2,6 +2,30 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.6.3]
+
+### Added
+- **Attach a source to several people at once.** After adding a file, image, link
+  or citation to someone, a dialog offers to attach the same item to others —
+  spouse, parents and children as one-tap quick picks (multi-select), plus a full
+  person search.
+- **Manage who an item is attached to, afterwards.** Documents and citations get a
+  people button that opens a manager: see everyone it's attached to (remove with
+  ×) and add more. For a citation this shows every person who cites the same
+  source; removing one keeps the source for the others.
+- **Link existing documents both ways.** From the Documents overview you can
+  assign a document to people, and from a person's Sources panel you can link an
+  existing document from the library ("Existing").
+
+### Fixed
+- **Calendar: long names no longer overflow the day cells** — they truncate
+  cleanly inside the chip.
+- **Image viewer: no more console warnings when zooming with the wheel** (the
+  wheel handler is now a proper non-passive listener), and zooming no longer
+  scrolls the page behind it.
+- **Map: hardened against a "signal is aborted" crash** on basemap/theme swaps and
+  when leaving the map view.
+
 ## [1.6.2]
 
 ### Fixed
