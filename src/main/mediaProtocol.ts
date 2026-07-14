@@ -4,7 +4,7 @@ import { readFile, writeFile } from 'fs/promises'
 import { existsSync, mkdirSync, statSync } from 'fs'
 import { extname, join } from 'path'
 import { Documents } from './db/repo'
-import { mediaDir } from './db/connection'
+import { mediaDir, resolveMediaPath } from './db/connection'
 
 /**
  * Custom `tmedia://media/<documentId>` scheme that streams a stored document's
@@ -199,16 +199,19 @@ export function registerMediaProtocol(): void {
         }
       }
 
-      if (!existsSync(doc.filePath)) return new Response('Gone', { status: 404 })
+      // A restored backup's paths may point at another machine's folders —
+      // fall back to the same file name in the current media folder.
+      const filePath = resolveMediaPath(doc.filePath)
+      if (!existsSync(filePath)) return new Response('Gone', { status: 404 })
       // Thumbnail: served from the disk cache without ever reading/decoding the
       // (possibly multi-megabyte) original on a hit.
       if (w > 0) {
-        const thumb = await localThumb(id, doc.filePath, w)
+        const thumb = await localThumb(id, filePath, w)
         if (thumb) return new Response(thumb, { headers: jpegHeaders })
       }
       // Full size (the viewer) or a format nativeImage can't thumbnail.
-      const mime = doc.mimeType || EXT_MIME[extname(doc.filePath).toLowerCase()] || 'application/octet-stream'
-      const data = await readFile(doc.filePath)
+      const mime = doc.mimeType || EXT_MIME[extname(filePath).toLowerCase()] || 'application/octet-stream'
+      const data = await readFile(filePath)
       return new Response(data, {
         headers: { 'Content-Type': mime, 'Cache-Control': 'no-cache' }
       })

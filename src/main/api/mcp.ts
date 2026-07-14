@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import { extname } from 'node:path'
 import { app, nativeImage } from 'electron'
 import { Documents, Events, Families, People } from '../db/repo'
+import { resolveMediaPath } from '../db/connection'
 import { buildAtlasPoints } from '../db/atlasData'
 import type { Person } from '@shared/types'
 
@@ -172,8 +173,9 @@ function buildServer(allowWrites: boolean, onWrite: () => void): McpServer {
       if (!doc) return text({ error: 'Document not found' })
       if (/^https?:\/\//i.test(doc.filePath))
         return text({ error: 'File not downloaded locally yet — open it in TreeMonk once first' })
-      if (!existsSync(doc.filePath)) return text({ error: 'File missing on disk' })
-      const ext = extname(doc.filePath).toLowerCase()
+      const filePath = resolveMediaPath(doc.filePath)
+      if (!existsSync(filePath)) return text({ error: 'File missing on disk' })
+      const ext = extname(filePath).toLowerCase()
       const mime =
         doc.mimeType ||
         ({ '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.gif': 'image/gif' } as Record<string, string>)[ext] ||
@@ -185,7 +187,7 @@ function buildServer(allowWrites: boolean, onWrite: () => void): McpServer {
       // PNG/JPEG: decode + downscale via nativeImage (vision reads ~1500px scans
       // perfectly, and it keeps the payload small). Other formats: send as-is
       // when reasonably sized.
-      const img = nativeImage.createFromPath(doc.filePath)
+      const img = nativeImage.createFromPath(filePath)
       if (!img.isEmpty()) {
         const { width } = img.getSize()
         const resized = width > 1600 ? img.resize({ width: 1600 }) : img
@@ -196,7 +198,7 @@ function buildServer(allowWrites: boolean, onWrite: () => void): McpServer {
           ]
         }
       }
-      const buf = readFileSync(doc.filePath)
+      const buf = readFileSync(filePath)
       if (buf.length > 3 * 1024 * 1024)
         return text({ error: 'Image format not resizable and file too large (>3 MB) — open it in TreeMonk' })
       return {

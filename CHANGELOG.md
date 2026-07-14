@@ -2,6 +2,20 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.6.2]
+
+### Fixed
+- **Restoring a backup on another computer works now.** The workspace registry
+  and document records store absolute paths, so a backup restored under a
+  different Windows username (or drive) pointed at the old machine's folders —
+  the app died on launch with "Could not open the database" even though every
+  file had been restored fine. The registry now self-heals on load (a missing
+  path is re-pointed at the same file in the current data folder; entries that
+  resolve are never touched), and media reads fall back to the local media
+  folder the same way — so photos and scanned documents display again and are
+  included in GEDCOM exports after a restore. Covered by an e2e test that
+  boots the app on a foreign-path registry.
+
 ## [1.6.1]
 
 ### Fixed

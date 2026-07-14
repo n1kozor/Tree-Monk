@@ -1,6 +1,6 @@
 import { app } from 'electron'
-import { join } from 'path'
-import { mkdirSync } from 'fs'
+import { basename, join } from 'path'
+import { existsSync, mkdirSync } from 'fs'
 import Database from 'better-sqlite3'
 import { SCHEMA_SQL } from './schema'
 import { applyAuditSchema, Audit } from './audit'
@@ -20,6 +20,20 @@ export function mediaDir(): string {
   const dir = join(dataDir(), 'media')
   mkdirSync(dir, { recursive: true })
   return dir
+}
+
+/**
+ * Resolves a stored local media path that may come from ANOTHER machine.
+ * Documents record absolute paths, so a backup restored under a different
+ * Windows username (or drive) points at the old machine's folders even though
+ * the files themselves were restored fine. If the recorded path is gone but a
+ * file with the same name sits in the current media folder, use that one.
+ * Existing paths (and remote URLs) pass through untouched.
+ */
+export function resolveMediaPath(filePath: string): string {
+  if (!filePath || /^https?:\/\//i.test(filePath) || existsSync(filePath)) return filePath
+  const local = join(mediaDir(), basename(filePath))
+  return existsSync(local) ? local : filePath
 }
 
 /** Idempotent ALTERs for columns added after a DB was first created. */

@@ -1,6 +1,7 @@
 import { writeFileSync, copyFileSync, mkdirSync, existsSync } from 'fs'
 import { dirname, extname, join } from 'path'
 import { Aliases, Documents, Families, Occupations, People } from '../db/repo'
+import { resolveMediaPath } from '../db/connection'
 import type { Alias, DocumentRecord, Occupation, Person } from '@shared/types'
 
 function line(level: number, tag: string, value?: string | null): string {
@@ -55,15 +56,16 @@ function collectMedia(
         refs.set(d.id, { file: d.filePath, form: extOf(d.filePath), title: d.title })
         continue
       }
-      if (!existsSync(d.filePath)) continue
-      const ext = extOf(d.filePath)
+      const filePath = resolveMediaPath(d.filePath)
+      if (!existsSync(filePath)) continue
+      const ext = extOf(filePath)
       const base = sanitizeName(d.title)
       let name = `${base}.${ext}`
       for (let i = 2; usedNames.has(name.toLowerCase()); i++) name = `${base}_${i}.${ext}`
       usedNames.add(name.toLowerCase())
       if (!existsSync(mediaDir)) mkdirSync(mediaDir, { recursive: true })
       try {
-        copyFileSync(d.filePath, join(mediaDir, name))
+        copyFileSync(filePath, join(mediaDir, name))
         refs.set(d.id, { file: `media/${name}`, form: ext, title: d.title })
       } catch {
         /* unreadable source file — skip this one, keep exporting the rest */

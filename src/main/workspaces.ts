@@ -1,5 +1,5 @@
 import { app } from 'electron'
-import { join } from 'path'
+import { basename, join } from 'path'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs'
 import { randomUUID } from 'crypto'
 import type { Workspace } from '@shared/types'
@@ -79,7 +79,33 @@ function load(): Registry {
   if (!cache.workspaces.find((w) => w.id === cache!.active)) {
     cache.active = cache.workspaces[0].id
   }
+  healPaths(cache)
   return cache
+}
+
+/**
+ * Workspace entries store ABSOLUTE database paths, so a backup restored on
+ * another machine (different Windows username or drive) points at folders
+ * that don't exist there — the app then died on launch with "Cannot open
+ * database because the directory does not exist" even though every file was
+ * restored fine. If a recorded file is missing but a database with the same
+ * name sits in the current data folder, point the entry there. Entries whose
+ * path resolves are never touched, and a file that is genuinely absent
+ * everywhere is left alone (a fresh install's not-yet-created treemonk.db
+ * must keep its local path so getDb() can create it).
+ */
+function healPaths(r: Registry): void {
+  let healed = false
+  for (const w of r.workspaces) {
+    if (!w.file || existsSync(w.file)) continue
+    const name = basename(w.file)
+    const local = [join(treesDir(), name), join(rootDir(), name)].find((p) => existsSync(p))
+    if (local && local !== w.file) {
+      w.file = local
+      healed = true
+    }
+  }
+  if (healed) persist()
 }
 
 export function listWorkspaces(): Workspace[] {

@@ -6,6 +6,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { app } from 'electron'
 import { AppSettings, Documents, Events, Families, People, Places } from '../db/repo'
+import { resolveMediaPath } from '../db/connection'
 import { buildPedigree } from '../db/pedigree'
 import { buildAtlasPoints } from '../db/atlasData'
 import { exportGedcom } from '../gedcom/export'
@@ -334,14 +335,15 @@ const routes: Route[] = [
       if (!doc) throw new ApiError(404, 'Document not found')
       if (/^https?:\/\//i.test(doc.filePath))
         throw new ApiError(409, 'File not downloaded locally yet — open it in the app first')
-      if (!existsSync(doc.filePath)) throw new ApiError(410, 'File missing on disk')
+      const filePath = resolveMediaPath(doc.filePath)
+      if (!existsSync(filePath)) throw new ApiError(410, 'File missing on disk')
       const mime =
         doc.mimeType ||
         { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.gif': 'image/gif', '.pdf': 'application/pdf' }[
-          extname(doc.filePath).toLowerCase()
+          extname(filePath).toLowerCase()
         ] ||
         'application/octet-stream'
-      return { __raw: { mime, body: readFileSync(doc.filePath) } }
+      return { __raw: { mime, body: readFileSync(filePath) } }
     }
   },
   { method: 'GET', pattern: /^\/api\/v1\/places$/, handler: () => Places.list() },

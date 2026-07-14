@@ -3,7 +3,7 @@ import { mediaAuthHeaders } from './familysearch'
 import { copyFileSync, readFileSync, writeFileSync, existsSync } from 'fs'
 import { basename, extname, join } from 'path'
 import { randomUUID } from 'crypto'
-import { mediaDir } from './db/connection'
+import { mediaDir, resolveMediaPath } from './db/connection'
 import { warmThumbnails } from './mediaProtocol'
 import { Documents, People } from './db/repo'
 import type { DocumentKind, DocumentRecord, MediaDownloadProgress, Person } from '@shared/types'
@@ -215,7 +215,8 @@ export function openDocument(documentId: string): void {
     void shell.openExternal(doc.filePath)
     return
   }
-  if (existsSync(doc.filePath)) void shell.openPath(doc.filePath)
+  const filePath = resolveMediaPath(doc.filePath)
+  if (existsSync(filePath)) void shell.openPath(filePath)
 }
 
 /** Records a web link as a source/document attached to a person. */
@@ -238,8 +239,10 @@ export function createLinkDocument(
 /** Returns a base64 data URL for a stored document so the renderer can show it. */
 export function documentDataUrl(documentId: string): string | null {
   const doc = Documents.get(documentId)
-  if (!doc || !existsSync(doc.filePath)) return null
-  const buf = readFileSync(doc.filePath)
+  if (!doc) return null
+  const filePath = resolveMediaPath(doc.filePath)
+  if (!existsSync(filePath)) return null
+  const buf = readFileSync(filePath)
   const mime = doc.mimeType ?? 'application/octet-stream'
   return `data:${mime};base64,${buf.toString('base64')}`
 }
