@@ -32,6 +32,9 @@ Available in **English · Deutsch · Magyar** — auto-detected on first launch.
 - **🌍 Multilingual.** Full English, German and Hungarian UI (auto-detected on first launch).
 - **🪶 Lightweight & offline.** Works without an internet connection (map tiles
   being the obvious exception).
+- **🔌 Yours to automate.** An optional, local-only **HTTP API and MCP server**
+  lets your own scripts — or an AI assistant you connect — read and (if you
+  allow it) edit your tree. Off by default.
 
 ## ⬇️ Download
 
@@ -92,6 +95,37 @@ A **data-issue checker** (impossible dates, duplicates, …), one-click
 ### Global search
 Search people and documents from the top bar; results appear live as you type.
 
+### Local API & MCP server *(optional, for advanced users)*
+TreeMonk can act as a **local HTTP API** for your own scripts and tools — and as
+an **MCP server**, so an MCP-compatible AI assistant (e.g. Claude Desktop or
+Claude Code) can work with your tree: search people, walk relations and
+ancestors, read timelines and statistics, open attached document images (it can
+actually *read* a scanned certificate and cross-check it against your data),
+and — only if you allow writes — create and edit people, families and life
+events.
+
+- **Off by default, opt-in in Settings** (*Settings → Local API & MCP*). Nothing
+  changes unless you turn it on.
+- **Strictly local**: the server binds to `127.0.0.1` only and every request
+  needs the Bearer token generated in Settings. Writes sit behind a second
+  toggle, go through the same repository layer as the UI (so the audit log and
+  undo history are kept), and open windows refresh live.
+- **Self-documenting**: with the server enabled, open
+  `http://127.0.0.1:27007/docs` for the built-in offline documentation
+  (English · Deutsch · Magyar) and `http://127.0.0.1:27007/api/v1/openapi.json`
+  for the OpenAPI 3.1 spec.
+- **MCP endpoint**: `http://127.0.0.1:27007/mcp` (Streamable HTTP). For example,
+  with Claude Code:
+
+  ```bash
+  claude mcp add --transport http treemonk http://127.0.0.1:27007/mcp \
+    --header "Authorization: Bearer <token from Settings>"
+  ```
+
+No online service and no built-in AI are involved — this only lets tools *you*
+choose, running on *your* machine (or an assistant *you* connect), talk to your
+local database.
+
 ---
 
 ## 🔐 Privacy
@@ -99,7 +133,10 @@ Search people and documents from the top bar; results appear live as you type.
 TreeMonk is **local-first**. Your tree, photos and documents are stored only on
 your computer (under your user-data folder, as a SQLite database + media files).
 Nothing is uploaded anywhere. The only network calls are opt-in: map tiles,
-optional place geocoding, and the update check.
+optional place geocoding, and the update check. The optional
+[local API & MCP server](#local-api--mcp-server-optional-for-advanced-users) is
+off by default and, when enabled, listens on `127.0.0.1` only — it is never
+reachable from the network.
 
 ---
 
@@ -150,6 +187,7 @@ src/
 ├─ main/                # Electron main process (Node + SQLite)
 │  ├─ ipc.ts            # registers every ipcMain.handle
 │  ├─ db/               # connection, schema, repositories, tree projection, merge
+│  ├─ api/              # opt-in local HTTP API + MCP server + offline /docs
 │  └─ gedcom/           # parser, import, export
 ├─ preload/             # contextBridge → window.api (typed)
 └─ renderer/src/        # React app (Zustand store, i18n hu/en/de, components)
