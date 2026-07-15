@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import {
-  BookOpen,
   ClipboardList,
   Calendar,
+  Code2,
   Filter,
   Heart,
   HelpCircle,
@@ -14,10 +14,13 @@ import {
   Network,
   PanelLeftClose,
   PanelLeftOpen,
+  Plus,
+  Puzzle,
   Route,
   Search,
   Settings,
   ShieldAlert,
+  SlidersHorizontal,
   Sparkles,
   Users
 } from 'lucide-react'
@@ -26,6 +29,9 @@ import { cn } from '@/lib/utils'
 import { useAppStore, type View } from '@/store/useAppStore'
 import { useSettings } from '@/store/useSettings'
 import { isDemo } from '@/lib/demo'
+import { localizedPluginText } from '@/lib/plugins'
+import { PluginIcon } from '@/components/plugins/PluginIcon'
+import type { InstalledPlugin } from '@shared/types'
 import { AppIcon } from '@/components/common/AppIcon'
 import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { SupportDialog } from '@/components/common/SupportDialog'
@@ -36,6 +42,13 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 
 const ITEMS: { view: View; icon: typeof Search; labelKey: string }[] = [
   { view: 'board', icon: Search, labelKey: 'nav.board' },
@@ -54,9 +67,24 @@ const ITEMS: { view: View; icon: typeof Search; labelKey: string }[] = [
 ]
 
 export function Sidebar(): JSX.Element {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const view = useAppStore((s) => s.view)
   const setView = useAppStore((s) => s.setView)
+  const openPlugin = useAppStore((s) => s.openPlugin)
+  const pluginsNonce = useAppStore((s) => s.pluginsNonce)
+  const setPluginInstallOpen = useAppStore((s) => s.setPluginInstallOpen)
+  const [plugins, setPlugins] = useState<InstalledPlugin[]>([])
+  useEffect(() => {
+    let alive = true
+    const fn = window.api.plugins?.list
+    if (!fn) return undefined
+    void fn()
+      .then((list) => alive && setPlugins(list.filter((p) => p.enabled)))
+      .catch(() => alive && setPlugins([]))
+    return () => {
+      alive = false
+    }
+  }, [pluginsNonce])
   const collapsed = useSettings((s) => s.sidebarCollapsed)
   const setCollapsed = useSettings((s) => s.setSidebarCollapsed)
   const [feedbackOpen, setFeedbackOpen] = useState(false)
@@ -257,41 +285,106 @@ export function Sidebar(): JSX.Element {
               )}
             </div>
           ))}
+
         </div>
 
         {/* Separator above the bottom utility block */}
         <div className={cn('my-1 h-px shrink-0 bg-border', collapsed ? 'w-8' : 'w-full')} />
 
-        {/* Manual + Help + Settings pinned to the bottom */}
+        {/* Plugins flyout + Settings (with the small circled help) at the bottom */}
         <div className={cn('flex shrink-0 flex-col gap-1', collapsed ? 'items-center' : 'w-full')}>
-          {withTip(
-            'help.openManual',
-            <button
-              onClick={() => void window.api.app.openManual()}
-              className={cn(
-                'flex h-10 items-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
-                collapsed ? 'w-10 justify-center' : 'w-full gap-3 px-3'
-              )}
-            >
-              <BookOpen className="h-[18px] w-[18px] shrink-0" />
-              {!collapsed && <span className="truncate text-sm font-medium">{t('help.openManual')}</span>}
-            </button>
+          {!isDemo() && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  data-testid="nav-plugins-flyout"
+                  className={cn(
+                    'relative flex h-10 items-center rounded-xl transition-all duration-200',
+                    collapsed ? 'w-10 justify-center' : 'w-full gap-3 px-3',
+                    view === 'plugins' || view === 'plugin' || view === 'pluginGuide'
+                      ? 'bg-primary/20 text-primary shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
+                      : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
+                  )}
+                >
+                  <Puzzle className="h-[18px] w-[18px] shrink-0" />
+                  {!collapsed && (
+                    <span className="truncate text-sm font-medium">{t('plugins.title')}</span>
+                  )}
+                  {plugins.length > 0 && (
+                    <span
+                      className={cn(
+                        'flex items-center justify-center rounded-full bg-primary/20 text-[10px] font-bold leading-none text-primary',
+                        collapsed ? 'absolute -right-0.5 -top-0.5 h-4 min-w-4 px-1' : 'ml-auto h-5 min-w-5 px-1.5'
+                      )}
+                    >
+                      {plugins.length > 99 ? '99+' : plugins.length}
+                    </span>
+                  )}
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="end" className="w-64">
+                <DropdownMenuItem onClick={() => setPluginInstallOpen(true)} data-testid="plugins-flyout-add">
+                  <Plus className="mr-2 h-4 w-4" />
+                  {t('plugins.menuAdd')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setView('plugins')} data-testid="plugins-flyout-manage">
+                  <SlidersHorizontal className="mr-2 h-4 w-4" />
+                  {t('plugins.menuManage')}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setView('pluginGuide')} data-testid="plugins-flyout-guide">
+                  <Code2 className="mr-2 h-4 w-4" />
+                  {t('plugins.menuGuide')}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {plugins.length === 0 ? (
+                  <DropdownMenuItem disabled>{t('plugins.flyoutEmpty')}</DropdownMenuItem>
+                ) : (
+                  plugins.flatMap((p) =>
+                    p.menu.map((m) => (
+                      <DropdownMenuItem
+                        key={`${p.id}:${m.id}`}
+                        onClick={() => openPlugin(p.id, m.id)}
+                        data-testid={`nav-plugin-${p.id}-${m.id}`}
+                      >
+                        <PluginIcon pluginId={p.id} icon={p.icon} className="mr-2 h-4 w-4" />
+                        <span className="truncate">{localizedPluginText(m.title, i18n.language)}</span>
+                      </DropdownMenuItem>
+                    ))
+                  )
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
-          {withTip(
-            'nav.help',
-            <button
-              onClick={() => setHelpOpen(true)}
-              data-testid="open-help"
-              className={cn(
-                'flex h-10 items-center rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground',
-                collapsed ? 'w-10 justify-center' : 'w-full gap-3 px-3'
+
+          {collapsed ? (
+            <>
+              {navBtn('settings', Settings, 'nav.settings')}
+              {withTip(
+                'nav.help',
+                <button
+                  onClick={() => setHelpOpen(true)}
+                  data-testid="open-help"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <HelpCircle className="h-[18px] w-[18px]" />
+                </button>
               )}
-            >
-              <HelpCircle className="h-[18px] w-[18px] shrink-0" />
-              {!collapsed && <span className="truncate text-sm font-medium">{t('nav.help')}</span>}
-            </button>
+            </>
+          ) : (
+            <div className="flex w-full items-center gap-1">
+              <div className="min-w-0 flex-1">{navBtn('settings', Settings, 'nav.settings')}</div>
+              {withTip(
+                'nav.help',
+                <button
+                  onClick={() => setHelpOpen(true)}
+                  data-testid="open-help"
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <HelpCircle className="h-[18px] w-[18px]" />
+                </button>
+              )}
+            </div>
           )}
-          {navBtn('settings', Settings, 'nav.settings')}
         </div>
       </aside>
 

@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Longevity Top List</title>
+    <!-- The official SDK: shared TreeMonk look + automatic light/dark theming. -->
+    <link rel="stylesheet" href="tmplugin://sdk/treemonk.css" />
+    <script src="tmplugin://sdk/treemonk.js"></script>
+    <style>
+      /* Plugin-specific styles only — colors come from the SDK's --tm-* vars. */
+      .rank { width: 28px; text-align: center; font-weight: 700; color: var(--tm-accent); }
+      .tm-card:nth-child(-n + 3) .rank { font-size: 16px; }
+      .name { flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .years { color: var(--tm-muted); font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <h1 id="title"></h1>
+    <p class="tm-sub" id="sub"></p>
+    <div id="out" class="tm-state"></div>
+    <script>
+      // TM (from treemonk.js) carries api/token/lang/theme and helpers:
+      // TM.t({hu,en,de}) picks the app language, TM.fetch() talks to the API.
+      const T = {
+        title: TM.t({ hu: 'Hosszú élet toplista', en: 'Longevity top list', de: 'Langlebigkeit-Topliste' }),
+        sub: TM.t({
+          hu: 'A leghosszabb életű családtagok (ismert születési és halálozási év alapján)',
+          en: 'The longest-lived family members (based on known birth and death years)',
+          de: 'Die langlebigsten Familienmitglieder (nach bekannten Geburts- und Sterbejahren)'
+        }),
+        loading: TM.t({ hu: 'Betöltés…', en: 'Loading…', de: 'Laden…' }),
+        years: TM.t({ hu: 'év', en: 'yrs', de: 'J.' }),
+        none: TM.t({
+          hu: 'Nincs elég adat — ehhez születési ÉS halálozási dátumok kellenek.',
+          en: 'Not enough data — this needs both birth AND death dates.',
+          de: 'Zu wenig Daten — es braucht Geburts- UND Sterbedaten.'
+        }),
+        error: TM.t({ hu: 'Nem sikerült elérni a helyi API-t.', en: 'Could not reach the local API.', de: 'Lokale API nicht erreichbar.' }),
+        of: TM.t({ hu: 'fő vizsgálva', en: 'people examined', de: 'Personen geprüft' })
+      }
+
+      document.getElementById('title').textContent = T.title
+      document.getElementById('sub').textContent = T.sub
+      const out = document.getElementById('out')
+      out.textContent = T.loading
+
+      const year = (s) => {
+        const m = /\d{4}/.exec(s || '')
+        return m ? Number(m[0]) : null
+      }
+
+      TM.fetch('/api/v1/people?limit=500')
+        .then(({ total, items }) => {
+          const scored = items
+            .map((p) => {
+              const b = year(p.birthDate)
+              const d = year(p.deathDate)
+              return b && d && d >= b && d - b < 130
+                ? { name: `${p.givenName} ${p.surname}`.trim() || '—', b, d, age: d - b }
+                : null
+            })
+            .filter(Boolean)
+            .sort((a, b) => b.age - a.age)
+            .slice(0, 20)
+          if (!scored.length) {
+            out.textContent = T.none
+            return
+          }
+          out.className = ''
+          out.innerHTML = scored
+            .map(
+              (p, i) =>
+                `<div class="tm-card tm-row"><span class="rank">${i + 1}.</span>` +
+                `<span class="name"></span>` +
+                `<span class="years">${p.b}–${p.d}</span>` +
+                `<span class="tm-badge">${p.age} ${T.years}</span></div>`
+            )
+            .join('')
+          // Names are set via textContent so a creative name can't inject HTML.
+          out.querySelectorAll('.name').forEach((el, i) => (el.textContent = scored[i].name))
+          document.getElementById('sub').textContent = `${T.sub} — ${total} ${T.of}`
+        })
+        .catch(() => {
+          out.textContent = T.error
+        })
+    </script>
+  </body>
+</html>

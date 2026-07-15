@@ -124,6 +124,13 @@ const api: TreeMonkApi = {
       return () => ipcRenderer.removeListener(Channels.apiServer.onExternalChange, h)
     }
   },
+  plugins: {
+    list: () => ipcRenderer.invoke(Channels.plugins.list),
+    install: (filePath) => ipcRenderer.invoke(Channels.plugins.install, filePath),
+    remove: (id) => ipcRenderer.invoke(Channels.plugins.remove, id),
+    setEnabled: (id, enabled) => ipcRenderer.invoke(Channels.plugins.setEnabled, id, enabled),
+    panel: (pluginId, menuId) => ipcRenderer.invoke(Channels.plugins.panel, pluginId, menuId)
+  },
   wiki: {
     eventsNear: (lat, lon, fromYear, toYear, lang) =>
       ipcRenderer.invoke(Channels.wiki.eventsNear, lat, lon, fromYear, toYear, lang)

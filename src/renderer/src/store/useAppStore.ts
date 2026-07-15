@@ -18,6 +18,9 @@ export type View =
   | 'changelog'
   | 'profile'
   | 'settings'
+  | 'plugin'
+  | 'plugins'
+  | 'pluginGuide'
 
 /** A browser-style open tab. Views are singletons (one tab each); persons and
  *  documents can each have many. Title/icon are derived live from the store. */
@@ -88,6 +91,16 @@ interface AppState {
   loading: boolean
 
   setView: (view: View) => void
+  /** The plugin menu entry shown while `view === 'plugin'`. */
+  activePlugin: { pluginId: string; menuId: string } | null
+  /** Open a plugin's sandboxed panel (sidebar plugin entries). */
+  openPlugin: (pluginId: string, menuId: string) => void
+  /** Bumped whenever plugins are (un)installed or toggled — sidebar refreshes. */
+  pluginsNonce: number
+  bumpPlugins: () => void
+  /** The step-by-step plugin install wizard (opened from the sidebar flyout). */
+  pluginInstallOpen: boolean
+  setPluginInstallOpen: (open: boolean) => void
   /** Navigate to the Documents view and open this document in the viewer. */
   openDocument: (id: string) => void
   selectPerson: (id: string | null) => void
@@ -245,6 +258,21 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((s) => {
       persistTabs(view, s.tabs, null)
       return { view, activeTabId: null, profilePersonId: undefined }
+    }),
+  activePlugin: null,
+  pluginsNonce: 0,
+  bumpPlugins: () => set((s) => ({ pluginsNonce: s.pluginsNonce + 1 })),
+  pluginInstallOpen: false,
+  setPluginInstallOpen: (open) => set({ pluginInstallOpen: open }),
+  openPlugin: (pluginId, menuId) =>
+    set((s) => {
+      persistTabs(s.view, s.tabs, null)
+      return {
+        view: 'plugin' as View,
+        activePlugin: { pluginId, menuId },
+        activeTabId: null,
+        profilePersonId: undefined
+      }
     }),
   openDocument: (id) =>
     set((s) => {

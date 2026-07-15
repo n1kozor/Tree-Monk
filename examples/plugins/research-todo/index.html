@@ -1,0 +1,308 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Research To-Do</title>
+    <link rel="stylesheet" href="tmplugin://sdk/treemonk.css" />
+    <script src="tmplugin://sdk/treemonk.js"></script>
+    <style>
+      /* Colors come from the SDK's --tm-* variables → light + dark for free. */
+      .toolbar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+      .toolbar .tm-input { flex: 1; min-width: 160px; width: auto; }
+      .chip {
+        font: inherit; font-size: 12px; cursor: pointer;
+        color: var(--tm-muted); background: var(--tm-card);
+        border: 1px solid var(--tm-border); border-radius: 999px; padding: 4px 12px;
+      }
+      .chip.on { color: var(--tm-accent); border-color: var(--tm-accent); background: var(--tm-accent-soft); }
+      .summary { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+      .kpi { flex: 1; min-width: 120px; text-align: center; }
+      .kpi b { display: block; font-size: 20px; color: var(--tm-accent); }
+      .kpi span { font-size: 11px; color: var(--tm-muted); }
+      .person { cursor: pointer; }
+      .person .head { display: flex; align-items: center; gap: 10px; }
+      .pname { font-weight: 600; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+      .years { color: var(--tm-muted); font-size: 12px; }
+      .tasks { margin-top: 8px; display: none; }
+      .person.open .tasks { display: block; }
+      .task { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; font-size: 13px; }
+      .dot { margin-top: 5px; height: 8px; width: 8px; border-radius: 999px; flex-shrink: 0; }
+      .p1 { background: var(--tm-danger); }
+      .p2 { background: var(--tm-accent); }
+      .p3 { background: var(--tm-muted); }
+      .hint { color: var(--tm-muted); font-size: 12px; }
+      .extra { margin-top: 6px; }
+    </style>
+  </head>
+  <body>
+    <h1 id="title"></h1>
+    <p class="tm-sub" id="sub"></p>
+    <div class="summary" id="summary" style="display: none">
+      <div class="tm-card kpi"><b id="kPeople"></b><span id="kPeopleL"></span></div>
+      <div class="tm-card kpi"><b id="kTasks"></b><span id="kTasksL"></span></div>
+      <div class="tm-card kpi"><b id="kHigh"></b><span id="kHighL"></span></div>
+    </div>
+    <div class="toolbar" id="toolbar" style="display: none">
+      <input id="q" class="tm-input" type="search" />
+    </div>
+    <div id="out" class="tm-state"></div>
+
+    <script>
+      const T = {
+        title: TM.t({ hu: 'Kutatási teendők', en: 'Research to-dos', de: 'Recherche-Aufgaben' }),
+        sub: TM.t({
+          hu: 'A fád hiányaiból generált teendőlista — kattints egy személyre a részletekért és a forrás-ellenőrzésért.',
+          en: "A to-do list generated from your tree's gaps — click a person for details and a source check.",
+          de: 'Aus den Lücken deines Baums erzeugte Aufgabenliste — klicke eine Person für Details und Quellen-Check.'
+        }),
+        loading: TM.t({ hu: 'A fa elemzése…', en: 'Analysing the tree…', de: 'Baum wird analysiert…' }),
+        error: TM.t({ hu: 'Nem sikerült elérni a helyi API-t.', en: 'Could not reach the local API.', de: 'Lokale API nicht erreichbar.' }),
+        empty: TM.t({ hu: 'Nincs teendő — minden alapadat megvan. Szép munka! 🎉', en: 'No to-dos — all core data present. Nice work! 🎉', de: 'Keine Aufgaben — alle Kerndaten vorhanden. Gute Arbeit! 🎉' }),
+        noMatch: TM.t({ hu: 'Nincs találat a szűrésre.', en: 'Nothing matches the filter.', de: 'Nichts passt zum Filter.' }),
+        people: TM.t({ hu: 'érintett személy', en: 'people affected', de: 'betroffene Personen' }),
+        tasks: TM.t({ hu: 'teendő', en: 'to-dos', de: 'Aufgaben' }),
+        high: TM.t({ hu: 'sürgős', en: 'high priority', de: 'dringend' }),
+        search: TM.t({ hu: 'Keresés névre…', en: 'Search by name…', de: 'Nach Name suchen…' }),
+        all: TM.t({ hu: 'Mind', en: 'All', de: 'Alle' }),
+        checking: TM.t({ hu: 'Források ellenőrzése…', en: 'Checking sources…', de: 'Quellen werden geprüft…' }),
+        logs: TM.t({ hu: 'kutatási napló-bejegyzés', en: 'research log entries', de: 'Recherche-Protokolleinträge' }),
+        // Task texts + archival hints
+        tBirthDate: TM.t({ hu: 'Születési dátum felkutatása', en: 'Find the birth date', de: 'Geburtsdatum ermitteln' }),
+        tBirthPlace: TM.t({ hu: 'Születési hely felkutatása', en: 'Find the birth place', de: 'Geburtsort ermitteln' }),
+        hBirth: TM.t({ hu: 'keresztelési anyakönyv a lakóhely egyházközségénél', en: 'christening register of the home parish', de: 'Taufmatrikel der Heimatpfarrei' }),
+        tDeathDate: TM.t({ hu: 'Halálozási dátum felkutatása (elhunytként jelölt)', en: 'Find the death date (marked deceased)', de: 'Sterbedatum ermitteln (als verstorben markiert)' }),
+        tDeathLikely: TM.t({ hu: 'Valószínűleg elhunyt — halálozás ellenőrzése', en: 'Probably deceased — verify the death', de: 'Wahrscheinlich verstorben — Tod prüfen' }),
+        tDeathPlace: TM.t({ hu: 'Halálozási hely felkutatása', en: 'Find the death place', de: 'Sterbeort ermitteln' }),
+        hDeath: TM.t({ hu: 'halotti anyakönyv, gyászjelentés, temetői nyilvántartás', en: 'death register, obituary, cemetery records', de: 'Sterbematrikel, Todesanzeige, Friedhofsregister' }),
+        tParents: TM.t({ hu: 'Szülők felkutatása', en: 'Find the parents', de: 'Eltern ermitteln' }),
+        hParents: TM.t({ hu: 'a keresztelési bejegyzés megnevezi a szülőket', en: 'the christening entry names the parents', de: 'der Taufeintrag nennt die Eltern' }),
+        tMarriage: TM.t({ hu: 'Házassági dátum/hely felkutatása', en: 'Find the marriage date/place', de: 'Heiratsdatum/-ort ermitteln' }),
+        hMarriage: TM.t({ hu: 'házassági anyakönyv — általában a menyasszony egyházközségében', en: "marriage register — usually the bride's parish", de: 'Traumatrikel — meist in der Pfarrei der Braut' }),
+        tNoSource: TM.t({ hu: 'Egyetlen forrás sincs rögzítve', en: 'No source recorded at all', de: 'Keine einzige Quelle erfasst' }),
+        tNoSourceFor: TM.t({ hu: 'Nincs forrás ehhez: ', en: 'No source for: ', de: 'Keine Quelle für: ' }),
+        hSource: TM.t({ hu: 'csatolj anyakönyvi kivonatot vagy hivatkozást', en: 'attach a record image or a citation', de: 'Urkundenbild oder Zitat anhängen' }),
+        fBirth: TM.t({ hu: 'születés', en: 'birth', de: 'Geburt' }),
+        fDeath: TM.t({ hu: 'halálozás', en: 'death', de: 'Tod' }),
+        fMarriage: TM.t({ hu: 'házasság', en: 'marriage', de: 'Heirat' }),
+        fParents: TM.t({ hu: 'szülők', en: 'parents', de: 'Eltern' }),
+        fSources: TM.t({ hu: 'források', en: 'sources', de: 'Quellen' })
+      }
+
+      document.getElementById('title').textContent = T.title
+      document.getElementById('sub').textContent = T.sub
+      const out = document.getElementById('out')
+      out.textContent = T.loading
+
+      const year = (s) => {
+        const m = /\d{4}/.exec(s || '')
+        return m ? Number(m[0]) : null
+      }
+      const NOW = new Date().getFullYear()
+
+      /** Drains a paged list endpoint ({ total, offset, items }). */
+      async function allPages(path, pageSize) {
+        const all = []
+        for (let offset = 0; offset < 50000; offset += pageSize) {
+          const page = await TM.fetch(path + '?limit=' + pageSize + '&offset=' + offset)
+          all.push(...page.items)
+          if (all.length >= page.total || page.items.length === 0) break
+        }
+        return all
+      }
+
+      const CATS = ['birth', 'death', 'marriage', 'parents']
+      let filterCat = 'all'
+      let rows = [] // { p, years, tasks: [{cat, prio, text, hint}] }
+
+      function computeTasks(p, hasParents, undatedUnions) {
+        const tasks = []
+        const b = year(p.birthDate)
+        const d = year(p.deathDate)
+        if (!p.birthDate) tasks.push({ cat: 'birth', prio: 1, text: T.tBirthDate, hint: T.hBirth })
+        if (!p.birthPlace) tasks.push({ cat: 'birth', prio: 2, text: T.tBirthPlace, hint: T.hBirth })
+        if (p.deceased && !p.deathDate) tasks.push({ cat: 'death', prio: 1, text: T.tDeathDate, hint: T.hDeath })
+        if (!p.deceased && !p.deathDate && b && NOW - b > 105)
+          tasks.push({ cat: 'death', prio: 2, text: T.tDeathLikely, hint: T.hDeath })
+        if (p.deathDate && !p.deathPlace) tasks.push({ cat: 'death', prio: 2, text: T.tDeathPlace, hint: T.hDeath })
+        if (!hasParents) tasks.push({ cat: 'parents', prio: 2, text: T.tParents, hint: T.hParents })
+        for (let i = 0; i < undatedUnions; i++)
+          tasks.push({ cat: 'marriage', prio: 2, text: T.tMarriage, hint: T.hMarriage })
+        return tasks
+      }
+
+      Promise.all([
+        allPages('/api/v1/people', 500),
+        allPages('/api/v1/families', 500),
+        TM.fetch('/api/v1/research-logs')
+      ])
+        .then(([people, families, logs]) => {
+          const isChild = new Set()
+          for (const f of families) for (const c of f.childIds) isChild.add(c)
+          const undated = {}
+          for (const f of families) {
+            if (f.marriageDate || (!f.husbandId && !f.wifeId)) continue
+            // An undated union only counts when it is a REAL couple.
+            if (f.husbandId && f.wifeId) {
+              undated[f.husbandId] = (undated[f.husbandId] || 0) + 1
+              undated[f.wifeId] = (undated[f.wifeId] || 0) + 1
+            }
+          }
+          const logCount = {}
+          for (const l of logs) if (l.personId) logCount[l.personId] = (logCount[l.personId] || 0) + 1
+
+          rows = people
+            .map((p) => {
+              const tasks = computeTasks(p, isChild.has(p.id), undated[p.id] || 0)
+              const b = year(p.birthDate)
+              const d = year(p.deathDate)
+              return tasks.length
+                ? {
+                    p,
+                    years: (b || '?') + '–' + (d || (p.deceased ? '?' : '')),
+                    tasks,
+                    logs: logCount[p.id] || 0,
+                    score: tasks.reduce((s, t) => s + (t.prio === 1 ? 3 : t.prio === 2 ? 2 : 1), 0)
+                  }
+                : null
+            })
+            .filter(Boolean)
+            .sort((a, b) => b.score - a.score)
+
+          const total = rows.reduce((s, r) => s + r.tasks.length, 0)
+          const high = rows.reduce((s, r) => s + r.tasks.filter((t) => t.prio === 1).length, 0)
+          document.getElementById('kPeople').textContent = rows.length
+          document.getElementById('kPeopleL').textContent = T.people
+          document.getElementById('kTasks').textContent = total
+          document.getElementById('kTasksL').textContent = T.tasks
+          document.getElementById('kHigh').textContent = high
+          document.getElementById('kHighL').textContent = T.high
+          document.getElementById('summary').style.display = ''
+
+          // Toolbar: search + category chips
+          const tb = document.getElementById('toolbar')
+          tb.style.display = ''
+          const q = document.getElementById('q')
+          q.placeholder = T.search
+          q.addEventListener('input', render)
+          const catLabel = { birth: T.fBirth, death: T.fDeath, marriage: T.fMarriage, parents: T.fParents }
+          for (const c of ['all', ...CATS]) {
+            const btn = document.createElement('button')
+            btn.className = 'chip' + (c === 'all' ? ' on' : '')
+            btn.textContent = c === 'all' ? T.all : catLabel[c]
+            btn.addEventListener('click', () => {
+              filterCat = c
+              tb.querySelectorAll('.chip').forEach((x) => x.classList.remove('on'))
+              btn.classList.add('on')
+              render()
+            })
+            tb.appendChild(btn)
+          }
+          render()
+        })
+        .catch((e) => {
+          // Show the concrete reason (API 401/403/404, Failed to fetch…) — it
+          // tells apart a dead server, a bad token and a missing endpoint.
+          out.textContent = T.error + ' [' + ((e && e.message) || e) + ']'
+        })
+
+      function render() {
+        const q = document.getElementById('q').value.trim().toLowerCase()
+        const list = rows.filter((r) => {
+          const name = (r.p.givenName + ' ' + r.p.surname).toLowerCase()
+          if (q && !name.includes(q)) return false
+          if (filterCat !== 'all' && !r.tasks.some((t) => t.cat === filterCat)) return false
+          return true
+        })
+        out.className = ''
+        out.textContent = ''
+        if (!rows.length) {
+          out.className = 'tm-state'
+          out.textContent = T.empty
+          return
+        }
+        if (!list.length) {
+          out.className = 'tm-state'
+          out.textContent = T.noMatch
+          return
+        }
+        for (const r of list.slice(0, 300)) out.appendChild(personCard(r))
+      }
+
+      function personCard(r) {
+        const card = document.createElement('div')
+        card.className = 'tm-card person'
+        const head = document.createElement('div')
+        head.className = 'head'
+        const name = document.createElement('span')
+        name.className = 'pname'
+        name.textContent = (r.p.givenName + ' ' + r.p.surname).trim() || '—' // textContent: injection-safe
+        const years = document.createElement('span')
+        years.className = 'years'
+        years.textContent = r.years
+        const badge = document.createElement('span')
+        badge.className = 'tm-badge'
+        badge.textContent = r.tasks.length
+        head.append(name, years, badge)
+        card.appendChild(head)
+
+        const tasks = document.createElement('div')
+        tasks.className = 'tasks'
+        for (const t of r.tasks) tasks.appendChild(taskRow(t))
+        if (r.logs) {
+          const l = document.createElement('p')
+          l.className = 'hint extra'
+          l.textContent = '📋 ' + r.logs + ' ' + T.logs
+          tasks.appendChild(l)
+        }
+        card.appendChild(tasks)
+
+        let checked = false
+        head.addEventListener('click', () => {
+          card.classList.toggle('open')
+          if (checked || !card.classList.contains('open')) return
+          checked = true
+          // Lazy source check: one extra call per OPENED person only.
+          const note = document.createElement('p')
+          note.className = 'hint extra'
+          note.textContent = T.checking
+          tasks.appendChild(note)
+          TM.fetch('/api/v1/people/' + r.p.id + '/citations')
+            .then((cites) => {
+              note.remove()
+              const tags = new Set(cites.map((c) => (c.eventTag || '').toUpperCase()))
+              const missing = []
+              if (!cites.length) {
+                tasks.insertBefore(taskRow({ prio: 1, text: T.tNoSource, hint: T.hSource }), tasks.firstChild)
+                return
+              }
+              if (r.p.birthDate && !tags.has('BIRT')) missing.push(T.fBirth)
+              if (r.p.deathDate && !tags.has('DEAT')) missing.push(T.fDeath)
+              if (missing.length)
+                tasks.insertBefore(
+                  taskRow({ prio: 3, text: T.tNoSourceFor + missing.join(', '), hint: T.hSource }),
+                  tasks.firstChild
+                )
+            })
+            .catch(() => note.remove())
+        })
+        return card
+      }
+
+      function taskRow(t) {
+        const row = document.createElement('div')
+        row.className = 'task'
+        const dot = document.createElement('span')
+        dot.className = 'dot p' + (t.prio || 2)
+        const body = document.createElement('div')
+        const main = document.createElement('div')
+        main.textContent = t.text
+        const hint = document.createElement('div')
+        hint.className = 'hint'
+        hint.textContent = t.hint || ''
+        body.append(main, hint)
+        row.append(dot, body)
+        return row
+      }
+    </script>
+  </body>
+</html>

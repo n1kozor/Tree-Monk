@@ -1,0 +1,20 @@
+{
+  "id": "research-todo",
+  "name": "Research To-Do",
+  "version": "1.0.0",
+  "author": "TreeMonk examples",
+  "description": {
+    "hu": "Kutatási teendőlista a fád hiányaiból: hiányzó dátumok, helyek, szülők, források — prioritással, személyenként.",
+    "en": "A research to-do list generated from your tree's gaps: missing dates, places, parents, sources — prioritised, per person.",
+    "de": "Eine Recherche-Aufgabenliste aus den Lücken deines Baums: fehlende Daten, Orte, Eltern, Quellen — priorisiert, pro Person."
+  },
+  "icon": "icon.svg",
+  "permissions": ["read"],
+  "menu": [
+    {
+      "id": "todo",
+      "title": { "hu": "Kutatási teendők", "en": "Research to-dos", "de": "Recherche-Aufgaben" },
+      "entry": "index.html"
+    }
+  ]
+}

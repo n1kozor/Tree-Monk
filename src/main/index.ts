@@ -7,6 +7,7 @@ import { setApiChangeBroadcaster, startApiIfEnabled, stopApiServer } from './api
 import { Channels } from '@shared/ipc'
 import { destroyExportWindow } from './treeExport'
 import { registerMediaScheme, registerMediaProtocol } from './mediaProtocol'
+import { registerPluginScheme, registerPluginProtocol } from './pluginProtocol'
 
 // AppImage on newer Linux (e.g. Ubuntu 24.04) restricts unprivileged user
 // namespaces and ships chrome-sandbox without the SUID-root bit, so Chromium's
@@ -18,8 +19,10 @@ if (process.platform === 'linux' && process.env.APPIMAGE) {
   app.commandLine.appendSwitch('no-sandbox')
 }
 
-// Privileged custom scheme (tmedia://) must be registered before app `ready`.
+// Privileged custom schemes (tmedia://, tmplugin://) must be registered
+// before app `ready`.
 registerMediaScheme()
+registerPluginScheme()
 
 const isDev = !app.isPackaged
 // Bundled app icon (extraResources → resources/icon.png) for the window + taskbar.
@@ -94,6 +97,7 @@ if (!app.requestSingleInstanceLock()) {
       )
     }
     registerMediaProtocol()
+    registerPluginProtocol()
     registerIpc()
     // Local API server (Settings-toggled): external writes refresh open windows.
     setApiChangeBroadcaster(() => {

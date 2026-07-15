@@ -5,7 +5,21 @@ import { randomBytes } from 'node:crypto'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { app } from 'electron'
-import { AppSettings, Documents, Events, Families, People, Places } from '../db/repo'
+import {
+  Aliases,
+  AppSettings,
+  Citations,
+  Collaborations,
+  Documents,
+  Events,
+  Families,
+  Godparents,
+  Notes,
+  Occupations,
+  People,
+  Places,
+  ResearchLogs
+} from '../db/repo'
 import { resolveMediaPath } from '../db/connection'
 import { buildPedigree } from '../db/pedigree'
 import { buildAtlasPoints } from '../db/atlasData'
@@ -13,6 +27,7 @@ import { exportGedcom } from '../gedcom/export'
 import type { ApiServerConfig, ApiServerStatus, EventRecord, FamilyInput, PersonInput } from '@shared/types'
 import { handleMcpRequest } from './mcp'
 import { DOCS_HTML } from './docs'
+import { anyPluginEnabled, pluginScopesForToken } from '../plugins'
 
 /**
  * TreeMonk Local API — an opt-in HTTP server bound STRICTLY to 127.0.0.1.
@@ -125,6 +140,10 @@ async function readBody(req: IncomingMessage): Promise<unknown> {
   }
 }
 
+function requirePerson(id: string): void {
+  if (!People.get(id)) throw new ApiError(404, 'Person not found')
+}
+
 /** Person detail: the person plus their relations, events and occupations. */
 function personDetail(id: string): unknown {
   const person = People.get(id)
@@ -174,6 +193,8 @@ interface Route {
   method: string
   pattern: RegExp
   write?: boolean
+  /** Extra scope a PLUGIN token needs beyond read/write (e.g. document files). */
+  scope?: 'documents'
   handler: (req: IncomingMessage, params: string[], query: URLSearchParams) => Promise<unknown> | unknown
 }
 
@@ -330,6 +351,7 @@ const routes: Route[] = [
   {
     method: 'GET',
     pattern: /^\/api\/v1\/documents\/([^/]+)\/file$/,
+    scope: 'documents',
     handler: (_r, [id]) => {
       const doc = Documents.get(id)
       if (!doc) throw new ApiError(404, 'Document not found')
@@ -344,6 +366,67 @@ const routes: Route[] = [
         ] ||
         'application/octet-stream'
       return { __raw: { mime, body: readFileSync(filePath) } }
+    }
+  },
+  // ---- Research & profile extras (sources, occupations, aliases, …) ----
+  {
+    method: 'GET',
+    pattern: /^\/api\/v1\/people\/([^/]+)\/citations$/,
+    handler: (_r, [id]) => {
+      requirePerson(id)
+      return Citations.forOwner('person', id)
+    }
+  },
+  {
+    method: 'GET',
+    pattern: /^\/api\/v1\/people\/([^/]+)\/occupations$/,
+    handler: (_r, [id]) => {
+      requirePerson(id)
+      return Occupations.forPerson(id)
+    }
+  },
+  { method: 'GET', pattern: /^\/api\/v1\/occupations$/, handler: () => Occupations.all() },
+  {
+    method: 'GET',
+    pattern: /^\/api\/v1\/people\/([^/]+)\/aliases$/,
+    handler: (_r, [id]) => {
+      requirePerson(id)
+      return Aliases.forPerson(id)
+    }
+  },
+  { method: 'GET', pattern: /^\/api\/v1\/aliases$/, handler: () => Aliases.all() },
+  {
+    method: 'GET',
+    pattern: /^\/api\/v1\/people\/([^/]+)\/godparents$/,
+    handler: (_r, [id]) => {
+      requirePerson(id)
+      // Both directions at once: this person's godparents AND godchildren.
+      return { godparentIds: Godparents.forPerson(id), godchildIds: Godparents.godchildrenOf(id) }
+    }
+  },
+  {
+    method: 'GET',
+    pattern: /^\/api\/v1\/people\/([^/]+)\/notes$/,
+    handler: (_r, [id]) => {
+      requirePerson(id)
+      return Notes.forOwner('person', id)
+    }
+  },
+  {
+    method: 'GET',
+    pattern: /^\/api\/v1\/people\/([^/]+)\/research-logs$/,
+    handler: (_r, [id]) => {
+      requirePerson(id)
+      return ResearchLogs.forPerson(id)
+    }
+  },
+  { method: 'GET', pattern: /^\/api\/v1\/research-logs$/, handler: () => ResearchLogs.all() },
+  {
+    method: 'GET',
+    pattern: /^\/api\/v1\/people\/([^/]+)\/collaborations$/,
+    handler: (_r, [id]) => {
+      requirePerson(id)
+      return Collaborations.forPerson(id)
     }
   },
   { method: 'GET', pattern: /^\/api\/v1\/places$/, handler: () => Places.list() },
@@ -367,6 +450,20 @@ async function handle(req: IncomingMessage, res: ServerResponse, cfg: ApiConfig)
   const url = new URL(req.url ?? '/', 'http://127.0.0.1')
   const path = url.pathname
 
+  // CORS: plugin panels run in sandboxed frames (opaque origin), so their
+  // fetches are cross-origin. Auth stays entirely with the Bearer token —
+  // without one, every data route still returns 401.
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+      'Access-Control-Max-Age': '600'
+    })
+    res.end()
+    return
+  }
+
   // Unauthenticated, data-free routes.
   if (path === '/api/v1/ping') return json(res, 200, { name: 'TreeMonk', version: app.getVersion() })
   if (path === '/docs' || path === '/docs/') {
@@ -376,20 +473,35 @@ async function handle(req: IncomingMessage, res: ServerResponse, cfg: ApiConfig)
   }
   if (path === '/api/v1/openapi.json') return json(res, 200, buildOpenApi(cfg))
 
-  // Everything else requires the Bearer token.
+  // Everything else requires a Bearer token: the user's MAIN token (full
+  // access, gated by the Settings toggles) or an enabled PLUGIN's own token
+  // (gated by the scopes the user approved for that plugin).
   const auth = req.headers.authorization ?? ''
-  if (auth !== `Bearer ${cfg.token}`) return json(res, 401, { error: 'Missing or invalid Bearer token' })
+  const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : ''
+  const isMain = bearer !== '' && bearer === cfg.token
+  const pluginScopes = isMain ? null : pluginScopesForToken(bearer)
+  if (!isMain && !pluginScopes) return json(res, 401, { error: 'Missing or invalid Bearer token' })
 
   if (path === '/mcp') {
+    if (!isMain) return json(res, 403, { error: 'Plugin tokens cannot use the MCP endpoint' })
     if (!cfg.mcpEnabled) return json(res, 404, { error: 'MCP endpoint is disabled' })
     return handleMcpRequest(req, res, cfg.allowWrites, () => broadcast())
   }
+  // The API itself may be off in Settings while the server only runs for
+  // plugin panels — then the main token has no data surface here.
+  if (isMain && !cfg.enabled) return json(res, 403, { error: 'The local API is disabled in Settings' })
 
   for (const r of routes) {
     if (req.method !== r.method) continue
     const m = path.match(r.pattern)
     if (!m) continue
-    if (r.write && !cfg.allowWrites) return json(res, 403, { error: 'Writes are disabled in Settings' })
+    if (pluginScopes) {
+      const needed = r.write ? 'write' : (r.scope ?? 'read')
+      if (!pluginScopes.includes(needed))
+        return json(res, 403, { error: `This plugin was not granted the "${needed}" permission` })
+    } else if (r.write && !cfg.allowWrites) {
+      return json(res, 403, { error: 'Writes are disabled in Settings' })
+    }
     try {
       const result = await r.handler(req, m.slice(1).map(decodeURIComponent), url.searchParams)
       if (result && typeof result === 'object' && '__raw' in (result as Record<string, unknown>)) {
@@ -411,7 +523,9 @@ async function handle(req: IncomingMessage, res: ServerResponse, cfg: ApiConfig)
 
 export function startApiIfEnabled(): void {
   const cfg = getApiConfig()
-  if (!cfg.enabled) return
+  // The server also runs while any plugin is enabled — plugin panels talk to
+  // the data through it (still 127.0.0.1-only, still token-gated per plugin).
+  if (!cfg.enabled && !anyPluginEnabled()) return
   stopApiServer()
   try {
     server = createServer((req, res) => {
@@ -506,6 +620,30 @@ function buildOpenApi(cfg: ApiConfig): unknown {
       },
       '/api/v1/people/{id}/documents': {
         get: p('Documents attached to a person', { params: [idParam] })
+      },
+      '/api/v1/people/{id}/citations': {
+        get: p('Source citations of a person (source title/author/text, event tag, quality)', { params: [idParam] })
+      },
+      '/api/v1/people/{id}/occupations': {
+        get: p('Occupations of a person (time-scoped)', { params: [idParam] })
+      },
+      '/api/v1/occupations': { get: p('Every occupation of every person') },
+      '/api/v1/people/{id}/aliases': {
+        get: p('Name variants / AKA aliases of a person', { params: [idParam] })
+      },
+      '/api/v1/aliases': { get: p('Every alias of every person') },
+      '/api/v1/people/{id}/godparents': {
+        get: p('Godparent ids of a person + the people they are godparent of', { params: [idParam] })
+      },
+      '/api/v1/people/{id}/notes': {
+        get: p('Free-text notes attached to a person', { params: [idParam] })
+      },
+      '/api/v1/people/{id}/research-logs': {
+        get: p('Research log entries for a person', { params: [idParam] })
+      },
+      '/api/v1/research-logs': { get: p('Every research log entry (incl. general ones)') },
+      '/api/v1/people/{id}/collaborations': {
+        get: p('FamilySearch collaboration discussions (read-only)', { params: [idParam] })
       },
       '/api/v1/documents/{id}/file': {
         get: p('Raw document file (image/PDF binary)', { params: [idParam] })

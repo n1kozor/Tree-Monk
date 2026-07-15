@@ -1,0 +1,20 @@
+{
+  "id": "longevity-top",
+  "name": "Longevity Top List",
+  "version": "1.0.0",
+  "author": "TreeMonk examples",
+  "description": {
+    "hu": "A családfád leghosszabb életű tagjai — toplista a helyi API-ból.",
+    "en": "The longest-lived members of your tree — a top list from the local API.",
+    "de": "Die langlebigsten Mitglieder deines Stammbaums — eine Topliste aus der lokalen API."
+  },
+  "icon": "icon.svg",
+  "permissions": ["read"],
+  "menu": [
+    {
+      "id": "toplist",
+      "title": { "hu": "Hosszú élet toplista", "en": "Longevity top list", "de": "Langlebigkeit-Topliste" },
+      "entry": "index.html"
+    }
+  ]
+}

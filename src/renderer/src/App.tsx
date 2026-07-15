@@ -23,6 +23,10 @@ import { CalendarView } from '@/components/calendar/CalendarView'
 import { ChangelogView } from '@/components/changelog/ChangelogView'
 import { ProfileView } from '@/components/profile/ProfileView'
 import { SettingsView } from '@/components/settings/SettingsView'
+import { PluginHost } from '@/components/plugins/PluginHost'
+import { PluginsView } from '@/components/plugins/PluginsView'
+import { PluginDevGuideView } from '@/components/plugins/PluginDevGuideView'
+import { PluginInstallDialog } from '@/components/plugins/PluginInstallDialog'
 import { MediaDownloadProgress } from '@/components/common/MediaDownloadProgress'
 import { GedcomSummaryDialog } from '@/components/common/GedcomSummaryDialog'
 import { CommandPalette } from '@/components/CommandPalette'
@@ -71,6 +75,9 @@ function ViewRenderer(): JSX.Element {
       {view === 'calendar' && <CalendarView />}
       {view === 'changelog' && <ChangelogView />}
       {view === 'settings' && <SettingsView />}
+      {view === 'plugin' && <PluginHost />}
+      {view === 'plugins' && <PluginsView />}
+      {view === 'pluginGuide' && <PluginDevGuideView />}
     </div>
   )
 }
@@ -269,6 +276,7 @@ export default function App(): JSX.Element {
         <PersonPanel />
         <MediaDownloadProgress />
         <GedcomSummaryDialog />
+        <PluginInstallDialog />
         <CommandPalette />
         <SupportInviteDialog open={supportInviteOpen} onOpenChange={setSupportInviteOpen} />
         <FsAnnounceDialog open={fsAnnounceOpen} onOpenChange={setFsAnnounceOpen} />

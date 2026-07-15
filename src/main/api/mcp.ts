@@ -5,7 +5,19 @@ import { z } from 'zod'
 import { existsSync, readFileSync } from 'node:fs'
 import { extname } from 'node:path'
 import { app, nativeImage } from 'electron'
-import { Documents, Events, Families, People } from '../db/repo'
+import {
+  Aliases,
+  Citations,
+  Collaborations,
+  Documents,
+  Events,
+  Families,
+  Godparents,
+  Notes,
+  Occupations,
+  People,
+  ResearchLogs
+} from '../db/repo'
 import { resolveMediaPath } from '../db/connection'
 import { buildAtlasPoints } from '../db/atlasData'
 import type { Person } from '@shared/types'
@@ -160,6 +172,50 @@ function buildServer(allowWrites: boolean, onWrite: () => void): McpServer {
         storedLocally: !/^https?:\/\//i.test(d.filePath)
       }))
       return text({ total: docs.length, documents: docs })
+    }
+  )
+
+  server.tool(
+    'get_sources',
+    'Every SOURCE of a person: citations (source title/author/publication/text, event tag, page, ' +
+      'quality) plus attached document metadata — the full evidence base for their facts.',
+    { person_id: z.string() },
+    async ({ person_id }) => {
+      if (!People.get(person_id)) return text({ error: 'Person not found' })
+      return text({
+        citations: Citations.forOwner('person', person_id),
+        documents: Documents.listForPerson(person_id).map((d) => ({
+          id: d.id,
+          title: d.title,
+          kind: d.kind,
+          date: d.date,
+          mimeType: d.mimeType
+        }))
+      })
+    }
+  )
+
+  server.tool(
+    'get_profile_extras',
+    'Everything else on a profile: occupations, name variants (aliases), godparents/godchildren, ' +
+      'free-text notes, research log entries and FamilySearch collaboration discussions.',
+    { person_id: z.string() },
+    async ({ person_id }) => {
+      const p = People.get(person_id)
+      if (!p) return text({ error: 'Person not found' })
+      const name = (pid: string): string => {
+        const x = People.get(pid)
+        return x ? `${x.givenName} ${x.surname}`.trim() : pid
+      }
+      return text({
+        occupations: Occupations.forPerson(person_id),
+        aliases: Aliases.forPerson(person_id),
+        godparents: Godparents.forPerson(person_id).map((id) => ({ id, name: name(id) })),
+        godchildren: Godparents.godchildrenOf(person_id).map((id) => ({ id, name: name(id) })),
+        notes: Notes.forOwner('person', person_id),
+        researchLogs: ResearchLogs.forPerson(person_id),
+        collaborations: Collaborations.forPerson(person_id)
+      })
     }
   )
 

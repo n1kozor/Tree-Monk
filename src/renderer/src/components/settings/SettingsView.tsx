@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Archive,
   BadgeCheck,
+  BookOpen,
   Database,
   Download,
   Eraser,
@@ -288,6 +289,13 @@ export function SettingsView(): JSX.Element {
               <Button size="sm" className="gap-2" onClick={() => setFeedbackOpen(true)}>
                 <MessageCircle className="h-4 w-4" />
                 {t('feedback.send')}
+              </Button>
+            </Row>
+            {/* The user manual moved here from the sidebar. */}
+            <Row icon={BookOpen} title={t('help.openManual')} desc={t('settings.manualDesc')}>
+              <Button size="sm" variant="outline" className="gap-2" onClick={() => void window.api.app.openManual()}>
+                <BookOpen className="h-4 w-4" />
+                {t('help.openManual')}
               </Button>
             </Row>
           </Category>

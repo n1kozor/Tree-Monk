@@ -27,6 +27,7 @@ import { exportTreeImage, exportHtmlPdf } from './treeExport'
 import { buildMapMarkers } from './db/mapData'
 import { buildAtlasPoints } from './db/atlasData'
 import { getApiConfig, getApiStatus, regenerateApiToken, restartApiServer, setApiConfig } from './api/server'
+import { installPluginZip, listPlugins, pluginPanelInfo, removePlugin, setPluginEnabled } from './plugins'
 import { eventsNear as wikiEventsNear } from './wiki'
 import { runSanityCheck } from './db/sanity'
 import { findRelationshipPath } from './db/relationship'
@@ -335,6 +336,19 @@ export function registerIpc(): void {
     return t
   })
   ipcMain.handle(Channels.apiServer.status, () => getApiStatus())
+
+  // Plugins (sandboxed panels over the local API)
+  ipcMain.handle(Channels.plugins.list, () => listPlugins())
+  ipcMain.handle(Channels.plugins.install, (e, filePath?: string) =>
+    installPluginZip(BrowserWindow.fromWebContents(e.sender), filePath)
+  )
+  ipcMain.handle(Channels.plugins.remove, (_e, id: string) => removePlugin(id))
+  ipcMain.handle(Channels.plugins.setEnabled, (_e, id: string, enabled: boolean) =>
+    setPluginEnabled(id, enabled)
+  )
+  ipcMain.handle(Channels.plugins.panel, (_e, pluginId: string, menuId: string) =>
+    pluginPanelInfo(pluginId, menuId)
+  )
   ipcMain.handle(
     Channels.wiki.eventsNear,
     (_e, lat: number, lon: number, fromYear: number, toYear: number, lang?: string) =>

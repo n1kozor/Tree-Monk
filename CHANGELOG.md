@@ -2,6 +2,30 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.7.0]
+
+### Added
+- **Plugin system (opt-in, mainly for advanced users).** Install a plugin from a
+  .zip via *sidebar → Plugins*; its menu entries appear in the sidebar. Each
+  plugin runs in a sandboxed panel that can reach **only** the local
+  127.0.0.1 API, with its own scoped token limited to the permissions
+  (read / write / documents) shown on install and granted by enabling it — no
+  Node, no external network, so data cannot leave the machine. Includes a
+  step-by-step installer that surfaces the exact validator error on a bad
+  plugin, an in-app developer guide with a "Copy for AI" button (puts the full
+  spec — manifest rules, SDK, API reference with examples — on the clipboard),
+  a shared `treemonk.css` / `treemonk.js` SDK served at `tmplugin://sdk/…`
+  (theme-aware, trilingual helpers), and two example plugins in `examples/`.
+  Manifests must provide description + menu titles in all three languages
+  (hu/en/de) or the installer rejects them. No online features and no built-in
+  AI were added; nothing changes unless you install and enable a plugin.
+- **Local API: read-only research endpoints.** Source citations, occupations,
+  aliases, godparents, notes, research logs and FamilySearch collaborations are
+  now exposed over the API, so plugins (and AI assistants over MCP) can see a
+  person's sources and profile extras. MCP gained `get_sources` and
+  `get_profile_extras` tools. `GET /api/v1/families` is now paged
+  (`{total, offset, items}`), like `/api/v1/people`.
+
 ## [1.6.3]
 
 ### Added

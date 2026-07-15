@@ -205,6 +205,13 @@ export function createDemoApi(): TreeMonkApi {
       status: async () => ({ running: false, port: 27007, error: null }),
       onExternalChange: () => () => {}
     },
+    plugins: {
+      list: async () => [],
+      install: async () => blocked(),
+      remove: async () => blocked(),
+      setEnabled: async () => blocked(),
+      panel: async () => null
+    },
     wiki: {
       eventsNear: async (lat, lon, fromYear, toYear, lang) =>
         eventsNear(lat, lon, fromYear, toYear, lang)

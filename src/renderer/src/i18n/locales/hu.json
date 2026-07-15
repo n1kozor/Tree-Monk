@@ -713,7 +713,8 @@
       "regenerate": "Új token",
       "regenerated": "Új token generálva — a régi érvénytelen.",
       "error": "A beállítás mentése nem sikerült."
-    }
+    },
+    "manualDesc": "A teljes TreeMonk-kézikönyv PDF-ben, a gép alapértelmezett megjelenítőjében nyílik meg."
   },
   "common": {
     "copy": "Másolás",
@@ -1898,5 +1899,54 @@
     "all": "Mind",
     "general": "Általános (nem személyhez kötött)",
     "empty": "Még nincs kutatási jegyzet. A személy panel „Kutatás\" fülén rögzíthetsz."
+  },
+  "plugins": {
+    "title": "Bővítmények",
+    "sidebarSection": "Bővítmények",
+    "sandboxBadge": "Elszigetelt panel — csak a helyi API-t éri el",
+    "reload": "Újratöltés",
+    "panelUnavailable": "A bővítménypanel nem érhető el (a bővítmény le van tiltva vagy hiányzik).",
+    "install": "Bővítmény telepítése",
+    "installed": "„{{name}}” telepítve. A kapcsolóval engedélyezheted.",
+    "installError": "A telepítés nem sikerült: {{error}}",
+    "remove": "Bővítmény törlése",
+    "removeConfirm": "Törlöd a(z) „{{name}}” bővítményt? A fájljai véglegesen törlődnek.",
+    "removed": "„{{name}}” törölve.",
+    "none": "Nincs telepített bővítmény. A bővítmények elszigetelt panelek, amelyek kizárólag a helyi API-n keresztül, saját jogosultságokkal érik el az adataidat.",
+    "securityNote": "A bővítmények homokozóban futnak: kizárólag a helyi API-hoz csatlakozhatnak a saját, szűkített tokenjükkel — külső hálózatot nem érnek el, így az adataid nem hagyhatják el a gépet. Telepítés után kapcsold be, ha elfogadod az alábbi jogosultságokat.",
+    "scope": {
+      "read": "olvasás",
+      "write": "írás",
+      "documents": "dokumentumfájlok",
+      "none": "nincs adathozzáférés"
+    },
+    "menuAdd": "Bővítmény hozzáadása",
+    "menuManage": "Bővítmények kezelése",
+    "flyoutEmpty": "Nincs aktív bővítmény",
+    "manageDesc": "Telepített bővítmények engedélyezése, jogosultságaik áttekintése és eltávolítása.",
+    "wizard": {
+      "title": "Bővítmény hozzáadása",
+      "step1Intro": "Mielőtt telepítesz, ezt érdemes tudni:",
+      "reqSandbox": "A bővítmények elszigetelt panelben futnak: kizárólag a helyi API-t érik el a saját, szűkített tokenjükkel — külső hálózatot nem, így az adataid nem hagyhatják el a gépet.",
+      "reqLangs": "Egy szabályos bővítmény három nyelven (magyar, angol, német) adja meg a leírását és a menüpontjait — e nélkül a telepítő elutasítja.",
+      "reqTheme": "A világos ÉS sötét témát is követnie kell — a hivatalos stíluskészlettel ez automatikus.",
+      "reqZip": "A bővítmény egyetlen .zip fájl (benne manifest.json). Telepítés után alapból kikapcsolva kerül a listába.",
+      "step2Intro": "Válaszd ki a bővítmény .zip fájlját. A telepítő ellenőrzi a manifestet — ha hibás, pontosan megmutatjuk, mi a gond.",
+      "pick": "Zip kiválasztása…",
+      "errorTitle": "A bővítmény érvénytelen",
+      "errorHint": "A fenti üzenet a fejlesztőnek szól: pontosan ezt kell javítania a manifest.json-ban. A követelmények: PLUGINS.md a TreeMonk repóban.",
+      "successTitle": "A bővítmény telepítve!",
+      "successBody": "Bekapcsolás előtt nézd át, milyen jogosultságokat kér. A bekapcsolással ezeket engedélyezed — bármikor visszavonhatod a bővítmény kikapcsolásával.",
+      "enableNow": "Engedélyezés most",
+      "later": "Majd később",
+      "enabled": "„{{name}}” engedélyezve — ott van a Bővítmények menüben.",
+      "next": "Tovább",
+      "back": "Vissza",
+      "cancel": "Mégse"
+    },
+    "menuGuide": "Bővítmény készítése",
+    "copyForLlm": "Másolás AI-nak",
+    "copiedForLlm": "A teljes plugin-specifikáció a vágólapon — illeszd be egy AI-modellnek.",
+    "copyForLlmDesc": "Tipp: a „Másolás AI-nak” gomb a TELJES műszaki specifikációt (manifest-szabályok, SDK, teljes API-referencia, működő példa) egyetlen dokumentumként a vágólapra teszi — illeszd be egy AI-asszisztensnek (pl. Claude), írd le mellé, mit csináljon a bővítmény, és kész plugint kapsz."
   }
 }

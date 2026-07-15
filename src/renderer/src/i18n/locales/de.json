@@ -713,7 +713,8 @@
       "regenerate": "Neues Token",
       "regenerated": "Neues Token erzeugt — das alte ist ungültig.",
       "error": "Speichern der Einstellung fehlgeschlagen."
-    }
+    },
+    "manualDesc": "Das vollständige TreeMonk-Handbuch als PDF, geöffnet im Standard-Viewer."
   },
   "common": {
     "copy": "Kopieren",
@@ -1898,5 +1899,54 @@
     "all": "Alle",
     "general": "Allgemein (nicht personenbezogen)",
     "empty": "Noch keine Forschungsnotizen. Erfasse sie im Reiter „Forschung\" einer Person."
+  },
+  "plugins": {
+    "title": "Erweiterungen",
+    "sidebarSection": "Erweiterungen",
+    "sandboxBadge": "Isoliertes Panel — nur lokale API",
+    "reload": "Neu laden",
+    "panelUnavailable": "Das Erweiterungs-Panel ist nicht verfügbar (Erweiterung deaktiviert oder fehlt).",
+    "install": "Erweiterung installieren",
+    "installed": "„{{name}}“ installiert. Mit dem Schalter aktivieren.",
+    "installError": "Installation fehlgeschlagen: {{error}}",
+    "remove": "Erweiterung entfernen",
+    "removeConfirm": "Erweiterung „{{name}}“ entfernen? Ihre Dateien werden endgültig gelöscht.",
+    "removed": "„{{name}}“ entfernt.",
+    "none": "Keine Erweiterungen installiert. Erweiterungen sind isolierte Panels, die ausschließlich über die lokale API und mit eigenen Berechtigungen auf deine Daten zugreifen.",
+    "securityNote": "Erweiterungen laufen isoliert: Sie können sich nur mit ihrem eigenen, eingeschränkten Token mit der lokalen API verbinden — kein Zugriff auf externe Netzwerke, deine Daten können den Rechner nicht verlassen. Aktiviere eine Erweiterung nach der Installation, wenn du die unten gezeigten Berechtigungen akzeptierst.",
+    "scope": {
+      "read": "Lesen",
+      "write": "Schreiben",
+      "documents": "Dokumentdateien",
+      "none": "kein Datenzugriff"
+    },
+    "menuAdd": "Erweiterung hinzufügen",
+    "menuManage": "Erweiterungen verwalten",
+    "flyoutEmpty": "Keine aktiven Erweiterungen",
+    "manageDesc": "Installierte Erweiterungen aktivieren, ihre Berechtigungen prüfen und entfernen.",
+    "wizard": {
+      "title": "Erweiterung hinzufügen",
+      "step1Intro": "Bevor du installierst, solltest du Folgendes wissen:",
+      "reqSandbox": "Erweiterungen laufen in einem isolierten Panel: Sie erreichen nur die lokale API mit ihrem eigenen, eingeschränkten Token — kein externes Netzwerk, deine Daten können den Rechner nicht verlassen.",
+      "reqLangs": "Eine gültige Erweiterung liefert Beschreibung und Menüeinträge in drei Sprachen (Ungarisch, Englisch, Deutsch) — sonst lehnt der Installer sie ab.",
+      "reqTheme": "Sie muss dem hellen UND dunklen Design folgen — mit dem offiziellen Stil-Kit automatisch.",
+      "reqZip": "Eine Erweiterung ist eine einzelne .zip-Datei (mit manifest.json). Nach der Installation ist sie zunächst deaktiviert.",
+      "step2Intro": "Wähle die .zip-Datei der Erweiterung. Der Installer prüft das Manifest — bei Fehlern zeigen wir genau, was nicht stimmt.",
+      "pick": "Zip auswählen…",
+      "errorTitle": "Die Erweiterung ist ungültig",
+      "errorHint": "Die Meldung oben richtet sich an den Entwickler: Genau das ist in manifest.json zu beheben. Anforderungen: PLUGINS.md im TreeMonk-Repo.",
+      "successTitle": "Erweiterung installiert!",
+      "successBody": "Prüfe die angeforderten Berechtigungen vor dem Aktivieren. Mit dem Aktivieren gewährst du sie — jederzeit widerrufbar durch Deaktivieren.",
+      "enableNow": "Jetzt aktivieren",
+      "later": "Später",
+      "enabled": "„{{name}}“ aktiviert — zu finden im Erweiterungen-Menü.",
+      "next": "Weiter",
+      "back": "Zurück",
+      "cancel": "Abbrechen"
+    },
+    "menuGuide": "Erweiterung entwickeln",
+    "copyForLlm": "Für KI kopieren",
+    "copiedForLlm": "Die vollständige Plugin-Spezifikation ist in der Zwischenablage — füge sie einem KI-Modell ein.",
+    "copyForLlmDesc": "Tipp: Der Knopf „Für KI kopieren“ legt die GESAMTE technische Spezifikation (Manifest-Regeln, SDK, vollständige API-Referenz, ein funktionierendes Beispiel) als ein Dokument in die Zwischenablage — füge sie einem KI-Assistenten (z. B. Claude) ein, beschreibe, was deine Erweiterung tun soll, und erhalte eine fertige Erweiterung."
   }
 }

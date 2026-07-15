@@ -34,6 +34,7 @@ import type {
   GedcomImportResult,
   GeoResult,
   HistEvent,
+  InstalledPlugin,
   MapMarker,
   MediaDownloadProgress,
   NoteRecord,
@@ -42,6 +43,7 @@ import type {
   KinshipFlag,
   PedigreeCouple,
   Person,
+  PluginPanelInfo,
   PersonInput,
   PersonQuery,
   SavedQuery,
@@ -171,6 +173,13 @@ export const Channels = {
     regenerateToken: 'apiServer:regenerateToken',
     status: 'apiServer:status',
     onExternalChange: 'apiServer:externalChange'
+  },
+  plugins: {
+    list: 'plugins:list',
+    install: 'plugins:install',
+    remove: 'plugins:remove',
+    setEnabled: 'plugins:setEnabled',
+    panel: 'plugins:panel'
   },
   wiki: {
     eventsNear: 'wiki:eventsNear'
@@ -432,6 +441,19 @@ export interface TreeMonkApi {
     status(): Promise<ApiServerStatus>
     /** Fires when an external API/MCP client changed the data — refresh. */
     onExternalChange(cb: () => void): () => void
+  }
+  plugins: {
+    /** Installed plugins (manifest + enabled state). */
+    list(): Promise<InstalledPlugin[]>
+    /** Picks a plugin .zip and installs it (disabled by default). Null = cancelled.
+     *  `filePath` skips the picker — automated tests only. */
+    install(filePath?: string): Promise<InstalledPlugin | null>
+    /** Uninstalls a plugin (deletes its folder + revokes its token). */
+    remove(id: string): Promise<void>
+    /** Enable/disable; enabling issues the plugin's scoped API token. */
+    setEnabled(id: string, enabled: boolean): Promise<InstalledPlugin[]>
+    /** Boot info for one menu entry's sandboxed panel. */
+    panel(pluginId: string, menuId: string): Promise<PluginPanelInfo | null>
   }
   wiki: {
     /** Historical events near a place + era (Wikidata, Hungarian labels). */

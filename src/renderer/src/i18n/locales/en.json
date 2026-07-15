@@ -713,7 +713,8 @@
       "regenerate": "New token",
       "regenerated": "New token generated — the old one is now invalid.",
       "error": "Saving the setting failed."
-    }
+    },
+    "manualDesc": "The full TreeMonk manual as a PDF, opened in your default viewer."
   },
   "common": {
     "copy": "Copy",
@@ -1901,5 +1902,54 @@
     "all": "All",
     "general": "General (not person-specific)",
     "empty": "No research notes yet. Add them on a person’s \"Research\" tab."
+  },
+  "plugins": {
+    "title": "Plugins",
+    "sidebarSection": "Plugins",
+    "sandboxBadge": "Sandboxed panel — local API only",
+    "reload": "Reload",
+    "panelUnavailable": "The plugin panel is unavailable (the plugin is disabled or missing).",
+    "install": "Install plugin",
+    "installed": "“{{name}}” installed. Flip the toggle to enable it.",
+    "installError": "Install failed: {{error}}",
+    "remove": "Remove plugin",
+    "removeConfirm": "Remove the “{{name}}” plugin? Its files are deleted permanently.",
+    "removed": "“{{name}}” removed.",
+    "none": "No plugins installed. Plugins are sandboxed panels that access your data exclusively through the local API, with their own permissions.",
+    "securityNote": "Plugins run sandboxed: they can only connect to the local API with their own scoped token — no external network access, so your data cannot leave this machine. After installing, enable a plugin if you accept the permissions shown below.",
+    "scope": {
+      "read": "read",
+      "write": "write",
+      "documents": "document files",
+      "none": "no data access"
+    },
+    "menuAdd": "Add plugin",
+    "menuManage": "Manage plugins",
+    "flyoutEmpty": "No active plugins",
+    "manageDesc": "Enable installed plugins, review their permissions and remove them.",
+    "wizard": {
+      "title": "Add plugin",
+      "step1Intro": "Before you install, here is what to know:",
+      "reqSandbox": "Plugins run in a sandboxed panel: they can only reach the local API with their own scoped token — no external network, so your data cannot leave this machine.",
+      "reqLangs": "A valid plugin provides its description and menu entries in three languages (Hungarian, English, German) — the installer rejects it otherwise.",
+      "reqTheme": "It must follow BOTH light and dark themes — automatic with the official style kit.",
+      "reqZip": "A plugin is a single .zip file (with a manifest.json inside). After installing it is listed disabled.",
+      "step2Intro": "Pick the plugin's .zip file. The installer validates the manifest — if it is invalid, we show exactly what is wrong.",
+      "pick": "Choose zip…",
+      "errorTitle": "The plugin is invalid",
+      "errorHint": "The message above is for the developer: this is exactly what to fix in manifest.json. Requirements: PLUGINS.md in the TreeMonk repo.",
+      "successTitle": "Plugin installed!",
+      "successBody": "Review the requested permissions before enabling. Enabling grants them — you can revoke at any time by disabling the plugin.",
+      "enableNow": "Enable now",
+      "later": "Later",
+      "enabled": "“{{name}}” enabled — find it in the Plugins menu.",
+      "next": "Next",
+      "back": "Back",
+      "cancel": "Cancel"
+    },
+    "menuGuide": "Build a plugin",
+    "copyForLlm": "Copy for AI",
+    "copiedForLlm": "The full plugin specification is on the clipboard — paste it to an AI model.",
+    "copyForLlmDesc": "Tip: the “Copy for AI” button puts the ENTIRE technical specification (manifest rules, SDK, full API reference, a working example) on the clipboard as one document — paste it into an AI assistant (e.g. Claude), describe what your plugin should do, and get a ready-made plugin."
   }
 }

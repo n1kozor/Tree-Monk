@@ -739,6 +739,48 @@ export interface ApiServerStatus {
   error: string | null
 }
 
+// ---- Plugins (sandboxed panels that may only talk to the local API) ----
+
+/** What a plugin is allowed to do — enforced per-token by the local API. */
+export type PluginScope = 'read' | 'write' | 'documents'
+
+/** One entry the plugin adds under the sidebar "Plugins" section. */
+export interface PluginMenuEntry {
+  id: string
+  /** Display title; either one string or per-language strings. */
+  title: string | Partial<Record<AppLanguage, string>>
+  /** HTML file (relative to the plugin folder) the panel loads. */
+  entry: string
+}
+
+/** The manifest.json a plugin ships (validated on install). */
+export interface PluginManifest {
+  id: string
+  name: string
+  version: string
+  author?: string
+  description?: string | Partial<Record<AppLanguage, string>>
+  /** Emoji shown in the sidebar/settings (keeps plugins asset-free). */
+  icon?: string
+  permissions: PluginScope[]
+  menu: PluginMenuEntry[]
+}
+
+/** An installed plugin as shown in Settings / the sidebar. */
+export interface InstalledPlugin extends PluginManifest {
+  enabled: boolean
+}
+
+/** Everything the sandboxed panel iframe needs to boot one menu entry. */
+export interface PluginPanelInfo {
+  /** tmplugin:// URL of the entry file. */
+  url: string
+  /** The plugin's own scoped API token (NOT the user's main token). */
+  token: string
+  /** http://127.0.0.1:<port> of the local API. */
+  apiBase: string
+}
+
 export type AppLanguage = 'hu' | 'en' | 'de'
 
 // ---- Printable tree export ----
