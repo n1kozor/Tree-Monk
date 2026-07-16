@@ -9,6 +9,7 @@ import {
   History,
   Images,
   LayoutDashboard,
+  ListChecks,
   MapPin,
   MessageCircle,
   Network,
@@ -61,6 +62,7 @@ const ITEMS: { view: View; icon: typeof Search; labelKey: string }[] = [
   { view: 'query', icon: Filter, labelKey: 'nav.query' },
   { view: 'kinship', icon: Route, labelKey: 'nav.kinship' },
   { view: 'research', icon: ClipboardList, labelKey: 'nav.research' },
+  { view: 'todos', icon: ListChecks, labelKey: 'nav.todos' },
   { view: 'calendar', icon: Calendar, labelKey: 'nav.calendar' },
   { view: 'changelog', icon: Sparkles, labelKey: 'nav.changelog' },
   { view: 'audit', icon: History, labelKey: 'nav.audit' }

@@ -2,6 +2,23 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.7.2]
+
+### Added
+- **To-do list (new sidebar view).** Create tasks with a title, note, priority
+  (high / normal / low) and a due date; overdue dates are highlighted. Filter by
+  open / done / all, search, toggle done in one click, and undo on delete.
+- **Link people to a to-do.** A task can be attached to one or more people (via
+  the existing person-picker). Each linked person's profile shows a "To-dos"
+  section on the Research tab, where you can toggle a task done or create a new
+  one already linked to that person; clicking a linked person on a task card
+  opens their profile.
+
+### Technical
+- New `todos` and `todo_people` tables (auto-created on DB open), a `Todos` repo
+  module, `todos:*` IPC channels, and reactive store state (`todos` plus a
+  `todosByPerson` index). No online features — everything stays local.
+
 ## [1.7.0]
 
 ### Added

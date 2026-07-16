@@ -315,7 +315,41 @@
     "startPersonHint": "Globale Startperson (ich) festlegen",
     "clearStartPerson": "Entfernen",
     "changelog": "Neuigkeiten",
-    "research": "Forschung"
+    "research": "Forschung",
+    "todos": "Aufgaben"
+  },
+  "todos": {
+    "title": "Aufgaben",
+    "new": "Neue Aufgabe",
+    "newTitle": "Neue Aufgabe",
+    "editTitle": "Aufgabe bearbeiten",
+    "openCount": "{{count}} offen",
+    "filterOpen": "Offen",
+    "filterDone": "Erledigt",
+    "filterAll": "Alle",
+    "empty": "Noch keine Aufgaben. Erstelle eine und verknüpfe die betroffenen Personen.",
+    "personEmpty": "Mit dieser Person sind keine Aufgaben verknüpft.",
+    "untitled": "Unbenannte Aufgabe",
+    "overdue": "Überfällig",
+    "markDone": "Als erledigt markieren",
+    "markOpen": "Als offen markieren",
+    "deleted": "„{{title}}“ gelöscht",
+    "deleteTitle": "„{{title}}“ löschen",
+    "deleteConfirm": "Diese Aufgabe löschen? Die Verknüpfung zu Personen wird ebenfalls entfernt.",
+    "fieldTitle": "Titel",
+    "fieldNote": "Notiz",
+    "fieldPriority": "Priorität",
+    "fieldDue": "Fällig am",
+    "fieldPeople": "Verknüpfte Personen",
+    "titlePlaceholder": "Was ist zu tun?",
+    "notePlaceholder": "Details, ein Verweis, nächster Schritt…",
+    "addPeople": "Personen hinzufügen",
+    "editPeople": "Personen bearbeiten",
+    "priority": {
+      "low": "Niedrig",
+      "normal": "Normal",
+      "high": "Hoch"
+    }
   },
   "calendar": {
     "title": "Kalender",

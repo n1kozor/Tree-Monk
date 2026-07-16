@@ -244,6 +244,26 @@ CREATE TABLE IF NOT EXISTS research_logs (
   created_at      TEXT NOT NULL
 );
 
+-- To-do items (tasks): free-standing research/admin to-dos, each optionally
+-- linked to one or more people (shown on their profile). Additive tables →
+-- existing DBs gain them on the next launch (CREATE TABLE IF NOT EXISTS).
+CREATE TABLE IF NOT EXISTS todos (
+  id          TEXT PRIMARY KEY,
+  title       TEXT NOT NULL DEFAULT '',
+  note        TEXT,
+  done        INTEGER NOT NULL DEFAULT 0,
+  priority    TEXT NOT NULL DEFAULT 'normal',  -- 'low' | 'normal' | 'high'
+  due_date    TEXT,                             -- free-form, like other dates
+  created_at  TEXT NOT NULL,
+  updated_at  TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS todo_people (
+  todo_id     TEXT NOT NULL REFERENCES todos(id) ON DELETE CASCADE,
+  person_id   TEXT NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  PRIMARY KEY (todo_id, person_id)
+);
+CREATE INDEX IF NOT EXISTS idx_todo_people_person ON todo_people(person_id);
+
 -- Life events / facts beyond the fixed vitals — residences (one person can have
 -- many), military service, nationality, caste, title, naturalization, etc. A
 -- generic store so "import everything" never needs a column per fact type.

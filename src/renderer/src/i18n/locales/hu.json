@@ -315,7 +315,41 @@
     "startPersonHint": "Globális kezdőszemély (én) beállítása",
     "clearStartPerson": "Törlés",
     "changelog": "Újdonságok",
-    "research": "Kutatás"
+    "research": "Kutatás",
+    "todos": "Teendők"
+  },
+  "todos": {
+    "title": "Teendők",
+    "new": "Új teendő",
+    "newTitle": "Új teendő",
+    "editTitle": "Teendő szerkesztése",
+    "openCount": "{{count}} nyitott",
+    "filterOpen": "Nyitott",
+    "filterDone": "Kész",
+    "filterAll": "Mind",
+    "empty": "Még nincs egyetlen teendő sem. Hozz létre egyet, és kapcsolj hozzá személyeket!",
+    "personEmpty": "Nincs ehhez a személyhez kapcsolt teendő.",
+    "untitled": "Névtelen teendő",
+    "overdue": "Lejárt",
+    "markDone": "Késznek jelölés",
+    "markOpen": "Nyitottra állítás",
+    "deleted": "„{{title}}” törölve",
+    "deleteTitle": "„{{title}}” törlése",
+    "deleteConfirm": "Biztosan törlöd ezt a teendőt? A személyekhez kapcsolás is megszűnik.",
+    "fieldTitle": "Cím",
+    "fieldNote": "Jegyzet",
+    "fieldPriority": "Prioritás",
+    "fieldDue": "Határidő",
+    "fieldPeople": "Kapcsolt személyek",
+    "titlePlaceholder": "Mit kell elintézni?",
+    "notePlaceholder": "Részletek, hivatkozás, tennivaló…",
+    "addPeople": "Személyek hozzáadása",
+    "editPeople": "Személyek szerkesztése",
+    "priority": {
+      "low": "Alacsony",
+      "normal": "Normál",
+      "high": "Magas"
+    }
   },
   "calendar": {
     "title": "Naptár",

@@ -67,6 +67,13 @@ const api: TreeMonkApi = {
     updateLog: (id, input) => ipcRenderer.invoke(Channels.research.updateLog, id, input),
     removeLog: (id) => ipcRenderer.invoke(Channels.research.removeLog, id)
   },
+  todos: {
+    all: () => ipcRenderer.invoke(Channels.todos.all),
+    forPerson: (pid) => ipcRenderer.invoke(Channels.todos.forPerson, pid),
+    create: (input) => ipcRenderer.invoke(Channels.todos.create, input),
+    update: (id, input) => ipcRenderer.invoke(Channels.todos.update, id, input),
+    remove: (id) => ipcRenderer.invoke(Channels.todos.remove, id)
+  },
   aliases: {
     listForPerson: (pid) => ipcRenderer.invoke(Channels.aliases.listForPerson, pid),
     all: () => ipcRenderer.invoke(Channels.aliases.all),

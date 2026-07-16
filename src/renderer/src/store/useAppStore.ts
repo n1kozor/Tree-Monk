@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import type { Alias, DocumentRecord, Family, GedcomImportResult, Person, ResearchLog } from '@shared/types'
+import type { Alias, DocumentRecord, Family, GedcomImportResult, Person, ResearchLog, Todo } from '@shared/types'
 import { isFamilySearchId } from '@/lib/familySearchSearch'
 
 export type View =
@@ -13,6 +13,7 @@ export type View =
   | 'query'
   | 'kinship'
   | 'research'
+  | 'todos'
   | 'audit'
   | 'calendar'
   | 'changelog'
@@ -52,6 +53,10 @@ interface AppState {
   researchLogs: ResearchLog[]
   /** Research logs grouped by person id — derived from `researchLogs`. */
   researchByPerson: Map<string, ResearchLog[]>
+  /** All to-dos / tasks — surfaced in the Todos view and on person profiles. */
+  todos: Todo[]
+  /** To-dos grouped by attached person id — derived from `todos`. */
+  todosByPerson: Map<string, Todo[]>
   /** Person ids that have at least one occupation row (occupations live in their
    *  own table, not the people.occupation column) — used by the quality scoring. */
   occupationPersonIds: Set<string>
@@ -133,6 +138,7 @@ interface AppState {
   refreshOccupations: () => Promise<void>
   refreshAliases: () => Promise<void>
   refreshResearch: () => Promise<void>
+  refreshTodos: () => Promise<void>
   bumpPersonSync: () => void
   bumpSources: () => void
   /** FamilySearch background watcher: personId → pending remote change summary. */
@@ -187,6 +193,18 @@ function indexResearch(logs: ResearchLog[]): Map<string, ResearchLog[]> {
   return m
 }
 
+function indexTodos(todos: Todo[]): Map<string, Todo[]> {
+  const m = new Map<string, Todo[]>()
+  for (const t of todos) {
+    for (const pid of t.personIds) {
+      const arr = m.get(pid)
+      if (arr) arr.push(t)
+      else m.set(pid, [t])
+    }
+  }
+  return m
+}
+
 // ---- Tabs (person profiles only — views are plain navigation, NOT tabs) ----
 
 const TABS_KEY = 'tm.tabs'
@@ -233,6 +251,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   aliases: [],
   researchLogs: [],
   researchByPerson: new Map(),
+  todos: [],
+  todosByPerson: new Map(),
   occupationPersonIds: new Set(),
   personSyncNonce: 0,
   sourcesNonce: 0,
@@ -394,15 +414,17 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   refreshAll: async () => {
     set({ loading: true })
-    const [people, families, documents, aliases, researchLogs, occupations, defaultRoot] = await Promise.all([
-      window.api.people.list(),
-      window.api.families.list(),
-      window.api.documents.list(),
-      window.api.aliases.all().catch(() => []),
-      window.api.research.allLogs().catch(() => []),
-      window.api.occupations.all().catch(() => []),
-      window.api.settings.getDefaultRoot().catch(() => null)
-    ])
+    const [people, families, documents, aliases, researchLogs, occupations, todos, defaultRoot] =
+      await Promise.all([
+        window.api.people.list(),
+        window.api.families.list(),
+        window.api.documents.list(),
+        window.api.aliases.all().catch(() => []),
+        window.api.research.allLogs().catch(() => []),
+        window.api.occupations.all().catch(() => []),
+        window.api.todos.all().catch(() => []),
+        window.api.settings.getDefaultRoot().catch(() => null)
+      ])
     // Strict root enforcement: keep the session's chosen root ONLY if that
     // person still exists (after a `replace` import the old id is gone — falling
     // back to the heuristic would otherwise pick the wrong person, e.g. a sibling).
@@ -432,6 +454,8 @@ export const useAppStore = create<AppState>((set, get) => ({
       aliases,
       researchLogs,
       researchByPerson: indexResearch(researchLogs),
+      todos,
+      todosByPerson: indexTodos(todos),
       occupationPersonIds: new Set(occupations.map((o) => o.personId)),
       defaultRootId,
       treeRootId,
@@ -569,6 +593,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   refreshResearch: async () => {
     const researchLogs = await window.api.research.allLogs()
     set({ researchLogs, researchByPerson: indexResearch(researchLogs) })
+  },
+  refreshTodos: async () => {
+    const todos = await window.api.todos.all().catch(() => [])
+    set({ todos, todosByPerson: indexTodos(todos) })
   }
 }))
 

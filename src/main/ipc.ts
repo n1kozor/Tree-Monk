@@ -18,7 +18,8 @@ import {
   Collaborations,
   People,
   ResearchLogs,
-  Sources
+  Sources,
+  Todos
 } from './db/repo'
 import { buildTree } from './db/tree'
 import { buildPedigree, buildPersonDescendants, buildUnionCouple } from './db/pedigree'
@@ -279,6 +280,13 @@ export function registerIpc(): void {
   ipcMain.handle(Channels.research.createLog, (_e, input) => ResearchLogs.create(input))
   ipcMain.handle(Channels.research.updateLog, (_e, id: string, input) => ResearchLogs.update(id, input))
   ipcMain.handle(Channels.research.removeLog, (_e, id: string) => ResearchLogs.remove(id))
+
+  // Todos
+  ipcMain.handle(Channels.todos.all, () => Todos.all())
+  ipcMain.handle(Channels.todos.forPerson, (_e, pid: string) => Todos.forPerson(pid))
+  ipcMain.handle(Channels.todos.create, (_e, input) => Todos.create(input))
+  ipcMain.handle(Channels.todos.update, (_e, id: string, input) => Todos.update(id, input))
+  ipcMain.handle(Channels.todos.remove, (_e, id: string) => Todos.remove(id))
 
   // Aliases
   ipcMain.handle(Channels.aliases.listForPerson, (_e, pid: string) => Aliases.forPerson(pid))

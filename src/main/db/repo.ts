@@ -878,7 +878,10 @@ import type {
   ResearchLog,
   ResearchLogInput,
   ResearchResult,
-  Source
+  Source,
+  Todo,
+  TodoInput,
+  TodoPriority
 } from '@shared/types'
 
 export const Boards = {
@@ -1817,5 +1820,128 @@ export const ResearchLogs = {
   },
   remove(id: string): void {
     getDb().prepare('DELETE FROM research_logs WHERE id = ?').run(id)
+  }
+}
+
+interface TodoRow {
+  id: string
+  title: string
+  note: string | null
+  done: number
+  priority: string
+  due_date: string | null
+  created_at: string
+  updated_at: string
+}
+
+const mapTodo = (r: TodoRow, personIds: string[]): Todo => ({
+  id: r.id,
+  title: r.title,
+  note: r.note,
+  done: r.done === 1,
+  priority: (r.priority as TodoPriority) || 'normal',
+  dueDate: r.due_date,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+  personIds
+})
+
+/** People a to-do is attached to → shown on the person's profile. */
+function setTodoPeople(id: string, personIds: string[]): void {
+  const db = getDb()
+  const tx = db.transaction((pids: string[]) => {
+    db.prepare('DELETE FROM todo_people WHERE todo_id = ?').run(id)
+    const ins = db.prepare('INSERT OR IGNORE INTO todo_people (todo_id, person_id) VALUES (?, ?)')
+    for (const pid of pids) ins.run(id, pid)
+  })
+  tx(personIds)
+}
+
+export const Todos = {
+  all(): Todo[] {
+    const db = getDb()
+    const rows = db
+      .prepare(
+        `SELECT * FROM todos
+         ORDER BY done ASC,
+                  CASE priority WHEN 'high' THEN 0 WHEN 'normal' THEN 1 ELSE 2 END ASC,
+                  (due_date IS NULL OR due_date = '') ASC, due_date ASC,
+                  created_at DESC`
+      )
+      .all() as TodoRow[]
+    const links = db.prepare('SELECT todo_id, person_id FROM todo_people').all() as {
+      todo_id: string
+      person_id: string
+    }[]
+    const byTodo = new Map<string, string[]>()
+    for (const l of links) {
+      const arr = byTodo.get(l.todo_id) ?? []
+      arr.push(l.person_id)
+      byTodo.set(l.todo_id, arr)
+    }
+    return rows.map((r) => mapTodo(r, byTodo.get(r.id) ?? []))
+  },
+  get(id: string): Todo | null {
+    const row = getDb().prepare('SELECT * FROM todos WHERE id = ?').get(id) as TodoRow | undefined
+    if (!row) return null
+    const pids = (
+      getDb().prepare('SELECT person_id FROM todo_people WHERE todo_id = ?').all(id) as {
+        person_id: string
+      }[]
+    ).map((r) => r.person_id)
+    return mapTodo(row, pids)
+  },
+  forPerson(personId: string): Todo[] {
+    const ids = (
+      getDb().prepare('SELECT todo_id FROM todo_people WHERE person_id = ?').all(personId) as {
+        todo_id: string
+      }[]
+    ).map((r) => r.todo_id)
+    return this.all().filter((t) => ids.includes(t.id))
+  },
+  create(input: TodoInput, id = uuid()): Todo {
+    const ts = now()
+    getDb()
+      .prepare(
+        `INSERT INTO todos (id, title, note, done, priority, due_date, created_at, updated_at)
+         VALUES (@id, @title, @note, @done, @priority, @due_date, @created_at, @updated_at)`
+      )
+      .run({
+        id,
+        title: input.title ?? '',
+        note: input.note ?? null,
+        done: input.done ? 1 : 0,
+        priority: input.priority ?? 'normal',
+        due_date: input.dueDate ?? null,
+        created_at: ts,
+        updated_at: ts
+      })
+    setTodoPeople(id, input.personIds ?? [])
+    return this.get(id)!
+  },
+  update(id: string, input: TodoInput): Todo | null {
+    const existing = getDb().prepare('SELECT * FROM todos WHERE id = ?').get(id) as TodoRow | undefined
+    if (!existing) return null
+    getDb()
+      .prepare(
+        `UPDATE todos SET
+           title=@title, note=@note, done=@done, priority=@priority,
+           due_date=@due_date, updated_at=@updated_at
+         WHERE id=@id`
+      )
+      .run({
+        id,
+        title: input.title ?? existing.title,
+        note: input.note !== undefined ? input.note : existing.note,
+        done: input.done !== undefined ? (input.done ? 1 : 0) : existing.done,
+        priority: input.priority ?? existing.priority,
+        due_date: input.dueDate !== undefined ? input.dueDate : existing.due_date,
+        updated_at: now()
+      })
+    if (input.personIds !== undefined) setTodoPeople(id, input.personIds)
+    return this.get(id)
+  },
+  remove(id: string): void {
+    getDb().prepare('DELETE FROM todos WHERE id = ?').run(id)
   }
 }

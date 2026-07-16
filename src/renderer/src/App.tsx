@@ -19,6 +19,7 @@ import { QueryView } from '@/components/query/QueryView'
 import { RelationshipView } from '@/components/kinship/RelationshipView'
 import { AuditView } from '@/components/audit/AuditView'
 import { ResearchView } from '@/components/research/ResearchView'
+import { TodosView } from '@/components/todos/TodosView'
 import { CalendarView } from '@/components/calendar/CalendarView'
 import { ChangelogView } from '@/components/changelog/ChangelogView'
 import { ProfileView } from '@/components/profile/ProfileView'
@@ -71,6 +72,7 @@ function ViewRenderer(): JSX.Element {
       {view === 'query' && <QueryView />}
       {view === 'kinship' && <RelationshipView />}
       {view === 'research' && <ResearchView />}
+      {view === 'todos' && <TodosView />}
       {view === 'audit' && <AuditView />}
       {view === 'calendar' && <CalendarView />}
       {view === 'changelog' && <ChangelogView />}

@@ -503,6 +503,27 @@ export interface ResearchLog {
 
 export type ResearchLogInput = Partial<Omit<ResearchLog, 'id' | 'createdAt'>>
 
+export type TodoPriority = 'low' | 'normal' | 'high'
+
+/** A task / to-do, optionally linked to one or more people. */
+export interface Todo {
+  id: string
+  title: string
+  note: string | null
+  done: boolean
+  priority: TodoPriority
+  /** Free-form due date (like other dates in the app). */
+  dueDate: string | null
+  createdAt: string
+  updatedAt: string
+  /** Person ids this to-do is attached to (shown on their profile). */
+  personIds: string[]
+}
+
+export type TodoInput = Partial<
+  Omit<Todo, 'id' | 'createdAt' | 'updatedAt' | 'personIds'>
+> & { personIds?: string[] }
+
 /** A citation joined with its source + repository, for the Sources tab. */
 export interface CitationDetail extends Citation {
   sourceTitle: string

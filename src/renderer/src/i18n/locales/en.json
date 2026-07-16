@@ -315,7 +315,41 @@
     "startPersonHint": "Set the global starting person (\"me\")",
     "clearStartPerson": "Clear",
     "changelog": "What's new",
-    "research": "Research"
+    "research": "Research",
+    "todos": "To-dos"
+  },
+  "todos": {
+    "title": "To-dos",
+    "new": "New to-do",
+    "newTitle": "New to-do",
+    "editTitle": "Edit to-do",
+    "openCount": "{{count}} open",
+    "filterOpen": "Open",
+    "filterDone": "Done",
+    "filterAll": "All",
+    "empty": "No tasks yet. Create one and link the people it concerns.",
+    "personEmpty": "No to-dos are linked to this person.",
+    "untitled": "Untitled to-do",
+    "overdue": "Overdue",
+    "markDone": "Mark as done",
+    "markOpen": "Mark as open",
+    "deleted": "“{{title}}” deleted",
+    "deleteTitle": "Delete “{{title}}”",
+    "deleteConfirm": "Delete this to-do? It will also be unlinked from any people.",
+    "fieldTitle": "Title",
+    "fieldNote": "Note",
+    "fieldPriority": "Priority",
+    "fieldDue": "Due date",
+    "fieldPeople": "Linked people",
+    "titlePlaceholder": "What needs doing?",
+    "notePlaceholder": "Details, a reference, next step…",
+    "addPeople": "Add people",
+    "editPeople": "Edit people",
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
+    }
   },
   "calendar": {
     "title": "Calendar",

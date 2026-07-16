@@ -40,6 +40,7 @@ import { FactSources, VitalNote } from './FactSources'
 import { QualityRing } from '@/components/common/QualityRing'
 import { personQuality } from '@/lib/completeness'
 import { PersonResearch } from './PersonResearch'
+import { PersonTodos } from './PersonTodos'
 import type { CitationDetail, Person, PersonInput, SanityIssue, Sex } from '@shared/types'
 
 export function PersonPanel(): JSX.Element | null {
@@ -485,8 +486,11 @@ export function PersonPanel(): JSX.Element | null {
             <PersonSources personId={person.id} />
           </TabsContent>
 
-          <TabsContent value="research" className="min-h-0 flex-1 overflow-y-auto p-4">
+          <TabsContent value="research" className="min-h-0 flex-1 space-y-4 overflow-y-auto p-4">
             <PersonResearch personId={person.id} />
+            <div className="border-t border-border/40 pt-4">
+              <PersonTodos personId={person.id} />
+            </div>
           </TabsContent>
 
           <TabsContent

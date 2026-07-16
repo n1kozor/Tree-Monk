@@ -51,6 +51,8 @@ import type {
   RelationshipPath,
   ResearchLog,
   ResearchLogInput,
+  Todo,
+  TodoInput,
   SanityIssue,
   NameGroup,
   ReleaseEntry,
@@ -122,6 +124,13 @@ export const Channels = {
     createLog: 'research:createLog',
     updateLog: 'research:updateLog',
     removeLog: 'research:removeLog'
+  },
+  todos: {
+    all: 'todos:all',
+    forPerson: 'todos:forPerson',
+    create: 'todos:create',
+    update: 'todos:update',
+    remove: 'todos:remove'
   },
   aliases: {
     listForPerson: 'aliases:listForPerson',
@@ -376,6 +385,13 @@ export interface TreeMonkApi {
     createLog(input: ResearchLogInput): Promise<ResearchLog>
     updateLog(id: string, input: Partial<ResearchLogInput>): Promise<ResearchLog | null>
     removeLog(id: string): Promise<void>
+  }
+  todos: {
+    all(): Promise<Todo[]>
+    forPerson(personId: string): Promise<Todo[]>
+    create(input: TodoInput): Promise<Todo>
+    update(id: string, input: TodoInput): Promise<Todo | null>
+    remove(id: string): Promise<void>
   }
   aliases: {
     listForPerson(personId: string): Promise<Alias[]>
