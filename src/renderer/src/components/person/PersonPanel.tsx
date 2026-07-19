@@ -1,8 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { AlertTriangle, ArrowDownToLine, BadgeCheck, Camera, ChevronRight, Copy, ExternalLink, Loader2, MapPin, Maximize2, Network, Printer, RefreshCw, Route, Search, Trash2, TreeDeciduous, X } from 'lucide-react'
+import { AlertTriangle, ArrowDownToLine, BadgeCheck, Camera, ChevronDown, ChevronRight, Copy, ExternalLink, Loader2, MapPin, Maximize2, Network, Printer, RefreshCw, Route, Search, Trash2, TreeDeciduous, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { useFsMode } from '@/hooks/useFsMode'
 import { FsPersonSyncDialog } from '@/components/person/FsPersonSyncDialog'
 import { FsExpandDialog } from '@/components/person/FsExpandDialog'
@@ -70,6 +77,7 @@ export function PersonPanel(): JSX.Element | null {
   const fsMode = useFsMode()
   const [fsSyncOpen, setFsSyncOpen] = useState(false)
   const [fsExpandOpen, setFsExpandOpen] = useState(false)
+  const [fsIdOpen, setFsIdOpen] = useState(false)
   const [sheet, setSheet] = useState<'person' | 'family' | null>(null)
 
   useEffect(() => {
@@ -316,18 +324,6 @@ export function PersonPanel(): JSX.Element | null {
             >
               <BadgeCheck className="h-4 w-4" />
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => {
-                save()
-                focusPersonTree(person.id)
-              }}
-            >
-              <Network className="h-3.5 w-3.5" />
-              {t('person.showTree')}
-            </Button>
             <Button variant="ghost" size="icon" onClick={close}>
               <X className="h-4 w-4" />
             </Button>
@@ -341,7 +337,7 @@ export function PersonPanel(): JSX.Element | null {
             void save()
             openProfile(person.id)
           }}
-          className="group mx-4 mt-3 flex items-center gap-3 rounded-xl bg-primary px-3.5 py-3 text-left text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:bg-primary/90 hover:shadow-md"
+          className="group mx-4 mt-3 flex items-center gap-3 rounded-xl bg-primary px-3.5 py-2.5 text-left text-primary-foreground shadow-sm ring-1 ring-primary/30 transition-all hover:bg-primary/90 hover:shadow-md"
         >
           <Maximize2 className="h-5 w-5 shrink-0" />
           <span className="min-w-0 flex-1">
@@ -353,103 +349,107 @@ export function PersonPanel(): JSX.Element | null {
           <ChevronRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
         </button>
 
-        {/* Show the person on the period map (their era + nearby history). */}
-        <button
-          onClick={() => {
-            void save()
-            openPersonOnMap(person.id)
-          }}
-          className="mx-4 mt-2 flex items-center justify-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-        >
-          <MapPin className="h-4 w-4 text-primary" />
-          {t('person.showOnMap')}
-        </button>
+        {/* Compact action strip — everything that used to stack up here as its
+            own row (map, prints, FamilySearch, kinship) folded into small tiles
+            and two menus, so the tabs start high up. */}
+        {(() => {
+          const rootId = defaultRootId ?? treeRootId
+          const rootPerson = rootId && rootId !== person.id ? peopleById.get(rootId) : undefined
+          const kinship = !!rootId && rootId !== person.id
+          return (
+            <div className={cn('mx-4 mt-2 grid gap-1.5', kinship ? 'grid-cols-3' : 'grid-cols-2')}>
+              <ActionTile
+                icon={<Network className="h-4 w-4 shrink-0 text-primary" />}
+                label={t('person.treeShort')}
+                title={t('person.showTree')}
+                onClick={() => {
+                  save()
+                  focusPersonTree(person.id)
+                }}
+              />
+              <ActionTile
+                icon={<MapPin className="h-4 w-4 shrink-0 text-primary" />}
+                label={t('person.mapShort')}
+                title={t('person.showOnMap')}
+                onClick={() => {
+                  save()
+                  openPersonOnMap(person.id)
+                }}
+              />
+              {kinship && (
+                <ActionTile
+                  icon={<Route className="h-4 w-4 shrink-0 text-primary" />}
+                  label={t('person.kinshipShort')}
+                  title={
+                    rootPerson
+                      ? t('person.howRelated', { name: fullName(rootPerson) })
+                      : t('person.howRelatedGeneric')
+                  }
+                  onClick={() => openKinship(person.id)}
+                />
+              )}
+            </div>
+          )
+        })()}
+        <div className="mx-4 mt-1.5 grid grid-cols-2 gap-1.5">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2 py-2 text-[11px] font-medium transition-colors hover:bg-accent">
+                <Printer className="h-4 w-4 shrink-0 text-primary" />
+                <span className="truncate">{t('person.printMenu')}</span>
+                <ChevronDown className="h-3 w-3 shrink-0 opacity-60" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-52">
+              <DropdownMenuItem onClick={() => setSheet('person')} className="gap-2">
+                <Printer className="h-4 w-4 text-muted-foreground" /> {t('print.personSheet')}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSheet('family')} className="gap-2">
+                <Printer className="h-4 w-4 text-muted-foreground" /> {t('print.familySheet')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        <div className="mx-4 mt-2 grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setSheet('person')}
-            className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2.5 py-2 text-xs font-medium transition-colors hover:bg-accent"
-          >
-            <Printer className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">{t('print.personSheet')}</span>
-          </button>
-          <button
-            onClick={() => setSheet('family')}
-            className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2.5 py-2 text-xs font-medium transition-colors hover:bg-accent"
-          >
-            <Printer className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">{t('print.familySheet')}</span>
-          </button>
-        </div>
-
-        {/* FamilySearch: open the person's own page (needs an fsId) + a record
-            search. The open button is hidden when there is no FamilySearch id. */}
-        <div className={cn('mx-4 mt-2 grid gap-2', fsPersonUrl ? 'grid-cols-2' : 'grid-cols-1')}>
-          {fsPersonUrl && (
-            <button
-              onClick={openFamilySearch}
-              title={t('person.openFamilySearch')}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 px-2.5 py-2 text-xs font-medium text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-400"
-            >
-              <ExternalLink className="h-4 w-4 shrink-0" />
-              <span className="truncate">{t('person.fsOpenShort')}</span>
-            </button>
-          )}
-          <button
-            onClick={searchFamilySearch}
-            disabled={!canSearchFamilySearch(person)}
-            title={t('person.searchFamilySearch')}
-            className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2.5 py-2 text-xs font-medium transition-colors hover:bg-accent disabled:opacity-50"
-          >
-            <Search className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">{fsPersonUrl ? t('person.fsSearchShort') : t('person.searchFamilySearch')}</span>
-          </button>
-        </div>
-
-        {/* FamilySearch refresh (pull) — full preview modal before anything changes. */}
-        {fsMode && fsConfigured && isFamilySearchId(person.fsId) && (
-          <button
-            onClick={() => setFsSyncOpen(true)}
-            title={t('fs.pullBtn')}
-            className="mx-4 mt-2 flex items-center justify-center gap-1.5 rounded-lg border border-emerald-500/40 bg-emerald-500/10 px-2.5 py-2 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-500/20 dark:text-emerald-400"
-          >
-            <RefreshCw className="h-4 w-4 shrink-0" />
-            <span className="truncate">{t('fs.pullBtn')}</span>
-          </button>
-        )}
-        {fsMode && fsConfigured && isFamilySearchId(person.fsId) && (
-          <button
-            onClick={() => setFsExpandOpen(true)}
-            title={t('fsExpand.btn')}
-            className="mx-4 mt-2 flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2.5 py-2 text-xs font-medium transition-colors hover:bg-accent"
-          >
-            <Network className="h-4 w-4 shrink-0 text-primary" />
-            <span className="truncate">{t('fsExpand.btn')}</span>
-          </button>
-        )}
-
-        {/* Editable FamilySearch ID — add it by hand (e.g. after a GEDCOM import
-            with no _FSFTID); a valid id lights up the Open/Search buttons above. */}
-        <div className="mx-4 mt-2">
-          <label className="mb-1 flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
-            <TreeDeciduous className="h-3 w-3" /> {t('person.fsIdLabel')}
-          </label>
-          <input
-            value={person.fsId ?? ''}
-            onChange={(e) => patch('fsId', e.target.value.trim().toUpperCase())}
-            onBlur={() => void save()}
-            onKeyDown={(e) => e.key === 'Enter' && void save()}
-            placeholder={t('person.fsIdPlaceholder')}
-            spellCheck={false}
-            autoComplete="off"
-            className={cn(
-              'w-full rounded-lg border bg-secondary/40 px-2.5 py-1.5 font-mono text-xs outline-none transition-colors focus:border-primary',
-              person.fsId && !isFamilySearchId(person.fsId) ? 'border-amber-500/60' : 'border-border'
-            )}
-          />
-          {person.fsId && !isFamilySearchId(person.fsId) && (
-            <p className="mt-1 text-[10px] text-amber-600 dark:text-amber-400">{t('person.fsIdInvalid')}</p>
-          )}
+          {/* All FamilySearch actions live in one menu: open page, record
+              search, (FS mode) pull + expand, and setting the FS ID by hand. */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center justify-center gap-1.5 rounded-lg border border-sky-500/40 bg-sky-500/10 px-2 py-2 text-[11px] font-medium text-sky-700 transition-colors hover:bg-sky-500/20 dark:text-sky-400">
+                <TreeDeciduous className="h-4 w-4 shrink-0" />
+                <span className="truncate">FamilySearch</span>
+                <ChevronDown className="h-3 w-3 shrink-0 opacity-60" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-60">
+              {fsPersonUrl && (
+                <DropdownMenuItem onClick={openFamilySearch} className="gap-2">
+                  <ExternalLink className="h-4 w-4 text-muted-foreground" /> {t('person.openFamilySearch')}
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem
+                disabled={!canSearchFamilySearch(person)}
+                onClick={searchFamilySearch}
+                className="gap-2"
+              >
+                <Search className="h-4 w-4 text-muted-foreground" /> {t('person.searchFamilySearch')}
+              </DropdownMenuItem>
+              {fsMode && fsConfigured && isFamilySearchId(person.fsId) && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setFsSyncOpen(true)} className="gap-2">
+                    <RefreshCw className="h-4 w-4 text-muted-foreground" /> {t('fs.pullBtn')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setFsExpandOpen(true)} className="gap-2">
+                    <Network className="h-4 w-4 text-muted-foreground" /> {t('fsExpand.btn')}
+                  </DropdownMenuItem>
+                </>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setFsIdOpen(true)} className="gap-2">
+                <TreeDeciduous className="h-4 w-4 text-muted-foreground" /> {t('person.fsIdEdit')}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
 
@@ -511,25 +511,6 @@ export function PersonPanel(): JSX.Element | null {
                 ))}
               </div>
             )}
-            {/* "How are we related?" — opens the relationship finder with this
-                person pre-filled. "Me" is the default root, else the tree's focus
-                root; if neither is set the finder lets you pick the other end. */}
-            {(() => {
-              const rootId = defaultRootId ?? treeRootId
-              if (rootId && rootId === person.id) return null
-              const rootPerson = rootId ? peopleById.get(rootId) : undefined
-              return (
-                <button
-                  onClick={() => openKinship(person.id)}
-                  className="flex w-full items-center justify-center gap-2 rounded-md border border-border bg-secondary/40 px-3 py-2 text-sm font-medium transition-colors hover:bg-accent"
-                >
-                  <Route className="h-4 w-4 text-primary" />
-                  {rootPerson
-                    ? t('person.howRelated', { name: fullName(rootPerson) })
-                    : t('person.howRelatedGeneric')}
-                </button>
-              )
-            })()}
             <div className="grid grid-cols-2 gap-3">
               {/* Hungarian writes the family name first; other languages given first. */}
               {(i18n.language === 'hu'
@@ -766,6 +747,53 @@ export function PersonPanel(): JSX.Element | null {
         </ConfirmDialog>
       )}
 
+      {/* Manual FamilySearch ID editor — moved out of the always-visible header
+          stack into a small dialog reached from the FamilySearch menu. */}
+      <Dialog open={fsIdOpen} onOpenChange={setFsIdOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <TreeDeciduous className="h-4 w-4 text-primary" /> {t('person.fsIdLabel')}
+            </DialogTitle>
+          </DialogHeader>
+          <div>
+            <input
+              value={person.fsId ?? ''}
+              onChange={(e) => patch('fsId', e.target.value.trim().toUpperCase())}
+              onBlur={() => void save()}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  void save()
+                  setFsIdOpen(false)
+                }
+              }}
+              placeholder={t('person.fsIdPlaceholder')}
+              spellCheck={false}
+              autoComplete="off"
+              autoFocus
+              className={cn(
+                'w-full rounded-lg border bg-secondary/40 px-2.5 py-1.5 font-mono text-sm outline-none transition-colors focus:border-primary',
+                person.fsId && !isFamilySearchId(person.fsId) ? 'border-amber-500/60' : 'border-border'
+              )}
+            />
+            {person.fsId && !isFamilySearchId(person.fsId) && (
+              <p className="mt-1 text-[11px] text-amber-600 dark:text-amber-400">{t('person.fsIdInvalid')}</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              size="sm"
+              onClick={() => {
+                void save()
+                setFsIdOpen(false)
+              }}
+            >
+              {t('common.done')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {sheet === 'person' && person && <PersonSheetDialog personId={person.id} onClose={() => setSheet(null)} />}
       {sheet === 'family' && person && <FamilySheetDialog personId={person.id} onClose={() => setSheet(null)} />}
       {fsExpandOpen && person && isFamilySearchId(person.fsId) && (
@@ -811,6 +839,30 @@ function Field({
       </div>
       {children}
     </div>
+  )
+}
+
+/** One tile of the compact action strip under the hero button. */
+function ActionTile({
+  icon,
+  label,
+  title,
+  onClick
+}: {
+  icon: React.ReactNode
+  label: string
+  title?: string
+  onClick: () => void
+}): JSX.Element {
+  return (
+    <button
+      onClick={onClick}
+      title={title ?? label}
+      className="flex items-center justify-center gap-1.5 rounded-lg border border-border bg-secondary/40 px-2 py-2 text-[11px] font-medium transition-colors hover:bg-accent"
+    >
+      {icon}
+      <span className="truncate">{label}</span>
+    </button>
   )
 }
 

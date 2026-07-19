@@ -751,6 +751,7 @@
     "manualDesc": "The full TreeMonk manual as a PDF, opened in your default viewer."
   },
   "common": {
+    "done": "Done",
     "copy": "Copy",
     "dragToReorder": "Drag to reorder",
     "back": "Back",
@@ -1042,6 +1043,14 @@
     "offline": "Map tiles couldn't load — check your internet connection."
   },
   "person": {
+    "treeShort": "Tree",
+    "mapShort": "Map",
+    "kinshipShort": "Kinship",
+    "printMenu": "Print",
+    "fsIdEdit": "Set FamilySearch ID…",
+    "identity": "Identity",
+    "vitalEvents": "Life events",
+    "moreActions": "More actions",
     "addSource": "Add source",
     "noCitations": "No citations yet.",
     "srcTitle": "Title",

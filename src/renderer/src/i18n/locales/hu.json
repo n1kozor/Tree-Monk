@@ -751,6 +751,7 @@
     "manualDesc": "A teljes TreeMonk-kézikönyv PDF-ben, a gép alapértelmezett megjelenítőjében nyílik meg."
   },
   "common": {
+    "done": "Kész",
     "copy": "Másolás",
     "dragToReorder": "Húzd a sorrend átrendezéséhez",
     "back": "Vissza",
@@ -1042,6 +1043,14 @@
     "offline": "A térkép csempéi nem töltődtek be — ellenőrizd az internetkapcsolatot."
   },
   "person": {
+    "treeShort": "Fa",
+    "mapShort": "Térkép",
+    "kinshipShort": "Rokonság",
+    "printMenu": "Nyomtatás",
+    "fsIdEdit": "FamilySearch ID megadása…",
+    "identity": "Alapadatok",
+    "vitalEvents": "Életesemények",
+    "moreActions": "További műveletek",
     "addSource": "Forrás hozzáadása",
     "noCitations": "Még nincs hivatkozás.",
     "srcTitle": "Cím",

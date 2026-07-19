@@ -2,6 +2,43 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.7.5]
+
+### Added
+- **GEDCOM round-trip completeness.** Godparents now export/import as the
+  standard `ASSO`/`RELA godparent` association; life events (residence,
+  military, education, …) export as `RESI` / typed `EVEN` records with date
+  ranges, places and notes, and import back as structured events (previously
+  they were flattened into notes); per-vital research notes (`2 NOTE` under
+  BIRT/CHR/DEAT/BURI) and the out-of-wedlock flag (`_ILLEGITIMATE`) round-trip;
+  spouse families (`FAMS`) are written in marriage order.
+
+### Changed
+- **Person profile redesigned.** Compact segmented tab switcher (always
+  labelled, animated, sticky while scrolling), grouped header actions with a
+  ⋯ overflow menu (prints + delete moved there), identity/religion merged into
+  one card, and the four vital events laid out as icon-labelled blocks in a
+  2×2 grid with per-fact sources and notes inline.
+- **Person side panel tidied.** The stacked header buttons collapsed into a
+  compact action strip (tree / map / kinship tiles) plus Print and FamilySearch
+  menus; the FamilySearch ID moved into a small dialog behind the FS menu.
+- **Top bar is responsive.** Import/export/theme/language fold into a single
+  ⋯ menu below 1024 px (icon-only labels below 1280 px), and the tree/root
+  pickers get tighter max widths — nothing overlaps on small windows anymore.
+- The tree views' "Display" settings panel starts collapsed, with a labelled
+  button to open it.
+
+### Fixed
+- **GEDCOM export could scramble trees in other programs.** Generated record
+  ids could collide with imported ones (`@I5@` given to two different people),
+  which made Gramps/MyHeritage merge unrelated records — wrong parents,
+  duplicated spouse couples. Xref assignment is now collision-free across the
+  whole file, and re-importing the same file never duplicates data.
+- Long unbreakable place names no longer push dialog content out of the frame
+  (dialog grid items may now shrink).
+- Timeline dots are no longer clipped at fractional display scalings — the
+  rail and dots sit inside the list's own padding.
+
 ## [1.7.2]
 
 ### Added

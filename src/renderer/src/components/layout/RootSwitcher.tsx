@@ -43,7 +43,7 @@ export function RootSwitcher(): JSX.Element {
         onClick={toggle}
         title={t('nav.startPersonHint')}
         className={cn(
-          'flex h-9 max-w-[240px] items-center gap-2 rounded-xl px-2.5 text-xs font-medium transition-colors',
+          'flex h-9 max-w-[10rem] items-center gap-2 rounded-xl px-2.5 text-xs font-medium transition-colors lg:max-w-[13rem] xl:max-w-[240px]',
           current
             ? 'glass-subtle text-foreground hover:bg-accent'
             : 'animate-pulse border border-amber-500/70 bg-amber-500/15 text-amber-700 hover:bg-amber-500/25 dark:text-amber-300'

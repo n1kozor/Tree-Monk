@@ -1,17 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
+import { motion } from 'framer-motion'
 import {
   AlertTriangle,
   ArrowDownToLine,
   ArrowLeft,
+  Baby,
   BadgeCheck,
   Camera,
   Copy,
+  Droplets,
   ExternalLink,
   FileText,
+  Flower2,
   Loader2,
   MapPin,
+  MoreHorizontal,
   Network,
   RefreshCw,
   Route,
@@ -24,6 +29,13 @@ import {
   Users
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/DateInput'
 import { useDatePlaceholder } from '@/hooks/useDateFormat'
@@ -53,6 +65,7 @@ import { personQuality } from '@/lib/completeness'
 import { canSearchFamilySearch, familySearchPersonUrl, familySearchSearchUrl, isFamilySearchId } from '@/lib/familySearchSearch'
 import { PersonAliases } from '@/components/person/PersonAliases'
 import { useAppStore } from '@/store/useAppStore'
+import { useSettings } from '@/store/useSettings'
 import { useFsMode } from '@/hooks/useFsMode'
 import { cn, fullName, yearOf } from '@/lib/utils'
 import { smartNormalizeDate } from '@/lib/smartDate'
@@ -84,7 +97,9 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   const refreshDocuments = useAppStore((s) => s.refreshDocuments)
   const personSyncNonce = useAppStore((s) => s.personSyncNonce)
 
+  const animations = useSettings((s) => s.animations)
   const [person, setPerson] = useState<Person | null>(null)
+  const [tab, setTab] = useState('overview')
   const [factCites, setFactCites] = useState<CitationDetail[]>([])
   const [docCount, setDocCount] = useState(0)
   const [anomalies, setAnomalies] = useState<SanityIssue[]>([])
@@ -254,7 +269,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
 
   return (
     <div className="h-full overflow-y-auto bg-background">
-      <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
+      <div className="mx-auto w-full max-w-screen-2xl px-4 py-5 sm:px-6 lg:px-8">
         <button
           onClick={closeProfile}
           className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
@@ -323,29 +338,21 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
               </div>
             </div>
 
-            <QualityRing
-              value={personQuality(person, occPersonIds).score}
-              size={56}
-              title={t('quality.title')}
-              className="hidden shrink-0 sm:block"
-            />
+            <div className="hidden shrink-0 flex-col items-center gap-1 sm:flex">
+              <QualityRing value={personQuality(person, occPersonIds).score} size={56} title={t('quality.title')} />
+              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t('quality.title')}
+              </span>
+            </div>
           </div>
 
-          {/* Primary actions — own row, wrap freely. */}
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-border/40 pt-4">
-            <Button
-              variant={person.verified ? 'default' : 'outline'}
-              size="sm"
-              className={cn('gap-1.5', person.verified && 'bg-emerald-600 text-white hover:bg-emerald-700')}
-              onClick={() => void toggleVerified()}
-            >
-              <BadgeCheck className="h-3.5 w-3.5" />
-              {person.verified ? t('person.verifiedOn') : t('person.markVerified')}
-            </Button>
+          {/* Actions — grouped by weight: the teal navigation trio, then the
+              FamilySearch cluster, then status + the ⋯ overflow on the right. */}
+          <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border/40 pt-4">
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 border-primary/25 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
               onClick={() => {
                 void save()
                 focusPersonTree(person.id)
@@ -357,7 +364,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 border-primary/25 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
               onClick={() => {
                 void save()
                 openPersonOnMap(person.id)
@@ -366,6 +373,20 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
               <MapPin className="h-3.5 w-3.5" />
               {t('person.showOnMap')}
             </Button>
+            {rootPerson && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5 border-primary/25 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary"
+                onClick={() => openKinship(person.id)}
+              >
+                <Route className="h-3.5 w-3.5" />
+                {t('person.howRelatedGeneric')}
+              </Button>
+            )}
+
+            <span className="mx-1 hidden h-5 w-px bg-border/60 sm:block" aria-hidden />
+
             {familySearchPersonUrl(person) && (
               <Button
                 variant="outline"
@@ -412,48 +433,99 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                 </Button>
               </>
             )}
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSheet('person')}>
-              <Printer className="h-3.5 w-3.5" />
-              {t('print.personSheet')}
-            </Button>
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setSheet('family')}>
-              <Printer className="h-3.5 w-3.5" />
-              {t('print.familySheet')}
-            </Button>
-            {rootPerson && (
-              <Button variant="outline" size="sm" className="gap-1.5" onClick={() => openKinship(person.id)}>
-                <Route className="h-3.5 w-3.5" />
-                {t('person.howRelatedGeneric')}
+
+            <div className="ml-auto flex items-center gap-2">
+              <Button
+                variant={person.verified ? 'default' : 'outline'}
+                size="sm"
+                className={cn('gap-1.5', person.verified && 'bg-emerald-600 text-white hover:bg-emerald-700')}
+                onClick={() => void toggleVerified()}
+              >
+                <BadgeCheck className="h-3.5 w-3.5" />
+                {person.verified ? t('person.verifiedOn') : t('person.markVerified')}
               </Button>
-            )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    title={t('person.moreActions')}
+                    aria-label={t('person.moreActions')}
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setSheet('person')}>
+                    <Printer className="h-4 w-4" />
+                    {t('print.personSheet')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setSheet('family')}>
+                    <Printer className="h-4 w-4" />
+                    {t('print.familySheet')}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => setDeleting(true)}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    {t('common.delete')}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
 
-        {/* Tabbed content */}
-        <Tabs defaultValue="overview" className="mt-5 pb-12">
-          <TabsList className="h-11 w-full">
-            <TabsTrigger value="overview" className="flex-1 gap-1.5">
-              <UserRound className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('person.overview')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="family" className="flex-1 gap-1.5">
-              <Users className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('person.family')}</span>
-              <TabCount n={familyCount} />
-            </TabsTrigger>
-            <TabsTrigger value="sources" className="flex-1 gap-1.5">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('person.sources')}</span>
-              <TabCount n={docCount} />
-            </TabsTrigger>
-            <TabsTrigger value="research" className="flex-1 gap-1.5">
-              <Search className="h-4 w-4" />
-              <span className="hidden sm:inline">{t('person.research')}</span>
-            </TabsTrigger>
+        {/* Tabbed content. A compact segmented switcher — always-labelled,
+            counted, the active segment tinted in the app's selection teal and
+            slid into place — kept sticky so it never scrolls out of reach. */}
+        <Tabs value={tab} onValueChange={setTab} className="mt-5 pb-12">
+          <TabsList className="sticky top-2 z-20 h-auto">
+            {(
+              [
+                { value: 'overview', icon: UserRound, label: t('person.overview'), count: 0 },
+                { value: 'family', icon: Users, label: t('person.family'), count: familyCount },
+                { value: 'sources', icon: FileText, label: t('person.sources'), count: docCount },
+                { value: 'research', icon: Search, label: t('person.research'), count: 0 }
+              ] as const
+            ).map(({ value, icon: Icon, label, count }) => {
+              const active = tab === value
+              return (
+                <TabsTrigger
+                  key={value}
+                  value={value}
+                  className={cn(
+                    'relative h-9 gap-2 px-4 transition-colors',
+                    'hover:text-foreground data-[state=active]:bg-transparent data-[state=active]:text-primary data-[state=active]:shadow-none'
+                  )}
+                >
+                  {active && (
+                    <motion.span
+                      layoutId="profile-tab-pill"
+                      transition={
+                        animations ? { type: 'spring', bounce: 0.16, duration: 0.45 } : { duration: 0 }
+                      }
+                      className="absolute inset-0 rounded-lg bg-primary/15 ring-1 ring-primary/25"
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span className={cn(active && 'font-semibold')}>{label}</span>
+                    <TabCount n={count} active={active} />
+                  </span>
+                </TabsTrigger>
+              )
+            })}
           </TabsList>
 
           {/* Overview — editable vitals + occupations + aliases */}
-          <TabsContent value="overview" className="mt-4">
+          <TabsContent
+            value="overview"
+            className="mt-4 animate-in fade-in-0 slide-in-from-bottom-1 duration-300"
+          >
             {anomalies.length > 0 && (
               <div className="mb-4 space-y-1.5 rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4">
                 <p className="flex items-center gap-1.5 text-sm font-semibold text-amber-600 dark:text-amber-400">
@@ -470,20 +542,20 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
             )}
 
             <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px]">
-              {/* Center column: vitals + everything that used to flank the timeline */}
+              {/* Center column: identity, then the vital events as four scannable
+                  register-style blocks, then faith & notes and the extras. */}
               <div className="space-y-5">
-              <Card title={t('person.overview')}>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {/* Hungarian writes the family name first; other languages given first. */}
-                  {(i18n.language === 'hu'
-                    ? (['surname', 'givenName'] as const)
-                    : (['givenName', 'surname'] as const)
-                  ).map((f) => (
-                    <Field key={f} label={t(`person.${f}`)}>
-                      <Input value={person[f]} onChange={(e) => patch(f, e.target.value)} onBlur={() => save()} />
-                    </Field>
-                  ))}
-                  <div className="sm:col-span-2">
+                <Card title={t('person.identity')}>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {/* Hungarian writes the family name first; other languages given first. */}
+                    {(i18n.language === 'hu'
+                      ? (['surname', 'givenName'] as const)
+                      : (['givenName', 'surname'] as const)
+                    ).map((f) => (
+                      <Field key={f} label={t(`person.${f}`)}>
+                        <Input value={person[f]} onChange={(e) => patch(f, e.target.value)} onBlur={() => save()} />
+                      </Field>
+                    ))}
                     <Field label={t('person.sex')}>
                       <div className="flex gap-1.5">
                         {(
@@ -509,98 +581,6 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                         ))}
                       </div>
                     </Field>
-                  </div>
-                  <Field
-                    label={`${t('person.birth')} · ${t('person.date')}`}
-                    action={<FactSources citations={factCites} tags={['BIRT', 'CHR']} label={t('person.birth')} />}
-                  >
-                    <DateInput
-                      value={person.birthDate ?? ''}
-                      placeholder={datePlaceholder}
-                      onValueChange={(v) => patch('birthDate', v)}
-                      onCommit={() => commitDate('birthDate')}
-                    />
-                  </Field>
-                  <Field label={`${t('person.birth')} · ${t('person.place')}`}>
-                    <PlaceInput value={person.birthPlace ?? ''} onChange={(v) => patch('birthPlace', v)} onCommit={() => save()} />
-                  </Field>
-                  <div className="sm:col-span-2">
-                    <VitalNote label={t('person.birth')} value={person.birthNote ?? ''} onSave={(v) => saveNote('birthNote', v)} />
-                  </div>
-                  <Field
-                    label={`${t('person.death')} · ${t('person.date')}`}
-                    action={<FactSources citations={factCites} tags={['DEAT']} label={t('person.death')} />}
-                  >
-                    <DateInput
-                      value={person.deathDate ?? ''}
-                      placeholder={datePlaceholder}
-                      onValueChange={(v) => patch('deathDate', v)}
-                      onCommit={() => commitDate('deathDate')}
-                    />
-                  </Field>
-                  <Field label={`${t('person.death')} · ${t('person.place')}`}>
-                    <PlaceInput value={person.deathPlace ?? ''} onChange={(v) => patch('deathPlace', v)} onCommit={() => save()} />
-                  </Field>
-                  <div className="sm:col-span-2">
-                    <VitalNote label={t('person.death')} value={person.deathNote ?? ''} onSave={(v) => saveNote('deathNote', v)} />
-                  </div>
-                  <label className="flex cursor-pointer items-center gap-2 text-sm sm:col-span-2">
-                    <input
-                      type="checkbox"
-                      checked={deceased}
-                      disabled={!!person.deathDate}
-                      onChange={(e) => setDeceased(e.target.checked)}
-                      className="h-4 w-4 accent-[hsl(var(--primary))]"
-                    />
-                    <span className={person.deathDate ? 'text-muted-foreground' : ''}>{t('person.deceased')}</span>
-                  </label>
-                  <div className="flex justify-end sm:col-span-2">
-                    <button
-                      type="button"
-                      onClick={copyBirthToChristening}
-                      disabled={!person.birthDate && !person.birthPlace}
-                      title={t('person.copyBirthToChristening')}
-                      className="flex items-center gap-1.5 rounded-lg border border-primary/30 bg-primary/5 px-2 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:border-border disabled:text-muted-foreground/50 disabled:hover:bg-transparent"
-                    >
-                      <ArrowDownToLine className="h-3 w-3" />
-                      {t('person.copyBirthToChristening')}
-                    </button>
-                  </div>
-                  <Field
-                    label={`${t('person.christening')} · ${t('person.date')}`}
-                    action={<FactSources citations={factCites} tags={['CHR']} label={t('person.christening')} />}
-                  >
-                    <DateInput
-                      value={person.christeningDate ?? ''}
-                      placeholder={datePlaceholder}
-                      onValueChange={(v) => patch('christeningDate', v)}
-                      onCommit={() => commitDate('christeningDate')}
-                    />
-                  </Field>
-                  <Field label={`${t('person.christening')} · ${t('person.place')}`}>
-                    <PlaceInput value={person.christeningPlace ?? ''} onChange={(v) => patch('christeningPlace', v)} onCommit={() => save()} />
-                  </Field>
-                  <div className="sm:col-span-2">
-                    <VitalNote label={t('person.christening')} value={person.christeningNote ?? ''} onSave={(v) => saveNote('christeningNote', v)} />
-                  </div>
-                  <Field
-                    label={`${t('person.burial')} · ${t('person.date')}`}
-                    action={<FactSources citations={factCites} tags={['BURI']} label={t('person.burial')} />}
-                  >
-                    <DateInput
-                      value={person.burialDate ?? ''}
-                      placeholder={datePlaceholder}
-                      onValueChange={(v) => patch('burialDate', v)}
-                      onCommit={() => commitDate('burialDate')}
-                    />
-                  </Field>
-                  <Field label={`${t('person.burial')} · ${t('person.place')}`}>
-                    <PlaceInput value={person.burialPlace ?? ''} onChange={(v) => patch('burialPlace', v)} onCommit={() => save()} />
-                  </Field>
-                  <div className="sm:col-span-2">
-                    <VitalNote label={t('person.burial')} value={person.burialNote ?? ''} onSave={(v) => saveNote('burialNote', v)} />
-                  </div>
-                  <div className="sm:col-span-2">
                     <Field label={t('person.religion')}>
                       <Input list="tm-religions" value={person.religion ?? ''} onChange={(e) => patch('religion', e.target.value)} onBlur={() => save()} />
                       <datalist id="tm-religions">
@@ -610,13 +590,129 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                       </datalist>
                     </Field>
                   </div>
-                  <div className="sm:col-span-2">
-                    <Field label={t('person.notes')}>
-                      <Textarea value={person.notes ?? ''} onChange={(e) => patch('notes', e.target.value)} onBlur={() => save()} rows={4} />
-                    </Field>
+                </Card>
+
+                <Card title={t('person.vitalEvents')}>
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-4 lg:grid-cols-2">
+                    <VitalBlock
+                      icon={Baby}
+                      tint="text-emerald-600 dark:text-emerald-400"
+                      title={t('person.birth')}
+                      action={<FactSources citations={factCites} tags={['BIRT', 'CHR']} label={t('person.birth')} />}
+                    >
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <Field label={t('person.date')}>
+                          <DateInput
+                            value={person.birthDate ?? ''}
+                            placeholder={datePlaceholder}
+                            onValueChange={(v) => patch('birthDate', v)}
+                            onCommit={() => commitDate('birthDate')}
+                          />
+                        </Field>
+                        <Field label={t('person.place')}>
+                          <PlaceInput value={person.birthPlace ?? ''} onChange={(v) => patch('birthPlace', v)} onCommit={() => save()} />
+                        </Field>
+                      </div>
+                      <VitalNote label={t('person.birth')} value={person.birthNote ?? ''} onSave={(v) => saveNote('birthNote', v)} />
+                    </VitalBlock>
+
+                    <VitalBlock
+                      icon={Droplets}
+                      tint="text-sky-600 dark:text-sky-400"
+                      title={t('person.christening')}
+                      action={
+                        <>
+                          <button
+                            type="button"
+                            onClick={copyBirthToChristening}
+                            disabled={!person.birthDate && !person.birthPlace}
+                            title={t('person.copyBirthToChristening')}
+                            aria-label={t('person.copyBirthToChristening')}
+                            className="flex h-6 w-6 items-center justify-center rounded-md border border-primary/30 bg-primary/5 text-primary transition-colors hover:bg-primary/10 disabled:cursor-not-allowed disabled:border-border disabled:text-muted-foreground/50 disabled:hover:bg-transparent"
+                          >
+                            <ArrowDownToLine className="h-3 w-3" />
+                          </button>
+                          <FactSources citations={factCites} tags={['CHR']} label={t('person.christening')} />
+                        </>
+                      }
+                    >
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <Field label={t('person.date')}>
+                          <DateInput
+                            value={person.christeningDate ?? ''}
+                            placeholder={datePlaceholder}
+                            onValueChange={(v) => patch('christeningDate', v)}
+                            onCommit={() => commitDate('christeningDate')}
+                          />
+                        </Field>
+                        <Field label={t('person.place')}>
+                          <PlaceInput value={person.christeningPlace ?? ''} onChange={(v) => patch('christeningPlace', v)} onCommit={() => save()} />
+                        </Field>
+                      </div>
+                      <VitalNote label={t('person.christening')} value={person.christeningNote ?? ''} onSave={(v) => saveNote('christeningNote', v)} />
+                    </VitalBlock>
+
+                    <VitalBlock
+                      icon={Bird}
+                      tint="text-slate-500 dark:text-slate-300"
+                      title={t('person.death')}
+                      action={<FactSources citations={factCites} tags={['DEAT']} label={t('person.death')} />}
+                    >
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <Field label={t('person.date')}>
+                          <DateInput
+                            value={person.deathDate ?? ''}
+                            placeholder={datePlaceholder}
+                            onValueChange={(v) => patch('deathDate', v)}
+                            onCommit={() => commitDate('deathDate')}
+                          />
+                        </Field>
+                        <Field label={t('person.place')}>
+                          <PlaceInput value={person.deathPlace ?? ''} onChange={(v) => patch('deathPlace', v)} onCommit={() => save()} />
+                        </Field>
+                      </div>
+                      <label className="flex cursor-pointer items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={deceased}
+                          disabled={!!person.deathDate}
+                          onChange={(e) => setDeceased(e.target.checked)}
+                          className="h-4 w-4 accent-[hsl(var(--primary))]"
+                        />
+                        <span className={person.deathDate ? 'text-muted-foreground' : ''}>{t('person.deceased')}</span>
+                      </label>
+                      <VitalNote label={t('person.death')} value={person.deathNote ?? ''} onSave={(v) => saveNote('deathNote', v)} />
+                    </VitalBlock>
+
+                    <VitalBlock
+                      icon={Flower2}
+                      tint="text-amber-700 dark:text-amber-400"
+                      title={t('person.burial')}
+                      action={<FactSources citations={factCites} tags={['BURI']} label={t('person.burial')} />}
+                    >
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        <Field label={t('person.date')}>
+                          <DateInput
+                            value={person.burialDate ?? ''}
+                            placeholder={datePlaceholder}
+                            onValueChange={(v) => patch('burialDate', v)}
+                            onCommit={() => commitDate('burialDate')}
+                          />
+                        </Field>
+                        <Field label={t('person.place')}>
+                          <PlaceInput value={person.burialPlace ?? ''} onChange={(v) => patch('burialPlace', v)} onCommit={() => save()} />
+                        </Field>
+                      </div>
+                      <VitalNote label={t('person.burial')} value={person.burialNote ?? ''} onSave={(v) => saveNote('burialNote', v)} />
+                    </VitalBlock>
                   </div>
-                </div>
-              </Card>
+                </Card>
+
+                <Card>
+                  <Field label={t('person.notes')}>
+                    <Textarea value={person.notes ?? ''} onChange={(e) => patch('notes', e.target.value)} onBlur={() => save()} rows={4} />
+                  </Field>
+                </Card>
 
                 <PersonQualityCard person={person} />
 
@@ -640,15 +736,11 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                 {/* FamilySearch collaboration discussions — its own section, only
                     shown when the person actually has any. */}
                 <PersonCollaborations personId={person.id} />
-
-                <Button variant="destructive" size="sm" className="w-full gap-2" onClick={() => setDeleting(true)}>
-                  <Trash2 className="h-4 w-4" />
-                  {t('common.delete')}
-                </Button>
               </div>
 
-              {/* Right column: the timeline only, kept in view while scrolling. */}
-              <div className="lg:sticky lg:top-4 lg:self-start">
+              {/* Right column: the timeline only, kept in view while scrolling —
+                  offset below the sticky section nav. */}
+              <div className="lg:sticky lg:top-14 lg:self-start">
                 <Card>
                   <PersonTimeline person={person} />
                 </Card>
@@ -656,7 +748,10 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
             </div>
           </TabsContent>
 
-          <TabsContent value="family" className="mt-4 space-y-4">
+          <TabsContent
+            value="family"
+            className="mt-4 space-y-4 animate-in fade-in-0 slide-in-from-bottom-1 duration-300"
+          >
             <Card>
               <PersonFamily person={person} />
             </Card>
@@ -665,13 +760,19 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
             </Card>
           </TabsContent>
 
-          <TabsContent value="sources" className="mt-4">
+          <TabsContent
+            value="sources"
+            className="mt-4 animate-in fade-in-0 slide-in-from-bottom-1 duration-300"
+          >
             <Card>
               <PersonSources personId={person.id} />
             </Card>
           </TabsContent>
 
-          <TabsContent value="research" className="mt-4">
+          <TabsContent
+            value="research"
+            className="mt-4 animate-in fade-in-0 slide-in-from-bottom-1 duration-300"
+          >
             <Card>
               <PersonResearch personId={person.id} />
             </Card>
@@ -771,6 +872,34 @@ function Field({
   )
 }
 
+/** One vital event (birth/christening/death/burial) as a compact block: a
+ *  small tinted icon + the app's usual section title, per-fact actions on the
+ *  right, date/place pair beneath. Four of these tile 2-up on wide screens. */
+function VitalBlock({
+  icon: Icon,
+  tint,
+  title,
+  action,
+  children
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  tint: string
+  title: string
+  action?: React.ReactNode
+  children: React.ReactNode
+}): JSX.Element {
+  return (
+    <section>
+      <div className="mb-2 flex flex-wrap items-center gap-1.5">
+        <Icon className={cn('h-3.5 w-3.5 shrink-0', tint)} />
+        <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{title}</h4>
+        <div className="ml-auto flex flex-wrap items-center justify-end gap-1.5">{action}</div>
+      </div>
+      <div className="space-y-2">{children}</div>
+    </section>
+  )
+}
+
 function Badge({ className, children }: { className?: string; children: React.ReactNode }): JSX.Element {
   return (
     <span
@@ -785,10 +914,15 @@ function Badge({ className, children }: { className?: string; children: React.Re
 }
 
 /** Count pill shown on a tab (hidden when zero). */
-function TabCount({ n }: { n: number }): JSX.Element | null {
+function TabCount({ n, active }: { n: number; active?: boolean }): JSX.Element | null {
   if (!n) return null
   return (
-    <span className="inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-muted px-1 text-[10px] font-semibold leading-none text-muted-foreground">
+    <span
+      className={cn(
+        'inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-none',
+        active ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
+      )}
+    >
       {n}
     </span>
   )

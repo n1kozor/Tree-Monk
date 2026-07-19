@@ -3,7 +3,7 @@ import { isFamilySearchId } from '@shared/familysearch'
 import { mediaDocId } from '../mediaId'
 import { getDb } from '../db/connection'
 import { removeNamelessStubs } from '../db/admin'
-import { Aliases, Citations, Documents, Families, Notes, Occupations, People, Places, Repositories, Sources } from '../db/repo'
+import { Aliases, Citations, Documents, Events, Families, Godparents, Notes, Occupations, People, Places, Repositories, Sources } from '../db/repo'
 import {
   child,
   childValue,
@@ -52,6 +52,19 @@ function eventByType(node: GedNode, re: RegExp): { date: string | null; place: s
 
 // EVEN TYPEs already captured as a structured field (christening) — not re-imported as a note.
 const HANDLED_EVENT_TYPE = /bapt|christen|keresz/i
+
+/** RELA values that mean "godparent" across the languages we meet. */
+const GODPARENT_RELA = /god\s*(parent|father|mother)|kereszt|taufpat|pate|patin|witness.*bapt/i
+
+/** The inline (non-pointer) NOTE directly under an event node, e.g. `2 NOTE …` inside `1 BIRT`. */
+function eventNote(indi: GedNode, tag: string): string | null {
+  const ev = child(indi, tag)
+  if (!ev) return null
+  for (const c of ev.children) {
+    if (c.tag === 'NOTE' && !/^@.+@$/.test(c.value) && c.value.trim()) return c.value.trim()
+  }
+  return null
+}
 
 
 /** Collects the http(s) media URLs referenced by a record's `OBJE > FILE`
@@ -250,26 +263,60 @@ export function importGedcomText(text: string): GedcomImportResult {
       }
     }
 
-    // Generic EVENs that have no dedicated field (e.g. "Marriage Registration",
-    // "Death Registration", residence/census) are preserved as person notes so
-    // nothing in the GEDCOM is silently dropped. Baptism EVENs already became the
-    // christening field, so they're skipped here. Deduped by text on re-import.
+    // Life events. `RESI` and typed `EVEN`s become STRUCTURED events (the same
+    // "Events" list the app edits, and what our export writes) instead of the
+    // note-dump they used to be — so residence/military/etc. survive a
+    // round-trip. Baptism EVENs already became the christening field. Deduped
+    // so a re-import never duplicates.
     const importEvents = (indi: GedNode, personId: string): void => {
       let existing: Set<string> | null = null
+      const keyOf = (e: { type: string; date: string | null; endDate: string | null; place: string | null; value: string | null }): string =>
+        `${e.type}|${e.date ?? ''}|${e.endDate ?? ''}|${e.place ?? ''}|${e.value ?? ''}`
+      const addEvent = (input: {
+        type: string
+        date: string | null
+        endDate: string | null
+        place: string | null
+        value: string | null
+        note: string | null
+      }): void => {
+        if (!input.date && !input.endDate && !input.place && !input.value && !input.note) return
+        if (!existing) existing = new Set(Events.forPerson(personId).map(keyOf))
+        const key = keyOf(input)
+        if (existing.has(key)) return
+        existing.add(key)
+        Events.create('person', personId, input)
+      }
+      const inlineNote = (ev: GedNode): string | null => {
+        for (const c of ev.children) {
+          if (c.tag === 'NOTE' && !/^@.+@$/.test(c.value) && c.value.trim()) return c.value.trim()
+        }
+        return null
+      }
       for (const ev of indi.children) {
-        if (ev.tag !== 'EVEN') continue
-        const type = (childValue(ev, 'TYPE') ?? '').trim()
-        if (HANDLED_EVENT_TYPE.test(type)) continue
-        const text = [type || 'Esemény', childValue(ev, 'DATE'), childValue(ev, 'PLAC')]
-          .filter(Boolean)
-          .join(' — ')
-        if (text === 'Esemény') continue
-        if (!existing) existing = new Set(Notes.forOwner('person', personId).map((n) => n.text))
-        if (existing.has(text)) continue
-        existing.add(text)
-        const note = Notes.create(text)
-        Notes.link(note.id, 'person', personId)
-        result.notes++
+        if (ev.tag === 'RESI') {
+          const { startDate, endDate } = parseOccupationPeriod(childValue(ev, 'DATE'))
+          addEvent({
+            type: 'residence',
+            date: startDate,
+            endDate,
+            place: childValue(ev, 'PLAC'),
+            value: null,
+            note: inlineNote(ev)
+          })
+        } else if (ev.tag === 'EVEN') {
+          const rawType = (childValue(ev, 'TYPE') ?? '').trim()
+          if (HANDLED_EVENT_TYPE.test(rawType)) continue
+          const { startDate, endDate } = parseOccupationPeriod(childValue(ev, 'DATE'))
+          addEvent({
+            type: rawType || 'other',
+            date: startDate,
+            endDate,
+            place: childValue(ev, 'PLAC'),
+            value: ev.value.trim() || null,
+            note: inlineNote(ev)
+          })
+        }
       }
     }
 
@@ -321,6 +368,13 @@ export function importGedcomText(text: string): GedcomImportResult {
         christeningPlace:
           eventDetails(indi, 'CHR').place ?? eventDetails(indi, 'BAPM').place ?? evenChristening?.place ?? null,
         religion: childValue(indi, 'RELI'),
+        // Per-fact research notes (`2 NOTE` under the vital event) round-trip
+        // into the same field our export writes them from.
+        birthNote: eventNote(indi, 'BIRT'),
+        deathNote: eventNote(indi, 'DEAT'),
+        christeningNote: eventNote(indi, 'CHR') ?? eventNote(indi, 'BAPM'),
+        burialNote: eventNote(indi, 'BURI'),
+        illegitimate: /^y/i.test(childValue(indi, '_ILLEGITIMATE') ?? '') || undefined,
         notes: null
       }
       // Match a stable id FIRST (fs_id), then the file-local xref. Existing
@@ -374,6 +428,20 @@ export function importGedcomText(text: string): GedcomImportResult {
       importEvents(indi, person.id)
     }
     result.people = personByXref.size
+
+    // --- Godparents (ASSO @X@ / RELA godparent) --- second pass, so the
+    // association target exists no matter where it sits in the file.
+    // `Godparents.add` is INSERT OR IGNORE → re-imports never duplicate.
+    for (const indi of indis) {
+      const personId = personByXref.get(indi.xref!)
+      if (!personId) continue
+      for (const asso of indi.children) {
+        if (asso.tag !== 'ASSO') continue
+        if (!GODPARENT_RELA.test(childValue(asso, 'RELA') ?? '')) continue
+        const target = /^@.+@$/.test(asso.value) ? personByXref.get(asso.value) : null
+        if (target) Godparents.add(personId, target)
+      }
+    }
 
     // --- Families ---
     const resolve = (x: string | null): string | null => (x ? personByXref.get(x) ?? null : null)

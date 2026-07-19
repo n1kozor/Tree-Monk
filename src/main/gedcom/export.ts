@@ -1,8 +1,8 @@
 import { writeFileSync, copyFileSync, mkdirSync, existsSync } from 'fs'
 import { dirname, extname, join } from 'path'
-import { Aliases, Documents, Families, Occupations, People } from '../db/repo'
+import { Aliases, Documents, Events, Families, Godparents, Occupations, People } from '../db/repo'
 import { resolveMediaPath } from '../db/connection'
-import type { Alias, DocumentRecord, Occupation, Person } from '@shared/types'
+import type { Alias, DocumentRecord, EventRecord, Occupation, Person } from '@shared/types'
 
 function line(level: number, tag: string, value?: string | null): string {
   return value ? `${level} ${tag} ${value}` : `${level} ${tag}`
@@ -83,8 +83,56 @@ function periodValue(o: Occupation): string | null {
   return null
 }
 
+/** Same period form for a life event's date + optional end date. */
+function eventPeriod(e: EventRecord): string | null {
+  if (e.date && e.endDate) return `FROM ${e.date} TO ${e.endDate}`
+  if (e.date) return e.date
+  if (e.endDate) return `TO ${e.endDate}`
+  return null
+}
+
+/** Single-line NOTE payload (GEDCOM lines must not contain raw newlines). */
+function flatNote(text: string | null | undefined): string | null {
+  const s = (text ?? '').replace(/\s*\n\s*/g, ' ').trim()
+  return s || null
+}
+
 function nameValue(p: Person): string {
   return `${p.givenName} /${p.surname}/`.trim()
+}
+
+/**
+ * GEDCOM cross-reference ids must be unique across the WHOLE file. A stored
+ * gedcomId is reused verbatim (stable round-trips), but only its FIRST holder
+ * keeps it; duplicates and records without one get the next free generated id.
+ * The previous `@I${index}@` fallback could collide with an imported id on a
+ * different person — importers (Gramps, MyHeritage) then merge the two records,
+ * scrambling the whole tree (people fused, parent couples multiplied).
+ */
+function assignXrefs<T extends { id: string; gedcomId: string | null }>(
+  items: T[],
+  prefix: string,
+  used: Set<string>
+): Map<string, string> {
+  const valid = /^@[^@\s]{1,20}@$/
+  const out = new Map<string, string>()
+  for (const it of items) {
+    const gid = it.gedcomId
+    if (gid && valid.test(gid) && !used.has(gid)) {
+      out.set(it.id, gid)
+      used.add(gid)
+    }
+  }
+  let n = 1
+  for (const it of items) {
+    if (out.has(it.id)) continue
+    let cand = `@${prefix}${n}@`
+    while (used.has(cand)) cand = `@${prefix}${++n}@`
+    out.set(it.id, cand)
+    used.add(cand)
+    n++
+  }
+  return out
 }
 
 /**
@@ -97,9 +145,11 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
   const people = include ? allPeople.filter((p) => include.has(p.id)) : allPeople
   const personSet = new Set(people.map((p) => p.id))
 
-  // Assign stable xrefs.
-  const xref = new Map<string, string>()
-  people.forEach((p, i) => xref.set(p.id, p.gedcomId ?? `@I${i + 1}@`))
+  // Assign stable, collision-free xrefs. One shared `used` set: the xref
+  // namespace is global in a GEDCOM file, so a family id must never equal a
+  // person id either.
+  const usedXrefs = new Set<string>()
+  const xref = assignXrefs(people, 'I', usedXrefs)
 
   const families = Families.list().filter((f) => {
     if (!include) return true
@@ -109,19 +159,22 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
       f.childIds.some((c) => personSet.has(c))
     )
   })
-  const famXref = new Map<string, string>()
-  families.forEach((f, i) => famXref.set(f.id, f.gedcomId ?? `@F${i + 1}@`))
+  const famXref = assignXrefs(families, 'F', usedXrefs)
 
-  // Reverse lookups: person -> families they belong to.
-  const spouseIn = new Map<string, string[]>()
+  // Reverse lookups: person -> families they belong to. Spouse families are
+  // sorted (marriage order, then date) so multiple marriages export in
+  // sequence — FAMS order is how GEDCOM readers infer it.
+  const famsSortKey = (f: { marriageOrder: number | null; marriageDate: string | null }): string =>
+    `${String(f.marriageOrder ?? 9999).padStart(4, '0')}|${f.marriageDate ?? '9999'}`
+  const spouseFams = new Map<string, typeof families>()
   const childIn = new Map<string, string[]>()
   for (const f of families) {
     const fx = famXref.get(f.id)!
     for (const sid of [f.husbandId, f.wifeId]) {
       if (sid && personSet.has(sid)) {
-        const arr = spouseIn.get(sid) ?? []
-        arr.push(fx)
-        spouseIn.set(sid, arr)
+        const arr = spouseFams.get(sid) ?? []
+        arr.push(f)
+        spouseFams.set(sid, arr)
       }
     }
     for (const cid of f.childIds) {
@@ -131,6 +184,13 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
         childIn.set(cid, arr)
       }
     }
+  }
+  const spouseIn = new Map<string, string[]>()
+  for (const [pid, fams] of spouseFams) {
+    spouseIn.set(
+      pid,
+      [...fams].sort((a, b) => famsSortKey(a).localeCompare(famsSortKey(b))).map((f) => famXref.get(f.id)!)
+    )
   }
 
   // Occupations grouped by person (the source of truth — may be several each).
@@ -171,17 +231,23 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
       if (a.kind) out.push(line(2, 'TYPE', a.kind))
     }
     if (p.sex !== 'U') out.push(line(1, 'SEX', p.sex))
-    if (p.birthDate || p.birthPlace) {
+    // Vital events, each with its per-fact research note when present.
+    const birthNote = flatNote(p.birthNote)
+    if (p.birthDate || p.birthPlace || birthNote) {
       out.push(line(1, 'BIRT'))
       if (p.birthDate) out.push(line(2, 'DATE', p.birthDate))
       if (p.birthPlace) out.push(line(2, 'PLAC', p.birthPlace))
+      if (birthNote) out.push(line(2, 'NOTE', birthNote))
     }
-    if (p.christeningDate || p.christeningPlace) {
+    const chrNote = flatNote(p.christeningNote)
+    if (p.christeningDate || p.christeningPlace || chrNote) {
       out.push(line(1, 'CHR'))
       if (p.christeningDate) out.push(line(2, 'DATE', p.christeningDate))
       if (p.christeningPlace) out.push(line(2, 'PLAC', p.christeningPlace))
+      if (chrNote) out.push(line(2, 'NOTE', chrNote))
     }
-    if (p.deceased || p.deathDate || p.deathPlace) {
+    const deathNote = flatNote(p.deathNote)
+    if (p.deceased || p.deathDate || p.deathPlace || deathNote) {
       if (p.deathDate || p.deathPlace) {
         out.push(line(1, 'DEAT'))
         if (p.deathDate) out.push(line(2, 'DATE', p.deathDate))
@@ -190,13 +256,36 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
         // Deceased, date unknown → `1 DEAT Y` asserts the event occurred (5.5.1).
         out.push(line(1, 'DEAT', 'Y'))
       }
+      if (deathNote) out.push(line(2, 'NOTE', deathNote))
     }
-    if (p.burialDate || p.burialPlace) {
+    const burialNote = flatNote(p.burialNote)
+    if (p.burialDate || p.burialPlace || burialNote) {
       out.push(line(1, 'BURI'))
       if (p.burialDate) out.push(line(2, 'DATE', p.burialDate))
       if (p.burialPlace) out.push(line(2, 'PLAC', p.burialPlace))
+      if (burialNote) out.push(line(2, 'NOTE', burialNote))
     }
+    if (p.illegitimate) out.push(line(1, '_ILLEGITIMATE', 'Y'))
     if (p.religion) out.push(line(1, 'RELI', p.religion))
+    // Life events: residence as the standard RESI, everything else as a typed
+    // EVEN — the import side turns both back into structured events.
+    for (const ev of Events.forPerson(p.id)) {
+      const period = eventPeriod(ev)
+      const note = flatNote(ev.note)
+      if (ev.type.toLowerCase() === 'residence') {
+        out.push(line(1, 'RESI'))
+        if (period) out.push(line(2, 'DATE', period))
+        if (ev.place) out.push(line(2, 'PLAC', ev.place))
+        if (ev.value) out.push(line(2, 'NOTE', flatNote(ev.value)!))
+        else if (note) out.push(line(2, 'NOTE', note))
+      } else {
+        out.push(line(1, 'EVEN', ev.value ? flatNote(ev.value) ?? undefined : undefined))
+        out.push(line(2, 'TYPE', ev.type))
+        if (period) out.push(line(2, 'DATE', period))
+        if (ev.place) out.push(line(2, 'PLAC', ev.place))
+        if (note) out.push(line(2, 'NOTE', note))
+      }
+    }
     for (const occ of occByPerson.get(p.id) ?? []) {
       if (!occ.title) continue
       out.push(line(1, 'OCCU', occ.title))
@@ -212,6 +301,13 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
       out.push(line(2, 'FILE', m.file))
       out.push(line(3, 'FORM', m.form))
       if (m.title) out.push(line(2, 'TITL', m.title))
+    }
+    // Godparents as the standard association structure (ASSO + RELA), which
+    // Gramps & co. read back as an association — and our import restores it.
+    for (const gid of Godparents.forPerson(p.id)) {
+      if (!personSet.has(gid)) continue
+      out.push(line(1, 'ASSO', xref.get(gid)))
+      out.push(line(2, 'RELA', 'godparent'))
     }
     for (const fx of spouseIn.get(p.id) ?? []) out.push(line(1, 'FAMS', fx))
     for (const fx of childIn.get(p.id) ?? []) out.push(line(1, 'FAMC', fx))

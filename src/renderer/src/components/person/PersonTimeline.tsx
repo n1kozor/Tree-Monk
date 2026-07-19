@@ -89,7 +89,10 @@ function TimelineList({ items, birthDate }: { items: TItem[]; birthDate: string 
   const { t } = useTranslation()
   const fmtDate = useDateFormat()
   return (
-    <ol className="relative ml-1 space-y-2 border-l border-border/40 pl-4">
+    // The rail is a pseudo-element and the dots sit INSIDE the list's own
+    // left padding — hanging them outside (old `-left-[21px]` + border-l)
+    // let scroll containers clip the dots at fractional display scalings.
+    <ol className="relative space-y-2 pl-6 before:absolute before:bottom-0.5 before:left-[9.5px] before:top-0.5 before:w-px before:bg-border/40 before:content-['']">
       {items.map((it) => {
         const { icon: Icon, dot } = META[it.tone]
         // Use the full event date (it.when) so month/day refine the age — e.g. a
@@ -97,7 +100,7 @@ function TimelineList({ items, birthDate }: { items: TItem[]; birthDate: string 
         const age = it.tone !== 'birth' ? ageAt(birthDate, it.when) : null
         return (
           <li key={it.key} className="relative">
-            <span className={cn('absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full ring-2 ring-background', dot)} />
+            <span className={cn('absolute -left-[19px] top-1 h-2.5 w-2.5 rounded-full ring-2 ring-background', dot)} />
             <div className={cn('flex items-start gap-2 text-xs', it.tone === 'world' && 'opacity-90')}>
               <Icon className={cn('mt-0.5 h-3.5 w-3.5 shrink-0', it.tone === 'world' ? 'text-blue-400' : 'text-muted-foreground')} />
               <div className="min-w-0 flex-1">

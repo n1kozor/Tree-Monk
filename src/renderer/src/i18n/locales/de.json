@@ -751,6 +751,7 @@
     "manualDesc": "Das vollständige TreeMonk-Handbuch als PDF, geöffnet im Standard-Viewer."
   },
   "common": {
+    "done": "Fertig",
     "copy": "Kopieren",
     "dragToReorder": "Zum Umsortieren ziehen",
     "back": "Zurück",
@@ -1042,6 +1043,14 @@
     "offline": "Kartenkacheln konnten nicht geladen werden — Internetverbindung prüfen."
   },
   "person": {
+    "treeShort": "Baum",
+    "mapShort": "Karte",
+    "kinshipShort": "Verwandtschaft",
+    "printMenu": "Drucken",
+    "fsIdEdit": "FamilySearch-ID festlegen…",
+    "identity": "Stammdaten",
+    "vitalEvents": "Lebensereignisse",
+    "moreActions": "Weitere Aktionen",
     "addSource": "Quelle hinzufügen",
     "noCitations": "Noch keine Zitate.",
     "srcTitle": "Titel",

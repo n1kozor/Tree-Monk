@@ -11,20 +11,21 @@ import {
 } from '@/store/usePedigreeSettings'
 
 /** Floating, persisted look-and-feel panel for the pedigree canvas.
- *  Lives in the top-right of the canvas and is open by default. */
+ *  Lives in the top-right of the canvas; starts collapsed to a labelled button. */
 export function PedigreeSettingsPanel(): JSX.Element {
   const { t } = useTranslation()
   const ped = usePedigreeSettings()
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(false)
 
   if (!open) {
     return (
       <button
         onClick={() => setOpen(true)}
         title={t('tree.displaySettings')}
-        className="glass-subtle absolute right-4 top-4 z-30 flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:text-primary"
+        className="glass-subtle absolute right-4 top-4 z-30 flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
       >
         <Settings2 className="h-4 w-4" />
+        {t('tree.displaySettings')}
       </button>
     )
   }

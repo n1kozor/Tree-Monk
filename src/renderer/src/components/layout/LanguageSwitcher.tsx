@@ -22,7 +22,7 @@ export function LanguageSwitcher(): JSX.Element {
         <Button variant="ghost" size="sm" className="gap-2">
           <Languages className="h-4 w-4" />
           <span>{current.flag}</span>
-          <span className="hidden sm:inline">{current.label}</span>
+          <span className="hidden xl:inline">{current.label}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
