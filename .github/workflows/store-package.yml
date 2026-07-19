@@ -5,23 +5,11 @@ name: Store package
 # it lands as a workflow artifact, to be uploaded manually in Partner Center
 # (the Store signs it during ingestion — no certificate involved).
 #
-# The three inputs come from Partner Center → the product's "Product identity"
-# page. They MUST match, or Partner Center rejects the upload.
+# The package identity comes from the STORE_IDENTITY_NAME / STORE_PUBLISHER /
+# STORE_PUBLISHER_DISPLAY repository secrets (Partner Center → Product
+# identity), so the values never appear in the repo or in build logs.
 on:
-  workflow_dispatch:
-    inputs:
-      identityName:
-        description: 'Package/Identity/Name (e.g. 12345AttilaBarkoczi.TreeMonk)'
-        required: true
-        type: string
-      publisher:
-        description: 'Package/Identity/Publisher (e.g. CN=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)'
-        required: true
-        type: string
-      publisherDisplayName:
-        description: 'Publisher display name'
-        required: true
-        type: string
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -44,9 +32,9 @@ jobs:
         shell: bash
         run: |
           npm run dist:win:store -- \
-            -c.appx.identityName="${{ github.event.inputs.identityName }}" \
-            -c.appx.publisher="${{ github.event.inputs.publisher }}" \
-            -c.appx.publisherDisplayName="${{ github.event.inputs.publisherDisplayName }}"
+            -c.appx.identityName="${{ secrets.STORE_IDENTITY_NAME }}" \
+            -c.appx.publisher="${{ secrets.STORE_PUBLISHER }}" \
+            -c.appx.publisherDisplayName="${{ secrets.STORE_PUBLISHER_DISPLAY }}"
 
       - name: Upload package artifact
         uses: actions/upload-artifact@v4
