@@ -32,6 +32,9 @@ export function UpdateBadge(): JSX.Element {
   const [version, setVersion] = useState<string>('')
   const [info, setInfo] = useState<UpdateInfo | null>(null)
   const [checking, setChecking] = useState(false)
+  // Microsoft Store builds: the Store delivers updates, so the badge is a
+  // plain version label — no check button, no download dialog.
+  const [storeBuild, setStoreBuild] = useState(false)
   const [open, setOpen] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const lastCheck = useRef(0)
@@ -45,6 +48,10 @@ export function UpdateBadge(): JSX.Element {
       const res = await window.api.updates.check()
       setInfo(res)
       if (res?.current) setVersion(res.current)
+      if (res?.store) {
+        setStoreBuild(true)
+        return
+      }
       if (res?.hasUpdate && res.latest) {
         // Auto-announce a freshly-detected version exactly once (per version):
         // pop the dialog open so the user sees the (localized) release notes.
@@ -94,6 +101,14 @@ export function UpdateBadge(): JSX.Element {
 
   const hasUpdate = !!info?.hasUpdate
   const notes = localizeReleaseNotes(info?.notes, i18n.language)
+
+  if (storeBuild) {
+    return (
+      <span className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-[11px] font-medium text-muted-foreground">
+        <span className="tabular-nums">v{version || '…'}</span>
+      </span>
+    )
+  }
 
   return (
     <>

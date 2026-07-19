@@ -1,0 +1,56 @@
+name: Store package
+
+# Builds the Microsoft Store (MSIX/AppX) package on demand. AppX can only be
+# built on Windows, hence the CI runner. The package is NOT published anywhere:
+# it lands as a workflow artifact, to be uploaded manually in Partner Center
+# (the Store signs it during ingestion — no certificate involved).
+#
+# The three inputs come from Partner Center → the product's "Product identity"
+# page. They MUST match, or Partner Center rejects the upload.
+on:
+  workflow_dispatch:
+    inputs:
+      identityName:
+        description: 'Package/Identity/Name (e.g. 12345AttilaBarkoczi.TreeMonk)'
+        required: true
+        type: string
+      publisher:
+        description: 'Package/Identity/Publisher (e.g. CN=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)'
+        required: true
+        type: string
+      publisherDisplayName:
+        description: 'Publisher display name'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  appx:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build MSIX (AppX) package
+        shell: bash
+        run: |
+          npm run dist:win:store -- \
+            -c.appx.identityName="${{ github.event.inputs.identityName }}" \
+            -c.appx.publisher="${{ github.event.inputs.publisher }}" \
+            -c.appx.publisherDisplayName="${{ github.event.inputs.publisherDisplayName }}"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TreeMonk-store-appx
+          path: release/*.appx
+          if-no-files-found: error

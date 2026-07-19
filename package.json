@@ -31,6 +31,7 @@
     "postinstall": "electron-rebuild -f -w better-sqlite3",
     "dist:linux": "electron-vite build && electron-builder --linux",
     "dist:win": "electron-vite build && electron-builder --win",
+    "dist:win:store": "electron-vite build && electron-builder --win appx --publish never",
     "dist:mac": "electron-vite build && electron-builder --mac"
   },
   "dependencies": {

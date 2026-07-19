@@ -874,6 +874,9 @@ export interface ReleaseEntry {
 export interface UpdateInfo {
   /** The running app version (from package.json). */
   current: string
+  /** True in Microsoft Store (MSIX) builds — updates come from the Store, so
+   *  the in-app GitHub updater is dormant and the UI shows a plain version. */
+  store?: boolean
   /** The latest published release tag (without a leading "v"), or null if unknown. */
   latest: string | null
   /** True when `latest` is strictly newer than `current`. */

@@ -52,6 +52,25 @@ win:
   icon: build/icon.ico
   target:
     - nsis
+# Microsoft Store (MSIX/AppX) package — built ONLY via `npm run dist:win:store`,
+# never by the normal release flow. The Store signs the package itself, so no
+# certificate is needed. The identity values below are PLACEHOLDERS: pass the
+# real ones from Partner Center → Product identity at build time, e.g.
+#   npm run dist:win:store -- \
+#     -c.appx.identityName=XXXXX.TreeMonk \
+#     -c.appx.publisher="CN=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" \
+#     -c.appx.publisherDisplayName="Attila Barkóczi"
+appx:
+  identityName: PLACEHOLDER.TreeMonk
+  publisher: CN=00000000-0000-0000-0000-000000000000
+  publisherDisplayName: Attila Barkóczi
+  applicationId: TreeMonk
+  displayName: TreeMonk
+  backgroundColor: '#0f766e'
+  languages:
+    - en-US
+    - hu-HU
+    - de-DE
 mac:
   target:
     - dmg
