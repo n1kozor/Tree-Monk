@@ -23,15 +23,25 @@
     "none": "Nincs feltöltött kép."
   },
   "places": {
-    "standardizeTitle": "Helyek standardizálása",
-    "standardizeDesc": "Az összes helynév egységesítése a kanonikus formára (a duplikátumok, pl. „…Hungary” / „…Magyarország” összevonása).",
-    "standardizeBtn": "Standardizálás",
-    "standardizing": "Helyek standardizálása…",
-    "standardizingHint": "Kanonikus helynevek keresése…",
-    "progress": "{{done}}/{{total}} hely · {{changed}} egységesítve",
-    "standardizeDone": "{{count}} rekord helyei egységesítve",
-    "standardizeNone": "Minden hely már egységes",
-    "standardizeFailed": "A standardizálás nem sikerült"
+    "manage": "Helyek kezelése",
+    "title": "Helyek",
+    "hint": "Hely-hierarchia (falu → járás → megye → ország) és GOV-azonosító. A személyeknél tárolt helynevek változatlanok maradnak.",
+    "none": "Nincs találat.",
+    "select": "Válassz egy helyet a listából.",
+    "typeLabel": "Típus",
+    "parent": "Fölérendelt hely",
+    "parentHint": "pl. a járás vagy megye",
+    "hierarchy": "Hierarchia",
+    "type": {
+      "village": "Falu",
+      "town": "Nagyközség / mezőváros",
+      "city": "Város",
+      "district": "Járás",
+      "county": "Megye",
+      "region": "Régió / tartomány",
+      "country": "Ország",
+      "other": "Egyéb"
+    }
   },
   "welcome": {
     "title": "Hogy tetszik eddig a TreeMonk?",
@@ -150,6 +160,49 @@
     "addTitle": "Keresztszülő hozzáadása",
     "none": "Nincs rögzített keresztszülő.",
     "godchildOf": "Keresztszülője ennek:"
+  },
+  "witnesses": {
+    "christeningTitle": "Keresztelési tanúk",
+    "marriageTitle": "Esküvői tanúk",
+    "add": "Hozzáadás",
+    "addTitle": "Tanú hozzáadása",
+    "none": "Nincs rögzített tanú."
+  },
+  "relation": {
+    "father": "Apa",
+    "mother": "Anya",
+    "spouse": "Házastárs",
+    "husband": "Férj",
+    "wife": "Feleség"
+  },
+  "participants": {
+    "title": "Résztvevők",
+    "add": "Hozzáadás",
+    "addTitle": "Résztvevő hozzáadása",
+    "none": "Nincs rögzített résztvevő.",
+    "role": "Szerep",
+    "participationsTitle": "Részvételek",
+    "roles": {
+      "priest": "Pap / lelkész",
+      "midwife": "Bába",
+      "officiant": "Anyakönyvvezető",
+      "donor": "Adományozó",
+      "gravedigger": "Sírásó"
+    }
+  },
+  "childRelation": {
+    "title": "Kapcsolat a szülőkkel",
+    "birth": "Vér szerinti",
+    "adopted": "Örökbefogadott",
+    "foster": "Nevelt",
+    "step": "Mostoha"
+  },
+  "attributes": {
+    "title": "Egyéb adatok",
+    "none": "Nincs rögzített adat.",
+    "key": "Megnevezés",
+    "value": "Érték",
+    "add": "Hozzáadás"
   },
   "dashboard": {
     "title": "Áttekintés",
@@ -748,7 +801,11 @@
       "regenerated": "Új token generálva — a régi érvénytelen.",
       "error": "A beállítás mentése nem sikerült."
     },
-    "manualDesc": "A teljes TreeMonk-kézikönyv PDF-ben, a gép alapértelmezett megjelenítőjében nyílik meg."
+    "manualDesc": "A teljes TreeMonk-kézikönyv PDF-ben, a gép alapértelmezett megjelenítőjében nyílik meg.",
+    "siteExport": "Webhely exportálása",
+    "siteExportDesc": "Böngészhető, kereshető HTML-oldal a teljes fáról — egyetlen fájl, bárkivel megosztható. A bizalmas személyek adatai kimaradnak.",
+    "siteExportBtn": "HTML-webhely",
+    "siteExportDone": "Webhely exportálva: {{path}}"
   },
   "common": {
     "done": "Kész",
@@ -1171,7 +1228,15 @@
     "unlinkSpouseChildren": "A(z) {{count}} gyermek ennél a személynél marad (egyszülős családként).",
     "spouseUnlinked": "{{name}} leválasztva a házasságról.",
     "verifiedOn": "Ellenőrizve",
-    "markVerified": "Ellenőrzöttnek jelöl"
+    "markVerified": "Ellenőrzöttnek jelöl",
+    "callName": "Hívónév",
+    "callNameHint": "amelyiken szólították",
+    "namePrefix": "Névelőtag",
+    "nameSuffix": "Névutótag",
+    "stillborn": "Halva született",
+    "private": "Bizalmas személy",
+    "privateHint": "(GEDCOM-exportban „confidential” jelölést kap)",
+    "dateQualifierHint": "Minősítők: „kb. 1850”, „1850 előtt”, „1850 után”, „1850 és 1860 között”"
   },
   "research": {
     "history": "Kutatási előzmények",
@@ -1206,10 +1271,17 @@
       "education": "Tanulmányok",
       "religious": "Vallási esemény",
       "other": "Egyéb",
-      "divorce": "Válás"
+      "divorce": "Válás",
+      "engagement": "Eljegyzés",
+      "banns": "Kihirdetés",
+      "civilMarriage": "Polgári esküvő",
+      "churchMarriage": "Egyházi esküvő",
+      "separation": "Különválás"
     },
     "from": "Ettől",
-    "to": "Eddig"
+    "to": "Eddig",
+    "familyTitle": "Családi események",
+    "addTitle": "Új esemény"
   },
   "timeline": {
     "title": "Idővonal",
@@ -1885,13 +1957,6 @@
     "children": "Gyermekek",
     "events": "Események",
     "noFamily": "Nincs rögzített család."
-  },
-  "relation": {
-    "father": "Apa",
-    "mother": "Anya",
-    "spouse": "Házastárs",
-    "husband": "Férj",
-    "wife": "Feleség"
   },
   "sex": {
     "male": "Férfi",

@@ -10,6 +10,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { fullName, yearOf } from '@/lib/utils'
+import { dateSortKey } from '@/lib/dates'
 import { norm } from '@/lib/nameMatch'
 import type { Person } from '@shared/types'
 
@@ -34,7 +35,7 @@ export function DrillDownDialog({
   const sorted = useMemo(
     () =>
       [...people].sort(
-        (a, b) => (Number(yearOf(a.birthDate)) || 9999) - (Number(yearOf(b.birthDate)) || 9999)
+        (a, b) => dateSortKey(a.birthDate) - dateSortKey(b.birthDate)
       ),
     [people]
   )

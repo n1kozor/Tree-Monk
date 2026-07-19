@@ -78,6 +78,20 @@ function migrate(database: Database.Database): void {
   add('ALTER TABLE people ADD COLUMN illegitimate INTEGER NOT NULL DEFAULT 0')
   // Verified/reviewed flag (manual confirmation). Additive + defaulted → safe.
   add('ALTER TABLE people ADD COLUMN verified INTEGER NOT NULL DEFAULT 0')
+  // Name pieces: Rufname / call name (_RUFNAME) plus prefix/suffix (NPFX/NSFX).
+  // Additive + nullable → existing DBs gain them on the next launch.
+  add('ALTER TABLE people ADD COLUMN call_name TEXT')
+  add('ALTER TABLE people ADD COLUMN name_prefix TEXT')
+  add('ALTER TABLE people ADD COLUMN name_suffix TEXT')
+  // Stillborn + confidential flags. Additive + defaulted → safe.
+  add('ALTER TABLE people ADD COLUMN stillborn INTEGER NOT NULL DEFAULT 0')
+  add('ALTER TABLE people ADD COLUMN is_private INTEGER NOT NULL DEFAULT 0')
+  // Place hierarchy + GOV id (gov.genealogy.net). Additive + nullable → safe.
+  add('ALTER TABLE places ADD COLUMN place_type TEXT')
+  add('ALTER TABLE places ADD COLUMN parent_name TEXT')
+  add('ALTER TABLE places ADD COLUMN gov_id TEXT')
+  // Child↔parents relationship type (GEDCOM PEDI): NULL = birth. Additive → safe.
+  add('ALTER TABLE family_children ADD COLUMN relation TEXT')
   // Which marriage this union is for the couple (1st, 2nd, …) — user-set badge.
   // Additive + nullable → existing DBs gain it on the next launch, nothing lost.
   add('ALTER TABLE families ADD COLUMN marriage_order INTEGER')

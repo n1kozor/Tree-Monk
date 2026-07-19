@@ -43,6 +43,9 @@ import { PersonEvents } from './PersonEvents'
 import { PersonTimeline } from './PersonTimeline'
 import { PhotoFrameDialog } from './PhotoFrameDialog'
 import { PersonGodparents } from './PersonGodparents'
+import { PersonWitnesses } from './PersonWitnesses'
+import { PersonAttributes } from './PersonAttributes'
+import { PersonParticipations } from './PersonParticipations'
 import { FactSources, VitalNote } from './FactSources'
 import { QualityRing } from '@/components/common/QualityRing'
 import { personQuality } from '@/lib/completeness'
@@ -163,7 +166,12 @@ export function PersonPanel(): JSX.Element | null {
       birthNote: next.birthNote,
       deathNote: next.deathNote,
       christeningNote: next.christeningNote,
-      burialNote: next.burialNote
+      burialNote: next.burialNote,
+      callName: next.callName,
+      namePrefix: next.namePrefix,
+      nameSuffix: next.nameSuffix,
+      stillborn: next.stillborn,
+      isPrivate: next.isPrivate
     })
     await refreshPeople()
   }
@@ -201,6 +209,21 @@ export function PersonPanel(): JSX.Element | null {
   const setIllegitimate = (v: boolean): void => {
     if (!person) return
     const next = { ...person, illegitimate: v }
+    setPerson(next)
+    void save(next)
+  }
+
+  // Stillborn implies deceased (the checkbox reflects that immediately).
+  const setStillborn = (v: boolean): void => {
+    if (!person) return
+    const next = { ...person, stillborn: v, deceased: person.deceased || v }
+    setPerson(next)
+    void save(next)
+  }
+
+  const setPrivate = (v: boolean): void => {
+    if (!person) return
+    const next = { ...person, isPrivate: v }
     setPerson(next)
     void save(next)
   }
@@ -521,6 +544,31 @@ export function PersonPanel(): JSX.Element | null {
                   <Input value={person[f]} onChange={(e) => patch(f, e.target.value)} onBlur={() => save()} />
                 </Field>
               ))}
+              <Field label={t('person.callName')}>
+                <Input
+                  value={person.callName ?? ''}
+                  onChange={(e) => patch('callName', e.target.value)}
+                  onBlur={() => save()}
+                />
+              </Field>
+              <div className="grid grid-cols-2 gap-2">
+                <Field label={t('person.namePrefix')}>
+                  <Input
+                    value={person.namePrefix ?? ''}
+                    onChange={(e) => patch('namePrefix', e.target.value)}
+                    onBlur={() => save()}
+                    placeholder="Dr."
+                  />
+                </Field>
+                <Field label={t('person.nameSuffix')}>
+                  <Input
+                    value={person.nameSuffix ?? ''}
+                    onChange={(e) => patch('nameSuffix', e.target.value)}
+                    onBlur={() => save()}
+                    placeholder="Jr."
+                  />
+                </Field>
+              </div>
             </div>
             <Field label={t('person.sex')}>
               <div className="flex gap-1.5">
@@ -631,6 +679,25 @@ export function PersonPanel(): JSX.Element | null {
                 />
                 <span>{t('person.illegitimate')}</span>
               </label>
+              <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={!!person.stillborn}
+                  onChange={(e) => setStillborn(e.target.checked)}
+                  className="h-4 w-4 accent-[hsl(var(--primary))]"
+                />
+                <span>{t('person.stillborn')}</span>
+              </label>
+              {/* Confidential — marked RESN confidential on GEDCOM export. */}
+              <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={!!person.isPrivate}
+                  onChange={(e) => setPrivate(e.target.checked)}
+                  className="h-4 w-4 accent-[hsl(var(--primary))]"
+                />
+                <span>{t('person.private')}</span>
+              </label>
               <div className="col-span-2 -mb-1 flex justify-end">
                 <button
                   type="button"
@@ -677,6 +744,14 @@ export function PersonPanel(): JSX.Element | null {
             <PersonOccupations personId={person.id} />
             <PersonEvents personId={person.id} />
             <PersonGodparents person={person} />
+            <PersonWitnesses
+              ownerType="person"
+              ownerId={person.id}
+              title={t('witnesses.christeningTitle')}
+              excludeIds={[person.id]}
+            />
+            <PersonAttributes personId={person.id} />
+            <PersonParticipations personId={person.id} />
             <PersonTimeline person={person} />
             <Field label={t('person.notes')}>
               <Textarea

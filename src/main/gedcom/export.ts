@@ -1,6 +1,6 @@
 import { writeFileSync, copyFileSync, mkdirSync, existsSync } from 'fs'
 import { dirname, extname, join } from 'path'
-import { Aliases, Documents, Events, Families, Godparents, Occupations, People } from '../db/repo'
+import { Aliases, Attributes, Documents, EventParticipants, Events, Families, Godparents, Occupations, People, Witnesses } from '../db/repo'
 import { resolveMediaPath } from '../db/connection'
 import type { Alias, DocumentRecord, EventRecord, Occupation, Person } from '@shared/types'
 
@@ -161,6 +161,16 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
   })
   const famXref = assignXrefs(families, 'F', usedXrefs)
 
+  // Shared-event participants as a custom sub-structure (readers ignore the
+  // underscore tag; our import restores person + role).
+  const pushParticipants = (eventId: string, level: number): void => {
+    for (const pt of EventParticipants.forEvent(eventId)) {
+      if (!personSet.has(pt.personId)) continue
+      out.push(line(level, '_PART', xref.get(pt.personId)))
+      if (pt.role) out.push(line(level + 1, 'ROLE', pt.role))
+    }
+  }
+
   // Reverse lookups: person -> families they belong to. Spouse families are
   // sorted (marriage order, then date) so multiple marriages export in
   // sequence — FAMS order is how GEDCOM readers infer it.
@@ -168,6 +178,8 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
     `${String(f.marriageOrder ?? 9999).padStart(4, '0')}|${f.marriageDate ?? '9999'}`
   const spouseFams = new Map<string, typeof families>()
   const childIn = new Map<string, string[]>()
+  // (childId|famXref) -> adopted/foster/step, exported as FAMC/PEDI.
+  const childRelation = new Map<string, string>()
   for (const f of families) {
     const fx = famXref.get(f.id)!
     for (const sid of [f.husbandId, f.wifeId]) {
@@ -182,6 +194,8 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
         const arr = childIn.get(cid) ?? []
         arr.push(fx)
         childIn.set(cid, arr)
+        const rel = f.childRelations?.[cid]
+        if (rel) childRelation.set(`${cid}|${fx}`, rel)
       }
     }
   }
@@ -225,6 +239,11 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
   for (const p of people) {
     out.push(line(0, `${xref.get(p.id)} INDI`))
     out.push(line(1, 'NAME', nameValue(p)))
+    // Name pieces: prefix/suffix as the standard NPFX/NSFX, the Rufname as the
+    // _RUFNAME custom tag Gramps & the German programs (Ahnenblatt, GFAhnen) use.
+    if (p.namePrefix) out.push(line(2, 'NPFX', p.namePrefix))
+    if (p.nameSuffix) out.push(line(2, 'NSFX', p.nameSuffix))
+    if (p.callName) out.push(line(2, '_RUFNAME', p.callName))
     // Name variations as additional NAME records.
     for (const a of aliasByPerson.get(p.id) ?? []) {
       out.push(line(1, 'NAME', `${a.givenName} /${a.surname}/`.trim()))
@@ -266,6 +285,9 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
       if (burialNote) out.push(line(2, 'NOTE', burialNote))
     }
     if (p.illegitimate) out.push(line(1, '_ILLEGITIMATE', 'Y'))
+    if (p.stillborn) out.push(line(1, '_STILLBORN', 'Y'))
+    // Confidential person → the standard 5.5.1 restriction notice.
+    if (p.isPrivate) out.push(line(1, 'RESN', 'confidential'))
     if (p.religion) out.push(line(1, 'RELI', p.religion))
     // Life events: residence as the standard RESI, everything else as a typed
     // EVEN — the import side turns both back into structured events.
@@ -285,12 +307,18 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
         if (ev.place) out.push(line(2, 'PLAC', ev.place))
         if (note) out.push(line(2, 'NOTE', note))
       }
+      pushParticipants(ev.id, 2)
     }
     for (const occ of occByPerson.get(p.id) ?? []) {
       if (!occ.title) continue
       out.push(line(1, 'OCCU', occ.title))
       const period = periodValue(occ)
       if (period) out.push(line(2, 'DATE', period))
+    }
+    // Free-form attributes as the generic 5.5.1 attribute: FACT <value> / TYPE <key>.
+    for (const attr of Attributes.forPerson(p.id)) {
+      out.push(line(1, 'FACT', attr.value ? flatNote(attr.value) ?? undefined : undefined))
+      out.push(line(2, 'TYPE', attr.key))
     }
     if (p.notes) out.push(line(1, 'NOTE', p.notes.replace(/\n/g, ' ')))
     // Multimedia objects (FILE → media/<title>.<ext>, or the original URL).
@@ -309,8 +337,19 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
       out.push(line(1, 'ASSO', xref.get(gid)))
       out.push(line(2, 'RELA', 'godparent'))
     }
+    // Christening witnesses use the same ASSO structure with a witness RELA.
+    for (const wid of Witnesses.forOwner('person', p.id)) {
+      if (!personSet.has(wid)) continue
+      out.push(line(1, 'ASSO', xref.get(wid)))
+      out.push(line(2, 'RELA', 'christening witness'))
+    }
     for (const fx of spouseIn.get(p.id) ?? []) out.push(line(1, 'FAMS', fx))
-    for (const fx of childIn.get(p.id) ?? []) out.push(line(1, 'FAMC', fx))
+    for (const fx of childIn.get(p.id) ?? []) {
+      out.push(line(1, 'FAMC', fx))
+      // Non-birth pedigree (adopted/foster; "step" is our readable extension).
+      const rel = childRelation.get(`${p.id}|${fx}`)
+      if (rel) out.push(line(2, 'PEDI', rel))
+    }
   }
 
   for (const f of families) {
@@ -325,6 +364,31 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
       out.push(line(1, 'MARR'))
       if (f.marriageDate) out.push(line(2, 'DATE', f.marriageDate))
       if (f.marriagePlace) out.push(line(2, 'PLAC', f.marriagePlace))
+    }
+    // Marriage witnesses as a custom family-level pointer (our import restores
+    // it; other readers safely ignore the underscore tag).
+    for (const wid of Witnesses.forOwner('family', f.id)) {
+      if (personSet.has(wid)) out.push(line(1, '_WITN', xref.get(wid)))
+    }
+    // Family (union) events: the standard tags where one exists (DIV/ENGA/MARB),
+    // everything else as a typed EVEN — the import side restores both.
+    for (const ev of Events.forOwner('family', f.id)) {
+      const period = eventPeriod(ev)
+      const note = flatNote(ev.note)
+      const value = ev.value ? flatNote(ev.value) : null
+      const tl = ev.type.toLowerCase()
+      const std = tl === 'divorce' ? 'DIV' : tl === 'engagement' ? 'ENGA' : tl === 'banns' ? 'MARB' : null
+      if (std) out.push(line(1, std))
+      else {
+        out.push(line(1, 'EVEN', value ?? undefined))
+        out.push(line(2, 'TYPE', ev.type))
+      }
+      if (period) out.push(line(2, 'DATE', period))
+      if (ev.place) out.push(line(2, 'PLAC', ev.place))
+      // A standard tag carries no payload — its text value travels as a NOTE.
+      if (std && value) out.push(line(2, 'NOTE', value))
+      if (note) out.push(line(2, 'NOTE', note))
+      pushParticipants(ev.id, 2)
     }
   }
 

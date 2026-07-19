@@ -11,7 +11,12 @@ import {
   DismissedIssues,
   Documents,
   Families,
+  Attributes,
+  EventParticipants,
   Godparents,
+  Places,
+  Witnesses,
+  type WitnessOwnerType,
   Notes,
   Events,
   Occupations,
@@ -82,7 +87,7 @@ import {
 } from './workspaces'
 import { geoSearch, geocodePlaces, savePlace, standardizePlaces } from './geo'
 import { checkForUpdates, currentVersion, listReleases, openUpdateDownload } from './updates'
-import type { FamilySearchImportOptions } from '@shared/types'
+import type { ChildRelation, FamilySearchImportOptions } from '@shared/types'
 import {
   createLinkDocument,
   documentDataUrl,
@@ -95,6 +100,7 @@ import {
 } from './media'
 import { importGedcomFile, importGedcomText } from './gedcom/import'
 import { exportGedcom } from './gedcom/export'
+import { exportSite } from './siteExport'
 import type {
   AuditFilter,
   BoardEdge,
@@ -143,6 +149,19 @@ export function registerIpc(): void {
     Families.update(id, input)
   )
   ipcMain.handle(Channels.families.remove, (_e, id: string) => Families.remove(id))
+  ipcMain.handle(Channels.families.setChildRelation, (_e, fid: string, cid: string, rel: ChildRelation | null) =>
+    Families.setChildRelation(fid, cid, rel)
+  )
+
+  // Shared-event participants (roles: pap, bába, adományozó…).
+  ipcMain.handle(Channels.eventParticipants.forEvent, (_e, eid: string) => EventParticipants.forEvent(eid))
+  ipcMain.handle(Channels.eventParticipants.set, (_e, eid: string, pid: string, role: string | null) =>
+    EventParticipants.set(eid, pid, role)
+  )
+  ipcMain.handle(Channels.eventParticipants.remove, (_e, eid: string, pid: string) =>
+    EventParticipants.remove(eid, pid)
+  )
+  ipcMain.handle(Channels.eventParticipants.forPerson, (_e, pid: string) => EventParticipants.forPerson(pid))
 
   // Documents
   ipcMain.handle(Channels.documents.list, () => Documents.list())
@@ -309,9 +328,22 @@ export function registerIpc(): void {
   ipcMain.handle(Channels.godparents.add, (_e, pid: string, gid: string) => Godparents.add(pid, gid))
   ipcMain.handle(Channels.godparents.remove, (_e, pid: string, gid: string) => Godparents.remove(pid, gid))
 
+  // Witnesses (tanúk) — christening witnesses of a person, marriage witnesses of a family.
+  ipcMain.handle(Channels.witnesses.forOwner, (_e, ot: WitnessOwnerType, oid: string) => Witnesses.forOwner(ot, oid))
+  ipcMain.handle(Channels.witnesses.add, (_e, ot: WitnessOwnerType, oid: string, wid: string) => Witnesses.add(ot, oid, wid))
+  ipcMain.handle(Channels.witnesses.remove, (_e, ot: WitnessOwnerType, oid: string, wid: string) => Witnesses.remove(ot, oid, wid))
+
+  // Free-form person attributes (FACT/TYPE).
+  ipcMain.handle(Channels.attributes.forPerson, (_e, pid: string) => Attributes.forPerson(pid))
+  ipcMain.handle(Channels.attributes.create, (_e, pid: string, input) => Attributes.create(pid, input))
+  ipcMain.handle(Channels.attributes.update, (_e, id: string, input) => Attributes.update(id, input))
+  ipcMain.handle(Channels.attributes.remove, (_e, id: string) => Attributes.remove(id))
+
   // Life events / facts (residences, military, nationality, …) — person-scoped.
   ipcMain.handle(Channels.events.forPerson, (_e, pid: string) => Events.forPerson(pid))
+  ipcMain.handle(Channels.events.forFamily, (_e, fid: string) => Events.forOwner('family', fid))
   ipcMain.handle(Channels.events.create, (_e, pid: string, input) => Events.create('person', pid, input))
+  ipcMain.handle(Channels.events.createForFamily, (_e, fid: string, input) => Events.create('family', fid, input))
   ipcMain.handle(Channels.events.update, (_e, id: string, input) => Events.update(id, input))
   ipcMain.handle(Channels.events.remove, (_e, id: string) => Events.remove(id))
   ipcMain.handle(Channels.events.reorder, (_e, ids: string[]) => Events.reorder(ids))
@@ -706,6 +738,21 @@ export function registerIpc(): void {
   // Geocoding (Nominatim)
   ipcMain.handle(Channels.geo.search, (_e, query: string) => geoSearch(query))
   ipcMain.handle(Channels.geo.savePlace, (_e, place) => savePlace(place))
+  ipcMain.handle(Channels.geo.listPlaces, () =>
+    Places.list().map((p) => ({
+      name: p.name,
+      lat: p.lat,
+      lon: p.lon,
+      placeType: p.place_type ?? null,
+      parentName: p.parent_name ?? null,
+      govId: p.gov_id ?? null
+    }))
+  )
+  ipcMain.handle(
+    Channels.geo.setPlaceMeta,
+    (_e, name: string, meta: { placeType?: string | null; parentName?: string | null; govId?: string | null }) =>
+      Places.setMeta(name, meta)
+  )
   ipcMain.handle(Channels.geo.geocodeAll, (e) =>
     geocodePlaces((p) => safeSend(e.sender, Channels.geo.geocodeProgress, p))
   )
@@ -727,6 +774,18 @@ export function registerIpc(): void {
     })
     if (res.canceled || !res.filePath) return null
     exportGedcom(res.filePath, personIds)
+    return { path: res.filePath }
+  })
+  ipcMain.handle(Channels.site.export, async (e, lang: string) => {
+    const win = BrowserWindow.fromWebContents(e.sender) ?? undefined!
+    const res = await dialog.showSaveDialog(win, {
+      title: 'Export website',
+      defaultPath: 'treemonk-site.html',
+      filters: [{ name: 'HTML', extensions: ['html'] }],
+      properties: ['showOverwriteConfirmation', 'createDirectory']
+    })
+    if (res.canceled || !res.filePath) return null
+    exportSite(res.filePath, lang)
     return { path: res.filePath }
   })
 

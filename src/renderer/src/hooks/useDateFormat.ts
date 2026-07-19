@@ -10,7 +10,9 @@ import { useSettings } from '@/store/useSettings'
  */
 export function useDateFormat(): (date: string | null | undefined) => string {
   const fmt = useSettings((s) => s.dateFormat)
-  return useCallback((date) => formatDisplayDate(date, fmt), [fmt])
+  const { i18n } = useTranslation()
+  const lang = i18n.language
+  return useCallback((date) => formatDisplayDate(date, fmt, lang), [fmt, lang])
 }
 
 /**

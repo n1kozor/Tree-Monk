@@ -5,6 +5,7 @@ import type { Person } from '@shared/types'
 const person = (p: Partial<Person>): Person => ({
   id: '1', gedcomId: null, fsId: null, givenName: '', surname: '', sex: 'U',
   birthDate: null, birthPlace: null, deathDate: null, deathPlace: null, deceased: false, illegitimate: false, verified: false,
+    callName: null, namePrefix: null, nameSuffix: null, stillborn: false, isPrivate: false,
   burialDate: null, burialPlace: null, christeningDate: null, christeningPlace: null,
   religion: null, birthNote: null, deathNote: null, christeningNote: null, burialNote: null, occupation: null, notes: null, profilePhotoId: null, profilePhotoCrop: null,
   createdAt: '', updatedAt: '', ...p

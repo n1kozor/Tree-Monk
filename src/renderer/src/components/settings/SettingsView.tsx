@@ -7,6 +7,7 @@ import {
   BookOpen,
   Database,
   Download,
+  Globe,
   Eraser,
   MapPin,
   MessageCircle,
@@ -122,7 +123,7 @@ function Row({
 }
 
 export function SettingsView(): JSX.Element {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const refreshAll = useAppStore((s) => s.refreshAll)
   const {
     fontSize,
@@ -269,6 +270,20 @@ export function SettingsView(): JSX.Element {
               <Button size="sm" variant="outline" className="gap-2" onClick={() => setExportOpen(true)}>
                 <Download className="h-4 w-4" />
                 {t('gedcom.export')}
+              </Button>
+            </Row>
+            <Row icon={Globe} title={t('settings.siteExport')} desc={t('settings.siteExportDesc')}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                onClick={async () => {
+                  const res = await window.api.site.export(i18n.language)
+                  if (res) toast.success(t('settings.siteExportDone', { path: res.path }))
+                }}
+              >
+                <Globe className="h-4 w-4" />
+                {t('settings.siteExportBtn')}
               </Button>
             </Row>
             {!fsMode && (

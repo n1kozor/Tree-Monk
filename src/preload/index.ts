@@ -15,7 +15,15 @@ const api: TreeMonkApi = {
     list: () => ipcRenderer.invoke(Channels.families.list),
     create: (input) => ipcRenderer.invoke(Channels.families.create, input),
     update: (id, input) => ipcRenderer.invoke(Channels.families.update, id, input),
-    remove: (id) => ipcRenderer.invoke(Channels.families.remove, id)
+    remove: (id) => ipcRenderer.invoke(Channels.families.remove, id),
+    setChildRelation: (fid, cid, rel) =>
+      ipcRenderer.invoke(Channels.families.setChildRelation, fid, cid, rel)
+  },
+  eventParticipants: {
+    forEvent: (eid) => ipcRenderer.invoke(Channels.eventParticipants.forEvent, eid),
+    set: (eid, pid, role) => ipcRenderer.invoke(Channels.eventParticipants.set, eid, pid, role),
+    remove: (eid, pid) => ipcRenderer.invoke(Channels.eventParticipants.remove, eid, pid),
+    forPerson: (pid) => ipcRenderer.invoke(Channels.eventParticipants.forPerson, pid)
   },
   documents: {
     list: () => ipcRenderer.invoke(Channels.documents.list),
@@ -91,6 +99,17 @@ const api: TreeMonkApi = {
   collaborations: {
     listForPerson: (pid) => ipcRenderer.invoke(Channels.collaborations.listForPerson, pid)
   },
+  witnesses: {
+    forOwner: (ot, oid) => ipcRenderer.invoke(Channels.witnesses.forOwner, ot, oid),
+    add: (ot, oid, wid) => ipcRenderer.invoke(Channels.witnesses.add, ot, oid, wid),
+    remove: (ot, oid, wid) => ipcRenderer.invoke(Channels.witnesses.remove, ot, oid, wid)
+  },
+  attributes: {
+    forPerson: (pid) => ipcRenderer.invoke(Channels.attributes.forPerson, pid),
+    create: (pid, input) => ipcRenderer.invoke(Channels.attributes.create, pid, input),
+    update: (id, input) => ipcRenderer.invoke(Channels.attributes.update, id, input),
+    remove: (id) => ipcRenderer.invoke(Channels.attributes.remove, id)
+  },
   godparents: {
     listForPerson: (pid) => ipcRenderer.invoke(Channels.godparents.listForPerson, pid),
     godchildren: (pid) => ipcRenderer.invoke(Channels.godparents.godchildren, pid),
@@ -99,7 +118,9 @@ const api: TreeMonkApi = {
   },
   events: {
     forPerson: (pid) => ipcRenderer.invoke(Channels.events.forPerson, pid),
+    forFamily: (fid) => ipcRenderer.invoke(Channels.events.forFamily, fid),
     create: (pid, input) => ipcRenderer.invoke(Channels.events.create, pid, input),
+    createForFamily: (fid, input) => ipcRenderer.invoke(Channels.events.createForFamily, fid, input),
     update: (id, input) => ipcRenderer.invoke(Channels.events.update, id, input),
     remove: (id) => ipcRenderer.invoke(Channels.events.remove, id),
     reorder: (ids) => ipcRenderer.invoke(Channels.events.reorder, ids)
@@ -173,6 +194,9 @@ const api: TreeMonkApi = {
     export: (personIds, defaultName) =>
       ipcRenderer.invoke(Channels.gedcom.export, personIds, defaultName)
   },
+  site: {
+    export: (lang) => ipcRenderer.invoke(Channels.site.export, lang)
+  },
   data: {
     exportJson: () => ipcRenderer.invoke(Channels.data.exportJson),
     exportDatabase: () => ipcRenderer.invoke(Channels.data.exportDatabase)
@@ -219,6 +243,8 @@ const api: TreeMonkApi = {
     setDefaultRoot: (id) => ipcRenderer.invoke(Channels.settings.setDefaultRoot, id)
   },
   geo: {
+    listPlaces: () => ipcRenderer.invoke(Channels.geo.listPlaces),
+    setPlaceMeta: (name, meta) => ipcRenderer.invoke(Channels.geo.setPlaceMeta, name, meta),
     search: (query) => ipcRenderer.invoke(Channels.geo.search, query),
     savePlace: (place) => ipcRenderer.invoke(Channels.geo.savePlace, place),
     geocodeAll: () => ipcRenderer.invoke(Channels.geo.geocodeAll),

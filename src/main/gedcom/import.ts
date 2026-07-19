@@ -3,7 +3,7 @@ import { isFamilySearchId } from '@shared/familysearch'
 import { mediaDocId } from '../mediaId'
 import { getDb } from '../db/connection'
 import { removeNamelessStubs } from '../db/admin'
-import { Aliases, Citations, Documents, Events, Families, Godparents, Notes, Occupations, People, Places, Repositories, Sources } from '../db/repo'
+import { Aliases, Attributes, Citations, Documents, EventParticipants, Events, Families, Godparents, Notes, Occupations, People, Places, Repositories, Sources, Witnesses } from '../db/repo'
 import {
   child,
   childValue,
@@ -53,8 +53,11 @@ function eventByType(node: GedNode, re: RegExp): { date: string | null; place: s
 // EVEN TYPEs already captured as a structured field (christening) — not re-imported as a note.
 const HANDLED_EVENT_TYPE = /bapt|christen|keresz/i
 
+/** RELA values that mean "witness" — checked BEFORE godparents, because e.g.
+ *  "keresztelési tanú" (christening witness) also contains "kereszt". */
+const WITNESS_RELA = /witness|tan[uú]|zeug/i
 /** RELA values that mean "godparent" across the languages we meet. */
-const GODPARENT_RELA = /god\s*(parent|father|mother)|kereszt|taufpat|pate|patin|witness.*bapt/i
+const GODPARENT_RELA = /god\s*(parent|father|mother)|kereszt|taufpat|pate|patin/i
 
 /** The inline (non-pointer) NOTE directly under an event node, e.g. `2 NOTE …` inside `1 BIRT`. */
 function eventNote(indi: GedNode, tag: string): string | null {
@@ -269,9 +272,10 @@ export function importGedcomText(text: string): GedcomImportResult {
     // round-trip. Baptism EVENs already became the christening field. Deduped
     // so a re-import never duplicates.
     const importEvents = (indi: GedNode, personId: string): void => {
-      let existing: Set<string> | null = null
+      let existing: Map<string, string> | null = null
       const keyOf = (e: { type: string; date: string | null; endDate: string | null; place: string | null; value: string | null }): string =>
         `${e.type}|${e.date ?? ''}|${e.endDate ?? ''}|${e.place ?? ''}|${e.value ?? ''}`
+      // Returns the event id (created or already-present) so participants can attach.
       const addEvent = (input: {
         type: string
         date: string | null
@@ -279,13 +283,15 @@ export function importGedcomText(text: string): GedcomImportResult {
         place: string | null
         value: string | null
         note: string | null
-      }): void => {
-        if (!input.date && !input.endDate && !input.place && !input.value && !input.note) return
-        if (!existing) existing = new Set(Events.forPerson(personId).map(keyOf))
+      }): string | null => {
+        if (!input.date && !input.endDate && !input.place && !input.value && !input.note) return null
+        if (!existing) existing = new Map(Events.forPerson(personId).map((e) => [keyOf(e), e.id]))
         const key = keyOf(input)
-        if (existing.has(key)) return
-        existing.add(key)
-        Events.create('person', personId, input)
+        const have = existing.get(key)
+        if (have) return have
+        const created = Events.create('person', personId, input)
+        existing.set(key, created.id)
+        return created.id
       }
       const inlineNote = (ev: GedNode): string | null => {
         for (const c of ev.children) {
@@ -296,7 +302,7 @@ export function importGedcomText(text: string): GedcomImportResult {
       for (const ev of indi.children) {
         if (ev.tag === 'RESI') {
           const { startDate, endDate } = parseOccupationPeriod(childValue(ev, 'DATE'))
-          addEvent({
+          const eid = addEvent({
             type: 'residence',
             date: startDate,
             endDate,
@@ -304,11 +310,12 @@ export function importGedcomText(text: string): GedcomImportResult {
             value: null,
             note: inlineNote(ev)
           })
+          if (eid) pendingParticipants.push({ eventId: eid, node: ev })
         } else if (ev.tag === 'EVEN') {
           const rawType = (childValue(ev, 'TYPE') ?? '').trim()
           if (HANDLED_EVENT_TYPE.test(rawType)) continue
           const { startDate, endDate } = parseOccupationPeriod(childValue(ev, 'DATE'))
-          addEvent({
+          const eid = addEvent({
             type: rawType || 'other',
             date: startDate,
             endDate,
@@ -316,6 +323,7 @@ export function importGedcomText(text: string): GedcomImportResult {
             value: ev.value.trim() || null,
             note: inlineNote(ev)
           })
+          if (eid) pendingParticipants.push({ eventId: eid, node: ev })
         }
       }
     }
@@ -323,9 +331,14 @@ export function importGedcomText(text: string): GedcomImportResult {
     // --- Individuals ---
     const indis = roots.filter((r) => r.tag === 'INDI' && r.xref)
     const personByXref = new Map<string, string>()
+    // Shared-event participants (`_PART @X@` + ROLE under an event node) are
+    // attached AFTER everyone exists; collected while events import.
+    const pendingParticipants: { eventId: string; node: GedNode }[] = []
+    const famIdByXref = new Map<string, string>()
     for (const indi of indis) {
       const xref = indi.xref!
-      const { given, surname } = parseName(child(indi, 'NAME')?.value ?? null)
+      const nameNode = child(indi, 'NAME')
+      const { given, surname } = parseName(nameNode?.value ?? null)
       const birth = eventDetails(indi, 'BIRT')
       const death = eventDetails(indi, 'DEAT')
       const burial = eventDetails(indi, 'BURI')
@@ -375,6 +388,15 @@ export function importGedcomText(text: string): GedcomImportResult {
         christeningNote: eventNote(indi, 'CHR') ?? eventNote(indi, 'BAPM'),
         burialNote: eventNote(indi, 'BURI'),
         illegitimate: /^y/i.test(childValue(indi, '_ILLEGITIMATE') ?? '') || undefined,
+        stillborn: /^y/i.test(childValue(indi, '_STILLBORN') ?? '') || undefined,
+        // 5.5.1 restriction notice → confidential flag.
+        isPrivate: /confidential|privacy|private/i.test(childValue(indi, 'RESN') ?? '') || undefined,
+        // Name pieces (NPFX/NSFX + the German-convention _RUFNAME) live under NAME.
+        namePrefix: nameNode ? childValue(nameNode, 'NPFX') : null,
+        nameSuffix: nameNode ? childValue(nameNode, 'NSFX') : null,
+        callName: nameNode
+          ? childValue(nameNode, '_RUFNAME') ?? childValue(nameNode, 'RUFNAME')
+          : null,
         notes: null
       }
       // Match a stable id FIRST (fs_id), then the file-local xref. Existing
@@ -422,6 +444,17 @@ export function importGedcomText(text: string): GedcomImportResult {
         haveAlias.add(key)
         Aliases.create(person.id, { givenName: given, surname: aliasSurname, kind: childValue(node, 'TYPE') })
       }
+      // Free-form attributes (FACT <value> / TYPE <key>) — deduped on re-import.
+      const haveAttr = new Set(Attributes.forPerson(person.id).map((a) => `${a.key}|${a.value ?? ''}`))
+      for (const fact of indi.children.filter((c) => c.tag === 'FACT')) {
+        const attrKey = (childValue(fact, 'TYPE') ?? '').trim()
+        const attrValue = fact.value.trim() || null
+        if (!attrKey && !attrValue) continue
+        const dedup = `${attrKey || 'FACT'}|${attrValue ?? ''}`
+        if (haveAttr.has(dedup)) continue
+        haveAttr.add(dedup)
+        Attributes.create(person.id, { key: attrKey || 'FACT', value: attrValue })
+      }
       processNotes(indi, 'person', person.id)
       processCitations(indi, 'person', person.id)
       importMedia(indi, [person.id])
@@ -429,17 +462,20 @@ export function importGedcomText(text: string): GedcomImportResult {
     }
     result.people = personByXref.size
 
-    // --- Godparents (ASSO @X@ / RELA godparent) --- second pass, so the
-    // association target exists no matter where it sits in the file.
-    // `Godparents.add` is INSERT OR IGNORE → re-imports never duplicate.
+    // --- Associations (ASSO @X@ / RELA …) --- second pass, so the association
+    // target exists no matter where it sits in the file. Witness RELAs are
+    // checked FIRST ("keresztelési tanú" also contains "kereszt"). Both adds
+    // are INSERT OR IGNORE → re-imports never duplicate.
     for (const indi of indis) {
       const personId = personByXref.get(indi.xref!)
       if (!personId) continue
       for (const asso of indi.children) {
         if (asso.tag !== 'ASSO') continue
-        if (!GODPARENT_RELA.test(childValue(asso, 'RELA') ?? '')) continue
         const target = /^@.+@$/.test(asso.value) ? personByXref.get(asso.value) : null
-        if (target) Godparents.add(personId, target)
+        if (!target) continue
+        const rela = childValue(asso, 'RELA') ?? ''
+        if (WITNESS_RELA.test(rela)) Witnesses.add('person', personId, target)
+        else if (GODPARENT_RELA.test(rela)) Godparents.add(personId, target)
       }
     }
 
@@ -480,11 +516,87 @@ export function importGedcomText(text: string): GedcomImportResult {
         family = Families.create(input)
         result.familiesCreated++
       }
+      // Marriage witnesses (our own `1 _WITN @X@` custom tag, plus plain WITN).
+      for (const w of fam.children.filter((c) => c.tag === '_WITN' || c.tag === 'WITN')) {
+        const wid = /^@.+@$/.test(w.value) ? personByXref.get(w.value) : null
+        if (wid) Witnesses.add('family', family.id, wid)
+      }
+      famIdByXref.set(xref, family.id)
+      // Family (union) events: standard DIV/ENGA/MARB plus typed EVEN become
+      // structured family events — deduped so a re-import never duplicates.
+      {
+        const keyOf = (e: { type: string; date: string | null; place: string | null }): string =>
+          `${e.type.toLowerCase()}|${e.date ?? ''}|${e.place ?? ''}`
+        const haveEv = new Map(Events.forOwner('family', family.id).map((e) => [keyOf(e), e.id]))
+        const famNote = (node: GedNode): string | null => {
+          for (const c of node.children) {
+            if (c.tag === 'NOTE' && !/^@.+@$/.test(c.value) && c.value.trim()) return c.value.trim()
+          }
+          return null
+        }
+        const addFamEvent = (type: string, node: GedNode, value: string | null): void => {
+          const { startDate, endDate } = parseOccupationPeriod(childValue(node, 'DATE'))
+          const input = {
+            type,
+            date: startDate,
+            endDate,
+            place: childValue(node, 'PLAC'),
+            value,
+            note: famNote(node)
+          }
+          if (!input.date && !input.endDate && !input.place && !input.value && !input.note) return
+          const key = keyOf(input)
+          const have = haveEv.get(key)
+          if (have) {
+            pendingParticipants.push({ eventId: have, node })
+            return
+          }
+          const created = Events.create('family', family.id, input)
+          haveEv.set(key, created.id)
+          pendingParticipants.push({ eventId: created.id, node })
+        }
+        for (const c of fam.children) {
+          if (c.tag === 'DIV') addFamEvent('divorce', c, null)
+          else if (c.tag === 'ENGA') addFamEvent('engagement', c, null)
+          else if (c.tag === 'MARB') addFamEvent('banns', c, null)
+          else if (c.tag === 'EVEN') {
+            const rawType = (childValue(c, 'TYPE') ?? '').trim()
+            addFamEvent(rawType || 'other', c, c.value.trim() || null)
+          }
+        }
+      }
       processNotes(fam, 'family', family.id)
       processCitations(fam, 'family', family.id)
       // Family-level media (e.g. a marriage record image) → attached to both spouses.
       importMedia(fam, [family.husbandId, family.wifeId].filter((x): x is string => !!x))
     }
+    // --- Child pedigree (FAMC / PEDI: adopted, foster, step) ---
+    for (const indi of indis) {
+      const personId = personByXref.get(indi.xref!)
+      if (!personId) continue
+      for (const famc of indi.children.filter((c) => c.tag === 'FAMC')) {
+        const famId = famIdByXref.get(famc.value)
+        if (!famId) continue
+        const pedi = (childValue(famc, 'PEDI') ?? '').toLowerCase()
+        const rel = /adopt/.test(pedi)
+          ? 'adopted'
+          : /foster|nevel/.test(pedi)
+            ? 'foster'
+            : /step|mostoha/.test(pedi)
+              ? 'step'
+              : null
+        if (rel) Families.setChildRelation(famId, personId, rel)
+      }
+    }
+
+    // --- Shared-event participants (_PART + ROLE) — upsert, so re-imports are safe ---
+    for (const { eventId, node } of pendingParticipants) {
+      for (const part of node.children.filter((c) => c.tag === '_PART' || c.tag === 'PART')) {
+        const pid = /^@.+@$/.test(part.value) ? personByXref.get(part.value) : null
+        if (pid) EventParticipants.set(eventId, pid, childValue(part, 'ROLE'))
+      }
+    }
+
     result.people = result.peopleCreated + result.peopleUpdated
     result.families = result.familiesCreated + result.familiesUpdated
   })

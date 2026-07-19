@@ -4,6 +4,7 @@ import { Printer, X } from 'lucide-react'
 import type { EventRecord, Family, Occupation, Person } from '@shared/types'
 import { useAppStore } from '@/store/useAppStore'
 import { formatName, yearOf } from '@/lib/utils'
+import { dateSortKey } from '@/lib/dates'
 import { useDateFormat } from '@/hooks/useDateFormat'
 
 /* ------------------------------------------------------------------ helpers */
@@ -34,7 +35,8 @@ function useRelatives(personId: string): {
     const asChild = families.find((f) => f.childIds.includes(personId))
     const father = asChild?.husbandId ? byId.get(asChild.husbandId) : undefined
     const mother = asChild?.wifeId ? byId.get(asChild.wifeId) : undefined
-    // Unions: families where this person is a parent.
+    // Unions: families where this person is a parent — chronological order
+    // (marriage number → marriage date → spouse birth), children by birth.
     const unions = families
       .filter((f) => f.husbandId === personId || f.wifeId === personId)
       .map((family) => {
@@ -42,8 +44,20 @@ function useRelatives(personId: string): {
         return {
           spouse: spouseId ? byId.get(spouseId) : undefined,
           family,
-          children: family.childIds.map((c) => byId.get(c)).filter((x): x is Person => !!x)
+          children: family.childIds
+            .map((c) => byId.get(c))
+            .filter((x): x is Person => !!x)
+            .sort((a, b) => dateSortKey(a.birthDate) - dateSortKey(b.birthDate))
         }
+      })
+      .sort((a, b) => {
+        const key = (u: { family: Family; spouse?: Person }): number => {
+          if (u.family.marriageOrder) return u.family.marriageOrder
+          const m = dateSortKey(u.family.marriageDate, 0)
+          if (m) return 1000000 + m
+          return 1000000 + dateSortKey(u.spouse?.birthDate)
+        }
+        return key(a) - key(b)
       })
     return { person, father, mother, unions }
   }, [people, families, personId])
@@ -236,8 +250,6 @@ export function FamilySheetDialog({
   const { t } = useTranslation()
   const fmtDate = useDateFormat()
   const { person, unions } = useRelatives(personId)
-  // Use the first union as the family group (the common case).
-  const union = unions[0]
 
   const personCol = (p?: Person, label?: string): JSX.Element => (
     <div className="flex-1 border border-gray-300 p-3">
@@ -258,50 +270,59 @@ export function FamilySheetDialog({
         <h1 className="text-2xl font-bold">{nameOf(person)}</h1>
       </header>
 
-      {!union ? (
+      {unions.length === 0 ? (
         <p className="text-gray-500">{t('print.noFamily')}</p>
       ) : (
-        <>
-          <div className="mb-3 flex gap-3">
-            {personCol(person?.sex === 'F' ? union.spouse : person, t('relation.husband'))}
-            {personCol(person?.sex === 'F' ? person : union.spouse, t('relation.wife'))}
-          </div>
-          {(union.family.marriageDate || union.family.marriagePlace) && (
-            <div className="mb-3 text-sm">
-              <span className="font-semibold text-gray-600">{t('person.marriage')}: </span>
-              {[fmtDate(union.family.marriageDate), union.family.marriagePlace].filter(Boolean).join(' · ')}
+        // EVERY union gets its own family-group block (a person can have
+        // several marriages) — on paper each starts on a fresh page.
+        unions.map((union, ui) => (
+          <section key={union.family.id} className={ui > 0 ? 'mt-8 border-t-2 border-gray-800 pt-6 print:mt-0 print:break-before-page print:border-t-0 print:pt-0' : ''}>
+            {unions.length > 1 && (
+              <h2 className="mb-2 text-sm font-bold uppercase text-gray-700">
+                {t('print.union')} {ui + 1}
+              </h2>
+            )}
+            <div className="mb-3 flex gap-3">
+              {personCol(person?.sex === 'F' ? union.spouse : person, t('relation.husband'))}
+              {personCol(person?.sex === 'F' ? person : union.spouse, t('relation.wife'))}
             </div>
-          )}
+            {(union.family.marriageDate || union.family.marriagePlace) && (
+              <div className="mb-3 text-sm">
+                <span className="font-semibold text-gray-600">{t('person.marriage')}: </span>
+                {[fmtDate(union.family.marriageDate), union.family.marriagePlace].filter(Boolean).join(' · ')}
+              </div>
+            )}
 
-          <h2 className="mb-1 text-sm font-bold uppercase text-gray-700">{t('print.children')}</h2>
-          <table className="w-full border-collapse text-sm">
-            <thead>
-              <tr className="border-b border-gray-400 text-left text-xs uppercase text-gray-500">
-                <th className="py-1">#</th>
-                <th className="py-1">{t('person.name')}</th>
-                <th className="py-1">{t('person.birth')}</th>
-                <th className="py-1">{t('person.death')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {union.children.map((c, i) => (
-                <tr key={c.id} className="border-b border-gray-200">
-                  <td className="py-1">{i + 1}</td>
-                  <td className="py-1">{nameOf(c)}</td>
-                  <td className="py-1">{[fmtDate(c.birthDate), c.birthPlace].filter(Boolean).join(', ')}</td>
-                  <td className="py-1">{[fmtDate(c.deathDate), c.deathPlace].filter(Boolean).join(', ')}</td>
+            <h2 className="mb-1 text-sm font-bold uppercase text-gray-700">{t('print.children')}</h2>
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="border-b border-gray-400 text-left text-xs uppercase text-gray-500">
+                  <th className="py-1">#</th>
+                  <th className="py-1">{t('person.name')}</th>
+                  <th className="py-1">{t('person.birth')}</th>
+                  <th className="py-1">{t('person.death')}</th>
                 </tr>
-              ))}
-              {union.children.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="py-2 text-center text-gray-400">
-                    —
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </>
+              </thead>
+              <tbody>
+                {union.children.map((c, i) => (
+                  <tr key={c.id} className="border-b border-gray-200">
+                    <td className="py-1">{i + 1}</td>
+                    <td className="py-1">{nameOf(c)}</td>
+                    <td className="py-1">{[fmtDate(c.birthDate), c.birthPlace].filter(Boolean).join(', ')}</td>
+                    <td className="py-1">{[fmtDate(c.deathDate), c.deathPlace].filter(Boolean).join(', ')}</td>
+                  </tr>
+                ))}
+                {union.children.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="py-2 text-center text-gray-400">
+                      —
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </section>
+        ))
       )}
 
       <footer className="mt-6 border-t border-gray-300 pt-2 text-[10px] text-gray-400">TreeMonk</footer>

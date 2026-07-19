@@ -2,6 +2,54 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.8.0]
+
+### Added
+- **Witnesses.** Christening witnesses attach to a person, marriage witnesses
+  to the specific union — person-referencing chips on the profile, side panel
+  and family cards. GEDCOM round-trip via `ASSO`/`RELA christening witness`
+  (person) and a family-level `_WITN` pointer.
+- **Family (union) events.** Engagement, banns, civil/church wedding, divorce
+  and separation recorded on the marriage card (the events table's family
+  owner, no schema change). GEDCOM: `DIV`/`ENGA`/`MARB` plus typed `EVEN`.
+- **Shared-event participants with roles.** Any person can take part in any
+  event with a free-form role (priest, midwife, registrar, …); the participant's
+  profile shows the reverse "Participations" view. GEDCOM: `_PART` + `ROLE`.
+- **Adoption / parent types.** The child↔parents link carries a relation
+  (birth / adopted / foster / step) — selectable in the add-child dialog and on
+  the family cards; preserved across child reordering. GEDCOM `FAMC`/`PEDI`.
+- **Structured date qualifiers.** "abt / before / after / between" dates are
+  parsed from typed input in hu/en/de (`kb. 1850`, `1850 előtt`, `vor 1850`,
+  `between 1850 and 1860`, `~1850`…), stored as canonical GEDCOM-style prefixes
+  in the existing date fields (zero schema change) and displayed localized.
+  Sorting and GEDCOM round-trip unaffected.
+- **Name pieces.** Call name / Rufname (`_RUFNAME`), name prefix (`NPFX`) and
+  suffix (`NSFX`) — editable on the profile and side panel, shown in the header.
+- **Stillborn + confidential flags.** Stillborn implies deceased; confidential
+  people export with `RESN confidential` and are excluded from the website
+  export.
+- **Person attributes.** Free-form key/value facts (height, DNA haplogroup, …)
+  as a new card; GEDCOM `FACT`/`TYPE` round-trip.
+- **Place hierarchy + GOV ids.** Places gain a type (village/district/county/…),
+  a parent place and a GOV id (gov.genealogy.net) — managed in a new place
+  manager dialog opened from the Map view; the flat place strings on records
+  stay untouched.
+- **Website export.** The whole tree as ONE self-contained, searchable HTML
+  file (Settings → Export website), in the interface language, with every
+  person cross-linked; confidential people excluded.
+
+### Changed
+- Events (person and family) are now added through the same modal that edits
+  them, instead of the inline pre-fill row.
+
+### Fixed
+- Children sort by full birth-date precision (year-month-day) everywhere —
+  profile family tab, dashboards; unions order by marriage number, then date.
+- The printed family sheet shows ALL of a person's marriages, not just the
+  last one.
+- A GEDCOM `RELA` witness value is no longer misread as a godparent
+  ("keresztelési tanú" used to match the godparent pattern).
+
 ## [1.7.5]
 
 ### Added

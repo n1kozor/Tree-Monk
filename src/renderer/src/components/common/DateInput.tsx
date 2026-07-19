@@ -1,4 +1,5 @@
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import { formatDisplayDate, maskDateTyping } from '@/lib/dates'
 import { smartNormalizeDate } from '@/lib/smartDate'
@@ -28,11 +29,12 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
     const [open, setOpen] = React.useState(false)
     const [focused, setFocused] = React.useState(false)
     const dateFormat = useSettings((s) => s.dateFormat)
+    const { i18n, t } = useTranslation()
     const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     const seq = React.useRef(0)
     // Edit on the canonical ISO string; when not editing, show it in the user's
     // chosen display format (Settings → Date format). Storage stays ISO.
-    const shown = focused ? value : formatDisplayDate(value, dateFormat)
+    const shown = focused ? value : formatDisplayDate(value, dateFormat, i18n.language)
 
     const lookup = (raw: string): void => {
       if (timer.current) clearTimeout(timer.current)
@@ -54,6 +56,7 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
         <Input
           ref={ref}
           inputMode="numeric"
+          title={t('person.dateQualifierHint')}
           value={shown}
           onChange={(e) => {
             const v = maskDateTyping(e.target.value)

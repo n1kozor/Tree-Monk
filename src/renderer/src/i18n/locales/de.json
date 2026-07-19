@@ -23,15 +23,25 @@
     "none": "Kein Foto hochgeladen."
   },
   "places": {
-    "standardizeTitle": "Orte standardisieren",
-    "standardizeDesc": "Alle Ortsnamen in die kanonische Form umschreiben (führt Duplikate wie „…Hungary“ / „…Magyarország“ zusammen).",
-    "standardizeBtn": "Standardisieren",
-    "standardizing": "Orte werden standardisiert…",
-    "standardizingHint": "Kanonische Ortsnamen werden gesucht…",
-    "progress": "{{done}}/{{total}} Orte · {{changed}} vereinheitlicht",
-    "standardizeDone": "Orte in {{count}} Datensätzen vereinheitlicht",
-    "standardizeNone": "Alle Orte sind bereits einheitlich",
-    "standardizeFailed": "Standardisierung fehlgeschlagen"
+    "manage": "Orte verwalten",
+    "title": "Orte",
+    "hint": "Ortshierarchie (Dorf → Kreis → Bezirk → Land) und GOV-Kennung. Die bei Personen gespeicherten Ortsnamen bleiben unverändert.",
+    "none": "Keine Treffer.",
+    "select": "Wähle einen Ort aus der Liste.",
+    "typeLabel": "Typ",
+    "parent": "Übergeordneter Ort",
+    "parentHint": "z. B. Kreis oder Bezirk",
+    "hierarchy": "Hierarchie",
+    "type": {
+      "village": "Dorf",
+      "town": "Kleinstadt",
+      "city": "Stadt",
+      "district": "Kreis",
+      "county": "Bezirk / Komitat",
+      "region": "Region / Bundesland",
+      "country": "Land",
+      "other": "Sonstiges"
+    }
   },
   "welcome": {
     "title": "Wie gefällt dir TreeMonk bisher?",
@@ -150,6 +160,49 @@
     "addTitle": "Pate hinzufügen",
     "none": "Keine Paten erfasst.",
     "godchildOf": "Pate von:"
+  },
+  "witnesses": {
+    "christeningTitle": "Taufzeugen",
+    "marriageTitle": "Trauzeugen",
+    "add": "Hinzufügen",
+    "addTitle": "Zeuge hinzufügen",
+    "none": "Keine Zeugen erfasst."
+  },
+  "relation": {
+    "father": "Vater",
+    "mother": "Mutter",
+    "spouse": "Ehepartner",
+    "husband": "Ehemann",
+    "wife": "Ehefrau"
+  },
+  "participants": {
+    "title": "Beteiligte",
+    "add": "Hinzufügen",
+    "addTitle": "Beteiligte Person hinzufügen",
+    "none": "Keine Beteiligten erfasst.",
+    "role": "Rolle",
+    "participationsTitle": "Beteiligungen",
+    "roles": {
+      "priest": "Pfarrer / Geistlicher",
+      "midwife": "Hebamme",
+      "officiant": "Standesbeamter",
+      "donor": "Stifter",
+      "gravedigger": "Totengräber"
+    }
+  },
+  "childRelation": {
+    "title": "Verhältnis zu den Eltern",
+    "birth": "Leiblich",
+    "adopted": "Adoptiert",
+    "foster": "Pflegekind",
+    "step": "Stiefkind"
+  },
+  "attributes": {
+    "title": "Weitere Fakten",
+    "none": "Keine Fakten erfasst.",
+    "key": "Bezeichnung",
+    "value": "Wert",
+    "add": "Hinzufügen"
   },
   "dashboard": {
     "title": "Übersicht",
@@ -748,7 +801,11 @@
       "regenerated": "Neues Token erzeugt — das alte ist ungültig.",
       "error": "Speichern der Einstellung fehlgeschlagen."
     },
-    "manualDesc": "Das vollständige TreeMonk-Handbuch als PDF, geöffnet im Standard-Viewer."
+    "manualDesc": "Das vollständige TreeMonk-Handbuch als PDF, geöffnet im Standard-Viewer.",
+    "siteExport": "Website exportieren",
+    "siteExportDesc": "Eine durchsuchbare HTML-Seite des ganzen Baums — eine einzige Datei, mit jedem teilbar. Vertrauliche Personen werden ausgelassen.",
+    "siteExportBtn": "HTML-Website",
+    "siteExportDone": "Website exportiert: {{path}}"
   },
   "common": {
     "done": "Fertig",
@@ -1171,7 +1228,15 @@
     "unlinkSpouseChildren": "Die {{count}} Kinder bleiben bei dieser Person (als Ein-Eltern-Familie).",
     "spouseUnlinked": "{{name}} von der Ehe getrennt.",
     "verifiedOn": "Verifiziert",
-    "markVerified": "Als verifiziert markieren"
+    "markVerified": "Als verifiziert markieren",
+    "callName": "Rufname",
+    "callNameHint": "der im Alltag verwendete Vorname",
+    "namePrefix": "Namenspräfix",
+    "nameSuffix": "Namenssuffix",
+    "stillborn": "Totgeboren",
+    "private": "Vertrauliche Person",
+    "privateHint": "(im GEDCOM-Export als „confidential“ markiert)",
+    "dateQualifierHint": "Qualifikatoren: „um 1850“, „vor 1850“, „nach 1850“, „zwischen 1850 und 1860“"
   },
   "research": {
     "history": "Rechercheverlauf",
@@ -1206,10 +1271,17 @@
       "education": "Ausbildung",
       "religious": "Religiöses Ereignis",
       "other": "Sonstiges",
-      "divorce": "Scheidung"
+      "divorce": "Scheidung",
+      "engagement": "Verlobung",
+      "banns": "Aufgebot",
+      "civilMarriage": "Standesamtliche Trauung",
+      "churchMarriage": "Kirchliche Trauung",
+      "separation": "Trennung"
     },
     "from": "Von",
-    "to": "Bis"
+    "to": "Bis",
+    "familyTitle": "Familienereignisse",
+    "addTitle": "Neues Ereignis"
   },
   "timeline": {
     "title": "Zeitleiste",
@@ -1885,13 +1957,6 @@
     "children": "Kinder",
     "events": "Ereignisse",
     "noFamily": "Keine Familie erfasst."
-  },
-  "relation": {
-    "father": "Vater",
-    "mother": "Mutter",
-    "spouse": "Ehepartner",
-    "husband": "Ehemann",
-    "wife": "Ehefrau"
   },
   "sex": {
     "male": "Männlich",

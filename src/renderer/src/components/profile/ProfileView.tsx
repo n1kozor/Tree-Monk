@@ -15,6 +15,7 @@ import {
   FileText,
   Flower2,
   Loader2,
+  Lock,
   MapPin,
   MoreHorizontal,
   Network,
@@ -59,6 +60,9 @@ import { PersonSheetDialog, FamilySheetDialog } from '@/components/print/PrintSh
 import { religionOptions } from '@/lib/religions'
 import { PersonQualityCard } from '@/components/person/PersonQualityCard'
 import { PersonGodparents } from '@/components/person/PersonGodparents'
+import { PersonWitnesses } from '@/components/person/PersonWitnesses'
+import { PersonAttributes } from '@/components/person/PersonAttributes'
+import { PersonParticipations } from '@/components/person/PersonParticipations'
 import { FactSources, VitalNote } from '@/components/person/FactSources'
 import { QualityRing } from '@/components/common/QualityRing'
 import { personQuality } from '@/lib/completeness'
@@ -176,7 +180,12 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
       birthNote: next.birthNote,
       deathNote: next.deathNote,
       christeningNote: next.christeningNote,
-      burialNote: next.burialNote
+      burialNote: next.burialNote,
+      callName: next.callName,
+      namePrefix: next.namePrefix,
+      nameSuffix: next.nameSuffix,
+      stillborn: next.stillborn,
+      isPrivate: next.isPrivate
     })
     await refreshPeople()
   }
@@ -201,6 +210,19 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   const setDeceased = (v: boolean): void => {
     if (!person) return
     const next = { ...person, deceased: v }
+    setPerson(next)
+    void save(next)
+  }
+  // Stillborn implies deceased (the checkbox reflects that immediately).
+  const setStillborn = (v: boolean): void => {
+    if (!person) return
+    const next = { ...person, stillborn: v, deceased: person.deceased || v }
+    setPerson(next)
+    void save(next)
+  }
+  const setPrivate = (v: boolean): void => {
+    if (!person) return
+    const next = { ...person, isPrivate: v }
     setPerson(next)
     void save(next)
   }
@@ -299,7 +321,14 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
             </button>
 
             <div className="min-w-0 flex-1">
-              <h1 className="text-2xl font-bold leading-tight">{fullName(person)}</h1>
+              <h1 className="text-2xl font-bold leading-tight">
+                {[person.namePrefix, fullName(person), person.nameSuffix].filter(Boolean).join(' ')}
+                {person.callName?.trim() && (
+                  <span className="ml-2 text-base font-normal text-muted-foreground">
+                    „{person.callName.trim()}”
+                  </span>
+                )}
+              </h1>
               {lifespan && <p className="mt-0.5 text-sm text-muted-foreground">{lifespan}</p>}
               {isFamilySearchId(person.fsId) && (
                 <button
@@ -332,6 +361,14 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                 {person.illegitimate && (
                   <Badge className="text-amber-600 dark:text-amber-400">
                     {t('person.illegitimate')}
+                  </Badge>
+                )}
+                {person.stillborn && (
+                  <Badge className="text-slate-600 dark:text-slate-300">{t('person.stillborn')}</Badge>
+                )}
+                {person.isPrivate && (
+                  <Badge className="text-rose-600 dark:text-rose-400">
+                    <Lock className="h-3 w-3" /> {t('person.private')}
                   </Badge>
                 )}
                 {person.occupation?.trim() && <Badge>{person.occupation.trim()}</Badge>}
@@ -589,7 +626,44 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                         ))}
                       </datalist>
                     </Field>
+                    <Field label={t('person.callName')}>
+                      <Input
+                        value={person.callName ?? ''}
+                        onChange={(e) => patch('callName', e.target.value)}
+                        onBlur={() => save()}
+                        placeholder={t('person.callNameHint')}
+                      />
+                    </Field>
+                    {/* Prefix + suffix side by side in one grid cell — short fields. */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <Field label={t('person.namePrefix')}>
+                        <Input
+                          value={person.namePrefix ?? ''}
+                          onChange={(e) => patch('namePrefix', e.target.value)}
+                          onBlur={() => save()}
+                          placeholder="Dr."
+                        />
+                      </Field>
+                      <Field label={t('person.nameSuffix')}>
+                        <Input
+                          value={person.nameSuffix ?? ''}
+                          onChange={(e) => patch('nameSuffix', e.target.value)}
+                          onBlur={() => save()}
+                          placeholder="Jr."
+                        />
+                      </Field>
+                    </div>
                   </div>
+                  <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={!!person.isPrivate}
+                      onChange={(e) => setPrivate(e.target.checked)}
+                      className="h-4 w-4 accent-[hsl(var(--primary))]"
+                    />
+                    <span>{t('person.private')}</span>
+                    <span className="text-xs text-muted-foreground">{t('person.privateHint')}</span>
+                  </label>
                 </Card>
 
                 <Card title={t('person.vitalEvents')}>
@@ -671,16 +745,29 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                           <PlaceInput value={person.deathPlace ?? ''} onChange={(v) => patch('deathPlace', v)} onCommit={() => save()} />
                         </Field>
                       </div>
-                      <label className="flex cursor-pointer items-center gap-2 text-sm">
-                        <input
-                          type="checkbox"
-                          checked={deceased}
-                          disabled={!!person.deathDate}
-                          onChange={(e) => setDeceased(e.target.checked)}
-                          className="h-4 w-4 accent-[hsl(var(--primary))]"
-                        />
-                        <span className={person.deathDate ? 'text-muted-foreground' : ''}>{t('person.deceased')}</span>
-                      </label>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                        <label className="flex cursor-pointer items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={deceased}
+                            disabled={!!person.deathDate || !!person.stillborn}
+                            onChange={(e) => setDeceased(e.target.checked)}
+                            className="h-4 w-4 accent-[hsl(var(--primary))]"
+                          />
+                          <span className={person.deathDate || person.stillborn ? 'text-muted-foreground' : ''}>
+                            {t('person.deceased')}
+                          </span>
+                        </label>
+                        <label className="flex cursor-pointer items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={!!person.stillborn}
+                            onChange={(e) => setStillborn(e.target.checked)}
+                            className="h-4 w-4 accent-[hsl(var(--primary))]"
+                          />
+                          <span>{t('person.stillborn')}</span>
+                        </label>
+                      </div>
                       <VitalNote label={t('person.death')} value={person.deathNote ?? ''} onSave={(v) => saveNote('deathNote', v)} />
                     </VitalBlock>
 
@@ -729,9 +816,23 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                     <PersonGodparents person={person} />
                   </Card>
                   <Card>
+                    <PersonWitnesses
+                      ownerType="person"
+                      ownerId={person.id}
+                      title={t('witnesses.christeningTitle')}
+                      excludeIds={[person.id]}
+                    />
+                  </Card>
+                  <Card>
                     <PersonAliases personId={person.id} />
                   </Card>
+                  <Card>
+                    <PersonAttributes personId={person.id} />
+                  </Card>
                 </div>
+
+                {/* Role participations — self-hiding, like the collaborations below. */}
+                <PersonParticipations personId={person.id} variant="card" />
 
                 {/* FamilySearch collaboration discussions — its own section, only
                     shown when the person actually has any. */}
@@ -757,6 +858,14 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
             </Card>
             <Card>
               <PersonGodparents person={person} />
+            </Card>
+            <Card>
+              <PersonWitnesses
+                ownerType="person"
+                ownerId={person.id}
+                title={t('witnesses.christeningTitle')}
+                excludeIds={[person.id]}
+              />
             </Card>
           </TabsContent>
 

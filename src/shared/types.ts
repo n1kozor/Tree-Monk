@@ -27,6 +27,16 @@ export interface Person {
   deceased: boolean
   /** Marked as born out of wedlock (törvénytelen gyermek). */
   illegitimate: boolean
+  /** Rufname / call name — the given name the person actually went by (GEDCOM _RUFNAME). */
+  callName: string | null
+  /** Name prefix / title before the name (GEDCOM NPFX, e.g. "Dr.", "ifj."). */
+  namePrefix: string | null
+  /** Name suffix after the name (GEDCOM NSFX, e.g. "Jr.", "III"). */
+  nameSuffix: string | null
+  /** Stillborn (halva született) — implies deceased. */
+  stillborn: boolean
+  /** Confidential person: marked RESN confidential in GEDCOM exports. */
+  isPrivate: boolean
   /** Manually reviewed & confirmed ("verified") by the user. Off by default;
    *  surfaced as a green/orange mark when the verification setting is on. */
   verified: boolean
@@ -58,6 +68,9 @@ export type PersonInput = Partial<
 > & { givenName?: string; surname?: string }
 
 /** GEDCOM-style family unit: a couple plus their children. */
+/** How a child relates to this family's parents (GEDCOM PEDI). Absent/null = birth. */
+export type ChildRelation = 'adopted' | 'foster' | 'step'
+
 export interface Family {
   id: string
   gedcomId: string | null
@@ -69,6 +82,8 @@ export interface Family {
   marriageOrder: number | null
   notes: string | null
   childIds: string[]
+  /** Per-child relationship type; a child missing from the map is a birth child. */
+  childRelations?: Record<string, ChildRelation | null>
 }
 
 export type FamilyInput = Partial<Omit<Family, 'id' | 'childIds'>> & {
@@ -457,7 +472,56 @@ export type EventType =
   | 'cremation'
   | 'education'
   | 'religious'
+  // Family-owned event types (engagement → separation), used with owner_type='family'.
+  | 'engagement'
+  | 'civilMarriage'
+  | 'churchMarriage'
+  | 'banns'
+  | 'separation'
   | 'other'
+
+/** One participant of a shared event, with a free-form role (pap, bába, …). */
+export interface EventParticipant {
+  personId: string
+  role: string | null
+}
+
+/** Reverse view: an event a person participates in (with owner context). */
+export interface Participation {
+  eventId: string
+  role: string | null
+  ownerType: 'person' | 'family'
+  ownerId: string
+  type: string
+  date: string | null
+  place: string | null
+}
+
+/** A gazetteer place with its hierarchy/GOV metadata. */
+export interface PlaceInfo {
+  name: string
+  lat: number
+  lon: number
+  /** village / town / district / county / country / other (free-form). */
+  placeType: string | null
+  /** Next level up in the place hierarchy (another place's name). */
+  parentName: string | null
+  /** GOV id — gov.genealogy.net/item/show/<id>. */
+  govId: string | null
+}
+
+/** A free-form person attribute (GEDCOM FACT/TYPE): height, haplogroup, … */
+export interface PersonAttribute {
+  id: string
+  personId: string
+  key: string
+  value: string | null
+}
+
+export type AttributeInput = {
+  key: string
+  value?: string | null
+}
 
 export interface EventRecord {
   id: string

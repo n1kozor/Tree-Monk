@@ -2,16 +2,21 @@ import { randomUUID } from 'crypto'
 import type Database from 'better-sqlite3'
 import { getDb } from './connection'
 import type {
+  AttributeInput,
   BoardEdge,
   BoardNode,
   BoardState,
+  ChildRelation,
   Collaboration,
   DocumentInput,
+  EventParticipant,
   DocumentKind,
   DocumentRecord,
   Family,
   FamilyInput,
+  Participation,
   Person,
+  PersonAttribute,
   PersonInput,
   Sex
 } from '@shared/types'
@@ -35,6 +40,11 @@ interface PersonRow {
   deceased: number
   illegitimate: number
   verified: number
+  call_name: string | null
+  name_prefix: string | null
+  name_suffix: string | null
+  stillborn: number
+  is_private: number
   burial_date: string | null
   burial_place: string | null
   christening_date: string | null
@@ -52,9 +62,9 @@ interface PersonRow {
   updated_at: string
 }
 
-/** A person is deceased if explicitly flagged OR a death date is recorded. */
-function isDeceased(input: Pick<PersonInput, 'deceased' | 'deathDate'>): boolean {
-  return Boolean(input.deceased) || Boolean(input.deathDate)
+/** A person is deceased if explicitly flagged, stillborn, OR a death date is recorded. */
+function isDeceased(input: Pick<PersonInput, 'deceased' | 'deathDate' | 'stillborn'>): boolean {
+  return Boolean(input.deceased) || Boolean(input.deathDate) || Boolean(input.stillborn)
 }
 
 function mapPerson(r: PersonRow): Person {
@@ -72,6 +82,11 @@ function mapPerson(r: PersonRow): Person {
     deceased: Boolean(r.deceased) || Boolean(r.death_date),
     illegitimate: Boolean(r.illegitimate),
     verified: Boolean(r.verified),
+    callName: r.call_name,
+    namePrefix: r.name_prefix,
+    nameSuffix: r.name_suffix,
+    stillborn: Boolean(r.stillborn),
+    isPrivate: Boolean(r.is_private),
     burialDate: r.burial_date,
     burialPlace: r.burial_place,
     christeningDate: r.christening_date,
@@ -114,9 +129,9 @@ export const People = {
     getDb()
       .prepare(
         `INSERT INTO people (id, gedcom_id, fs_id, given_name, surname, sex, birth_date, birth_place,
-          death_date, death_place, deceased, illegitimate, verified, burial_date, burial_place, christening_date, christening_place, religion, birth_note, death_note, christening_note, burial_note, occupation, notes, profile_photo_id, profile_photo_crop, created_at, updated_at)
+          death_date, death_place, deceased, illegitimate, verified, call_name, name_prefix, name_suffix, stillborn, is_private, burial_date, burial_place, christening_date, christening_place, religion, birth_note, death_note, christening_note, burial_note, occupation, notes, profile_photo_id, profile_photo_crop, created_at, updated_at)
          VALUES (@id, @gedcom_id, @fs_id, @given_name, @surname, @sex, @birth_date, @birth_place,
-          @death_date, @death_place, @deceased, @illegitimate, @verified, @burial_date, @burial_place, @christening_date, @christening_place, @religion, @birth_note, @death_note, @christening_note, @burial_note, @occupation, @notes, @profile_photo_id, @profile_photo_crop, @created_at, @updated_at)`
+          @death_date, @death_place, @deceased, @illegitimate, @verified, @call_name, @name_prefix, @name_suffix, @stillborn, @is_private, @burial_date, @burial_place, @christening_date, @christening_place, @religion, @birth_note, @death_note, @christening_note, @burial_note, @occupation, @notes, @profile_photo_id, @profile_photo_crop, @created_at, @updated_at)`
       )
       .run({
         id,
@@ -132,6 +147,11 @@ export const People = {
         deceased: isDeceased(input) ? 1 : 0,
         illegitimate: input.illegitimate ? 1 : 0,
         verified: input.verified ? 1 : 0,
+        call_name: input.callName ?? null,
+        name_prefix: input.namePrefix ?? null,
+        name_suffix: input.nameSuffix ?? null,
+        stillborn: input.stillborn ? 1 : 0,
+        is_private: input.isPrivate ? 1 : 0,
         burial_date: input.burialDate ?? null,
         burial_place: input.burialPlace ?? null,
         christening_date: input.christeningDate ?? null,
@@ -158,6 +178,7 @@ export const People = {
       .prepare(
         `UPDATE people SET given_name=@given_name, surname=@surname, sex=@sex, birth_date=@birth_date,
           birth_place=@birth_place, death_date=@death_date, death_place=@death_place, deceased=@deceased, illegitimate=@illegitimate, verified=@verified,
+          call_name=@call_name, name_prefix=@name_prefix, name_suffix=@name_suffix, stillborn=@stillborn, is_private=@is_private,
           burial_date=@burial_date, burial_place=@burial_place,
           christening_date=@christening_date, christening_place=@christening_place, religion=@religion,
           birth_note=@birth_note, death_note=@death_note, christening_note=@christening_note, burial_note=@burial_note,
@@ -178,6 +199,11 @@ export const People = {
         deceased: isDeceased(merged) ? 1 : 0,
         illegitimate: merged.illegitimate ? 1 : 0,
         verified: merged.verified ? 1 : 0,
+        call_name: merged.callName ?? null,
+        name_prefix: merged.namePrefix ?? null,
+        name_suffix: merged.nameSuffix ?? null,
+        stillborn: merged.stillborn ? 1 : 0,
+        is_private: merged.isPrivate ? 1 : 0,
         burial_date: merged.burialDate,
         burial_place: merged.burialPlace,
         christening_date: merged.christeningDate,
@@ -214,7 +240,12 @@ export const People = {
       birth_place: empty(e.birthPlace) && input.birthPlace ? input.birthPlace : e.birthPlace,
       death_date: empty(e.deathDate) && input.deathDate ? input.deathDate : e.deathDate,
       death_place: empty(e.deathPlace) && input.deathPlace ? input.deathPlace : e.deathPlace,
-      deceased: e.deceased || input.deceased || !!input.deathDate ? 1 : 0,
+      deceased: e.deceased || input.deceased || !!input.deathDate || !!input.stillborn ? 1 : 0,
+      call_name: empty(e.callName) && input.callName ? input.callName : e.callName,
+      name_prefix: empty(e.namePrefix) && input.namePrefix ? input.namePrefix : e.namePrefix,
+      name_suffix: empty(e.nameSuffix) && input.nameSuffix ? input.nameSuffix : e.nameSuffix,
+      stillborn: e.stillborn || input.stillborn ? 1 : 0,
+      is_private: e.isPrivate || input.isPrivate ? 1 : 0,
       burial_date: empty(e.burialDate) && input.burialDate ? input.burialDate : e.burialDate,
       burial_place: empty(e.burialPlace) && input.burialPlace ? input.burialPlace : e.burialPlace,
       christening_date: empty(e.christeningDate) && input.christeningDate ? input.christeningDate : e.christeningDate,
@@ -236,6 +267,11 @@ export const People = {
       next.death_date !== e.deathDate ||
       next.death_place !== e.deathPlace ||
       Boolean(next.deceased) !== e.deceased ||
+      next.call_name !== e.callName ||
+      next.name_prefix !== e.namePrefix ||
+      next.name_suffix !== e.nameSuffix ||
+      Boolean(next.stillborn) !== e.stillborn ||
+      Boolean(next.is_private) !== e.isPrivate ||
       next.burial_date !== e.burialDate ||
       next.burial_place !== e.burialPlace ||
       next.christening_date !== e.christeningDate ||
@@ -252,6 +288,7 @@ export const People = {
       .prepare(
         `UPDATE people SET given_name=@given_name, surname=@surname, sex=@sex, birth_date=@birth_date,
           birth_place=@birth_place, death_date=@death_date, death_place=@death_place, deceased=@deceased,
+          call_name=@call_name, name_prefix=@name_prefix, name_suffix=@name_suffix, stillborn=@stillborn, is_private=@is_private,
           burial_date=@burial_date, burial_place=@burial_place,
           christening_date=@christening_date, christening_place=@christening_place, religion=@religion,
           birth_note=@birth_note, death_note=@death_note, christening_note=@christening_note, burial_note=@burial_note,
@@ -279,7 +316,12 @@ export const People = {
       birth_place: pick(input.birthPlace, e.birthPlace),
       death_date: pick(input.deathDate, e.deathDate),
       death_place: pick(input.deathPlace, e.deathPlace),
-      deceased: e.deceased || input.deceased || !!input.deathDate ? 1 : 0,
+      deceased: e.deceased || input.deceased || !!input.deathDate || !!input.stillborn ? 1 : 0,
+      call_name: pick(input.callName, e.callName),
+      name_prefix: pick(input.namePrefix, e.namePrefix),
+      name_suffix: pick(input.nameSuffix, e.nameSuffix),
+      stillborn: e.stillborn || input.stillborn ? 1 : 0,
+      is_private: e.isPrivate || input.isPrivate ? 1 : 0,
       burial_date: pick(input.burialDate, e.burialDate),
       burial_place: pick(input.burialPlace, e.burialPlace),
       christening_date: pick(input.christeningDate, e.christeningDate),
@@ -301,6 +343,11 @@ export const People = {
       next.death_date !== e.deathDate ||
       next.death_place !== e.deathPlace ||
       Boolean(next.deceased) !== e.deceased ||
+      next.call_name !== e.callName ||
+      next.name_prefix !== e.namePrefix ||
+      next.name_suffix !== e.nameSuffix ||
+      Boolean(next.stillborn) !== e.stillborn ||
+      Boolean(next.is_private) !== e.isPrivate ||
       next.burial_date !== e.burialDate ||
       next.burial_place !== e.burialPlace ||
       next.christening_date !== e.christeningDate ||
@@ -316,6 +363,7 @@ export const People = {
       .prepare(
         `UPDATE people SET given_name=@given_name, surname=@surname, sex=@sex, birth_date=@birth_date,
           birth_place=@birth_place, death_date=@death_date, death_place=@death_place, deceased=@deceased,
+          call_name=@call_name, name_prefix=@name_prefix, name_suffix=@name_suffix, stillborn=@stillborn, is_private=@is_private,
           burial_date=@burial_date, burial_place=@burial_place,
           christening_date=@christening_date, christening_place=@christening_place, religion=@religion,
           birth_note=@birth_note, death_note=@death_note, christening_note=@christening_note, burial_note=@burial_note,
@@ -360,6 +408,9 @@ export const People = {
       }[]).map((r) => r.note_id)
     }
     db.prepare('DELETE FROM people WHERE id = ?').run(id)
+    // The witness OWNER side has no FK (it points at two tables) — clean it up
+    // here; the witness side itself cascade-deletes with the person.
+    db.prepare("DELETE FROM witnesses WHERE owner_type = 'person' AND owner_id = ?").run(id)
     // Deleting the person nulls their husband_id/wife_id (ON DELETE SET NULL) and
     // cascades their child links. Any family that is now completely empty — no
     // husband, no wife, no children — is an orphan "ghost" couple that would
@@ -372,6 +423,7 @@ export const People = {
       if (!f.husband_id && !f.wife_id && !hasChild) {
         emptiedFamilies.push(mapFamily(db, f))
         db.prepare('DELETE FROM families WHERE id = ?').run(fid)
+        db.prepare("DELETE FROM witnesses WHERE owner_type = 'family' AND owner_id = ?").run(fid)
       }
     }
     snapshot.emptiedFamilies = emptiedFamilies
@@ -453,6 +505,12 @@ function childIdsOf(db: Database.Database, familyId: string): string[] {
 }
 
 function mapFamily(db: Database.Database, r: FamilyRow): Family {
+  const relations: Record<string, ChildRelation | null> = {}
+  for (const row of db
+    .prepare('SELECT child_id, relation FROM family_children WHERE family_id = ? AND relation IS NOT NULL')
+    .all(r.id) as { child_id: string; relation: string }[]) {
+    relations[row.child_id] = row.relation as ChildRelation
+  }
   return {
     id: r.id,
     gedcomId: r.gedcom_id,
@@ -462,16 +520,24 @@ function mapFamily(db: Database.Database, r: FamilyRow): Family {
     marriagePlace: r.marriage_place,
     marriageOrder: r.marriage_order,
     notes: r.notes,
-    childIds: childIdsOf(db, r.id)
+    childIds: childIdsOf(db, r.id),
+    childRelations: relations
   }
 }
 
 function writeChildren(db: Database.Database, familyId: string, childIds: string[]): void {
+  // Rewriting the rows must not lose each child's relation type (adopted/foster/step).
+  const keep = new Map(
+    (db.prepare('SELECT child_id, relation FROM family_children WHERE family_id = ?').all(familyId) as {
+      child_id: string
+      relation: string | null
+    }[]).map((r) => [r.child_id, r.relation])
+  )
   db.prepare('DELETE FROM family_children WHERE family_id = ?').run(familyId)
   const ins = db.prepare(
-    'INSERT OR IGNORE INTO family_children (family_id, child_id, ordinal) VALUES (?, ?, ?)'
+    'INSERT OR IGNORE INTO family_children (family_id, child_id, ordinal, relation) VALUES (?, ?, ?, ?)'
   )
-  childIds.forEach((cid, i) => ins.run(familyId, cid, i))
+  childIds.forEach((cid, i) => ins.run(familyId, cid, i, keep.get(cid) ?? null))
 }
 
 export const Families = {
@@ -531,6 +597,14 @@ export const Families = {
   },
   remove(id: string): void {
     getDb().prepare('DELETE FROM families WHERE id = ?').run(id)
+    // Marriage witnesses point at the family without an FK — clean them up here.
+    getDb().prepare("DELETE FROM witnesses WHERE owner_type = 'family' AND owner_id = ?").run(id)
+  },
+  /** How a child relates to this family's parents (GEDCOM PEDI); null = birth. */
+  setChildRelation(familyId: string, childId: string, relation: ChildRelation | null): void {
+    getDb()
+      .prepare('UPDATE family_children SET relation = ? WHERE family_id = ? AND child_id = ?')
+      .run(relation, familyId, childId)
   },
   findByGedcomId(gedcomId: string): Family | null {
     const db = getDb()
@@ -837,6 +911,9 @@ export interface PlaceRow {
   name: string
   lat: number
   lon: number
+  place_type?: string | null
+  parent_name?: string | null
+  gov_id?: string | null
 }
 
 // ---------- App settings (key/value) ----------
@@ -1211,14 +1288,38 @@ export const Places = {
       .run(key, lat, lon)
   },
   list(): PlaceRow[] {
-    return getDb().prepare('SELECT name, lat, lon FROM places').all() as PlaceRow[]
+    return getDb().prepare('SELECT * FROM places').all() as PlaceRow[]
   },
   get(name: string): PlaceRow | null {
     return (
-      (getDb().prepare('SELECT name, lat, lon FROM places WHERE name = ?').get(name.trim()) as
+      (getDb().prepare('SELECT * FROM places WHERE name = ?').get(name.trim()) as
         | PlaceRow
         | undefined) ?? null
     )
+  },
+  /** Hierarchy/GOV metadata for a place — never touches lat/lon. */
+  setMeta(
+    name: string,
+    meta: { placeType?: string | null; parentName?: string | null; govId?: string | null }
+  ): void {
+    const key = name.trim()
+    if (!key) return
+    getDb()
+      .prepare('UPDATE places SET place_type = ?, parent_name = ?, gov_id = ? WHERE name = ?')
+      .run(meta.placeType?.trim() || null, meta.parentName?.trim() || null, meta.govId?.trim() || null, key)
+  },
+  /** The hierarchy chain upward from a place ("Falu → Járás → Megye → Ország"),
+   *  starting with the place itself. Cycle-guarded. */
+  hierarchy(name: string): PlaceRow[] {
+    const chain: PlaceRow[] = []
+    const seen = new Set<string>()
+    let cur: PlaceRow | null = this.get(name)
+    while (cur && !seen.has(cur.name) && chain.length < 12) {
+      chain.push(cur)
+      seen.add(cur.name)
+      cur = cur.parent_name ? this.get(cur.parent_name) : null
+    }
+    return chain
   }
 }
 
@@ -1303,6 +1404,135 @@ export const Godparents = {
   },
   remove(personId: string, godparentId: string): void {
     getDb().prepare('DELETE FROM godparents WHERE person_id = ? AND godparent_id = ?').run(personId, godparentId)
+  }
+}
+
+// ---------- Event participants (megosztott események szereplői) ----------
+// Gramps-style shared events: any person can take part in an event with a
+// free-form role (pap, bába, adományozó…). Both sides cascade-delete.
+
+export const EventParticipants = {
+  forEvent(eventId: string): EventParticipant[] {
+    return (
+      getDb()
+        .prepare('SELECT person_id, role FROM event_participants WHERE event_id = ? ORDER BY ordinal, rowid')
+        .all(eventId) as { person_id: string; role: string | null }[]
+    ).map((r) => ({ personId: r.person_id, role: r.role }))
+  },
+  /** Add or update one participant (upsert on the event+person pair). */
+  set(eventId: string, personId: string, role: string | null): void {
+    const ord =
+      (getDb()
+        .prepare('SELECT COALESCE(MAX(ordinal), -1) + 1 AS n FROM event_participants WHERE event_id = ?')
+        .get(eventId) as { n: number }).n
+    getDb()
+      .prepare(
+        `INSERT INTO event_participants (event_id, person_id, role, ordinal) VALUES (?, ?, ?, ?)
+         ON CONFLICT(event_id, person_id) DO UPDATE SET role = excluded.role`
+      )
+      .run(eventId, personId, role?.trim() || null, ord)
+  },
+  remove(eventId: string, personId: string): void {
+    getDb().prepare('DELETE FROM event_participants WHERE event_id = ? AND person_id = ?').run(eventId, personId)
+  },
+  /** Reverse view: every event a person participates in, with owner context. */
+  forPerson(personId: string): Participation[] {
+    return (
+      getDb()
+        .prepare(
+          `SELECT p.event_id, p.role, e.owner_type, e.owner_id, e.type, e.date, e.place
+             FROM event_participants p JOIN events e ON e.id = p.event_id
+            WHERE p.person_id = ?
+            ORDER BY (e.date IS NULL OR e.date = ''), e.date`
+        )
+        .all(personId) as {
+        event_id: string
+        role: string | null
+        owner_type: string
+        owner_id: string
+        type: string
+        date: string | null
+        place: string | null
+      }[]
+    ).map((r) => ({
+      eventId: r.event_id,
+      role: r.role,
+      ownerType: r.owner_type as 'person' | 'family',
+      ownerId: r.owner_id,
+      type: r.type,
+      date: r.date,
+      place: r.place
+    }))
+  }
+}
+
+// ---------- Attributes (szabad tény-mezők: FACT/TYPE) ----------
+
+interface AttributeRow {
+  id: string
+  person_id: string
+  key: string
+  value: string | null
+  ordinal: number
+}
+
+export const Attributes = {
+  forPerson(personId: string): PersonAttribute[] {
+    return (
+      getDb()
+        .prepare('SELECT * FROM attributes WHERE person_id = ? ORDER BY ordinal, rowid')
+        .all(personId) as AttributeRow[]
+    ).map((r) => ({ id: r.id, personId: r.person_id, key: r.key, value: r.value }))
+  },
+  create(personId: string, input: AttributeInput, id = uuid()): PersonAttribute {
+    const ord =
+      (getDb()
+        .prepare('SELECT COALESCE(MAX(ordinal), -1) + 1 AS n FROM attributes WHERE person_id = ?')
+        .get(personId) as { n: number }).n
+    getDb()
+      .prepare('INSERT INTO attributes (id, person_id, key, value, ordinal) VALUES (?, ?, ?, ?, ?)')
+      .run(id, personId, input.key.trim(), input.value?.trim() || null, ord)
+    return { id, personId, key: input.key.trim(), value: input.value?.trim() || null }
+  },
+  update(id: string, input: AttributeInput): void {
+    getDb()
+      .prepare('UPDATE attributes SET key = ?, value = ? WHERE id = ?')
+      .run(input.key.trim(), input.value?.trim() || null, id)
+  },
+  remove(id: string): void {
+    getDb().prepare('DELETE FROM attributes WHERE id = ?').run(id)
+  }
+}
+
+// ---------- Witnesses (tanúk) ----------
+// A pure join: christening witnesses belong to a person, marriage witnesses to
+// a family. The witness side cascade-deletes with the person; the owner side is
+// cleaned up explicitly by People.remove / Families.remove.
+
+export type WitnessOwnerType = 'person' | 'family'
+
+export const Witnesses = {
+  /** The witness person-ids for an owner, in display order. */
+  forOwner(ownerType: WitnessOwnerType, ownerId: string): string[] {
+    return getDb()
+      .prepare('SELECT witness_id FROM witnesses WHERE owner_type = ? AND owner_id = ? ORDER BY ordinal, rowid')
+      .all(ownerType, ownerId)
+      .map((r) => (r as { witness_id: string }).witness_id)
+  },
+  add(ownerType: WitnessOwnerType, ownerId: string, witnessId: string): void {
+    if (ownerType === 'person' && ownerId === witnessId) return // can't witness your own christening
+    const ord =
+      (getDb()
+        .prepare('SELECT COALESCE(MAX(ordinal), -1) + 1 AS n FROM witnesses WHERE owner_type = ? AND owner_id = ?')
+        .get(ownerType, ownerId) as { n: number }).n
+    getDb()
+      .prepare('INSERT OR IGNORE INTO witnesses (owner_type, owner_id, witness_id, ordinal) VALUES (?, ?, ?, ?)')
+      .run(ownerType, ownerId, witnessId, ord)
+  },
+  remove(ownerType: WitnessOwnerType, ownerId: string, witnessId: string): void {
+    getDb()
+      .prepare('DELETE FROM witnesses WHERE owner_type = ? AND owner_id = ? AND witness_id = ?')
+      .run(ownerType, ownerId, witnessId)
   }
 }
 

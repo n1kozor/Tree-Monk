@@ -17,6 +17,11 @@ CREATE TABLE IF NOT EXISTS people (
   deceased        INTEGER NOT NULL DEFAULT 0,
   illegitimate    INTEGER NOT NULL DEFAULT 0,
   verified        INTEGER NOT NULL DEFAULT 0,
+  call_name       TEXT,                     -- Rufname (GEDCOM _RUFNAME)
+  name_prefix     TEXT,                     -- GEDCOM NPFX ("Dr.", "ifj.")
+  name_suffix     TEXT,                     -- GEDCOM NSFX ("Jr.", "III")
+  stillborn       INTEGER NOT NULL DEFAULT 0,
+  is_private      INTEGER NOT NULL DEFAULT 0,  -- confidential (GEDCOM RESN)
   burial_date     TEXT,
   burial_place    TEXT,
   christening_date  TEXT,
@@ -49,6 +54,7 @@ CREATE TABLE IF NOT EXISTS family_children (
   family_id       TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
   child_id        TEXT NOT NULL REFERENCES people(id) ON DELETE CASCADE,
   ordinal         INTEGER NOT NULL DEFAULT 0,
+  relation        TEXT,                     -- NULL = birth; adopted | foster | step (GEDCOM PEDI)
   PRIMARY KEY (family_id, child_id)
 );
 
@@ -61,6 +67,42 @@ CREATE TABLE IF NOT EXISTS godparents (
   PRIMARY KEY (person_id, godparent_id)
 );
 CREATE INDEX IF NOT EXISTS idx_godparents_godparent ON godparents(godparent_id);
+
+--- Witnesses (tanúk): christening witnesses attach to a person, marriage
+--- witnesses to a family (the union). The witness is always another person.
+--- The owner side has no FK (it points at two different tables); cleanup on
+--- owner delete happens in the repos.
+CREATE TABLE IF NOT EXISTS witnesses (
+  owner_type      TEXT NOT NULL CHECK (owner_type IN ('person','family')),
+  owner_id        TEXT NOT NULL,
+  witness_id      TEXT NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  ordinal         INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (owner_type, owner_id, witness_id)
+);
+CREATE INDEX IF NOT EXISTS idx_witnesses_witness ON witnesses(witness_id);
+
+--- Participants of a shared event, each with a free-form role (pap, bába,
+--- adományozó…) — Gramps-style shared events. The event's own witnesses stay
+--- in the witnesses table; this is for every OTHER kind of participant.
+CREATE TABLE IF NOT EXISTS event_participants (
+  event_id        TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  person_id       TEXT NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  role            TEXT,
+  ordinal         INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (event_id, person_id)
+);
+CREATE INDEX IF NOT EXISTS idx_event_participants_person ON event_participants(person_id);
+
+--- Free-form person attributes (GEDCOM FACT/TYPE): height, DNA haplogroup,
+--- service number… — anything that isn't a dated life event.
+CREATE TABLE IF NOT EXISTS attributes (
+  id              TEXT PRIMARY KEY,
+  person_id       TEXT NOT NULL REFERENCES people(id) ON DELETE CASCADE,
+  key             TEXT NOT NULL,
+  value           TEXT,
+  ordinal         INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_attributes_person ON attributes(person_id);
 
 CREATE TABLE IF NOT EXISTS documents (
   id              TEXT PRIMARY KEY,
@@ -105,7 +147,10 @@ CREATE TABLE IF NOT EXISTS board_edges (
 CREATE TABLE IF NOT EXISTS places (
   name            TEXT PRIMARY KEY,
   lat             REAL NOT NULL,
-  lon             REAL NOT NULL
+  lon             REAL NOT NULL,
+  place_type      TEXT,                     -- village/town/district/county/country/…
+  parent_name     TEXT,                     -- next level up in the place hierarchy
+  gov_id          TEXT                      -- GOV id (gov.genealogy.net)
 );
 
 -- App settings (key/value) — e.g. default_root_person_id

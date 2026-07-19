@@ -16,7 +16,79 @@ const pad = (n: number): string => String(n).padStart(2, '0')
 const okMonth = (m: number): boolean => m >= 1 && m <= 12
 const okDay = (d: number): boolean => d >= 1 && d <= 31
 
+/** GEDCOM-style date qualifier, stored as a canonical prefix in the SAME text
+ *  field ("ABT 1850", "BEF 1850-03", "BET 1850 AND 1860") — so every existing
+ *  consumer (sorting, export, DB) keeps working with zero schema change. */
+export type DateQualifier = 'ABT' | 'BEF' | 'AFT' | 'BET'
+
+export interface QualifiedDate {
+  qual: DateQualifier | null
+  core: string
+  /** Range end, only for BET … AND …. */
+  end: string | null
+}
+
+/** Split a stored date into its qualifier and core value(s). */
+export function splitQualifier(raw: string | null | undefined): QualifiedDate {
+  const s = (raw ?? '').trim()
+  let m = /^BET\.?\s+(.+?)\s+AND\s+(.+)$/i.exec(s)
+  if (m) return { qual: 'BET', core: m[1].trim(), end: m[2].trim() }
+  m = /^(ABT|BEF|AFT)\.?\s+(.+)$/i.exec(s)
+  if (m) return { qual: m[1].toUpperCase() as DateQualifier, core: m[2].trim(), end: null }
+  return { qual: null, core: s, end: null }
+}
+
+/**
+ * Pull a typed qualifier off the raw INPUT (multi-language, symbol or word,
+ * leading or trailing) so "kb 1850", "~1850", "1850 előtt", "vor 1850",
+ * "between 1850 and 1860", "1850 és 1860 között" all canonicalise.
+ */
+function splitInputQualifier(s: string): QualifiedDate {
+  // Already-canonical (or GEDCOM-imported) prefixes first.
+  const canonical = splitQualifier(s)
+  if (canonical.qual) return canonical
+  let m =
+    /^(?:between|zwischen)\s+(.+?)\s+(?:and|und)\s+(.+)$/i.exec(s) ??
+    /^(.+?)\s+és\s+(.+?)\s+között$/i.exec(s)
+  if (m) return { qual: 'BET', core: m[1].trim(), end: m[2].trim() }
+  m = /^(?:~|kb\.?|ca\.?|cca\.?|abt\.?|about|approx\.?|um|etwa)\s*(.+)$/i.exec(s)
+  if (m) return { qual: 'ABT', core: m[1].trim(), end: null }
+  m = /^(?:<|bef\.?|before|vor)\s*(.+)$/i.exec(s)
+  if (m) return { qual: 'BEF', core: m[1].trim(), end: null }
+  m = /^(?:>|aft\.?|after|nach)\s*(.+)$/i.exec(s)
+  if (m) return { qual: 'AFT', core: m[1].trim(), end: null }
+  m = /^(.+?)\s+körül$/i.exec(s)
+  if (m) return { qual: 'ABT', core: m[1].trim(), end: null }
+  m = /^(.+?)\s+előtt$/i.exec(s)
+  if (m) return { qual: 'BEF', core: m[1].trim(), end: null }
+  m = /^(.+?)\s+után$/i.exec(s)
+  if (m) return { qual: 'AFT', core: m[1].trim(), end: null }
+  return { qual: null, core: s, end: null }
+}
+
 export function normalizeDate(raw: string): string {
+  const trimmed = (raw ?? '').trim().replace(/\s+/g, ' ')
+  if (!trimmed) return ''
+  // Qualifier (typed in any supported language) → canonical GEDCOM-ish prefix,
+  // with the numeric part(s) canonicalised the usual way.
+  const q = splitInputQualifier(trimmed)
+  if (q.qual === 'BET') {
+    const a = normalizeCore(q.core)
+    const b = normalizeCore(q.end ?? '')
+    // Only canonicalise a range when BOTH ends are clean numeric dates —
+    // anything murkier stays exactly as typed.
+    if (/^\d{4}/.test(a) && /^\d{4}/.test(b)) return `BET ${a} AND ${b}`
+    return trimmed
+  }
+  if (q.qual) {
+    const core = normalizeCore(q.core)
+    if (/^\d{4}/.test(core)) return `${q.qual} ${core}`
+    return trimmed
+  }
+  return normalizeCore(trimmed)
+}
+
+function normalizeCore(raw: string): string {
   const s = (raw ?? '').trim().replace(/\s+/g, ' ')
   if (!s) return ''
 
@@ -68,9 +140,32 @@ export type DateDisplayFormat = 'iso' | 'eu' | 'us'
  *   1885-03     →  iso 1885-03    · eu 03.1885    · us 03/1885
  *   1885 / "abt 1850"  →  unchanged in every format
  */
-export function formatDisplayDate(raw: string | null | undefined, fmt: DateDisplayFormat): string {
+export function formatDisplayDate(
+  raw: string | null | undefined,
+  fmt: DateDisplayFormat,
+  lang?: string
+): string {
   const s = (raw ?? '').trim()
   if (!s) return ''
+  // Qualified date → format the core value(s), then wrap in the localized affix.
+  const q = splitQualifier(s)
+  if (q.qual) {
+    const core = formatCore(q.core, fmt)
+    const end = q.end ? formatCore(q.end, fmt) : ''
+    const l = (lang ?? 'en').slice(0, 2)
+    if (q.qual === 'BET') {
+      if (l === 'hu') return `${core} és ${end} között`
+      if (l === 'de') return `zwischen ${core} und ${end}`
+      return `between ${core} and ${end}`
+    }
+    if (q.qual === 'ABT') return l === 'hu' ? `kb. ${core}` : l === 'de' ? `um ${core}` : `abt. ${core}`
+    if (q.qual === 'BEF') return l === 'hu' ? `${core} előtt` : l === 'de' ? `vor ${core}` : `before ${core}`
+    return l === 'hu' ? `${core} után` : l === 'de' ? `nach ${core}` : `after ${core}`
+  }
+  return formatCore(s, fmt)
+}
+
+function formatCore(s: string, fmt: DateDisplayFormat): string {
   const m = /^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/.exec(s)
   if (!m || fmt === 'iso') return s
   const [, y, mo, d] = m
@@ -109,6 +204,17 @@ function dateParts(date: string | null | undefined): DateParts {
     month: m[2] ? Number(m[2]) : null,
     day: m[3] ? Number(m[3]) : null
   }
+}
+
+/**
+ * Sortable numeric key (yyyymmdd) for an ISO-ish date — FULL month/day
+ * precision, so same-year events (siblings, marriages) order correctly
+ * instead of falling back to insertion order. Unknown dates sort last.
+ */
+export function dateSortKey(date: string | null | undefined, missing = 99999999): number {
+  const p = dateParts(date)
+  if (p.year == null) return missing
+  return p.year * 10000 + (p.month ?? 0) * 100 + (p.day ?? 0)
 }
 
 /**

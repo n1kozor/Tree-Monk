@@ -23,15 +23,25 @@
     "none": "No photo uploaded."
   },
   "places": {
-    "standardizeTitle": "Standardize places",
-    "standardizeDesc": "Rewrite every place name to its canonical form (merges duplicates like “…Hungary” / “…Magyarország”).",
-    "standardizeBtn": "Standardize",
-    "standardizing": "Standardizing places…",
-    "standardizingHint": "Looking up canonical place names…",
-    "progress": "{{done}}/{{total}} places · {{changed}} normalized",
-    "standardizeDone": "Places normalized on {{count}} records",
-    "standardizeNone": "All places are already standard",
-    "standardizeFailed": "Standardization failed"
+    "manage": "Manage places",
+    "title": "Places",
+    "hint": "Place hierarchy (village → district → county → country) and GOV id. The place names stored on people stay untouched.",
+    "none": "No matches.",
+    "select": "Pick a place from the list.",
+    "typeLabel": "Type",
+    "parent": "Parent place",
+    "parentHint": "e.g. the district or county",
+    "hierarchy": "Hierarchy",
+    "type": {
+      "village": "Village",
+      "town": "Town",
+      "city": "City",
+      "district": "District",
+      "county": "County",
+      "region": "Region / state",
+      "country": "Country",
+      "other": "Other"
+    }
   },
   "welcome": {
     "title": "How do you like TreeMonk so far?",
@@ -150,6 +160,49 @@
     "addTitle": "Add a godparent",
     "none": "No godparents recorded.",
     "godchildOf": "Godparent of:"
+  },
+  "witnesses": {
+    "christeningTitle": "Christening witnesses",
+    "marriageTitle": "Marriage witnesses",
+    "add": "Add",
+    "addTitle": "Add witness",
+    "none": "No witnesses recorded."
+  },
+  "relation": {
+    "father": "Father",
+    "mother": "Mother",
+    "spouse": "Spouse",
+    "husband": "Husband",
+    "wife": "Wife"
+  },
+  "participants": {
+    "title": "Participants",
+    "add": "Add",
+    "addTitle": "Add participant",
+    "none": "No participants recorded.",
+    "role": "Role",
+    "participationsTitle": "Participations",
+    "roles": {
+      "priest": "Priest / minister",
+      "midwife": "Midwife",
+      "officiant": "Registrar",
+      "donor": "Donor",
+      "gravedigger": "Gravedigger"
+    }
+  },
+  "childRelation": {
+    "title": "Relationship to parents",
+    "birth": "Birth",
+    "adopted": "Adopted",
+    "foster": "Foster",
+    "step": "Step"
+  },
+  "attributes": {
+    "title": "Other facts",
+    "none": "No facts recorded.",
+    "key": "Name",
+    "value": "Value",
+    "add": "Add"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -748,7 +801,11 @@
       "regenerated": "New token generated — the old one is now invalid.",
       "error": "Saving the setting failed."
     },
-    "manualDesc": "The full TreeMonk manual as a PDF, opened in your default viewer."
+    "manualDesc": "The full TreeMonk manual as a PDF, opened in your default viewer.",
+    "siteExport": "Export website",
+    "siteExportDesc": "A browsable, searchable HTML page of the whole tree — a single file you can share with anyone. Confidential people are excluded.",
+    "siteExportBtn": "HTML website",
+    "siteExportDone": "Website exported: {{path}}"
   },
   "common": {
     "done": "Done",
@@ -1174,7 +1231,15 @@
     "unlinkSpouseChildren": "The {{count}} children stay with this person (as a single-parent family).",
     "spouseUnlinked": "{{name}} unlinked from the marriage.",
     "verifiedOn": "Verified",
-    "markVerified": "Mark as verified"
+    "markVerified": "Mark as verified",
+    "callName": "Call name",
+    "callNameHint": "the name they went by",
+    "namePrefix": "Name prefix",
+    "nameSuffix": "Name suffix",
+    "stillborn": "Stillborn",
+    "private": "Confidential person",
+    "privateHint": "(marked \"confidential\" in GEDCOM exports)",
+    "dateQualifierHint": "Qualifiers: \"abt 1850\", \"before 1850\", \"after 1850\", \"between 1850 and 1860\""
   },
   "research": {
     "history": "Research history",
@@ -1209,10 +1274,17 @@
       "education": "Education",
       "religious": "Religious event",
       "other": "Other",
-      "divorce": "Divorce"
+      "divorce": "Divorce",
+      "engagement": "Engagement",
+      "banns": "Banns",
+      "civilMarriage": "Civil marriage",
+      "churchMarriage": "Church marriage",
+      "separation": "Separation"
     },
     "from": "From",
-    "to": "To"
+    "to": "To",
+    "familyTitle": "Family events",
+    "addTitle": "New event"
   },
   "timeline": {
     "title": "Timeline",
@@ -1888,13 +1960,6 @@
     "children": "Children",
     "events": "Events",
     "noFamily": "No family recorded."
-  },
-  "relation": {
-    "father": "Father",
-    "mother": "Mother",
-    "spouse": "Spouse",
-    "husband": "Husband",
-    "wife": "Wife"
   },
   "sex": {
     "male": "Male",

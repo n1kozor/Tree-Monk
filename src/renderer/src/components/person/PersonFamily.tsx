@@ -8,10 +8,13 @@ import { useDatePlaceholder } from '@/hooks/useDateFormat'
 import { PlaceInput } from '@/components/common/PlaceInput'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { ConfirmDialog, toastUndo } from '@/components/common/ConfirmDialog'
-import { fullName, yearOf } from '@/lib/utils'
+import { cn, fullName, yearOf } from '@/lib/utils'
+import { dateSortKey } from '@/lib/dates'
 import { useAppStore } from '@/store/useAppStore'
 import { RelativeDialog, type MarriageDraft, type RelativeDraft } from './RelativeDialog'
-import type { Family, Person } from '@shared/types'
+import { PersonWitnesses } from './PersonWitnesses'
+import { FamilyEvents } from './PersonEvents'
+import type { ChildRelation, Family, Person } from '@shared/types'
 
 function PersonRow({ p, onClick }: { p: Person; onClick: () => void }): JSX.Element {
   return (
@@ -28,6 +31,40 @@ function PersonRow({ p, onClick }: { p: Person; onClick: () => void }): JSX.Elem
         </p>
       </div>
     </button>
+  )
+}
+
+/** Child↔parents relationship type (GEDCOM PEDI): birth (default) / adopted /
+ *  foster / step. Quiet when birth; amber when it carries information. */
+function RelationSelect({ family, childId }: { family: Family; childId: string }): JSX.Element {
+  const { t } = useTranslation()
+  const refreshFamilies = useAppStore((s) => s.refreshFamilies)
+  const value = family.childRelations?.[childId] ?? ''
+  return (
+    <select
+      value={value}
+      onClick={(e) => e.stopPropagation()}
+      onChange={async (e) => {
+        await window.api.families.setChildRelation(
+          family.id,
+          childId,
+          (e.target.value || null) as ChildRelation | null
+        )
+        await refreshFamilies()
+      }}
+      title={t('childRelation.title')}
+      className={cn(
+        'h-6 shrink-0 rounded-md border bg-background px-1 text-[10px] outline-none focus:border-primary',
+        value
+          ? 'border-amber-500/50 font-medium text-amber-600 dark:text-amber-400'
+          : 'border-border/40 text-muted-foreground/70'
+      )}
+    >
+      <option value="">{t('childRelation.birth')}</option>
+      <option value="adopted">{t('childRelation.adopted')}</option>
+      <option value="foster">{t('childRelation.foster')}</option>
+      <option value="step">{t('childRelation.step')}</option>
+    </select>
   )
 }
 
@@ -154,21 +191,22 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
   const parentFamily = families.find((f) => f.childIds.includes(person.id))
 
   // Order for multiple marriages: the user-set marriage number wins, then the
-  // marriage year, then the spouse's birth year — earliest partner first.
+  // marriage date, then the spouse's birth date — earliest partner first.
+  // Full month/day precision (dateSortKey), so same-year events order right.
   const unionSortKey = (f: Family): number => {
     if (f.marriageOrder) return f.marriageOrder
-    const marriage = Number(yearOf(f.marriageDate))
-    if (marriage) return 100 + marriage
+    const marriage = dateSortKey(f.marriageDate, 0)
+    if (marriage) return 1000000 + marriage
     const spouseId = f.husbandId === person.id ? f.wifeId : f.husbandId
     const spouse = spouseId ? byId.get(spouseId) : undefined
-    return 100 + (Number(yearOf(spouse?.birthDate)) || 9999)
+    return 1000000 + dateSortKey(spouse?.birthDate)
   }
   const unions = families
     .filter((f) => f.husbandId === person.id || f.wifeId === person.id)
     .sort((a, b) => unionSortKey(a) - unionSortKey(b))
 
   const byBirth = (a: Person, b: Person): number =>
-    (Number(yearOf(a.birthDate)) || 9999) - (Number(yearOf(b.birthDate)) || 9999)
+    dateSortKey(a.birthDate) - dateSortKey(b.birthDate)
 
   const parentIds = parentFamily
     ? [parentFamily.husbandId, parentFamily.wifeId].filter((x): x is string => !!x)
@@ -212,34 +250,46 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
       : []
   )
 
-  // Link an existing person (new OR attached) as a child of the family.
-  const linkChild = async (familyId: string, childId: string): Promise<void> => {
+  // Link an existing person (new OR attached) as a child of the family,
+  // optionally with a non-birth relation (adopted/foster/step) from the dialog.
+  const linkChild = async (
+    familyId: string,
+    childId: string,
+    relation?: ChildRelation | null
+  ): Promise<void> => {
     const fam = families.find((f) => f.id === familyId)
     if (fam && !fam.childIds.includes(childId))
       await window.api.families.update(familyId, { childIds: [...fam.childIds, childId] })
+    if (relation) await window.api.families.setChildRelation(familyId, childId, relation)
     await refreshFamilies()
     selectPerson(childId)
   }
   const addChild = async (familyId: string, draft: RelativeDraft): Promise<void> => {
     const child = await window.api.people.create(draft)
-    await linkChild(familyId, child.id)
+    await linkChild(familyId, child.id, draft.relation)
   }
 
   // Add a child WITHOUT a spouse — creates a single-parent family with this
   // person as the sole parent (the other parent unknown). Otherwise a child
   // could only be added inside an existing union.
-  const linkChildLone = async (childId: string): Promise<void> => {
+  const linkChildLone = async (childId: string, relation?: ChildRelation | null): Promise<void> => {
     const role =
       person.sex === 'F'
         ? { wifeId: person.id, husbandId: null }
         : { husbandId: person.id, wifeId: null }
-    await window.api.families.create({ ...role, childIds: [childId], marriageDate: null, marriagePlace: null })
+    const fam = await window.api.families.create({
+      ...role,
+      childIds: [childId],
+      marriageDate: null,
+      marriagePlace: null
+    })
+    if (relation) await window.api.families.setChildRelation(fam.id, childId, relation)
     await refreshFamilies()
     selectPerson(childId)
   }
   const addChildLone = async (draft: RelativeDraft): Promise<void> => {
     const child = await window.api.people.create(draft)
-    await linkChildLone(child.id)
+    await linkChildLone(child.id, draft.relation)
   }
 
   // Link a person as a new spouse (a fresh union with the proband), optionally
@@ -345,9 +395,12 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
       {/* Parents */}
       {parentFamily && (
         <section>
-          <h4 className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <Users className="h-3.5 w-3.5" /> {t('person.parents')}
-          </h4>
+          <div className="mb-1 flex items-center justify-between">
+            <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              <Users className="h-3.5 w-3.5" /> {t('person.parents')}
+            </h4>
+            <RelationSelect family={parentFamily} childId={person.id} />
+          </div>
           <div className="rounded-xl border border-border/40 bg-secondary/40">
             {[parentFamily.husbandId, parentFamily.wifeId]
               .map((id) => (id ? byId.get(id) : undefined))
@@ -449,6 +502,19 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
                   </button>
                 )}
                 <MarriageEditor family={f} />
+                {/* Marriage witnesses (esküvői tanúk) belong to the union itself. */}
+                <div className="mt-1.5 border-t border-border/40 px-2 pt-1.5">
+                  <PersonWitnesses
+                    ownerType="family"
+                    ownerId={f.id}
+                    title={t('witnesses.marriageTitle')}
+                    excludeIds={[f.husbandId, f.wifeId].filter((x): x is string => !!x)}
+                  />
+                </div>
+                {/* Union events: engagement, civil/church wedding, divorce… */}
+                <div className="mt-1.5 border-t border-border/40 px-2 pt-1.5">
+                  <FamilyEvents familyId={f.id} />
+                </div>
                 <div className="mt-1.5 border-t border-border/40 pt-1.5">
                   <div className="flex items-center justify-between px-2">
                     <span className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
@@ -462,7 +528,12 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
                     </button>
                   </div>
                   {children.map((c) => (
-                    <PersonRow key={c.id} p={c} onClick={() => selectPerson(c.id)} />
+                    <div key={c.id} className="flex items-center gap-1 pr-2">
+                      <div className="min-w-0 flex-1">
+                        <PersonRow p={c} onClick={() => selectPerson(c.id)} />
+                      </div>
+                      <RelationSelect family={f} childId={c.id} />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -476,11 +547,12 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
         onOpenChange={(o) => !o && setAddingChildTo(null)}
         title={t('person.addChildTitle')}
         defaultSurname={person.surname}
+        withChildRelation
         onSubmit={(draft) => {
           if (addingChildTo) void addChild(addingChildTo, draft)
         }}
-        onPickExisting={(id) => {
-          if (addingChildTo) void linkChild(addingChildTo, id)
+        onPickExisting={(id, _marriage, relation) => {
+          if (addingChildTo) void linkChild(addingChildTo, id, relation)
         }}
         excludeIds={addingChildTo ? childExclude(addingChildTo) : undefined}
       />
@@ -490,8 +562,9 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
         onOpenChange={setAddingChildLone}
         title={t('person.addChildTitle')}
         defaultSurname={person.surname}
+        withChildRelation
         onSubmit={(draft) => void addChildLone(draft)}
-        onPickExisting={(id) => void linkChildLone(id)}
+        onPickExisting={(id, _marriage, relation) => void linkChildLone(id, relation)}
         excludeIds={new Set([person.id])}
       />
       <RelativeDialog

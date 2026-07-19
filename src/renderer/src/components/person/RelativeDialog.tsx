@@ -17,7 +17,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 import { normalizeDate } from '@/lib/dates'
 import { ExistingPersonPicker } from '@/components/common/ExistingPersonPicker'
-import type { Sex } from '@shared/types'
+import type { ChildRelation, Sex } from '@shared/types'
 
 export interface RelativeDraft {
   givenName: string
@@ -27,6 +27,8 @@ export interface RelativeDraft {
   /** Only set when the dialog collects a marriage (spouse mode). */
   marriageDate?: string | null
   marriagePlace?: string | null
+  /** Only set when the dialog collects the child↔parents relation (child mode). */
+  relation?: ChildRelation | null
 }
 
 /** Marriage details collected when attaching/adding a spouse. */
@@ -49,7 +51,8 @@ export function RelativeDialog({
   onPickExisting,
   excludeIds,
   defaultMode = 'create',
-  withMarriage = false
+  withMarriage = false,
+  withChildRelation = false
 }: {
   open: boolean
   onOpenChange: (v: boolean) => void
@@ -58,13 +61,15 @@ export function RelativeDialog({
   defaultSex?: Sex
   onSubmit: (draft: RelativeDraft) => void
   /** When provided, an "attach existing person" tab is offered. */
-  onPickExisting?: (personId: string, marriage?: MarriageDraft) => void
+  onPickExisting?: (personId: string, marriage?: MarriageDraft, relation?: ChildRelation | null) => void
   /** People to hide from the existing-person picker (self / already linked). */
   excludeIds?: Set<string>
   /** Which tab opens first (e.g. godparents default to picking an existing person). */
   defaultMode?: 'create' | 'existing'
   /** Spouse mode: also collect the marriage date + place. */
   withMarriage?: boolean
+  /** Child mode: also collect the relationship to the parents (PEDI). */
+  withChildRelation?: boolean
 }): JSX.Element {
   const { t, i18n } = useTranslation()
   const datePlaceholder = useDatePlaceholder()
@@ -75,6 +80,7 @@ export function RelativeDialog({
   const [birth, setBirth] = useState('')
   const [marrDate, setMarrDate] = useState('')
   const [marrPlace, setMarrPlace] = useState('')
+  const [relation, setRelation] = useState('')
 
   useEffect(() => {
     if (open) {
@@ -85,10 +91,13 @@ export function RelativeDialog({
       setBirth('')
       setMarrDate('')
       setMarrPlace('')
+      setRelation('')
     }
   }, [open, defaultSurname, defaultSex, defaultMode])
 
   const marriage = (): MarriageDraft => ({ date: normalizeDate(marrDate) || null, place: marrPlace.trim() || null })
+
+  const pickedRelation = (): ChildRelation | null => (relation || null) as ChildRelation | null
 
   const submit = (): void => {
     const m = marriage()
@@ -97,7 +106,8 @@ export function RelativeDialog({
       surname: surname.trim(),
       sex,
       birthDate: normalizeDate(birth) || null,
-      ...(withMarriage ? { marriageDate: m.date, marriagePlace: m.place } : {})
+      ...(withMarriage ? { marriageDate: m.date, marriagePlace: m.place } : {}),
+      ...(withChildRelation ? { relation: pickedRelation() } : {})
     })
     onOpenChange(false)
   }
@@ -112,6 +122,23 @@ export function RelativeDialog({
         <Label>{`${t('person.marriage')} · ${t('person.place')}`}</Label>
         <PlaceInput value={marrPlace} onChange={setMarrPlace} />
       </div>
+    </div>
+  ) : null
+
+  // Child mode: relationship to the parents (birth default, PEDI values).
+  const relationField = withChildRelation ? (
+    <div className="space-y-1">
+      <Label>{t('childRelation.title')}</Label>
+      <select
+        value={relation}
+        onChange={(e) => setRelation(e.target.value)}
+        className="h-9 w-full rounded-lg border border-input bg-background px-2 text-sm text-foreground outline-none focus:border-primary"
+      >
+        <option value="">{t('childRelation.birth')}</option>
+        <option value="adopted">{t('childRelation.adopted')}</option>
+        <option value="foster">{t('childRelation.foster')}</option>
+        <option value="step">{t('childRelation.step')}</option>
+      </select>
     </div>
   ) : null
 
@@ -154,10 +181,15 @@ export function RelativeDialog({
         {mode === 'existing' && onPickExisting ? (
           <div className="space-y-3">
             {marriageFields}
+            {relationField}
             <ExistingPersonPicker
               excludeIds={excludeIds}
               onPick={(p) => {
-                onPickExisting(p.id, withMarriage ? marriage() : undefined)
+                onPickExisting(
+                  p.id,
+                  withMarriage ? marriage() : undefined,
+                  withChildRelation ? pickedRelation() : undefined
+                )
                 onOpenChange(false)
               }}
             />
@@ -218,6 +250,7 @@ export function RelativeDialog({
             />
           </div>
           {marriageFields}
+          {relationField}
           <DialogFooter>
             <Button type="button" variant="outline" size="sm" onClick={() => onOpenChange(false)}>
               {t('common.cancel')}

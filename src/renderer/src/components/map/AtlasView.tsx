@@ -12,6 +12,7 @@ import {
   Flame,
   Heart,
   Home,
+  Landmark,
   Layers as LayersIcon,
   Locate,
   MapPin,
@@ -30,6 +31,7 @@ import { useTheme } from '@/store/useTheme'
 import { useAtlasSettings } from '@/store/useAtlasSettings'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import type { AtlasKind, AtlasPoint } from '@shared/types'
+import { PlacesManagerDialog } from './PlacesManagerDialog'
 
 /**
  * Atlas — the map view, rebuilt from scratch.
@@ -153,6 +155,7 @@ export function AtlasView(): JSX.Element {
   const [personQ, setPersonQ] = useState('')
   const [personMenu, setPersonMenu] = useState(false)
   const [geoProg, setGeoProg] = useState<{ done: number; total: number } | null>(null)
+  const [placesOpen, setPlacesOpen] = useState(false)
   const dashRaf = useRef<number | undefined>(undefined)
   const fittedOnce = useRef(false)
 
@@ -1040,8 +1043,20 @@ export function AtlasView(): JSX.Element {
               </button>
             )}
           </section>
+
+          {/* ---- Place manager (hierarchy + GOV) ---- */}
+          <section className="border-t border-border/40 pt-2">
+            <button
+              onClick={() => setPlacesOpen(true)}
+              className="flex w-full items-center gap-1.5 rounded-lg border border-border/40 px-2 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              <Landmark className="h-3.5 w-3.5" /> {t('places.manage')}
+            </button>
+          </section>
         </div>
       </div>
+
+      <PlacesManagerDialog open={placesOpen} onOpenChange={setPlacesOpen} />
 
       {/* ---- Journey timeline (left, glass) ---- */}
       {focusPerson && (

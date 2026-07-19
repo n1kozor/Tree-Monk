@@ -15,10 +15,12 @@ import {
 } from '@/components/ui/dialog'
 import { normalizeDate } from '@/lib/dates'
 import { useDateFormat } from '@/hooks/useDateFormat'
-import { cn } from '@/lib/utils'
-import type { EventRecord, EventType } from '@shared/types'
+import { cn, fullName } from '@/lib/utils'
+import { PersonAvatar } from '@/components/common/PersonAvatar'
+import { RelativeDialog } from './RelativeDialog'
+import type { EventParticipant, EventRecord, EventType, Person } from '@shared/types'
 
-const TYPES: EventType[] = [
+const PERSON_TYPES: EventType[] = [
   'residence',
   'divorce',
   'military',
@@ -30,6 +32,17 @@ const TYPES: EventType[] = [
   'cremation',
   'education',
   'religious',
+  'other'
+]
+
+/** Event types that belong to a FAMILY (the union), not a person. */
+const FAMILY_TYPES: EventType[] = [
+  'engagement',
+  'banns',
+  'civilMarriage',
+  'churchMarriage',
+  'divorce',
+  'separation',
   'other'
 ]
 
@@ -46,47 +59,105 @@ function typeLabel(t: Tr, type: string): string {
   return type
 }
 
-/** Modal editor for one event — change every field, or delete it. */
+/** Modal editor for one event — create a new one (event = null) or change /
+ *  delete an existing one. Participants added while CREATING are buffered
+ *  locally and flushed once the event exists. */
 function EventEditDialog({
+  open,
   event,
+  ownerType,
+  ownerId,
+  types,
   onClose,
   onChanged
 }: {
+  open: boolean
+  /** The event being edited — null means create mode. */
   event: EventRecord | null
+  ownerType: 'person' | 'family'
+  ownerId: string
+  types: EventType[]
   onClose: () => void
   onChanged: () => Promise<void> | void
 }): JSX.Element {
   const { t } = useTranslation()
+  const peopleById = useAppStore((s) => s.peopleById)
   const [type, setType] = useState('other')
   const [value, setValue] = useState('')
   const [place, setPlace] = useState('')
   const [date, setDate] = useState('')
   const [dateTo, setDateTo] = useState('')
   const [note, setNote] = useState('')
+  // Shared-event participants (pap, bába, adományozó…), free-form roles.
+  // In create mode they live only in this state until the event is saved.
+  const [participants, setParticipants] = useState<EventParticipant[]>([])
+  const [addingPart, setAddingPart] = useState(false)
 
-  useEffect(() => {
-    if (!event) return
-    setType(event.type)
-    setValue(event.value ?? '')
-    setPlace(event.place ?? '')
-    setDate(event.date ?? '')
-    setDateTo(event.endDate ?? '')
-    setNote(event.note ?? '')
+  const loadParticipants = useCallback(async () => {
+    if (event) setParticipants(await window.api.eventParticipants.forEvent(event.id))
   }, [event])
 
-  // Include a custom/FS-derived type as its own option so it isn't lost on save.
-  const options = TYPES.includes(type as EventType) ? TYPES : [type, ...TYPES]
+  useEffect(() => {
+    if (!open) return
+    setType(event?.type ?? types[0])
+    setValue(event?.value ?? '')
+    setPlace(event?.place ?? '')
+    setDate(event?.date ?? '')
+    setDateTo(event?.endDate ?? '')
+    setNote(event?.note ?? '')
+    setParticipants([])
+    void loadParticipants()
+  }, [open, event, types, loadParticipants])
+
+  const setRole = async (personId: string, role: string): Promise<void> => {
+    if (event) await window.api.eventParticipants.set(event.id, personId, role || null)
+    else
+      setParticipants((xs) => xs.map((x) => (x.personId === personId ? { ...x, role: role || null } : x)))
+  }
+  const addParticipant = async (personId: string): Promise<void> => {
+    if (event) {
+      await window.api.eventParticipants.set(event.id, personId, null)
+      await loadParticipants()
+    } else {
+      setParticipants((xs) =>
+        xs.some((x) => x.personId === personId) ? xs : [...xs, { personId, role: null }]
+      )
+    }
+  }
+  const removeParticipant = async (personId: string): Promise<void> => {
+    if (event) {
+      await window.api.eventParticipants.remove(event.id, personId)
+      await loadParticipants()
+    } else {
+      setParticipants((xs) => xs.filter((x) => x.personId !== personId))
+    }
+  }
+
+  // The dialog offers the owner-appropriate type list, and includes a
+  // custom/FS-derived type as its own option so it isn't lost on save.
+  const options = types.includes(type as EventType) ? types : [type as EventType, ...types]
 
   const save = async (): Promise<void> => {
-    if (!event) return
-    await window.api.events.update(event.id, {
+    const input = {
       type: type.trim() || 'other',
       value: value.trim() || null,
       place: place.trim() || null,
       date: normalizeDate(date) || null,
       endDate: normalizeDate(dateTo) || null,
       note: note.trim() || null
-    })
+    }
+    if (event) {
+      await window.api.events.update(event.id, input)
+    } else {
+      const created =
+        ownerType === 'person'
+          ? await window.api.events.create(ownerId, input)
+          : await window.api.events.createForFamily(ownerId, input)
+      // Flush the participants buffered while creating.
+      for (const pt of participants) {
+        await window.api.eventParticipants.set(created.id, pt.personId, pt.role)
+      }
+    }
     await onChanged()
     onClose()
   }
@@ -98,10 +169,10 @@ function EventEditDialog({
   }
 
   return (
-    <Dialog open={!!event} onOpenChange={(o) => !o && onClose()}>
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{t('events.edit')}</DialogTitle>
+          <DialogTitle>{event ? t('events.edit') : t('events.addTitle')}</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-1">
           <label className="block space-y-1">
@@ -140,38 +211,122 @@ function EventEditDialog({
             <span className="text-xs font-medium text-muted-foreground">{t('person.notes')}</span>
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} className="min-h-[64px] text-sm" />
           </label>
+
+          {/* Participants with roles (Gramps-style shared event). */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-muted-foreground">{t('participants.title')}</span>
+              <button
+                type="button"
+                onClick={() => setAddingPart(true)}
+                className="flex items-center gap-1 rounded-lg border border-border/40 px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+              >
+                <Plus className="h-3 w-3" /> {t('participants.add')}
+              </button>
+            </div>
+            {participants.length === 0 && (
+              <p className="text-xs text-muted-foreground">{t('participants.none')}</p>
+            )}
+            {participants.map((pt) => {
+              const person: Person | undefined = peopleById.get(pt.personId)
+              if (!person) return null
+              return (
+                <div key={pt.personId} className="flex items-center gap-1.5">
+                  <span className="flex min-w-0 flex-1 items-center gap-1.5 text-xs">
+                    <PersonAvatar
+                      personId={person.id}
+                      name={fullName(person)}
+                      sex={person.sex}
+                      className="h-5 w-5 shrink-0 text-[8px]"
+                    />
+                    <span className="truncate font-medium">{fullName(person)}</span>
+                  </span>
+                  <Input
+                    key={`${pt.personId}-${event?.id ?? 'new'}`}
+                    defaultValue={pt.role ?? ''}
+                    list="tm-participant-roles"
+                    placeholder={t('participants.role')}
+                    onBlur={(e) => void setRole(pt.personId, e.target.value.trim())}
+                    className="h-7 w-36 text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => void removeParticipant(pt.personId)}
+                    className="rounded-full p-0.5 text-muted-foreground hover:text-destructive"
+                    title={t('common.delete')}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              )
+            })}
+            <datalist id="tm-participant-roles">
+              {(['priest', 'midwife', 'officiant', 'donor', 'gravedigger'] as const).map((r) => (
+                <option key={r} value={t(`participants.roles.${r}`)} />
+              ))}
+            </datalist>
+          </div>
         </div>
         <DialogFooter className="flex-row justify-between sm:justify-between">
-          <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={remove}>
-            {t('common.delete')}
-          </Button>
-          <Button onClick={save}>{t('common.save')}</Button>
+          {event ? (
+            <Button variant="ghost" className="text-destructive hover:text-destructive" onClick={remove}>
+              {t('common.delete')}
+            </Button>
+          ) : (
+            <span />
+          )}
+          <Button onClick={save}>{event ? t('common.save') : t('common.add')}</Button>
         </DialogFooter>
       </DialogContent>
+      <RelativeDialog
+        open={addingPart}
+        onOpenChange={setAddingPart}
+        title={t('participants.addTitle')}
+        defaultMode="existing"
+        excludeIds={new Set(participants.map((pt) => pt.personId))}
+        onPickExisting={(id) => void addParticipant(id)}
+        onSubmit={async (draft) => {
+          const created = await window.api.people.create(draft)
+          await addParticipant(created.id)
+          await useAppStore.getState().refreshAll()
+        }}
+      />
     </Dialog>
   )
 }
 
 /**
- * A person's life events / facts (residences — several allowed — plus military,
- * nationality, etc.). Add inline, click a row to edit it in a modal, or delete.
- * Populated by the FS/GEDCOM import but fully hand-maintainable.
+ * Events / facts of an owner: a PERSON's life events (residences — several
+ * allowed — plus military, nationality, etc.) or a FAMILY's union events
+ * (engagement, civil/church wedding, divorce…). Add via the same modal that
+ * edits a row (click to open), delete inline. Populated by the FS/GEDCOM
+ * import but fully hand-maintainable.
  */
-export function PersonEvents({ personId }: { personId: string }): JSX.Element {
+function EventsBlock({
+  ownerType,
+  ownerId,
+  types,
+  heading
+}: {
+  ownerType: 'person' | 'family'
+  ownerId: string
+  types: EventType[]
+  heading: string
+}): JSX.Element {
   const { t } = useTranslation()
   const fmtDate = useDateFormat()
   const [list, setList] = useState<EventRecord[]>([])
   const [editing, setEditing] = useState<EventRecord | null>(null)
+  const [creating, setCreating] = useState(false)
   const [dragId, setDragId] = useState<string | null>(null)
-  const [type, setType] = useState<EventType>('residence')
-  const [value, setValue] = useState('')
-  const [place, setPlace] = useState('')
-  const [date, setDate] = useState('')
-  const [dateTo, setDateTo] = useState('')
 
   const load = useCallback(async () => {
-    setList(await window.api.events.forPerson(personId))
-  }, [personId])
+    setList(
+      ownerType === 'person'
+        ? await window.api.events.forPerson(ownerId)
+        : await window.api.events.forFamily(ownerId)
+    )
+  }, [ownerType, ownerId])
   // Reload after a FamilySearch sync too (residence & other facts are merged
   // into the events table, but this panel fetches its own list).
   const syncNonce = useAppStore((s) => s.personSyncNonce)
@@ -179,21 +334,6 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
     void load()
   }, [load, syncNonce])
 
-  const add = async (): Promise<void> => {
-    if (!value.trim() && !place.trim() && !date.trim()) return
-    await window.api.events.create(personId, {
-      type,
-      value: value.trim() || null,
-      place: place.trim() || null,
-      date: normalizeDate(date) || null,
-      endDate: normalizeDate(dateTo) || null
-    })
-    setValue('')
-    setPlace('')
-    setDate('')
-    setDateTo('')
-    await load()
-  }
   const remove = async (id: string): Promise<void> => {
     await window.api.events.remove(id)
     await load()
@@ -218,7 +358,7 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
   return (
     <div className="space-y-2">
       <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        <CalendarClock className="h-3.5 w-3.5" /> {t('events.title')}
+        <CalendarClock className="h-3.5 w-3.5" /> {heading}
       </h4>
 
       {list.length > 0 && (
@@ -275,48 +415,37 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
         </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <select
-          value={type}
-          onChange={(e) => setType(e.target.value as EventType)}
-          className="h-8 shrink-0 rounded-lg border border-input bg-background px-2 text-xs text-foreground outline-none focus:border-primary"
-        >
-          {TYPES.map((ty) => (
-            <option key={ty} value={ty}>
-              {typeLabel(t, ty)}
-            </option>
-          ))}
-        </select>
-        <Input
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder={t('events.value')}
-          className="h-8 min-w-[72px] flex-1 text-xs"
-        />
-        <Input
-          value={place}
-          onChange={(e) => setPlace(e.target.value)}
-          placeholder={t('person.place')}
-          className="h-8 min-w-[72px] flex-1 text-xs"
-        />
-        <DateInput
-          value={date}
-          onValueChange={setDate}
-          placeholder={t('events.from')}
-          className="h-8 w-20 text-xs"
-        />
-        <DateInput
-          value={dateTo}
-          onValueChange={setDateTo}
-          placeholder={t('events.to')}
-          className="h-8 w-20 text-xs"
-        />
-        <Button size="icon" variant="outline" className="h-8 w-8 shrink-0" onClick={add} title={t('events.title')}>
-          <Plus className="h-4 w-4" />
-        </Button>
-      </div>
+      <button
+        onClick={() => setCreating(true)}
+        className="flex items-center gap-1 rounded-lg border border-border/40 px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+      >
+        <Plus className="h-3 w-3" /> {t('events.addTitle')}
+      </button>
 
-      <EventEditDialog event={editing} onClose={() => setEditing(null)} onChanged={load} />
+      <EventEditDialog
+        open={!!editing || creating}
+        event={editing}
+        ownerType={ownerType}
+        ownerId={ownerId}
+        types={types}
+        onClose={() => {
+          setEditing(null)
+          setCreating(false)
+        }}
+        onChanged={load}
+      />
     </div>
   )
+}
+
+/** A person's life events / facts — the original public surface. */
+export function PersonEvents({ personId }: { personId: string }): JSX.Element {
+  const { t } = useTranslation()
+  return <EventsBlock ownerType="person" ownerId={personId} types={PERSON_TYPES} heading={t('events.title')} />
+}
+
+/** A family's (union's) events: engagement, weddings, divorce, separation. */
+export function FamilyEvents({ familyId }: { familyId: string }): JSX.Element {
+  const { t } = useTranslation()
+  return <EventsBlock ownerType="family" ownerId={familyId} types={FAMILY_TYPES} heading={t('events.familyTitle')} />
 }

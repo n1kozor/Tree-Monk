@@ -4,7 +4,10 @@ import type {
   AtlasPoint,
   Alias,
   AliasInput,
+  AttributeInput,
   AuditFilter,
+  ChildRelation,
+  EventParticipant,
   AuditImpact,
   AuditPage,
   BoardEdge,
@@ -41,8 +44,11 @@ import type {
   Occupation,
   OccupationInput,
   KinshipFlag,
+  Participation,
   PedigreeCouple,
   Person,
+  PersonAttribute,
+  PlaceInfo,
   PluginPanelInfo,
   PersonInput,
   PersonQuery,
@@ -78,7 +84,14 @@ export const Channels = {
     list: 'families:list',
     create: 'families:create',
     update: 'families:update',
-    remove: 'families:remove'
+    remove: 'families:remove',
+    setChildRelation: 'families:setChildRelation'
+  },
+  eventParticipants: {
+    forEvent: 'eventParticipants:forEvent',
+    set: 'eventParticipants:set',
+    remove: 'eventParticipants:remove',
+    forPerson: 'eventParticipants:forPerson'
   },
   documents: {
     list: 'documents:list',
@@ -140,7 +153,9 @@ export const Channels = {
   },
   events: {
     forPerson: 'events:forPerson',
+    forFamily: 'events:forFamily',
     create: 'events:create',
+    createForFamily: 'events:createForFamily',
     update: 'events:update',
     remove: 'events:remove',
     reorder: 'events:reorder'
@@ -161,6 +176,17 @@ export const Channels = {
     godchildren: 'godparents:godchildren',
     add: 'godparents:add',
     remove: 'godparents:remove'
+  },
+  witnesses: {
+    forOwner: 'witnesses:forOwner',
+    add: 'witnesses:add',
+    remove: 'witnesses:remove'
+  },
+  attributes: {
+    forPerson: 'attributes:forPerson',
+    create: 'attributes:create',
+    update: 'attributes:update',
+    remove: 'attributes:remove'
   },
   tree: {
     build: 'tree:build',
@@ -219,6 +245,9 @@ export const Channels = {
     importContent: 'gedcom:importContent',
     export: 'gedcom:export'
   },
+  site: {
+    export: 'site:export'
+  },
   data: {
     exportJson: 'data:exportJson',
     exportDatabase: 'data:exportDatabase'
@@ -256,6 +285,8 @@ export const Channels = {
   geo: {
     search: 'geo:search',
     savePlace: 'geo:savePlace',
+    listPlaces: 'geo:listPlaces',
+    setPlaceMeta: 'geo:setPlaceMeta',
     geocodeAll: 'geo:geocodeAll',
     geocodeProgress: 'geo:geocodeProgress',
     standardizeAll: 'geo:standardizeAll',
@@ -327,6 +358,17 @@ export interface TreeMonkApi {
     create(input: FamilyInput): Promise<Family>
     update(id: string, input: FamilyInput): Promise<Family>
     remove(id: string): Promise<void>
+    /** How a child relates to the family's parents (GEDCOM PEDI); null = birth. */
+    setChildRelation(familyId: string, childId: string, relation: ChildRelation | null): Promise<void>
+  }
+  eventParticipants: {
+    /** Participants of one shared event, with their roles. */
+    forEvent(eventId: string): Promise<EventParticipant[]>
+    /** Add or update a participant (upsert on the event+person pair). */
+    set(eventId: string, personId: string, role: string | null): Promise<void>
+    remove(eventId: string, personId: string): Promise<void>
+    /** Every event a person participates in (reverse view, owner context included). */
+    forPerson(personId: string): Promise<Participation[]>
   }
   documents: {
     list(): Promise<DocumentRecord[]>
@@ -420,10 +462,27 @@ export interface TreeMonkApi {
     add(personId: string, godparentId: string): Promise<void>
     remove(personId: string, godparentId: string): Promise<void>
   }
+  witnesses: {
+    /** Witness person-ids of an owner: christening witnesses of a person
+     *  (`'person'`), or marriage witnesses of a family (`'family'`). */
+    forOwner(ownerType: 'person' | 'family', ownerId: string): Promise<string[]>
+    add(ownerType: 'person' | 'family', ownerId: string, witnessId: string): Promise<void>
+    remove(ownerType: 'person' | 'family', ownerId: string, witnessId: string): Promise<void>
+  }
+  attributes: {
+    /** Free-form person attributes (GEDCOM FACT/TYPE): height, haplogroup, … */
+    forPerson(personId: string): Promise<PersonAttribute[]>
+    create(personId: string, input: AttributeInput): Promise<PersonAttribute>
+    update(id: string, input: AttributeInput): Promise<void>
+    remove(id: string): Promise<void>
+  }
   events: {
     /** A person's life events / facts (residences, military, nationality, …). */
     forPerson(personId: string): Promise<EventRecord[]>
+    /** A family's events (engagement, civil/church wedding, divorce, …). */
+    forFamily(familyId: string): Promise<EventRecord[]>
     create(personId: string, input: EventInput): Promise<EventRecord>
+    createForFamily(familyId: string, input: EventInput): Promise<EventRecord>
     update(id: string, input: EventInput): Promise<EventRecord>
     remove(id: string): Promise<void>
     /** Persist a manual order (ids in the desired display order). */
@@ -504,6 +563,10 @@ export interface TreeMonkApi {
     import(): Promise<GedcomImportResult | null>
     importContent(text: string): Promise<GedcomImportResult>
     export(personIds?: string[], defaultName?: string): Promise<{ path: string } | null>
+  }
+  site: {
+    /** Static-website export: one self-contained, searchable HTML file. */
+    export(lang: string): Promise<{ path: string } | null>
   }
   data: {
     /** Full JSON snapshot of the active tree (all tables). */
@@ -586,6 +649,13 @@ export interface TreeMonkApi {
     setDefaultRoot(personId: string | null): Promise<void>
   }
   geo: {
+    /** The full gazetteer with hierarchy/GOV metadata (place manager). */
+    listPlaces(): Promise<PlaceInfo[]>
+    /** Set a place's hierarchy/GOV metadata (type, parent, GOV id). */
+    setPlaceMeta(
+      name: string,
+      meta: { placeType?: string | null; parentName?: string | null; govId?: string | null }
+    ): Promise<void>
     /** Nominatim place autocomplete. */
     search(query: string): Promise<GeoResult[]>
     /** Persist a chosen place + coordinates into the gazetteer. */
