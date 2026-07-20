@@ -16,8 +16,8 @@ const api: TreeMonkApi = {
     create: (input) => ipcRenderer.invoke(Channels.families.create, input),
     update: (id, input) => ipcRenderer.invoke(Channels.families.update, id, input),
     remove: (id) => ipcRenderer.invoke(Channels.families.remove, id),
-    setChildRelation: (fid, cid, rel) =>
-      ipcRenderer.invoke(Channels.families.setChildRelation, fid, cid, rel)
+    setChildRelation: (fid, cid, side, rel) =>
+      ipcRenderer.invoke(Channels.families.setChildRelation, fid, cid, side, rel)
   },
   eventParticipants: {
     forEvent: (eid) => ipcRenderer.invoke(Channels.eventParticipants.forEvent, eid),
@@ -191,11 +191,15 @@ const api: TreeMonkApi = {
   gedcom: {
     import: () => ipcRenderer.invoke(Channels.gedcom.import),
     importContent: (text) => ipcRenderer.invoke(Channels.gedcom.importContent, text),
-    export: (personIds, defaultName) =>
-      ipcRenderer.invoke(Channels.gedcom.export, personIds, defaultName)
+    export: (personIds, defaultName, opts) =>
+      ipcRenderer.invoke(Channels.gedcom.export, personIds, defaultName, opts)
   },
   site: {
-    export: (lang) => ipcRenderer.invoke(Channels.site.export, lang)
+    export: (lang) => ipcRenderer.invoke(Channels.site.export, lang),
+    exportIndexes: (lang) => ipcRenderer.invoke(Channels.site.exportIndexes, lang)
+  },
+  csv: {
+    import: () => ipcRenderer.invoke(Channels.csv.import)
   },
   data: {
     exportJson: () => ipcRenderer.invoke(Channels.data.exportJson),

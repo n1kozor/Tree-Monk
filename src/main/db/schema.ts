@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS families (
   marriage_date   TEXT,
   marriage_place  TEXT,
   marriage_order  INTEGER,                  -- 1st / 2nd / … marriage (user-set)
+  relationship    TEXT,                     -- NULL = marriage; partner | none | other
   notes           TEXT
 );
 
@@ -54,7 +55,9 @@ CREATE TABLE IF NOT EXISTS family_children (
   family_id       TEXT NOT NULL REFERENCES families(id) ON DELETE CASCADE,
   child_id        TEXT NOT NULL REFERENCES people(id) ON DELETE CASCADE,
   ordinal         INTEGER NOT NULL DEFAULT 0,
-  relation        TEXT,                     -- NULL = birth; adopted | foster | step (GEDCOM PEDI)
+  relation        TEXT,                     -- legacy couple-level value (kept readable; superseded below)
+  father_relation TEXT,                     -- NULL = birth; adopted | foster | step (per parent)
+  mother_relation TEXT,
   PRIMARY KEY (family_id, child_id)
 );
 

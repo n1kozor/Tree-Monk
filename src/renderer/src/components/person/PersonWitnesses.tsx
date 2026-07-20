@@ -42,13 +42,17 @@ export function PersonWitnesses({
   ownerType,
   ownerId,
   title,
-  excludeIds
+  excludeIds,
+  compact = false
 }: {
   ownerType: 'person' | 'family'
   ownerId: string
   title: string
   /** Extra people the picker should not offer (e.g. the person themselves). */
   excludeIds?: string[]
+  /** Compact mode (union cards): while EMPTY, render just a small "+ chip"
+   *  instead of the full header + empty-state block. */
+  compact?: boolean
 }): JSX.Element {
   const { t } = useTranslation()
   const peopleById = useAppStore((s) => s.peopleById)
@@ -81,8 +85,31 @@ export function PersonWitnesses({
 
   const exclude = new Set<string>([...(excludeIds ?? []), ...witnessIds])
 
+  // Compact + empty → one quiet chip; the dialog still opens from it.
+  if (compact && witnesses.length === 0) {
+    return (
+      <>
+        <button
+          onClick={() => setAdding(true)}
+          className="flex items-center gap-1 rounded-lg border border-border/40 px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+        >
+          <Plus className="h-3 w-3" /> {title}
+        </button>
+        <RelativeDialog
+          open={adding}
+          onOpenChange={setAdding}
+          title={t('witnesses.addTitle')}
+          defaultMode="existing"
+          excludeIds={exclude}
+          onPickExisting={(id) => void addExisting(id)}
+          onSubmit={(draft) => void createAndAdd(draft)}
+        />
+      </>
+    )
+  }
+
   return (
-    <div className="space-y-2">
+    <div className={compact ? 'w-full space-y-2' : 'space-y-2'}>
       <div className="flex items-center justify-between">
         <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           <Handshake className="h-3.5 w-3.5" /> {title}

@@ -41,7 +41,16 @@
       "region": "Region / state",
       "country": "Country",
       "other": "Other"
-    }
+    },
+    "standardizeTitle": "Standardize places",
+    "standardizeDesc": "Rewrite every place name to its canonical form (merges duplicates like “…Hungary” / “…Magyarország”).",
+    "standardizeBtn": "Standardize",
+    "standardizing": "Standardizing places…",
+    "standardizingHint": "Looking up canonical place names…",
+    "progress": "{{done}}/{{total}} places · {{changed}} normalized",
+    "standardizeDone": "Places normalized on {{count}} records",
+    "standardizeNone": "All places are already standard",
+    "standardizeFailed": "Standardization failed"
   },
   "welcome": {
     "title": "How do you like TreeMonk so far?",
@@ -168,6 +177,19 @@
     "addTitle": "Add witness",
     "none": "No witnesses recorded."
   },
+  "aliases": {
+    "kindLabel": "Name variant type",
+    "neeLine": "née {{name}}",
+    "marriedLine": "Married name: {{name}}",
+    "kind": {
+      "plain": "Other variant",
+      "married": "Married name",
+      "birth": "Birth name",
+      "aka": "Also known as",
+      "nickname": "Nickname",
+      "religious": "Religious name"
+    }
+  },
   "relation": {
     "father": "Father",
     "mother": "Mother",
@@ -192,10 +214,24 @@
   },
   "childRelation": {
     "title": "Relationship to parents",
+    "birth": "Birth child",
+    "adopted": "Adopted child",
+    "foster": "Foster child",
+    "step": "Stepchild",
+    "titleBoth": "Relationship to parents (both parents)"
+  },
+  "parentRelation": {
     "birth": "Birth",
-    "adopted": "Adopted",
+    "adopted": "Adoptive",
     "foster": "Foster",
     "step": "Step"
+  },
+  "relationship": {
+    "title": "Relationship type",
+    "married": "Marriage",
+    "partner": "Partners",
+    "none": "No relationship",
+    "other": "Other relationship"
   },
   "attributes": {
     "title": "Other facts",
@@ -805,7 +841,14 @@
     "siteExport": "Export website",
     "siteExportDesc": "A browsable, searchable HTML page of the whole tree — a single file you can share with anyone. Confidential people are excluded.",
     "siteExportBtn": "HTML website",
-    "siteExportDone": "Website exported: {{path}}"
+    "siteExportDone": "Website exported: {{path}}",
+    "csvImport": "CSV import",
+    "csvImportDesc": "Bulk person entry from a spreadsheet (Excel/CSV). Columns are recognised by header: surname, given name, sex, birth/death date and place, occupation…",
+    "csvImportBtn": "CSV file",
+    "csvImported": "{{count}} people imported.",
+    "indexExport": "Name & place index",
+    "indexExportDesc": "Printable alphabetical name index and place index (who was born/married/died where) as a single HTML file.",
+    "indexExportBtn": "Indexes (HTML)"
   },
   "common": {
     "done": "Done",
@@ -1239,7 +1282,16 @@
     "stillborn": "Stillborn",
     "private": "Confidential person",
     "privateHint": "(marked \"confidential\" in GEDCOM exports)",
-    "dateQualifierHint": "Qualifiers: \"abt 1850\", \"before 1850\", \"after 1850\", \"between 1850 and 1860\""
+    "dateQualifierHint": "Qualifiers: \"abt 1850\", \"before 1850\", \"after 1850\", \"between 1850 and 1860\" · Julian: \"1700-02-11 (J)\" · dual year: \"1699/1700\"",
+    "givenNamesHint": "Type a name; space or Enter starts the next one; drag the chips to reorder — the number shows each position. Mark the one they went by in the Call name field.",
+    "addFather": "Add father",
+    "addMother": "Add mother",
+    "addParentPair": "Add parent pair (e.g. adoptive)",
+    "unlinkParents": "Unlink from parents",
+    "unlinkParentsTitle": "Unlink {{name}} from this parent pair?",
+    "unlinkParentsBody": "Only the child–parents link is removed — no person is deleted.",
+    "moreNameFields": "More name fields (prefix, suffix)",
+    "moreData": "More data"
   },
   "research": {
     "history": "Research history",
@@ -1372,7 +1424,12 @@
     "summaryFamilies": "families",
     "summaryHint": "Photo downloads and place processing continue in the background.",
     "summaryOpenPeople": "People",
-    "summaryOpenTree": "Family tree"
+    "summaryOpenTree": "Family tree",
+    "privacyTitle": "Protection",
+    "excludePrivate": "Exclude confidential people",
+    "excludePrivateHint": "People marked confidential (and links pointing at them) are left out of the file entirely.",
+    "anonymizeLiving": "Anonymize living people",
+    "anonymizeLivingHint": "Living people keep their place in the structure but export without name or facts (\"Living\") — their marriage details are withheld too."
   },
   "fs": {
     "interrupted": "A previous import was interrupted. You may want to clean up the empty entries it left.",
@@ -1683,6 +1740,10 @@
           {
             "h": "Migration and geocoding",
             "p": "The \"Migration\" toggle links a person's events with animated arcs in chronological order, showing their life's journey on the map. If imported place names don't yet have coordinates, the \"Geocode places\" button looks up positions for them so they appear as pins."
+          },
+          {
+            "h": "Managing places",
+            "p": "The \"Manage places\" button on the right panel opens the gazetteer: every known place can carry a type (village, town, district, county, country…), a parent place and a GOV id (gov.genealogy.net). The hierarchy chain shows in the editor; place names stored on people stay untouched. The Settings \"Standardize place names\" button rewrites long, district-laden place names to a concise settlement–county–country form."
           }
         ]
       },
@@ -1737,6 +1798,26 @@
           {
             "h": "Research",
             "p": "The Research tab keeps a research log: for each entry you record a title, date, the archive searched and the result (negative, positive or inconclusive). This helps you track where you have already looked for the person — including the searches that found nothing."
+          },
+          {
+            "h": "Names and name variants",
+            "p": "The given-name field takes every given name separated by spaces; the Call name field marks the one the person actually went by (shown in quotes in the profile header). Name variants can carry a type — married name, birth (maiden) name, nickname or religious name — and the married/birth names also appear in the header. The rarer name prefix/suffix (Dr., Jr.) fields open via the \"More name fields\" link."
+          },
+          {
+            "h": "Witnesses, godparents and participants",
+            "p": "Godparents and christening witnesses are managed on the Family tab, referencing existing people. Marriage witnesses live on the specific marriage card. Any event can also list participants with free-form roles (priest, midwife, registrar…) — click the event row and use the bottom of the editor. The participant's own profile shows a \"Participations\" block."
+          },
+          {
+            "h": "Parents, adoption, relationship types",
+            "p": "On the Family tab a missing parent can be filled in (Add father/mother), and a second parent pair can be added — e.g. adoptive parents alongside birth parents. The child–parent relation is set PER PARENT (birth, adoptive, foster, step) via the pencil icon next to a child row; non-birth relations show as amber badges. The couple's own relationship is set in the marriage-line editor: marriage, partners, no relationship (a shared child without a couple), or other."
+          },
+          {
+            "h": "Uncertain dates",
+            "p": "Date fields understand qualifiers: \"abt 1850\", \"before 1850\", \"after 1850\", \"between 1850 and 1860\" — stored in a standard form and displayed in your language. They sort correctly and export to GEDCOM as standard qualified dates. Julian-calendar dates take the \"(J)\" marker (e.g. \"1700-02-11 (J)\"), and dual years the \"1699/1700\" form."
+          },
+          {
+            "h": "Other facts and flags",
+            "p": "The Other facts block stores free-form facts (height, DNA haplogroup, service number…). The stillborn flag automatically marks the person deceased; the confidential flag exports as \"confidential\" in GEDCOM and excludes the person from the website export."
           }
         ]
       },
@@ -1823,6 +1904,14 @@
           {
             "h": "Wiping data",
             "p": "A destructive action is also available that permanently deletes ALL data for a clean slate. It cannot be undone, so it asks for explicit confirmation."
+          },
+          {
+            "h": "Website export",
+            "p": "The whole tree can be exported into a single searchable HTML file that opens in any browser and can be shared with anyone — person pages cross-link, and people marked confidential are excluded."
+          },
+          {
+            "h": "CSV import, indexes and protected export",
+            "p": "CSV import creates people in bulk from a spreadsheet — columns are recognised by their headers (surname, given name, sex, birth/death data…). The Name & place index produces printable alphabetical lists as a single HTML file. The GEDCOM export offers two protection options: excluding confidential people entirely, or anonymizing the living (they keep their place in the structure, but without name or facts)."
           }
         ]
       }

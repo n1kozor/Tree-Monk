@@ -135,15 +135,36 @@ function assignXrefs<T extends { id: string; gedcomId: string | null }>(
   return out
 }
 
+export interface GedcomExportOptions {
+  /** Drop confidential (isPrivate) people entirely — links to them vanish too. */
+  excludePrivate?: boolean
+  /** Living people stay in the structure but export as "Living //" with no facts. */
+  anonymizeLiving?: boolean
+}
+
 /**
  * Exports the database (or a subset of people) to a GEDCOM 5.5.1 string.
  * Writes it to `filePath` and returns the string.
  */
-export function exportGedcom(filePath: string, personIds?: string[]): string {
+export function exportGedcom(
+  filePath: string,
+  personIds?: string[],
+  opts: GedcomExportOptions = {}
+): string {
   const allPeople = People.list()
   const include = personIds && personIds.length ? new Set(personIds) : null
-  const people = include ? allPeople.filter((p) => include.has(p.id)) : allPeople
+  let people = include ? allPeople.filter((p) => include.has(p.id)) : allPeople
+  if (opts.excludePrivate) people = people.filter((p) => !p.isPrivate)
   const personSet = new Set(people.map((p) => p.id))
+  // Living-person protection (Ahnenblatt-style): the person keeps their place
+  // in the structure (FAMS/FAMC), but every identifying fact is withheld.
+  const isAnon = (p: Person): boolean => !!opts.anonymizeLiving && !p.deceased
+  const byId = new Map(people.map((p) => [p.id, p]))
+  const famHasLiving = (h: string | null, w: string | null): boolean =>
+    [h, w].some((id) => {
+      const sp = id ? byId.get(id) : undefined
+      return !!sp && isAnon(sp)
+    })
 
   // Assign stable, collision-free xrefs. One shared `used` set: the xref
   // namespace is global in a GEDCOM file, so a family id must never equal a
@@ -178,8 +199,9 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
     `${String(f.marriageOrder ?? 9999).padStart(4, '0')}|${f.marriageDate ?? '9999'}`
   const spouseFams = new Map<string, typeof families>()
   const childIn = new Map<string, string[]>()
-  // (childId|famXref) -> adopted/foster/step, exported as FAMC/PEDI.
-  const childRelation = new Map<string, string>()
+  // (childId|famXref) -> per-parent relations. Equal sides export as the
+  // standard FAMC/PEDI; differing sides as FTM-style _FREL/_MREL under CHIL.
+  const childRelation = new Map<string, { father: string | null; mother: string | null }>()
   for (const f of families) {
     const fx = famXref.get(f.id)!
     for (const sid of [f.husbandId, f.wifeId]) {
@@ -195,7 +217,7 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
         arr.push(fx)
         childIn.set(cid, arr)
         const rel = f.childRelations?.[cid]
-        if (rel) childRelation.set(`${cid}|${fx}`, rel)
+        if (rel && (rel.father || rel.mother)) childRelation.set(`${cid}|${fx}`, rel)
       }
     }
   }
@@ -238,6 +260,15 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
 
   for (const p of people) {
     out.push(line(0, `${xref.get(p.id)} INDI`))
+    if (isAnon(p)) {
+      // Structure only: name withheld, sex + family links kept, RESN marks why.
+      out.push(line(1, 'NAME', 'Living //'))
+      if (p.sex !== 'U') out.push(line(1, 'SEX', p.sex))
+      out.push(line(1, 'RESN', 'privacy'))
+      for (const fx of spouseIn.get(p.id) ?? []) out.push(line(1, 'FAMS', fx))
+      for (const fx of childIn.get(p.id) ?? []) out.push(line(1, 'FAMC', fx))
+      continue
+    }
     out.push(line(1, 'NAME', nameValue(p)))
     // Name pieces: prefix/suffix as the standard NPFX/NSFX, the Rufname as the
     // _RUFNAME custom tag Gramps & the German programs (Ahnenblatt, GFAhnen) use.
@@ -347,8 +378,9 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
     for (const fx of childIn.get(p.id) ?? []) {
       out.push(line(1, 'FAMC', fx))
       // Non-birth pedigree (adopted/foster; "step" is our readable extension).
+      // Only when BOTH parents agree — differing sides go out as _FREL/_MREL.
       const rel = childRelation.get(`${p.id}|${fx}`)
-      if (rel) out.push(line(2, 'PEDI', rel))
+      if (rel && rel.father === rel.mother && rel.father) out.push(line(2, 'PEDI', rel.father))
     }
   }
 
@@ -358,21 +390,34 @@ export function exportGedcom(filePath: string, personIds?: string[]): string {
       out.push(line(1, 'HUSB', xref.get(f.husbandId)))
     if (f.wifeId && personSet.has(f.wifeId)) out.push(line(1, 'WIFE', xref.get(f.wifeId)))
     for (const cid of f.childIds) {
-      if (personSet.has(cid)) out.push(line(1, 'CHIL', xref.get(cid)))
+      if (!personSet.has(cid)) continue
+      out.push(line(1, 'CHIL', xref.get(cid)))
+      // Per-parent relations that DIFFER (FTM convention; birth side omitted).
+      const rel = f.childRelations?.[cid]
+      if (rel && rel.father !== rel.mother) {
+        if (rel.father) out.push(line(2, '_FREL', rel.father))
+        if (rel.mother) out.push(line(2, '_MREL', rel.mother))
+      }
     }
-    if (f.marriageDate || f.marriagePlace) {
+    // A union with a living, anonymized spouse withholds its facts too — the
+    // couple + children structure stays, dates/places/witnesses/events don't.
+    const anonFam = famHasLiving(f.husbandId, f.wifeId)
+    if (!anonFam && (f.marriageDate || f.marriagePlace)) {
       out.push(line(1, 'MARR'))
       if (f.marriageDate) out.push(line(2, 'DATE', f.marriageDate))
       if (f.marriagePlace) out.push(line(2, 'PLAC', f.marriagePlace))
     }
+    // Non-marriage unions (partner / never-a-couple / other) as a custom tag —
+    // readers ignore it, our import restores it.
+    if (!anonFam && f.relationship) out.push(line(1, '_REL', f.relationship))
     // Marriage witnesses as a custom family-level pointer (our import restores
     // it; other readers safely ignore the underscore tag).
-    for (const wid of Witnesses.forOwner('family', f.id)) {
+    for (const wid of anonFam ? [] : Witnesses.forOwner('family', f.id)) {
       if (personSet.has(wid)) out.push(line(1, '_WITN', xref.get(wid)))
     }
     // Family (union) events: the standard tags where one exists (DIV/ENGA/MARB),
     // everything else as a typed EVEN — the import side restores both.
-    for (const ev of Events.forOwner('family', f.id)) {
+    for (const ev of anonFam ? [] : Events.forOwner('family', f.id)) {
       const period = eventPeriod(ev)
       const note = flatNote(ev.note)
       const value = ev.value ? flatNote(ev.value) : null

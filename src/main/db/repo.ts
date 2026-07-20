@@ -7,6 +7,7 @@ import type {
   BoardNode,
   BoardState,
   ChildRelation,
+  ChildRelationPair,
   Collaboration,
   DocumentInput,
   EventParticipant,
@@ -18,6 +19,7 @@ import type {
   Person,
   PersonAttribute,
   PersonInput,
+  RelationshipType,
   Sex
 } from '@shared/types'
 
@@ -494,6 +496,7 @@ interface FamilyRow {
   marriage_date: string | null
   marriage_place: string | null
   marriage_order: number | null
+  relationship: string | null
   notes: string | null
 }
 
@@ -505,11 +508,17 @@ function childIdsOf(db: Database.Database, familyId: string): string[] {
 }
 
 function mapFamily(db: Database.Database, r: FamilyRow): Family {
-  const relations: Record<string, ChildRelation | null> = {}
+  const relations: Record<string, ChildRelationPair> = {}
   for (const row of db
-    .prepare('SELECT child_id, relation FROM family_children WHERE family_id = ? AND relation IS NOT NULL')
-    .all(r.id) as { child_id: string; relation: string }[]) {
-    relations[row.child_id] = row.relation as ChildRelation
+    .prepare(
+      `SELECT child_id, father_relation, mother_relation FROM family_children
+        WHERE family_id = ? AND (father_relation IS NOT NULL OR mother_relation IS NOT NULL)`
+    )
+    .all(r.id) as { child_id: string; father_relation: string | null; mother_relation: string | null }[]) {
+    relations[row.child_id] = {
+      father: (row.father_relation as ChildRelation | null) ?? null,
+      mother: (row.mother_relation as ChildRelation | null) ?? null
+    }
   }
   return {
     id: r.id,
@@ -519,6 +528,7 @@ function mapFamily(db: Database.Database, r: FamilyRow): Family {
     marriageDate: r.marriage_date,
     marriagePlace: r.marriage_place,
     marriageOrder: r.marriage_order,
+    relationship: (r.relationship as RelationshipType | null) ?? null,
     notes: r.notes,
     childIds: childIdsOf(db, r.id),
     childRelations: relations
@@ -526,18 +536,28 @@ function mapFamily(db: Database.Database, r: FamilyRow): Family {
 }
 
 function writeChildren(db: Database.Database, familyId: string, childIds: string[]): void {
-  // Rewriting the rows must not lose each child's relation type (adopted/foster/step).
+  // Rewriting the rows must not lose each child's relation types (per-parent).
   const keep = new Map(
-    (db.prepare('SELECT child_id, relation FROM family_children WHERE family_id = ?').all(familyId) as {
+    (db
+      .prepare(
+        'SELECT child_id, relation, father_relation, mother_relation FROM family_children WHERE family_id = ?'
+      )
+      .all(familyId) as {
       child_id: string
       relation: string | null
-    }[]).map((r) => [r.child_id, r.relation])
+      father_relation: string | null
+      mother_relation: string | null
+    }[]).map((r) => [r.child_id, r])
   )
   db.prepare('DELETE FROM family_children WHERE family_id = ?').run(familyId)
   const ins = db.prepare(
-    'INSERT OR IGNORE INTO family_children (family_id, child_id, ordinal, relation) VALUES (?, ?, ?, ?)'
+    `INSERT OR IGNORE INTO family_children (family_id, child_id, ordinal, relation, father_relation, mother_relation)
+     VALUES (?, ?, ?, ?, ?, ?)`
   )
-  childIds.forEach((cid, i) => ins.run(familyId, cid, i, keep.get(cid) ?? null))
+  childIds.forEach((cid, i) => {
+    const k = keep.get(cid)
+    ins.run(familyId, cid, i, k?.relation ?? null, k?.father_relation ?? null, k?.mother_relation ?? null)
+  })
 }
 
 export const Families = {
@@ -558,8 +578,8 @@ export const Families = {
   create(input: FamilyInput, id = uuid()): Family {
     const db = getDb()
     db.prepare(
-      `INSERT INTO families (id, gedcom_id, husband_id, wife_id, marriage_date, marriage_place, marriage_order, notes)
-       VALUES (@id, @gedcom_id, @husband_id, @wife_id, @marriage_date, @marriage_place, @marriage_order, @notes)`
+      `INSERT INTO families (id, gedcom_id, husband_id, wife_id, marriage_date, marriage_place, marriage_order, relationship, notes)
+       VALUES (@id, @gedcom_id, @husband_id, @wife_id, @marriage_date, @marriage_place, @marriage_order, @relationship, @notes)`
     ).run({
       id,
       gedcom_id: input.gedcomId ?? null,
@@ -568,6 +588,7 @@ export const Families = {
       marriage_date: input.marriageDate ?? null,
       marriage_place: input.marriagePlace ?? null,
       marriage_order: input.marriageOrder ?? null,
+      relationship: input.relationship ?? null,
       notes: input.notes ?? null
     })
     if (input.childIds) writeChildren(db, id, input.childIds)
@@ -581,7 +602,7 @@ export const Families = {
     db.prepare(
       `UPDATE families SET gedcom_id=@gedcom_id, husband_id=@husband_id, wife_id=@wife_id,
         marriage_date=@marriage_date, marriage_place=@marriage_place, marriage_order=@marriage_order,
-        notes=@notes WHERE id=@id`
+        relationship=@relationship, notes=@notes WHERE id=@id`
     ).run({
       id,
       gedcom_id: merged.gedcomId,
@@ -590,6 +611,7 @@ export const Families = {
       marriage_date: merged.marriageDate,
       marriage_place: merged.marriagePlace,
       marriage_order: merged.marriageOrder,
+      relationship: merged.relationship ?? null,
       notes: merged.notes
     })
     if (input.childIds) writeChildren(db, id, input.childIds)
@@ -600,11 +622,23 @@ export const Families = {
     // Marriage witnesses point at the family without an FK — clean them up here.
     getDb().prepare("DELETE FROM witnesses WHERE owner_type = 'family' AND owner_id = ?").run(id)
   },
-  /** How a child relates to this family's parents (GEDCOM PEDI); null = birth. */
-  setChildRelation(familyId: string, childId: string, relation: ChildRelation | null): void {
+  /** How a child relates to ONE parent of this family (GEDCOM PEDI / _FREL/_MREL);
+   *  null = birth. `side: 'both'` sets father and mother together (add dialogs). */
+  setChildRelation(
+    familyId: string,
+    childId: string,
+    side: 'father' | 'mother' | 'both',
+    relation: ChildRelation | null
+  ): void {
+    const sets =
+      side === 'both'
+        ? 'father_relation = @rel, mother_relation = @rel'
+        : side === 'father'
+          ? 'father_relation = @rel'
+          : 'mother_relation = @rel'
     getDb()
-      .prepare('UPDATE family_children SET relation = ? WHERE family_id = ? AND child_id = ?')
-      .run(relation, familyId, childId)
+      .prepare(`UPDATE family_children SET ${sets} WHERE family_id = @fid AND child_id = @cid`)
+      .run({ rel: relation, fid: familyId, cid: childId })
   },
   findByGedcomId(gedcomId: string): Family | null {
     const db = getDb()

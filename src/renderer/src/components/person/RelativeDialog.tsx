@@ -128,7 +128,7 @@ export function RelativeDialog({
   // Child mode: relationship to the parents (birth default, PEDI values).
   const relationField = withChildRelation ? (
     <div className="space-y-1">
-      <Label>{t('childRelation.title')}</Label>
+      <Label>{t('childRelation.titleBoth')}</Label>
       <select
         value={relation}
         onChange={(e) => setRelation(e.target.value)}

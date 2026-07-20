@@ -92,6 +92,18 @@ function migrate(database: Database.Database): void {
   add('ALTER TABLE places ADD COLUMN gov_id TEXT')
   // Child↔parents relationship type (GEDCOM PEDI): NULL = birth. Additive → safe.
   add('ALTER TABLE family_children ADD COLUMN relation TEXT')
+  // Per-PARENT relation (apánál/anyánál külön). The legacy couple-level value
+  // seeds both sides; COALESCE keeps this idempotent on every launch.
+  add('ALTER TABLE family_children ADD COLUMN father_relation TEXT')
+  add('ALTER TABLE family_children ADD COLUMN mother_relation TEXT')
+  add(
+    `UPDATE family_children SET
+       father_relation = COALESCE(father_relation, relation),
+       mother_relation = COALESCE(mother_relation, relation)
+     WHERE relation IS NOT NULL`
+  )
+  // Union relationship type: NULL = marriage; partner | none | other. Additive → safe.
+  add('ALTER TABLE families ADD COLUMN relationship TEXT')
   // Which marriage this union is for the couple (1st, 2nd, …) — user-set badge.
   // Additive + nullable → existing DBs gain it on the next launch, nothing lost.
   add('ALTER TABLE families ADD COLUMN marriage_order INTEGER')

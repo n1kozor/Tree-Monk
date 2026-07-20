@@ -2,6 +2,58 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.8.8]
+
+### Added
+- **Multiple parent families + parent slots.** Every family a person is a
+  child of shows on the profile; a missing parent can be filled in (Add
+  father/mother) and a second (e.g. adoptive) parent pair added. Abandoned
+  empty pairs auto-clean on leaving the profile; a real pair can be unlinked
+  (child–parents edge only) with confirmation.
+- **Per-parent child relations.** `family_children` gains father_relation /
+  mother_relation (legacy couple-level `relation` seeds both, idempotently);
+  quiet badge + expandable per-parent selects with PARENT-perspective labels
+  (Örökbefogadó, not Örökbefogadott); add-child dialog sets both sides.
+  GEDCOM: standard `PEDI` when equal, FTM-style `_FREL`/`_MREL` when differing.
+- **Union relationship type.** families.relationship (marriage default /
+  partner / none / other) with a type-aware icon; GEDCOM `_REL` round-trip.
+- **Protected GEDCOM export.** Options to exclude confidential people entirely
+  or anonymize the living (structure kept, "Living //" + RESN privacy, family
+  facts of living couples withheld).
+- **Given-names chip editor.** Numbered, drag-to-reorder chips on both
+  profiles — storage stays the space-separated string (zero migration).
+- **Typed name variants.** Alias kinds (married / birth / aka / nickname /
+  religious) with translated chips; married + birth (maiden) names shown in
+  the profile header; GEDCOM NAME/TYPE values normalized on import.
+- **CSV import.** Bulk person creation with delimiter + hu/en/de header
+  auto-detection and quoted-field support.
+- **Name & place index export.** Print-ready alphabetical name index + place
+  index (birth/christening/marriage/death/burial/residence symbols) as one
+  HTML file; confidential people excluded.
+- **Julian calendar + dual dating.** `(J)` marker and dual years
+  ("1699/00" → "1699/1700") parse, display, sort and round-trip.
+- **Concise place names.** Nominatim lookups use addressdetails to compose
+  settlement–county–country (drops járás/regions/postcodes; note: Nominatim's
+  `municipality` IS the járás in Hungary); the standardize button rewrites
+  existing long names.
+- Help (person/map/settings sections) and the trilingual HTML manual gained
+  chapters covering everything since 1.8.0.
+
+### Changed
+- **Union cards decluttered:** empty witnesses/family-events render as small
+  chips that expand on use; participants section in the event dialog likewise.
+- **Side panel:** the four flags share one row; witnesses/attributes/
+  participations moved into a collapsed "More data" section; name
+  prefix/suffix behind a "more name fields" link (both profiles).
+- Godparents/christening-witness cards live only on the Family tab (the
+  Overview duplicate was removed).
+
+### Fixed
+- Raw i18n keys at the Settings place-standardization row — the new `places`
+  namespace had clobbered the existing one (1.8.0 regression).
+- Child relation labels next to Apa/Anya now speak from the PARENT's
+  perspective, and the child-add dialog clarifies it sets both parents.
+
 ## [1.8.0]
 
 ### Added

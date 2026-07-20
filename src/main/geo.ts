@@ -44,6 +44,40 @@ function rankByOverlap(query: string, results: GeoResult[]): void {
   results.sort((a, b) => score(b.name) - score(a.name))
 }
 
+interface NominatimHit {
+  display_name: string
+  lat: string
+  lon: string
+  address?: Record<string, string>
+}
+
+/**
+ * Concise canonical place name from Nominatim's structured address, instead of
+ * the raw display_name with every administrative layer:
+ *
+ *   "Szilvásvárad, Bélapátfalvai járás, Heves vármegye, Észak-Magyarország,
+ *    Alföld és Észak, 3348, Magyarország"
+ *      → "Szilvásvárad, Heves vármegye, Magyarország"
+ *
+ * Kept: the feature itself (street, district — the display_name's first
+ * segment), the settlement, the county (state as fallback) and the country.
+ * Dropped: districts (járás — Nominatim's `municipality` in Hungary!),
+ * statistical regions, postcodes. Without address details the raw name is
+ * returned unchanged.
+ */
+function conciseName(d: NominatimHit): string {
+  const a = d.address
+  if (!a) return d.display_name
+  const first = (d.display_name.split(',')[0] ?? '').trim()
+  const settlement = a.city ?? a.town ?? a.village ?? a.hamlet ?? null
+  const parts: string[] = []
+  for (const p of [first, settlement, a.county ?? a.state ?? null, a.country ?? null]) {
+    const t = (p ?? '').trim()
+    if (t && !parts.includes(t)) parts.push(t)
+  }
+  return parts.join(', ') || d.display_name
+}
+
 export async function geoSearch(query: string): Promise<GeoResult[]> {
   const q = query.trim()
   if (q.length < 3) return []
@@ -72,15 +106,15 @@ export async function geoSearch(query: string): Promise<GeoResult[]> {
     const wait = lastFetchAt + MIN_INTERVAL_MS - Date.now()
     if (wait > 0) await new Promise((r) => setTimeout(r, wait))
     lastFetchAt = Date.now()
-    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&q=${encodeURIComponent(q)}`
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&addressdetails=1&q=${encodeURIComponent(q)}`
     try {
       const res = await fetch(url, {
         headers: { 'User-Agent': NOMINATIM_UA, 'Accept-Language': placeLang() }
       })
       if (!res.ok) return [] // don't cache failures (e.g. a transient 429)
-      const data = (await res.json()) as { display_name: string; lat: string; lon: string }[]
+      const data = (await res.json()) as NominatimHit[]
       const out = data
-        .map((d) => ({ name: d.display_name, lat: Number(d.lat), lon: Number(d.lon) }))
+        .map((d) => ({ name: conciseName(d), lat: Number(d.lat), lon: Number(d.lon) }))
         .filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon))
       rankByOverlap(q, out)
       geoCache.set(key, out)

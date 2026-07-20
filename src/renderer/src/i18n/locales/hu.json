@@ -41,7 +41,16 @@
       "region": "Régió / tartomány",
       "country": "Ország",
       "other": "Egyéb"
-    }
+    },
+    "standardizeTitle": "Helyek standardizálása",
+    "standardizeDesc": "Az összes helynév egységesítése a kanonikus formára (a duplikátumok, pl. „…Hungary” / „…Magyarország” összevonása).",
+    "standardizeBtn": "Standardizálás",
+    "standardizing": "Helyek standardizálása…",
+    "standardizingHint": "Kanonikus helynevek keresése…",
+    "progress": "{{done}}/{{total}} hely · {{changed}} egységesítve",
+    "standardizeDone": "{{count}} rekord helyei egységesítve",
+    "standardizeNone": "Minden hely már egységes",
+    "standardizeFailed": "A standardizálás nem sikerült"
   },
   "welcome": {
     "title": "Hogy tetszik eddig a TreeMonk?",
@@ -168,6 +177,19 @@
     "addTitle": "Tanú hozzáadása",
     "none": "Nincs rögzített tanú."
   },
+  "aliases": {
+    "kindLabel": "Névváltozat típusa",
+    "neeLine": "szül. {{name}}",
+    "marriedLine": "Házassági név: {{name}}",
+    "kind": {
+      "plain": "Egyéb névváltozat",
+      "married": "Házassági név",
+      "birth": "Születési név",
+      "aka": "Más néven",
+      "nickname": "Becenév",
+      "religious": "Szerzetesi név"
+    }
+  },
   "relation": {
     "father": "Apa",
     "mother": "Anya",
@@ -192,10 +214,24 @@
   },
   "childRelation": {
     "title": "Kapcsolat a szülőkkel",
+    "birth": "Vér szerinti gyermek",
+    "adopted": "Örökbefogadott gyermek",
+    "foster": "Nevelt gyermek",
+    "step": "Mostohagyermek",
+    "titleBoth": "Kapcsolat a szülőkkel (mindkét szülőnél)"
+  },
+  "parentRelation": {
     "birth": "Vér szerinti",
-    "adopted": "Örökbefogadott",
-    "foster": "Nevelt",
+    "adopted": "Örökbefogadó",
+    "foster": "Nevelő",
     "step": "Mostoha"
+  },
+  "relationship": {
+    "title": "Kapcsolat típusa",
+    "married": "Házasság",
+    "partner": "Élettársak",
+    "none": "Nincs kapcsolat",
+    "other": "Egyéb kapcsolat"
   },
   "attributes": {
     "title": "Egyéb adatok",
@@ -805,7 +841,14 @@
     "siteExport": "Webhely exportálása",
     "siteExportDesc": "Böngészhető, kereshető HTML-oldal a teljes fáról — egyetlen fájl, bárkivel megosztható. A bizalmas személyek adatai kimaradnak.",
     "siteExportBtn": "HTML-webhely",
-    "siteExportDone": "Webhely exportálva: {{path}}"
+    "siteExportDone": "Webhely exportálva: {{path}}",
+    "csvImport": "CSV-import",
+    "csvImportDesc": "Tömeges személyfelvitel táblázatból (Excel/CSV). Az oszlopokat a fejléc alapján ismeri fel: vezetéknév, keresztnév, nem, születési/halálozási dátum és hely, foglalkozás…",
+    "csvImportBtn": "CSV-fájl",
+    "csvImported": "{{count}} személy importálva.",
+    "indexExport": "Név- és helymutató",
+    "indexExportDesc": "Nyomtatható betűrendes névmutató és helymutató (ki született/házasodott/halt meg hol) egyetlen HTML-fájlban.",
+    "indexExportBtn": "Mutatók (HTML)"
   },
   "common": {
     "done": "Kész",
@@ -1236,7 +1279,16 @@
     "stillborn": "Halva született",
     "private": "Bizalmas személy",
     "privateHint": "(GEDCOM-exportban „confidential” jelölést kap)",
-    "dateQualifierHint": "Minősítők: „kb. 1850”, „1850 előtt”, „1850 után”, „1850 és 1860 között”"
+    "dateQualifierHint": "Minősítők: „kb. 1850”, „1850 előtt”, „1850 után”, „1850 és 1860 között” · Julián: „1700-02-11 (J)” · kettős év: „1699/1700”",
+    "givenNamesHint": "Gépeld a nevet, szóköz vagy Enter új nevet kezd; a chipek húzással átrendezhetők — a sorszám mutatja a helyüket. A Hívónév mezőben jelölheted, melyiket használta.",
+    "addFather": "Apa hozzáadása",
+    "addMother": "Anya hozzáadása",
+    "addParentPair": "Szülőpár hozzáadása (pl. örökbefogadó)",
+    "unlinkParents": "Leválasztás a szülőpárról",
+    "unlinkParentsTitle": "{{name}} leválasztása erről a szülőpárról?",
+    "unlinkParentsBody": "Csak a gyermek–szülő kapcsolat szűnik meg — egyik személy sem törlődik.",
+    "moreNameFields": "További névmezők (előtag, utótag)",
+    "moreData": "További adatok"
   },
   "research": {
     "history": "Kutatási előzmények",
@@ -1369,7 +1421,12 @@
     "summaryFamilies": "család",
     "summaryHint": "A fényképek letöltése és a helységnevek feldolgozása a háttérben folytatódik.",
     "summaryOpenPeople": "Személyek",
-    "summaryOpenTree": "Családfa"
+    "summaryOpenTree": "Családfa",
+    "privacyTitle": "Védelem",
+    "excludePrivate": "Bizalmas személyek kihagyása",
+    "excludePrivateHint": "A bizalmasként jelölt személyek (és a rájuk mutató kapcsolatok) teljesen kimaradnak a fájlból.",
+    "anonymizeLiving": "Élő személyek anonimizálása",
+    "anonymizeLivingHint": "Az élők a fa szerkezetében maradnak, de név és adatok nélkül („Living”) kerülnek a fájlba — a házasságuk adatai is rejtve."
   },
   "fs": {
     "interrupted": "Egy korábbi importálás megszakadt. Érdemes letakarítani az üres bejegyzéseket.",
@@ -1680,6 +1737,10 @@
           {
             "h": "Vándorlás és geokódolás",
             "p": "A „Vándorlás” kapcsolóval animált ívek kötik össze egy-egy személy eseményeit időrendben, megmutatva az életútját a térképen. Ha az importált helyneveknek még nincs koordinátájuk, a „Helyek geokódolása” gombbal kerestethetsz hozzájuk pozíciót, hogy tűként megjelenjenek."
+          },
+          {
+            "h": "Helyek kezelése",
+            "p": "A jobb oldali panel „Helyek kezelése” gombja megnyitja a helytárat: minden ismert hely típussal (falu, város, járás, megye, ország…), fölérendelt hellyel és GOV-azonosítóval (gov.genealogy.net) látható el. A hierarchia-lánc (falu → megye → ország) a szerkesztőben látszik; a személyeknél tárolt helynevek változatlanok maradnak. A Beállítások „Helynevek szabványosítása” gombja a hosszú, járásokkal-régiókkal teli helyneveket tömör település–megye–ország formára írja át."
           }
         ]
       },
@@ -1734,6 +1795,26 @@
           {
             "h": "Kutatás",
             "p": "A Kutatás fülön kutatási naplót vezethetsz: minden bejegyzéshez megadhatsz címet, dátumot, a kutatott levéltárat és az eredményt (negatív, pozitív vagy nem egyértelmű). Ez segít nyomon követni, hol kerested már az adott személyt — még a sikertelen kereséseket is."
+          },
+          {
+            "h": "Nevek és névváltozatok",
+            "p": "A keresztnév mezőbe az összes keresztnév beírható szóközzel elválasztva; a Hívónév mező jelöli, melyiket használta a személy a hétköznapokban (a profil fejlécében idézőjelben jelenik meg). A Névváltozatoknál típussal együtt rögzíthető a házassági név, születési (leánykori) név, becenév vagy szerzetesi név — a házassági és születési név a fejlécben is megjelenik. A ritkább névelőtag/névutótag (Dr., ifj.) a „További névmezők” linkre kattintva érhető el."
+          },
+          {
+            "h": "Tanúk, keresztszülők és résztvevők",
+            "p": "A keresztszülők és a keresztelési tanúk a Család fülön kezelhetők, meglévő személyre hivatkozva. Az esküvői tanúk az adott házasság kártyáján találhatók. Bármely eseményhez résztvevők is felvehetők tetszőleges szereppel (pap, bába, anyakönyvvezető…) — az esemény sorára kattintva, a szerkesztő alján. A résztvevő saját profilján a „Részvételek” blokk mutatja, mely eseményeknél működött közre."
+          },
+          {
+            "h": "Szülők, örökbefogadás, kapcsolattípusok",
+            "p": "A Család fülön hiányzó szülő pótolható (Apa/Anya hozzáadása), és második szülőpár is felvehető — például örökbefogadó szülők a vér szerintiek mellett. A gyermek–szülő kapcsolat szülőnként állítható (vér szerinti, örökbefogadó, nevelő, mostoha) a gyereksor melletti ceruza ikonnal; az eltérés borostyán jelvényként látszik. A pár kapcsolata is megadható a házasság-sor szerkesztőjében: házasság, élettársak, nincs kapcsolat (közös gyermek pár nélkül) vagy egyéb."
+          },
+          {
+            "h": "Bizonytalan dátumok",
+            "p": "A dátummezők értik a minősítőket: „kb. 1850”, „1850 előtt”, „1850 után”, „1850 és 1860 között” — gépelés után a program szabványos formában tárolja és a felület nyelvén jeleníti meg őket. Az időrendbe helyesen sorolódnak, és a GEDCOM-exportban is szabványosan mennek ki. A Julián-naptár szerinti dátum a „(J)” jelöléssel rögzíthető (pl. „1700-02-11 (J)”), a kettős évszám pedig „1699/1700” formában."
+          },
+          {
+            "h": "Egyéb adatok és jelölések",
+            "p": "Az Egyéb adatok blokkban tetszőleges tény rögzíthető (testmagasság, DNS-haplocsoport, szolgálati szám…). A halva született jelölés automatikusan elhunytnak jelöli a személyt; a bizalmas személy jelölés a GEDCOM-exportban „confidential” megjelölést kap, a webhely-exportból pedig teljesen kimarad."
           }
         ]
       },
@@ -1820,6 +1901,14 @@
           {
             "h": "Adatok törlése",
             "p": "Egy vész-művelet is elérhető, amely MINDEN adatot véglegesen töröl és tiszta lapot ad. Ez visszafordíthatatlan, ezért külön megerősítést kér."
+          },
+          {
+            "h": "Webhely exportálása",
+            "p": "A teljes fa egyetlen kereshető HTML-fájlba exportálható, ami bármilyen böngészőben megnyitható és bárkivel megosztható — a személyek adatlapjai egymásra hivatkoznak, a bizalmasként jelölt személyek adatai kimaradnak."
+          },
+          {
+            "h": "CSV-import, mutatók és védett export",
+            "p": "A CSV-import táblázatból vesz fel tömegesen személyeket — az oszlopokat a fejléc alapján ismeri fel (vezetéknév, keresztnév, nem, születési/halálozási adatok…). A Név- és helymutató nyomtatható betűrendes listákat készít egyetlen HTML-fájlba. A GEDCOM-exportnál pedig két védelmi opció kérhető: a bizalmas személyek teljes kihagyása, illetve az élők anonimizálása (a szerkezetben maradnak, de név és adatok nélkül)."
           }
         ]
       }

@@ -53,13 +53,19 @@ export function ExportGedcomDialog({
   const [scope, setScope] = useState<DashboardScope>('all')
   const [rootId, setRootId] = useState<string | undefined>(undefined)
   const [includeSpouses, setIncludeSpouses] = useState(true)
+  const [excludePrivate, setExcludePrivate] = useState(false)
+  const [anonymizeLiving, setAnonymizeLiving] = useState(false)
   const [busy, setBusy] = useState(false)
   const [fileName, setFileName] = useState('')
   const [nameEdited, setNameEdited] = useState(false)
 
   // Default the starting person to the app's "me" each time the dialog opens.
   useEffect(() => {
-    if (open) setRootId(defaultRootId ?? treeRootId)
+    if (open) {
+      setRootId(defaultRootId ?? treeRootId)
+      setExcludePrivate(false)
+      setAnonymizeLiving(false)
+    }
   }, [open, defaultRootId, treeRootId])
 
   // Suggested file name = the starting person's name, when one is known.
@@ -91,7 +97,10 @@ export function ExportGedcomDialog({
     setBusy(true)
     // 'all' → no filter (export everyone); otherwise the resolved scope ids.
     const ids = scope === 'all' ? undefined : [...scoped.ids]
-    const res = await window.api.gedcom.export(ids, safeFileBase(fileName))
+    const res = await window.api.gedcom.export(ids, safeFileBase(fileName), {
+      excludePrivate,
+      anonymizeLiving
+    })
     setBusy(false)
     if (res) {
       toast.success(t('gedcom.exported', { path: res.path }))
@@ -179,6 +188,35 @@ export function ExportGedcomDialog({
               </span>
             </button>
           )}
+
+          {/* Privacy: drop confidential people / anonymize the living (Ahnenblatt-style). */}
+          <div className="space-y-1.5">
+            <Label>{t('gedcom.privacyTitle')}</Label>
+            <label className="flex cursor-pointer items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={excludePrivate}
+                onChange={(e) => setExcludePrivate(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[hsl(var(--primary))]"
+              />
+              <span>
+                {t('gedcom.excludePrivate')}
+                <span className="block text-[11px] text-muted-foreground">{t('gedcom.excludePrivateHint')}</span>
+              </span>
+            </label>
+            <label className="flex cursor-pointer items-start gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={anonymizeLiving}
+                onChange={(e) => setAnonymizeLiving(e.target.checked)}
+                className="mt-0.5 h-4 w-4 accent-[hsl(var(--primary))]"
+              />
+              <span>
+                {t('gedcom.anonymizeLiving')}
+                <span className="block text-[11px] text-muted-foreground">{t('gedcom.anonymizeLivingHint')}</span>
+              </span>
+            </label>
+          </div>
 
           {/* File name — pre-filled from the starting person, editable here. */}
           <div className="space-y-1.5">

@@ -41,7 +41,16 @@
       "region": "Region / Bundesland",
       "country": "Land",
       "other": "Sonstiges"
-    }
+    },
+    "standardizeTitle": "Orte standardisieren",
+    "standardizeDesc": "Alle Ortsnamen in die kanonische Form umschreiben (führt Duplikate wie „…Hungary“ / „…Magyarország“ zusammen).",
+    "standardizeBtn": "Standardisieren",
+    "standardizing": "Orte werden standardisiert…",
+    "standardizingHint": "Kanonische Ortsnamen werden gesucht…",
+    "progress": "{{done}}/{{total}} Orte · {{changed}} vereinheitlicht",
+    "standardizeDone": "Orte in {{count}} Datensätzen vereinheitlicht",
+    "standardizeNone": "Alle Orte sind bereits einheitlich",
+    "standardizeFailed": "Standardisierung fehlgeschlagen"
   },
   "welcome": {
     "title": "Wie gefällt dir TreeMonk bisher?",
@@ -168,6 +177,19 @@
     "addTitle": "Zeuge hinzufügen",
     "none": "Keine Zeugen erfasst."
   },
+  "aliases": {
+    "kindLabel": "Art der Namensvariante",
+    "neeLine": "geb. {{name}}",
+    "marriedLine": "Ehename: {{name}}",
+    "kind": {
+      "plain": "Sonstige Variante",
+      "married": "Ehename",
+      "birth": "Geburtsname",
+      "aka": "Auch bekannt als",
+      "nickname": "Spitzname",
+      "religious": "Ordensname"
+    }
+  },
   "relation": {
     "father": "Vater",
     "mother": "Mutter",
@@ -192,10 +214,24 @@
   },
   "childRelation": {
     "title": "Verhältnis zu den Eltern",
-    "birth": "Leiblich",
-    "adopted": "Adoptiert",
+    "birth": "Leibliches Kind",
+    "adopted": "Adoptiertes Kind",
     "foster": "Pflegekind",
-    "step": "Stiefkind"
+    "step": "Stiefkind",
+    "titleBoth": "Verhältnis zu den Eltern (beide Eltern)"
+  },
+  "parentRelation": {
+    "birth": "Leiblich",
+    "adopted": "Adoptiv",
+    "foster": "Pflege",
+    "step": "Stief"
+  },
+  "relationship": {
+    "title": "Beziehungstyp",
+    "married": "Ehe",
+    "partner": "Lebensgefährten",
+    "none": "Keine Beziehung",
+    "other": "Sonstige Beziehung"
   },
   "attributes": {
     "title": "Weitere Fakten",
@@ -805,7 +841,14 @@
     "siteExport": "Website exportieren",
     "siteExportDesc": "Eine durchsuchbare HTML-Seite des ganzen Baums — eine einzige Datei, mit jedem teilbar. Vertrauliche Personen werden ausgelassen.",
     "siteExportBtn": "HTML-Website",
-    "siteExportDone": "Website exportiert: {{path}}"
+    "siteExportDone": "Website exportiert: {{path}}",
+    "csvImport": "CSV-Import",
+    "csvImportDesc": "Massenerfassung aus einer Tabelle (Excel/CSV). Spalten werden am Kopf erkannt: Nachname, Vorname, Geschlecht, Geburts-/Sterbedatum und -ort, Beruf…",
+    "csvImportBtn": "CSV-Datei",
+    "csvImported": "{{count}} Personen importiert.",
+    "indexExport": "Namens- & Ortsverzeichnis",
+    "indexExportDesc": "Druckfertiges alphabetisches Namens- und Ortsverzeichnis (wer wurde wo geboren/getraut/starb) als eine HTML-Datei.",
+    "indexExportBtn": "Verzeichnisse (HTML)"
   },
   "common": {
     "done": "Fertig",
@@ -1236,7 +1279,16 @@
     "stillborn": "Totgeboren",
     "private": "Vertrauliche Person",
     "privateHint": "(im GEDCOM-Export als „confidential“ markiert)",
-    "dateQualifierHint": "Qualifikatoren: „um 1850“, „vor 1850“, „nach 1850“, „zwischen 1850 und 1860“"
+    "dateQualifierHint": "Qualifikatoren: „um 1850“, „vor 1850“, „nach 1850“, „zwischen 1850 und 1860“ · Julianisch: „1700-02-11 (J)“ · Doppeljahr: „1699/1700“",
+    "givenNamesHint": "Namen tippen; Leertaste oder Enter beginnt den nächsten; Chips lassen sich per Ziehen umordnen — die Nummer zeigt die Position. Den gebräuchlichen markierst du im Feld Rufname.",
+    "addFather": "Vater hinzufügen",
+    "addMother": "Mutter hinzufügen",
+    "addParentPair": "Elternpaar hinzufügen (z. B. Adoptiveltern)",
+    "unlinkParents": "Von den Eltern lösen",
+    "unlinkParentsTitle": "{{name}} von diesem Elternpaar lösen?",
+    "unlinkParentsBody": "Nur die Kind–Eltern-Verknüpfung wird entfernt — niemand wird gelöscht.",
+    "moreNameFields": "Weitere Namensfelder (Präfix, Suffix)",
+    "moreData": "Weitere Daten"
   },
   "research": {
     "history": "Rechercheverlauf",
@@ -1369,7 +1421,12 @@
     "summaryFamilies": "Familien",
     "summaryHint": "Foto-Downloads und Ortsverarbeitung laufen im Hintergrund weiter.",
     "summaryOpenPeople": "Personen",
-    "summaryOpenTree": "Stammbaum"
+    "summaryOpenTree": "Stammbaum",
+    "privacyTitle": "Schutz",
+    "excludePrivate": "Vertrauliche Personen auslassen",
+    "excludePrivateHint": "Als vertraulich markierte Personen (und Verweise auf sie) bleiben ganz aus der Datei.",
+    "anonymizeLiving": "Lebende Personen anonymisieren",
+    "anonymizeLivingHint": "Lebende behalten ihren Platz in der Struktur, exportieren aber ohne Namen und Fakten („Living“) — auch ihre Ehedaten bleiben zurück."
   },
   "fs": {
     "interrupted": "Ein früherer Import wurde unterbrochen. Du solltest die leeren Einträge bereinigen.",
@@ -1680,6 +1737,10 @@
           {
             "h": "Migration und Geokodierung",
             "p": "Der Schalter „Migration“ verbindet die Ereignisse einer Person mit animierten Bögen in chronologischer Reihenfolge und zeigt ihren Lebensweg auf der Karte. Haben importierte Ortsnamen noch keine Koordinaten, sucht der Knopf „Orte geokodieren“ Positionen für sie, damit sie als Nadeln erscheinen."
+          },
+          {
+            "h": "Orte verwalten",
+            "p": "Der Knopf „Orte verwalten“ im rechten Panel öffnet das Ortsverzeichnis: Jeder Ort kann Typ (Dorf, Stadt, Kreis, Bezirk, Land…), übergeordneten Ort und GOV-Kennung (gov.genealogy.net) tragen. Die Hierarchiekette zeigt der Editor; bei Personen gespeicherte Ortsnamen bleiben unverändert. „Ortsnamen standardisieren“ in den Einstellungen kürzt lange Ortsnamen auf die Form Ort–Bezirk–Land."
           }
         ]
       },
@@ -1734,6 +1795,26 @@
           {
             "h": "Forschung",
             "p": "Der Reiter Forschung führt ein Forschungsprotokoll: zu jedem Eintrag erfasst du Titel, Datum, das durchsuchte Archiv und das Ergebnis (negativ, positiv oder unklar). Das hilft nachzuvollziehen, wo du die Person schon gesucht hast — auch die erfolglosen Suchen."
+          },
+          {
+            "h": "Namen und Namensvarianten",
+            "p": "Ins Vornamenfeld gehören alle Vornamen durch Leerzeichen getrennt; das Feld Rufname markiert den gebräuchlichen (erscheint in Anführungszeichen im Profilkopf). Namensvarianten tragen einen Typ — Ehename, Geburtsname, Spitzname oder Ordensname — Ehe- und Geburtsname erscheinen auch im Kopf. Die selteneren Felder Namenspräfix/-suffix (Dr., jun.) öffnen sich über den Link „Weitere Namensfelder“."
+          },
+          {
+            "h": "Zeugen, Taufpaten und Beteiligte",
+            "p": "Taufpaten und Taufzeugen werden auf dem Familien-Reiter verwaltet, als Verweis auf vorhandene Personen. Trauzeugen liegen auf der jeweiligen Ehekarte. Zu jedem Ereignis lassen sich außerdem Beteiligte mit freier Rolle erfassen (Pfarrer, Hebamme, Standesbeamter…) — Ereigniszeile anklicken, unten im Editor. Im Profil der beteiligten Person erscheint ein Block „Beteiligungen“."
+          },
+          {
+            "h": "Eltern, Adoption, Beziehungstypen",
+            "p": "Auf dem Familien-Reiter lässt sich ein fehlender Elternteil ergänzen (Vater/Mutter hinzufügen) und ein zweites Elternpaar anlegen — z. B. Adoptiveltern neben den leiblichen. Das Kind–Eltern-Verhältnis wird PRO ELTERNTEIL gesetzt (leiblich, adoptiv, Pflege, Stief) über das Stift-Symbol neben der Kindzeile; Abweichungen erscheinen als bernsteinfarbene Abzeichen. Auch die Beziehung des Paares ist einstellbar: Ehe, Lebensgefährten, keine Beziehung (gemeinsames Kind ohne Paar) oder sonstige."
+          },
+          {
+            "h": "Unsichere Daten",
+            "p": "Datumsfelder verstehen Qualifikatoren: „um 1850“, „vor 1850“, „nach 1850“, „zwischen 1850 und 1860“ — standardisiert gespeichert und in deiner Sprache angezeigt. Sie sortieren korrekt und wandern standardkonform ins GEDCOM. Julianische Daten erhalten die Markierung „(J)“ (z. B. „1700-02-11 (J)“), Doppeljahre die Form „1699/1700“."
+          },
+          {
+            "h": "Weitere Fakten und Kennzeichnungen",
+            "p": "Der Block Weitere Fakten speichert freie Fakten (Körpergröße, DNA-Haplogruppe, Dienstnummer…). Die Kennzeichnung totgeboren markiert die Person automatisch als verstorben; vertraulich wird im GEDCOM als „confidential“ exportiert und aus dem Website-Export ganz ausgelassen."
           }
         ]
       },
@@ -1820,6 +1901,14 @@
           {
             "h": "Daten löschen",
             "p": "Es gibt auch eine destruktive Aktion, die ALLE Daten endgültig löscht und einen Neuanfang schafft. Sie kann nicht rückgängig gemacht werden und verlangt daher eine ausdrückliche Bestätigung."
+          },
+          {
+            "h": "Website exportieren",
+            "p": "Der ganze Baum lässt sich in eine einzige durchsuchbare HTML-Datei exportieren, die in jedem Browser läuft und mit jedem geteilt werden kann — Personenseiten verlinken aufeinander, vertrauliche Personen bleiben außen vor."
+          },
+          {
+            "h": "CSV-Import, Verzeichnisse und geschützter Export",
+            "p": "Der CSV-Import legt Personen massenhaft aus einer Tabelle an — Spalten werden am Kopf erkannt (Nachname, Vorname, Geschlecht, Geburts-/Sterbedaten…). Das Namens- & Ortsverzeichnis erzeugt druckfertige alphabetische Listen als eine HTML-Datei. Der GEDCOM-Export bietet zwei Schutzoptionen: vertrauliche Personen ganz auslassen oder Lebende anonymisieren (sie behalten ihren Platz in der Struktur, aber ohne Namen und Fakten)."
           }
         ]
       }

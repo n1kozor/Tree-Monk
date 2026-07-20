@@ -8,6 +8,8 @@ import {
   Database,
   Download,
   Globe,
+  ListOrdered,
+  Table,
   Eraser,
   MapPin,
   MessageCircle,
@@ -294,6 +296,39 @@ export function SettingsView(): JSX.Element {
                 </Button>
               </Row>
             )}
+            {!fsMode && (
+              <Row icon={Table} title={t('settings.csvImport')} desc={t('settings.csvImportDesc')}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="gap-2"
+                  onClick={async () => {
+                    const res = await window.api.csv.import()
+                    if (res) {
+                      toast.success(t('settings.csvImported', { count: res.created }))
+                      await useAppStore.getState().refreshAll()
+                    }
+                  }}
+                >
+                  <Table className="h-4 w-4" />
+                  {t('settings.csvImportBtn')}
+                </Button>
+              </Row>
+            )}
+            <Row icon={ListOrdered} title={t('settings.indexExport')} desc={t('settings.indexExportDesc')}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-2"
+                onClick={async () => {
+                  const res = await window.api.site.exportIndexes(i18n.language)
+                  if (res) toast.success(t('settings.siteExportDone', { path: res.path }))
+                }}
+              >
+                <ListOrdered className="h-4 w-4" />
+                {t('settings.indexExportBtn')}
+              </Button>
+            </Row>
           </Category>
 
           {/* Feedback */}

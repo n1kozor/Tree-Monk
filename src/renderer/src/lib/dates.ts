@@ -92,6 +92,29 @@ function normalizeCore(raw: string): string {
   const s = (raw ?? '').trim().replace(/\s+/g, ' ')
   if (!s) return ''
 
+  // Julian-calendar marker at the END — "1700-02-11 (J)", "1700.02.11 jul.",
+  // "1700 julián" → canonical "<normalized> (J)". Only applied when the rest
+  // is a clean numeric date, so free text keeps its trailing words.
+  const jm = /^(.*?)\s*(?:\(J\)|jul(?:ián|iánus|ianisch|ian)?\.?)$/i.exec(s)
+  if (jm && jm[1].trim() && jm[1].trim() !== s) {
+    const core = normalizeCore(jm[1])
+    if (/^\d{4}/.test(core)) return `${core} (J)`
+  }
+
+  // Dual (double-dated) year — the Julian/Gregorian year-start mismatch:
+  // "1699/00" and "1699/1700" → canonical "1699/1700". Sorting uses the
+  // first year; display passes it through untouched.
+  const dual = /^(\d{4})\s*\/\s*(\d{1,4})$/.exec(s)
+  if (dual) {
+    const y1 = Number(dual[1])
+    let y2 = Number(dual[2])
+    if (dual[2].length < 4) {
+      y2 = Math.floor(y1 / 100) * 100 + y2
+      if (y2 <= y1) y2 += 100
+    }
+    return `${y1}/${y2}`
+  }
+
   // Pure year.
   if (/^\d{4}$/.test(s)) return s
 
@@ -166,6 +189,9 @@ export function formatDisplayDate(
 }
 
 function formatCore(s: string, fmt: DateDisplayFormat): string {
+  // Julian marker rides along: format the date part, re-append " (J)".
+  const jm = /^(.*?)\s*\(J\)$/.exec(s)
+  if (jm) return `${formatCore(jm[1].trim(), fmt)} (J)`
   const m = /^(\d{4})(?:-(\d{2}))?(?:-(\d{2}))?$/.exec(s)
   if (!m || fmt === 'iso') return s
   const [, y, mo, d] = m

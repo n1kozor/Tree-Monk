@@ -62,12 +62,13 @@ import { PersonQualityCard } from '@/components/person/PersonQualityCard'
 import { PersonGodparents } from '@/components/person/PersonGodparents'
 import { PersonWitnesses } from '@/components/person/PersonWitnesses'
 import { PersonAttributes } from '@/components/person/PersonAttributes'
+import { GivenNamesEditor } from '@/components/person/GivenNamesEditor'
 import { PersonParticipations } from '@/components/person/PersonParticipations'
 import { FactSources, VitalNote } from '@/components/person/FactSources'
 import { QualityRing } from '@/components/common/QualityRing'
 import { personQuality } from '@/lib/completeness'
 import { canSearchFamilySearch, familySearchPersonUrl, familySearchSearchUrl, isFamilySearchId } from '@/lib/familySearchSearch'
-import { PersonAliases } from '@/components/person/PersonAliases'
+import { PersonAliases, NameOriginLine } from '@/components/person/PersonAliases'
 import { useAppStore } from '@/store/useAppStore'
 import { useSettings } from '@/store/useSettings'
 import { useFsMode } from '@/hooks/useFsMode'
@@ -103,6 +104,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
 
   const animations = useSettings((s) => s.animations)
   const [person, setPerson] = useState<Person | null>(null)
+  const [moreNames, setMoreNames] = useState(false)
   const [tab, setTab] = useState('overview')
   const [factCites, setFactCites] = useState<CitationDetail[]>([])
   const [docCount, setDocCount] = useState(0)
@@ -330,6 +332,8 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                 )}
               </h1>
               {lifespan && <p className="mt-0.5 text-sm text-muted-foreground">{lifespan}</p>}
+              {/* Married / birth (maiden) name from the typed name variants. */}
+              <NameOriginLine personId={person.id} />
               {isFamilySearchId(person.fsId) && (
                 <button
                   onClick={() => {
@@ -590,7 +594,20 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                       : (['givenName', 'surname'] as const)
                     ).map((f) => (
                       <Field key={f} label={t(`person.${f}`)}>
-                        <Input value={person[f]} onChange={(e) => patch(f, e.target.value)} onBlur={() => save()} />
+                        {f === 'givenName' ? (
+                          /* Structured given-names editor: numbered chips, drag to
+                             reorder — storage stays the space-separated string. */
+                          <GivenNamesEditor
+                            value={person.givenName}
+                            onCommit={(v) => {
+                              const next = { ...person, givenName: v }
+                              setPerson(next)
+                              void save(next)
+                            }}
+                          />
+                        ) : (
+                          <Input value={person[f]} onChange={(e) => patch(f, e.target.value)} onBlur={() => save()} />
+                        )}
                       </Field>
                     ))}
                     <Field label={t('person.sex')}>
@@ -634,25 +651,35 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                         placeholder={t('person.callNameHint')}
                       />
                     </Field>
-                    {/* Prefix + suffix side by side in one grid cell — short fields. */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <Field label={t('person.namePrefix')}>
-                        <Input
-                          value={person.namePrefix ?? ''}
-                          onChange={(e) => patch('namePrefix', e.target.value)}
-                          onBlur={() => save()}
-                          placeholder="Dr."
-                        />
-                      </Field>
-                      <Field label={t('person.nameSuffix')}>
-                        <Input
-                          value={person.nameSuffix ?? ''}
-                          onChange={(e) => patch('nameSuffix', e.target.value)}
-                          onBlur={() => save()}
-                          placeholder="Jr."
-                        />
-                      </Field>
-                    </div>
+                    {/* Prefix + suffix are rare — folded behind a small link,
+                        auto-open whenever either carries a value. */}
+                    {moreNames || person.namePrefix || person.nameSuffix ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        <Field label={t('person.namePrefix')}>
+                          <Input
+                            value={person.namePrefix ?? ''}
+                            onChange={(e) => patch('namePrefix', e.target.value)}
+                            onBlur={() => save()}
+                            placeholder="Dr."
+                          />
+                        </Field>
+                        <Field label={t('person.nameSuffix')}>
+                          <Input
+                            value={person.nameSuffix ?? ''}
+                            onChange={(e) => patch('nameSuffix', e.target.value)}
+                            onBlur={() => save()}
+                            placeholder="Jr."
+                          />
+                        </Field>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setMoreNames(true)}
+                        className="self-end pb-2 text-left text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+                      >
+                        + {t('person.moreNameFields')}
+                      </button>
+                    )}
                   </div>
                   <label className="mt-3 flex cursor-pointer items-center gap-2 text-sm">
                     <input
@@ -811,17 +838,6 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
                   </Card>
                   <Card>
                     <PersonEvents personId={person.id} />
-                  </Card>
-                  <Card>
-                    <PersonGodparents person={person} />
-                  </Card>
-                  <Card>
-                    <PersonWitnesses
-                      ownerType="person"
-                      ownerId={person.id}
-                      title={t('witnesses.christeningTitle')}
-                      excludeIds={[person.id]}
-                    />
                   </Card>
                   <Card>
                     <PersonAliases personId={person.id} />

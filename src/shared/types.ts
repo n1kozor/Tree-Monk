@@ -68,8 +68,18 @@ export type PersonInput = Partial<
 > & { givenName?: string; surname?: string }
 
 /** GEDCOM-style family unit: a couple plus their children. */
-/** How a child relates to this family's parents (GEDCOM PEDI). Absent/null = birth. */
+/** How a child relates to a parent (GEDCOM PEDI). Absent/null = birth. */
 export type ChildRelation = 'adopted' | 'foster' | 'step'
+
+/** Per-parent child relations within one family (null side = birth). */
+export interface ChildRelationPair {
+  father: ChildRelation | null
+  mother: ChildRelation | null
+}
+
+/** The couple's own relationship. Absent/null = marriage (the default);
+ *  'none' = the parents were never a couple (közös gyermek kapcsolat nélkül). */
+export type RelationshipType = 'partner' | 'none' | 'other'
 
 export interface Family {
   id: string
@@ -80,10 +90,13 @@ export interface Family {
   marriagePlace: string | null
   /** Which marriage this is for the couple (1 = first, 2 = second, …). */
   marriageOrder: number | null
+  /** NULL = marriage; partner / none / other. */
+  relationship: RelationshipType | null
   notes: string | null
   childIds: string[]
-  /** Per-child relationship type; a child missing from the map is a birth child. */
-  childRelations?: Record<string, ChildRelation | null>
+  /** Per-child, per-parent relationship types; a child missing from the map is
+   *  a birth child of both parents. */
+  childRelations?: Record<string, ChildRelationPair>
 }
 
 export type FamilyInput = Partial<Omit<Family, 'id' | 'childIds'>> & {

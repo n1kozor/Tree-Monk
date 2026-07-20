@@ -148,6 +148,7 @@
 <li>Megjelenés, nyelv, betűméret</li>
 <li>Gyakori kérdések és hibaelhárítás</li>
 <li>Adatvédelem</li>
+<li>Bővített adatmodell (1.8+)</li>
 </ol>
 </div>
 
@@ -426,6 +427,21 @@
 
 <p style="text-align:center; color:#7a8694; margin-top:24px;">TreeMonk – Felhasználói kézikönyv · Érvényes az 1.0 verziótól</p>
 
+<h1>16. Bővített adatmodell (1.8+)</h1>
+<h2>16.1 Tanúk, keresztszülők, résztvevők</h2>
+<p>A Család fülön a keresztszülők mellett <b>keresztelési tanúk</b> is rögzíthetők, a házassági kártyákon pedig <b>esküvői tanúk</b> — mindig meglévő személyre hivatkozva, kattintható névjelvényekkel. Bármely eseményhez (személyeshez és családihoz is) <b>résztvevők</b> vehetők fel tetszőleges szereppel (pap, bába, anyakönyvvezető, adományozó…): kattints az esemény sorára, és a szerkesztő alján add hozzá őket. A résztvevő saját profilján a „Részvételek” blokk mutatja a közreműködéseit.</p>
+<h2>16.2 Családi események és a pár kapcsolata</h2>
+<p>A házassági kártyán az eljegyzés, kihirdetés, polgári és egyházi esküvő, válás, különválás is rögzíthető („Családi események”). A pár <b>kapcsolatának típusa</b> is megadható a házasság-sor szerkesztőjében: házasság, élettársak, nincs kapcsolat (közös gyermek pár nélkül) vagy egyéb.</p>
+<h2>16.3 Örökbefogadás és több szülőpár</h2>
+<p>A gyermek–szülő kapcsolat <b>szülőnként</b> állítható: vér szerinti, örökbefogadó, nevelő vagy mostoha — a gyereksor melletti ceruza ikonnal. Az eltérő jelölés borostyán jelvényként látszik. Hiányzó szülő pótolható („Apa/Anya hozzáadása”), és <b>második szülőpár</b> is felvehető — például örökbefogadó szülők a vér szerintiek mellett.</p>
+<h2>16.4 Nevek</h2>
+<p>Több keresztnév a keresztnév mezőbe írható szóközzel; a <b>Hívónév</b> jelöli a ténylegesen használtat. A Névváltozatoknál típussal rögzíthető a <b>házassági</b> és <b>születési (leánykori) név</b> is — ezek a profil fejlécében is megjelennek.</p>
+<h2>16.5 Bizonytalan dátumok</h2>
+<p>A dátummezők értik: „kb. 1850”, „1850 előtt”, „1850 után”, „1850 és 1860 között”. A program szabványosan tárolja, a felület nyelvén jeleníti meg, és az időrendben is helyükre kerülnek.</p>
+<h2>16.6 Helyek, webhely-export, egyebek</h2>
+<p>A Térkép nézet „Helyek kezelése” gombjával a helyekhez típus, fölérendelt hely és GOV-azonosító rendelhető. A Beállításokban a <b>webhely-export</b> a teljes fát egyetlen kereshető HTML-fájlba menti (a bizalmas személyek kihagyásával), a „Helynevek szabványosítása” pedig a hosszú helyneveket tömör település–megye–ország formára írja át. Új jelölések: halva született, bizalmas személy; új blokk: Egyéb adatok (szabad tény-mezők).</p>
+<h2>16.7 Védelem, CSV-import, mutatók, Julián-dátumok</h2>
+<p>A GEDCOM-exportnál két védelmi opció kérhető: a <b>bizalmas személyek kihagyása</b> és az <b>élők anonimizálása</b> (a szerkezetben maradnak, de név és adatok nélkül). A <b>CSV-import</b> táblázatból vesz fel tömegesen személyeket a fejléc-oszlopok felismerésével. A <b>Név- és helymutató</b> nyomtatható betűrendes listákat készít. A dátummezők a <b>Julián-naptárat</b> („1700-02-11 (J)”) és a <b>kettős évszámot</b> („1699/1700”) is értik.</p>
 </section>
 
 <section class="lang" data-lang="en">
@@ -471,6 +487,7 @@
     <li>Appearance, language, font size</li>
     <li>FAQ &amp; troubleshooting</li>
     <li>Privacy</li>
+<li>The expanded data model (1.8+)</li>
   </ol>
 </div>
 
@@ -752,6 +769,21 @@
 
 <p style="text-align:center; color:#7a8694; margin-top:24px;">TreeMonk — User manual · Valid from version 1.0 · Happy researching!</p>
 
+<h1>16. The expanded data model (1.8+)</h1>
+<h2>16.1 Witnesses, godparents, participants</h2>
+<p>On the Family tab, <b>christening witnesses</b> can be recorded next to godparents, and <b>marriage witnesses</b> on each marriage card — always referencing existing people, shown as clickable name chips. Any event (personal or family) can also list <b>participants</b> with free-form roles (priest, midwife, registrar, donor…): click the event row and add them at the bottom of the editor. The participant's own profile shows a "Participations" block.</p>
+<h2>16.2 Family events and the couple's relationship</h2>
+<p>The marriage card records engagement, banns, civil and church weddings, divorce and separation ("Family events"). The couple's <b>relationship type</b> is set in the marriage-line editor: marriage, partners, no relationship (a shared child without a couple), or other.</p>
+<h2>16.3 Adoption and multiple parent pairs</h2>
+<p>The child–parent relation is set <b>per parent</b>: birth, adoptive, foster or step — via the pencil icon next to a child row. Non-birth relations show as amber badges. A missing parent can be filled in ("Add father/mother"), and a <b>second parent pair</b> can be added — e.g. adoptive parents alongside the birth parents.</p>
+<h2>16.4 Names</h2>
+<p>Multiple given names go into the given-name field separated by spaces; the <b>Call name</b> marks the one actually used. Name variants can carry a type, including <b>married</b> and <b>birth (maiden) names</b> — these also appear in the profile header.</p>
+<h2>16.5 Uncertain dates</h2>
+<p>Date fields understand "abt 1850", "before 1850", "after 1850", "between 1850 and 1860". Stored in a standard form, displayed in your language, and sorted correctly.</p>
+<h2>16.6 Places, website export, more</h2>
+<p>The Map view's "Manage places" button assigns a type, parent place and GOV id to places. In Settings, the <b>website export</b> saves the whole tree into one searchable HTML file (confidential people excluded), and "Standardize place names" rewrites long place names to a concise settlement–county–country form. New flags: stillborn, confidential; new block: Other facts (free-form facts).</p>
+<h2>16.7 Protection, CSV import, indexes, Julian dates</h2>
+<p>The GEDCOM export offers two protection options: <b>excluding confidential people</b> and <b>anonymizing the living</b> (they stay in the structure without name or facts). <b>CSV import</b> creates people in bulk from a spreadsheet by recognising header columns. The <b>Name &amp; place index</b> produces printable alphabetical lists. Date fields also understand the <b>Julian calendar</b> ("1700-02-11 (J)") and <b>dual years</b> ("1699/1700").</p>
 </section>
 
 <section class="lang" data-lang="de">
@@ -797,6 +829,7 @@
     <li>Darstellung, Sprache, Schriftgröße</li>
     <li>FAQ &amp; Fehlerbehebung</li>
     <li>Datenschutz</li>
+<li>Das erweiterte Datenmodell (1.8+)</li>
   </ol>
 </div>
 
@@ -1076,6 +1109,21 @@
 
 <p style="text-align:center; color:#7a8694; margin-top:24px;">TreeMonk — Benutzerhandbuch · Gültig ab Version 1.0 · Viel Freude beim Forschen!</p>
 
+<h1>16. Das erweiterte Datenmodell (1.8+)</h1>
+<h2>16.1 Zeugen, Taufpaten, Beteiligte</h2>
+<p>Auf dem Familien-Reiter lassen sich neben Taufpaten auch <b>Taufzeugen</b> erfassen, auf den Ehekarten <b>Trauzeugen</b> — stets als Verweis auf vorhandene Personen, als klickbare Namens-Chips. Zu jedem Ereignis (persönlich oder familiär) können <b>Beteiligte</b> mit freier Rolle erfasst werden (Pfarrer, Hebamme, Standesbeamter, Stifter…): Ereigniszeile anklicken, unten im Editor hinzufügen. Das Profil der beteiligten Person zeigt einen Block „Beteiligungen“.</p>
+<h2>16.2 Familienereignisse und die Beziehung des Paares</h2>
+<p>Die Ehekarte erfasst Verlobung, Aufgebot, standesamtliche und kirchliche Trauung, Scheidung und Trennung („Familienereignisse“). Der <b>Beziehungstyp</b> des Paares wird im Editor der Ehezeile gesetzt: Ehe, Lebensgefährten, keine Beziehung (gemeinsames Kind ohne Paar) oder sonstige.</p>
+<h2>16.3 Adoption und mehrere Elternpaare</h2>
+<p>Das Kind–Eltern-Verhältnis wird <b>pro Elternteil</b> gesetzt: leiblich, adoptiv, Pflege oder Stief — über das Stift-Symbol neben der Kindzeile. Abweichungen erscheinen als bernsteinfarbene Abzeichen. Ein fehlender Elternteil lässt sich ergänzen („Vater/Mutter hinzufügen“), und ein <b>zweites Elternpaar</b> kann angelegt werden — z. B. Adoptiveltern neben den leiblichen.</p>
+<h2>16.4 Namen</h2>
+<p>Mehrere Vornamen gehören durch Leerzeichen getrennt ins Vornamenfeld; der <b>Rufname</b> markiert den gebräuchlichen. Namensvarianten tragen einen Typ, darunter <b>Ehename</b> und <b>Geburtsname</b> — beide erscheinen auch im Profilkopf.</p>
+<h2>16.5 Unsichere Daten</h2>
+<p>Datumsfelder verstehen „um 1850“, „vor 1850“, „nach 1850“, „zwischen 1850 und 1860“. Standardisiert gespeichert, in deiner Sprache angezeigt, korrekt sortiert.</p>
+<h2>16.6 Orte, Website-Export, mehr</h2>
+<p>„Orte verwalten“ in der Kartenansicht weist Orten Typ, übergeordneten Ort und GOV-Kennung zu. In den Einstellungen speichert der <b>Website-Export</b> den ganzen Baum in eine durchsuchbare HTML-Datei (vertrauliche Personen ausgenommen), und „Ortsnamen standardisieren“ kürzt lange Ortsnamen auf Ort–Bezirk–Land. Neue Kennzeichnungen: totgeboren, vertraulich; neuer Block: Weitere Fakten.</p>
+<h2>16.7 Schutz, CSV-Import, Verzeichnisse, julianische Daten</h2>
+<p>Der GEDCOM-Export bietet zwei Schutzoptionen: <b>vertrauliche Personen auslassen</b> und <b>Lebende anonymisieren</b> (sie bleiben ohne Namen und Fakten in der Struktur). Der <b>CSV-Import</b> legt Personen massenhaft aus einer Tabelle an. Das <b>Namens- &amp; Ortsverzeichnis</b> erzeugt druckfertige alphabetische Listen. Datumsfelder verstehen auch den <b>julianischen Kalender</b> („1700-02-11 (J)“) und <b>Doppeljahre</b> („1699/1700“).</p>
 </section>
 
 <script>

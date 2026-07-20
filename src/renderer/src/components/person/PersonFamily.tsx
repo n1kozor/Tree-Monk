@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Baby, Unlink2, Check, Heart, Pencil, UserPlus, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -14,7 +14,7 @@ import { useAppStore } from '@/store/useAppStore'
 import { RelativeDialog, type MarriageDraft, type RelativeDraft } from './RelativeDialog'
 import { PersonWitnesses } from './PersonWitnesses'
 import { FamilyEvents } from './PersonEvents'
-import type { ChildRelation, Family, Person } from '@shared/types'
+import type { ChildRelation, Family, Person, Sex } from '@shared/types'
 
 function PersonRow({ p, onClick }: { p: Person; onClick: () => void }): JSX.Element {
   return (
@@ -34,37 +34,118 @@ function PersonRow({ p, onClick }: { p: Person; onClick: () => void }): JSX.Elem
   )
 }
 
-/** Child↔parents relationship type (GEDCOM PEDI): birth (default) / adopted /
- *  foster / step. Quiet when birth; amber when it carries information. */
-function RelationSelect({ family, childId }: { family: Family; childId: string }): JSX.Element {
+/** Child↔ONE-parent relationship type (PEDI / _FREL/_MREL): birth (default) /
+ *  adopted / foster / step. Quiet when birth; amber when it carries information. */
+function RelationSelect({
+  family,
+  childId,
+  side
+}: {
+  family: Family
+  childId: string
+  side: 'father' | 'mother'
+}): JSX.Element {
   const { t } = useTranslation()
   const refreshFamilies = useAppStore((s) => s.refreshFamilies)
-  const value = family.childRelations?.[childId] ?? ''
+  const value = family.childRelations?.[childId]?.[side] ?? ''
+  const parentLabel = t(side === 'father' ? 'relation.father' : 'relation.mother')
   return (
-    <select
-      value={value}
+    <label
+      className="flex shrink-0 items-center gap-0.5"
       onClick={(e) => e.stopPropagation()}
-      onChange={async (e) => {
-        await window.api.families.setChildRelation(
-          family.id,
-          childId,
-          (e.target.value || null) as ChildRelation | null
-        )
-        await refreshFamilies()
-      }}
-      title={t('childRelation.title')}
-      className={cn(
-        'h-6 shrink-0 rounded-md border bg-background px-1 text-[10px] outline-none focus:border-primary',
-        value
-          ? 'border-amber-500/50 font-medium text-amber-600 dark:text-amber-400'
-          : 'border-border/40 text-muted-foreground/70'
-      )}
+      title={`${t('childRelation.title')} — ${parentLabel}`}
     >
-      <option value="">{t('childRelation.birth')}</option>
-      <option value="adopted">{t('childRelation.adopted')}</option>
-      <option value="foster">{t('childRelation.foster')}</option>
-      <option value="step">{t('childRelation.step')}</option>
-    </select>
+      <span className="text-[9px] font-medium uppercase text-muted-foreground/60">{parentLabel}</span>
+      <select
+        value={value}
+        onChange={async (e) => {
+          await window.api.families.setChildRelation(
+            family.id,
+            childId,
+            side,
+            (e.target.value || null) as ChildRelation | null
+          )
+          await refreshFamilies()
+        }}
+        className={cn(
+          'h-6 rounded-md border bg-background px-1 text-[10px] outline-none focus:border-primary',
+          value
+            ? 'border-amber-500/50 font-medium text-amber-600 dark:text-amber-400'
+            : 'border-border/40 text-muted-foreground/70'
+        )}
+      >
+        {/* PARENT-perspective labels — the select sits next to "Apa"/"Anya",
+            so the father is the ADOPTIVE one, not the adopted one. */}
+        <option value="">{t('parentRelation.birth')}</option>
+        <option value="adopted">{t('parentRelation.adopted')}</option>
+        <option value="foster">{t('parentRelation.foster')}</option>
+        <option value="step">{t('parentRelation.step')}</option>
+      </select>
+    </label>
+  )
+}
+
+/**
+ * Quiet by default: birth children show only a tiny edit affordance; a
+ * non-birth relation shows as an amber badge. Clicking either expands the
+ * per-parent selects inline (father first), collapsible again with ✓.
+ */
+function ChildRelationControls({ family, childId }: { family: Family; childId: string }): JSX.Element | null {
+  const { t } = useTranslation()
+  const [open, setOpen] = useState(false)
+  if (!family.husbandId && !family.wifeId) return null
+  const pair = family.childRelations?.[childId]
+  const badges: { side: 'father' | 'mother'; v: ChildRelation }[] = []
+  if (family.husbandId && pair?.father) badges.push({ side: 'father', v: pair.father })
+  if (family.wifeId && pair?.mother) badges.push({ side: 'mother', v: pair.mother })
+
+  if (!open) {
+    return (
+      <span className="group/rel flex shrink-0 items-center gap-1">
+        {badges.map((b) => (
+          <button
+            key={b.side}
+            onClick={(e) => {
+              e.stopPropagation()
+              setOpen(true)
+            }}
+            title={t('childRelation.title')}
+            className="rounded-md border border-amber-500/50 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400"
+          >
+            {t(`parentRelation.${b.v}`)} · {t(b.side === 'father' ? 'relation.father' : 'relation.mother')}
+          </button>
+        ))}
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            setOpen(true)
+          }}
+          title={t('childRelation.title')}
+          className={cn(
+            'flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground/40 transition-all hover:bg-accent hover:text-foreground',
+            badges.length === 0 && 'opacity-0 group-hover/rel:opacity-100 focus:opacity-100'
+          )}
+        >
+          <Pencil className="h-3 w-3" />
+        </button>
+      </span>
+    )
+  }
+  return (
+    <span className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+      {family.husbandId && <RelationSelect family={family} childId={childId} side="father" />}
+      {family.wifeId && <RelationSelect family={family} childId={childId} side="mother" />}
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpen(false)
+        }}
+        title={t('common.done')}
+        className="flex h-6 w-6 items-center justify-center rounded-md text-primary transition-colors hover:bg-primary/10"
+      >
+        <Check className="h-3.5 w-3.5" />
+      </button>
+    </span>
   )
 }
 
@@ -77,6 +158,7 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
   const [date, setDate] = useState(family.marriageDate ?? '')
   const [place, setPlace] = useState(family.marriagePlace ?? '')
   const [order, setOrder] = useState(family.marriageOrder ? String(family.marriageOrder) : '')
+  const [relationship, setRelationship] = useState(family.relationship ?? '')
   const [note, setNote] = useState(family.notes ?? '')
   const [saving, setSaving] = useState(false)
 
@@ -87,6 +169,7 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
         marriageDate: date.trim() || null,
         marriagePlace: place.trim() || null,
         marriageOrder: order ? Number(order) : null,
+        relationship: (relationship || null) as Family['relationship'],
         notes: note.trim() || null
       })
       await refreshFamilies()
@@ -129,13 +212,27 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
             <Check className="h-3.5 w-3.5" />
           </Button>
         </div>
-        <Input
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-          placeholder={t('person.notes')}
-          className="h-7 w-full text-xs"
-          onKeyDown={(e) => e.key === 'Enter' && void save()}
-        />
+        <div className="flex items-center gap-1.5">
+          {/* The couple's own relationship: marriage (default) / partner / none / other. */}
+          <select
+            value={relationship}
+            onChange={(e) => setRelationship(e.target.value)}
+            title={t('relationship.title')}
+            className="h-7 shrink-0 rounded-lg border border-input bg-background/40 px-1 text-xs outline-none"
+          >
+            <option value="">{t('relationship.married')}</option>
+            <option value="partner">{t('relationship.partner')}</option>
+            <option value="none">{t('relationship.none')}</option>
+            <option value="other">{t('relationship.other')}</option>
+          </select>
+          <Input
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder={t('person.notes')}
+            className="h-7 flex-1 text-xs"
+            onKeyDown={(e) => e.key === 'Enter' && void save()}
+          />
+        </div>
       </div>
     )
   }
@@ -143,7 +240,10 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
   const ordinal = family.marriageOrder
     ? t('person.marriageOrdinal', { count: family.marriageOrder, ordinal: true })
     : ''
-  const label = [ordinal, family.marriageDate, family.marriagePlace].filter(Boolean).join(' · ')
+  const relLabel = family.relationship ? t(`relationship.${family.relationship}`) : ''
+  const label = [relLabel, ordinal, family.marriageDate, family.marriagePlace].filter(Boolean).join(' · ')
+  // A heart would be ironic on a "no relationship" union — icon follows the type.
+  const RelIcon = family.relationship === 'none' ? Unlink2 : family.relationship === 'other' ? Users : Heart
   return (
     <div>
       <button
@@ -151,12 +251,13 @@ function MarriageEditor({ family }: { family: Family }): JSX.Element {
           setDate(family.marriageDate ?? '')
           setPlace(family.marriagePlace ?? '')
           setOrder(family.marriageOrder ? String(family.marriageOrder) : '')
+          setRelationship(family.relationship ?? '')
           setNote(family.notes ?? '')
           setEditing(true)
         }}
         className="group/marr flex w-full items-center gap-1.5 px-2 py-0.5 text-left text-[11px] text-muted-foreground hover:text-primary"
       >
-        <Heart className="h-3 w-3 shrink-0" />
+        <RelIcon className="h-3 w-3 shrink-0" />
         <span className="truncate">{label || t('person.addMarriage')}</span>
         <Pencil className="h-2.5 w-2.5 shrink-0 opacity-0 group-hover/marr:opacity-100" />
       </button>
@@ -188,7 +289,9 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
   const [addingChildLone, setAddingChildLone] = useState(false)
   const [unlinking, setUnlinking] = useState<Family | null>(null)
 
-  const parentFamily = families.find((f) => f.childIds.includes(person.id))
+  // EVERY family the person is a child of — birth + adoptive/foster families.
+  const parentFamilies = families.filter((f) => f.childIds.includes(person.id))
+  const parentFamily = parentFamilies[0]
 
   // Order for multiple marriages: the user-set marriage number wins, then the
   // marriage date, then the spouse's birth date — earliest partner first.
@@ -250,6 +353,70 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
       : []
   )
 
+  // Fill a missing parent slot of a family the person is a CHILD of — or add a
+  // whole second parent family (e.g. adoptive parents alongside birth parents).
+  const [addingParentTo, setAddingParentTo] = useState<{ familyId: string; side: 'husbandId' | 'wifeId' } | null>(
+    null
+  )
+  const fillParent = async (familyId: string, side: 'husbandId' | 'wifeId', pid: string): Promise<void> => {
+    await window.api.families.update(familyId, { [side]: pid })
+    await refreshFamilies()
+  }
+  const fillNewParent = async (
+    familyId: string,
+    side: 'husbandId' | 'wifeId',
+    draft: RelativeDraft
+  ): Promise<void> => {
+    const parent = await window.api.people.create(draft)
+    await fillParent(familyId, side, parent.id)
+  }
+  const addParentPair = async (): Promise<void> => {
+    await window.api.families.create({
+      husbandId: null,
+      wifeId: null,
+      childIds: [person.id],
+      marriageDate: null,
+      marriagePlace: null
+    })
+    await refreshFamilies()
+  }
+  // An added-but-never-filled parent pair carries zero information — no
+  // parents, only this child, no data. Ghost check for cleanup/removal.
+  const isEmptyParentPair = (f: Family): boolean =>
+    !f.husbandId &&
+    !f.wifeId &&
+    f.childIds.length === 1 &&
+    f.childIds[0] === person.id &&
+    !f.marriageDate &&
+    !f.marriagePlace &&
+    !f.marriageOrder &&
+    !f.relationship &&
+    !f.notes
+  // Auto-cleanup: leaving the profile (or switching person) silently drops any
+  // empty parent pair, so an abandoned "+ Szülőpár" never lingers.
+  useEffect(() => {
+    return () => {
+      const fams = useAppStore.getState().families
+      const ghosts = fams.filter(isEmptyParentPair)
+      if (ghosts.length === 0) return
+      void Promise.all(ghosts.map((g) => window.api.families.remove(g.id))).then(() =>
+        useAppStore.getState().refreshFamilies()
+      )
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [person.id])
+  // Remove a parent family from THIS person: an empty pair is deleted outright;
+  // a real one only unlinks the child↔parents edge (nobody is deleted).
+  const [unlinkingParents, setUnlinkingParents] = useState<Family | null>(null)
+  const removeParentFamily = async (pf: Family): Promise<void> => {
+    if (isEmptyParentPair(pf)) {
+      await window.api.families.remove(pf.id)
+    } else {
+      await window.api.families.update(pf.id, { childIds: pf.childIds.filter((id) => id !== person.id) })
+    }
+    await refreshFamilies()
+  }
+
   // Link an existing person (new OR attached) as a child of the family,
   // optionally with a non-birth relation (adopted/foster/step) from the dialog.
   const linkChild = async (
@@ -260,7 +427,7 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
     const fam = families.find((f) => f.id === familyId)
     if (fam && !fam.childIds.includes(childId))
       await window.api.families.update(familyId, { childIds: [...fam.childIds, childId] })
-    if (relation) await window.api.families.setChildRelation(familyId, childId, relation)
+    if (relation) await window.api.families.setChildRelation(familyId, childId, 'both', relation)
     await refreshFamilies()
     selectPerson(childId)
   }
@@ -283,7 +450,7 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
       marriageDate: null,
       marriagePlace: null
     })
-    if (relation) await window.api.families.setChildRelation(fam.id, childId, relation)
+    if (relation) await window.api.families.setChildRelation(fam.id, childId, 'both', relation)
     await refreshFamilies()
     selectPerson(childId)
   }
@@ -392,24 +559,58 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
 
   return (
     <div className="space-y-4">
-      {/* Parents */}
-      {parentFamily && (
-        <section>
-          <div className="mb-1 flex items-center justify-between">
+      {/* Parents — every family the person is a child of (birth + adoptive…). */}
+      {parentFamilies.map((pf, idx) => (
+        <section key={pf.id}>
+          <div className="mb-1 flex items-center justify-between gap-2">
             <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               <Users className="h-3.5 w-3.5" /> {t('person.parents')}
+              {parentFamilies.length > 1 && (
+                <span className="font-normal normal-case tracking-normal text-muted-foreground/80">
+                  · {idx + 1}.
+                </span>
+              )}
             </h4>
-            <RelationSelect family={parentFamily} childId={person.id} />
+            <span className="flex items-center gap-1.5">
+              <ChildRelationControls family={pf} childId={person.id} />
+              <button
+                onClick={() => (isEmptyParentPair(pf) ? void removeParentFamily(pf) : setUnlinkingParents(pf))}
+                title={t('person.unlinkParents')}
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-muted-foreground/60 transition-colors hover:bg-destructive/15 hover:text-destructive"
+              >
+                <Unlink2 className="h-3.5 w-3.5" />
+              </button>
+            </span>
           </div>
           <div className="rounded-xl border border-border/40 bg-secondary/40">
-            {[parentFamily.husbandId, parentFamily.wifeId]
-              .map((id) => (id ? byId.get(id) : undefined))
-              .filter((p): p is Person => !!p)
-              .map((p) => (
-                <PersonRow key={p.id} p={p} onClick={() => selectPerson(p.id)} />
-              ))}
+            {([
+              ['husbandId', pf.husbandId, t('person.addFather'), 'M'],
+              ['wifeId', pf.wifeId, t('person.addMother'), 'F']
+            ] as ['husbandId' | 'wifeId', string | null, string, Sex][]).map(([side, pid, addLabel]) => {
+              const parent = pid ? byId.get(pid) : undefined
+              return parent ? (
+                <PersonRow key={side} p={parent} onClick={() => selectPerson(parent.id)} />
+              ) : (
+                <button
+                  key={side}
+                  onClick={() => setAddingParentTo({ familyId: pf.id, side })}
+                  className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10"
+                >
+                  <UserPlus className="h-4 w-4" /> {addLabel}
+                </button>
+              )
+            })}
           </div>
         </section>
+      ))}
+      {/* A second (adoptive / foster) parent family alongside the first. */}
+      {parentFamilies.length > 0 && parentFamilies.length < 3 && (
+        <button
+          onClick={() => void addParentPair()}
+          className="-mt-2 text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+        >
+          + {t('person.addParentPair')}
+        </button>
       )}
 
       {/* Full siblings (children sharing both parents) */}
@@ -502,18 +703,18 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
                   </button>
                 )}
                 <MarriageEditor family={f} />
-                {/* Marriage witnesses (esküvői tanúk) belong to the union itself. */}
-                <div className="mt-1.5 border-t border-border/40 px-2 pt-1.5">
+                {/* Marriage witnesses + union events share one row: while empty
+                    they are just two quiet chips; with content they grow into
+                    full-width blocks. */}
+                <div className="mt-1.5 flex flex-wrap items-start gap-1.5 border-t border-border/40 px-2 pt-1.5">
                   <PersonWitnesses
                     ownerType="family"
                     ownerId={f.id}
                     title={t('witnesses.marriageTitle')}
                     excludeIds={[f.husbandId, f.wifeId].filter((x): x is string => !!x)}
+                    compact
                   />
-                </div>
-                {/* Union events: engagement, civil/church wedding, divorce… */}
-                <div className="mt-1.5 border-t border-border/40 px-2 pt-1.5">
-                  <FamilyEvents familyId={f.id} />
+                  <FamilyEvents familyId={f.id} compact />
                 </div>
                 <div className="mt-1.5 border-t border-border/40 pt-1.5">
                   <div className="flex items-center justify-between px-2">
@@ -532,7 +733,7 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
                       <div className="min-w-0 flex-1">
                         <PersonRow p={c} onClick={() => selectPerson(c.id)} />
                       </div>
-                      <RelationSelect family={f} childId={c.id} />
+                      <ChildRelationControls family={f} childId={c.id} />
                     </div>
                   ))}
                 </div>
@@ -555,6 +756,21 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
           if (addingChildTo) void linkChild(addingChildTo, id, relation)
         }}
         excludeIds={addingChildTo ? childExclude(addingChildTo) : undefined}
+      />
+      {/* Fill a missing parent slot of a parent family. */}
+      <RelativeDialog
+        open={addingParentTo !== null}
+        onOpenChange={(o) => !o && setAddingParentTo(null)}
+        title={t(addingParentTo?.side === 'wifeId' ? 'person.addMother' : 'person.addFather')}
+        defaultSex={addingParentTo?.side === 'wifeId' ? 'F' : 'M'}
+        defaultSurname={addingParentTo?.side === 'wifeId' ? '' : person.surname}
+        onSubmit={(draft) => {
+          if (addingParentTo) void fillNewParent(addingParentTo.familyId, addingParentTo.side, draft)
+        }}
+        onPickExisting={(id) => {
+          if (addingParentTo) void fillParent(addingParentTo.familyId, addingParentTo.side, id)
+        }}
+        excludeIds={new Set([person.id])}
       />
       {/* Add a child with no spouse → a single-parent family. */}
       <RelativeDialog
@@ -592,6 +808,22 @@ export function PersonFamily({ person }: { person: Person }): JSX.Element {
         }}
         excludeIds={spouseExclude}
       />
+
+      {unlinkingParents && (
+        <ConfirmDialog
+          open={!!unlinkingParents}
+          onOpenChange={(o) => !o && setUnlinkingParents(null)}
+          title={t('person.unlinkParentsTitle', { name: fullName(person) })}
+          confirmLabel={t('person.unlinkParents')}
+          onConfirm={() => {
+            const f = unlinkingParents
+            setUnlinkingParents(null)
+            if (f) void removeParentFamily(f)
+          }}
+        >
+          <p>{t('person.unlinkParentsBody')}</p>
+        </ConfirmDialog>
+      )}
 
       {unlinking && (() => {
         const sid = unlinking.husbandId === person.id ? unlinking.wifeId : unlinking.husbandId

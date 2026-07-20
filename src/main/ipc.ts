@@ -100,7 +100,8 @@ import {
 } from './media'
 import { importGedcomFile, importGedcomText } from './gedcom/import'
 import { exportGedcom } from './gedcom/export'
-import { exportSite } from './siteExport'
+import { exportIndexes, exportSite } from './siteExport'
+import { importCsvFile } from './csvImport'
 import type {
   AuditFilter,
   BoardEdge,
@@ -149,8 +150,10 @@ export function registerIpc(): void {
     Families.update(id, input)
   )
   ipcMain.handle(Channels.families.remove, (_e, id: string) => Families.remove(id))
-  ipcMain.handle(Channels.families.setChildRelation, (_e, fid: string, cid: string, rel: ChildRelation | null) =>
-    Families.setChildRelation(fid, cid, rel)
+  ipcMain.handle(
+    Channels.families.setChildRelation,
+    (_e, fid: string, cid: string, side: 'father' | 'mother' | 'both', rel: ChildRelation | null) =>
+      Families.setChildRelation(fid, cid, side, rel)
   )
 
   // Shared-event participants (roles: pap, bába, adományozó…).
@@ -759,7 +762,14 @@ export function registerIpc(): void {
   ipcMain.handle(Channels.geo.standardizeAll, (e, onlyNew?: boolean) =>
     standardizePlaces((p) => safeSend(e.sender, Channels.geo.standardizeProgress, p), { skipKnown: !!onlyNew })
   )
-  ipcMain.handle(Channels.gedcom.export, async (e, personIds?: string[], defaultName?: string) => {
+  ipcMain.handle(
+    Channels.gedcom.export,
+    async (
+      e,
+      personIds?: string[],
+      defaultName?: string,
+      opts?: { excludePrivate?: boolean; anonymizeLiving?: boolean }
+    ) => {
     const win = BrowserWindow.fromWebContents(e.sender) ?? undefined!
     // Strip path separators / a stray .ged so the suggested name can't redirect
     // the dialog to another folder, then re-add the extension.
@@ -773,9 +783,10 @@ export function registerIpc(): void {
       properties: ['showOverwriteConfirmation', 'createDirectory']
     })
     if (res.canceled || !res.filePath) return null
-    exportGedcom(res.filePath, personIds)
+    exportGedcom(res.filePath, personIds, opts)
     return { path: res.filePath }
-  })
+    }
+  )
   ipcMain.handle(Channels.site.export, async (e, lang: string) => {
     const win = BrowserWindow.fromWebContents(e.sender) ?? undefined!
     const res = await dialog.showSaveDialog(win, {
@@ -787,6 +798,29 @@ export function registerIpc(): void {
     if (res.canceled || !res.filePath) return null
     exportSite(res.filePath, lang)
     return { path: res.filePath }
+  })
+  ipcMain.handle(Channels.site.exportIndexes, async (e, lang: string) => {
+    const win = BrowserWindow.fromWebContents(e.sender) ?? undefined!
+    const res = await dialog.showSaveDialog(win, {
+      title: 'Export indexes',
+      defaultPath: 'treemonk-indexes.html',
+      filters: [{ name: 'HTML', extensions: ['html'] }],
+      properties: ['showOverwriteConfirmation', 'createDirectory']
+    })
+    if (res.canceled || !res.filePath) return null
+    exportIndexes(res.filePath, lang)
+    return { path: res.filePath }
+  })
+  // Bulk person import from CSV (delimiter + column auto-detection).
+  ipcMain.handle(Channels.csv.import, async (e) => {
+    const win = BrowserWindow.fromWebContents(e.sender) ?? undefined!
+    const res = await dialog.showOpenDialog(win, {
+      title: 'Import CSV',
+      filters: [{ name: 'CSV', extensions: ['csv', 'txt', 'tsv'] }],
+      properties: ['openFile']
+    })
+    if (res.canceled || !res.filePaths[0]) return null
+    return importCsvFile(res.filePaths[0])
   })
 
   // Whole-tree data export — JSON snapshot or a raw SQLite database file.

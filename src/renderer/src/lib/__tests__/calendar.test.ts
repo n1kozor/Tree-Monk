@@ -30,7 +30,7 @@ function P(id: string, o: Partial<Person> = {}): Person {
   } as Person
 }
 function F(id: string, o: Partial<Family> = {}): Family {
-  return { id, gedcomId: null, husbandId: null, wifeId: null, marriageDate: null, marriagePlace: null, marriageOrder: null, notes: null, childIds: [], ...o }
+  return { id, gedcomId: null, husbandId: null, wifeId: null, marriageDate: null, marriagePlace: null, marriageOrder: null, relationship: null, notes: null, childIds: [], ...o }
 }
 
 describe('parts', () => {

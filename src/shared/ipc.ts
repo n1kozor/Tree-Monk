@@ -246,7 +246,11 @@ export const Channels = {
     export: 'gedcom:export'
   },
   site: {
-    export: 'site:export'
+    export: 'site:export',
+    exportIndexes: 'site:exportIndexes'
+  },
+  csv: {
+    import: 'csv:import'
   },
   data: {
     exportJson: 'data:exportJson',
@@ -358,8 +362,13 @@ export interface TreeMonkApi {
     create(input: FamilyInput): Promise<Family>
     update(id: string, input: FamilyInput): Promise<Family>
     remove(id: string): Promise<void>
-    /** How a child relates to the family's parents (GEDCOM PEDI); null = birth. */
-    setChildRelation(familyId: string, childId: string, relation: ChildRelation | null): Promise<void>
+    /** How a child relates to ONE parent (or both) of the family; null = birth. */
+    setChildRelation(
+      familyId: string,
+      childId: string,
+      side: 'father' | 'mother' | 'both',
+      relation: ChildRelation | null
+    ): Promise<void>
   }
   eventParticipants: {
     /** Participants of one shared event, with their roles. */
@@ -562,11 +571,21 @@ export interface TreeMonkApi {
   gedcom: {
     import(): Promise<GedcomImportResult | null>
     importContent(text: string): Promise<GedcomImportResult>
-    export(personIds?: string[], defaultName?: string): Promise<{ path: string } | null>
+    export(
+      personIds?: string[],
+      defaultName?: string,
+      opts?: { excludePrivate?: boolean; anonymizeLiving?: boolean }
+    ): Promise<{ path: string } | null>
   }
   site: {
     /** Static-website export: one self-contained, searchable HTML file. */
     export(lang: string): Promise<{ path: string } | null>
+    /** Print-ready name + place index lists as one HTML file. */
+    exportIndexes(lang: string): Promise<{ path: string } | null>
+  }
+  csv: {
+    /** Bulk person import from a CSV file (file picker in the main process). */
+    import(): Promise<{ created: number; skipped: number } | null>
   }
   data: {
     /** Full JSON snapshot of the active tree (all tables). */

@@ -53,6 +53,20 @@ function eventByType(node: GedNode, re: RegExp): { date: string | null; place: s
 // EVEN TYPEs already captured as a structured field (christening) — not re-imported as a note.
 const HANDLED_EVENT_TYPE = /bapt|christen|keresz/i
 
+/** Normalize a GEDCOM NAME/TYPE (or _AKA/NICK tag) to our canonical name-variant
+ *  kinds — married / birth / aka / nickname / religious — so the alias chips
+ *  translate. Unrecognised free-text TYPEs are kept verbatim. */
+function normalizeAliasKind(raw: string | null, tag: string): string | null {
+  const s = (raw ?? '').trim()
+  if (!s) return tag === 'NICK' ? 'nickname' : tag === '_AKA' ? 'aka' : null
+  if (/maiden|birth|geburt|szület|leány/i.test(s)) return 'birth'
+  if (/married|ehe|házas/i.test(s)) return 'married'
+  if (/^aka$|also\s*known/i.test(s)) return 'aka'
+  if (/nick|bece|spitz/i.test(s)) return 'nickname'
+  if (/relig|immigrant|szerzetes|orden/i.test(s)) return s.match(/relig|szerzetes|orden/i) ? 'religious' : s
+  return s
+}
+
 /** RELA values that mean "witness" — checked BEFORE godparents, because e.g.
  *  "keresztelési tanú" (christening witness) also contains "kereszt". */
 const WITNESS_RELA = /witness|tan[uú]|zeug/i
@@ -442,7 +456,11 @@ export function importGedcomText(text: string): GedcomImportResult {
         const key = `${given}|${aliasSurname}`
         if (haveAlias.has(key)) continue
         haveAlias.add(key)
-        Aliases.create(person.id, { givenName: given, surname: aliasSurname, kind: childValue(node, 'TYPE') })
+        Aliases.create(person.id, {
+          givenName: given,
+          surname: aliasSurname,
+          kind: normalizeAliasKind(childValue(node, 'TYPE'), node.tag)
+        })
       }
       // Free-form attributes (FACT <value> / TYPE <key>) — deduped on re-import.
       const haveAttr = new Set(Attributes.forPerson(person.id).map((a) => `${a.key}|${a.value ?? ''}`))
@@ -484,12 +502,20 @@ export function importGedcomText(text: string): GedcomImportResult {
     for (const fam of roots.filter((r) => r.tag === 'FAM' && r.xref)) {
       const xref = fam.xref!
       const marr = eventDetails(fam, 'MARR')
+      const relRaw = (childValue(fam, '_REL') ?? '').toLowerCase()
+      const relationship =
+        relRaw === 'partner' || relRaw === 'none' || relRaw === 'other'
+          ? (relRaw as 'partner' | 'none' | 'other')
+          : /unmarried|partner|élettárs|lebensgef/i.test(relRaw)
+            ? ('partner' as const)
+            : null
       const input = {
         gedcomId: xref,
         husbandId: resolve(childValue(fam, 'HUSB')),
         wifeId: resolve(childValue(fam, 'WIFE')),
         marriageDate: marr.date,
         marriagePlace: marr.place,
+        relationship,
         notes: null,
         childIds: fam.children
           .filter((c) => c.tag === 'CHIL')
@@ -509,6 +535,7 @@ export function importGedcomText(text: string): GedcomImportResult {
           wifeId: matched.wifeId ?? input.wifeId,
           marriageDate: matched.marriageDate ?? input.marriageDate,
           marriagePlace: matched.marriagePlace ?? input.marriagePlace,
+          relationship: matched.relationship ?? input.relationship,
           childIds
         })
         result.familiesUpdated++
@@ -522,6 +549,22 @@ export function importGedcomText(text: string): GedcomImportResult {
         if (wid) Witnesses.add('family', family.id, wid)
       }
       famIdByXref.set(xref, family.id)
+      // Per-parent child relations (FTM-style _FREL/_MREL under CHIL).
+      const mapRel = (v: string | null): 'adopted' | 'foster' | 'step' | null => {
+        const t = (v ?? '').toLowerCase()
+        if (/adopt/.test(t)) return 'adopted'
+        if (/foster|nevel/.test(t)) return 'foster'
+        if (/step|mostoha/.test(t)) return 'step'
+        return null
+      }
+      for (const chil of fam.children.filter((c) => c.tag === 'CHIL')) {
+        const cid = resolve(chil.value)
+        if (!cid) continue
+        const frel = mapRel(childValue(chil, '_FREL'))
+        const mrel = mapRel(childValue(chil, '_MREL'))
+        if (frel) Families.setChildRelation(family.id, cid, 'father', frel)
+        if (mrel) Families.setChildRelation(family.id, cid, 'mother', mrel)
+      }
       // Family (union) events: standard DIV/ENGA/MARB plus typed EVEN become
       // structured family events — deduped so a re-import never duplicates.
       {
@@ -585,7 +628,7 @@ export function importGedcomText(text: string): GedcomImportResult {
             : /step|mostoha/.test(pedi)
               ? 'step'
               : null
-        if (rel) Families.setChildRelation(famId, personId, rel)
+        if (rel) Families.setChildRelation(famId, personId, 'both', rel)
       }
     }
 

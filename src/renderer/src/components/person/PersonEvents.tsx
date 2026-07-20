@@ -212,20 +212,28 @@ function EventEditDialog({
             <Textarea value={note} onChange={(e) => setNote(e.target.value)} className="min-h-[64px] text-sm" />
           </label>
 
-          {/* Participants with roles (Gramps-style shared event). */}
+          {/* Participants with roles (Gramps-style shared event). While empty
+              only a quiet chip shows — no header + empty-state noise. */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">{t('participants.title')}</span>
+            {participants.length === 0 ? (
               <button
                 type="button"
                 onClick={() => setAddingPart(true)}
                 className="flex items-center gap-1 rounded-lg border border-border/40 px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
               >
-                <Plus className="h-3 w-3" /> {t('participants.add')}
+                <Plus className="h-3 w-3" /> {t('participants.title')}
               </button>
-            </div>
-            {participants.length === 0 && (
-              <p className="text-xs text-muted-foreground">{t('participants.none')}</p>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-muted-foreground">{t('participants.title')}</span>
+                <button
+                  type="button"
+                  onClick={() => setAddingPart(true)}
+                  className="flex items-center gap-1 rounded-lg border border-border/40 px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+                >
+                  <Plus className="h-3 w-3" /> {t('participants.add')}
+                </button>
+              </div>
             )}
             {participants.map((pt) => {
               const person: Person | undefined = peopleById.get(pt.personId)
@@ -306,12 +314,15 @@ function EventsBlock({
   ownerType,
   ownerId,
   types,
-  heading
+  heading,
+  compact = false
 }: {
   ownerType: 'person' | 'family'
   ownerId: string
   types: EventType[]
   heading: string
+  /** Compact mode (union cards): while EMPTY, render just a small "+ chip". */
+  compact?: boolean
 }): JSX.Element {
   const { t } = useTranslation()
   const fmtDate = useDateFormat()
@@ -355,8 +366,31 @@ function EventsBlock({
     await window.api.events.reorder(next.map((e) => e.id))
   }
 
+  // Compact + empty → one quiet chip; the create modal still opens from it.
+  if (compact && list.length === 0) {
+    return (
+      <>
+        <button
+          onClick={() => setCreating(true)}
+          className="flex items-center gap-1 rounded-lg border border-border/40 px-2 py-0.5 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+        >
+          <Plus className="h-3 w-3" /> {heading}
+        </button>
+        <EventEditDialog
+          open={creating}
+          event={null}
+          ownerType={ownerType}
+          ownerId={ownerId}
+          types={types}
+          onClose={() => setCreating(false)}
+          onChanged={load}
+        />
+      </>
+    )
+  }
+
   return (
-    <div className="space-y-2">
+    <div className={compact ? 'w-full space-y-2' : 'space-y-2'}>
       <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         <CalendarClock className="h-3.5 w-3.5" /> {heading}
       </h4>
@@ -445,7 +479,15 @@ export function PersonEvents({ personId }: { personId: string }): JSX.Element {
 }
 
 /** A family's (union's) events: engagement, weddings, divorce, separation. */
-export function FamilyEvents({ familyId }: { familyId: string }): JSX.Element {
+export function FamilyEvents({ familyId, compact }: { familyId: string; compact?: boolean }): JSX.Element {
   const { t } = useTranslation()
-  return <EventsBlock ownerType="family" ownerId={familyId} types={FAMILY_TYPES} heading={t('events.familyTitle')} />
+  return (
+    <EventsBlock
+      ownerType="family"
+      ownerId={familyId}
+      types={FAMILY_TYPES}
+      heading={t('events.familyTitle')}
+      compact={compact}
+    />
+  )
 }

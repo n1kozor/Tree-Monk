@@ -41,6 +41,10 @@ const L: Record<Lang, Record<string, string>> = {
     confidential: 'Bizalmas személy',
     confidentialNote: 'Ez a személy bizalmasként van jelölve — adatai nem kerültek exportálásra.',
     footer: 'TreeMonk családfa-export',
+    indexTitle: 'Név- és helymutató',
+    nameIndex: 'Névmutató',
+    placeIndex: 'Helymutató',
+    legend: 'Jelmagyarázat: * születés · ~ keresztelés · ⚭ házasság · † halál · ▭ temetés · ⌂ lakhely',
     abt: 'kb.',
     bef: 'előtt',
     aft: 'után',
@@ -74,6 +78,10 @@ const L: Record<Lang, Record<string, string>> = {
     confidential: 'Confidential person',
     confidentialNote: 'This person is marked confidential — their data was not exported.',
     footer: 'TreeMonk family-tree export',
+    indexTitle: 'Name and place index',
+    nameIndex: 'Name index',
+    placeIndex: 'Place index',
+    legend: 'Legend: * birth · ~ christening · ⚭ marriage · † death · ▭ burial · ⌂ residence',
     abt: 'abt.',
     bef: 'before',
     aft: 'after',
@@ -107,6 +115,10 @@ const L: Record<Lang, Record<string, string>> = {
     confidential: 'Vertrauliche Person',
     confidentialNote: 'Diese Person ist als vertraulich markiert — ihre Daten wurden nicht exportiert.',
     footer: 'TreeMonk-Stammbaum-Export',
+    indexTitle: 'Namens- und Ortsverzeichnis',
+    nameIndex: 'Namensverzeichnis',
+    placeIndex: 'Ortsverzeichnis',
+    legend: 'Legende: * Geburt · ~ Taufe · ⚭ Ehe · † Tod · ▭ Bestattung · ⌂ Wohnort',
     abt: 'um',
     bef: 'vor',
     aft: 'nach',
@@ -304,6 +316,131 @@ ${sections}
   });
 })();
 </script>
+</body>
+</html>
+`
+  writeFileSync(filePath, html, 'utf-8')
+  return filePath
+}
+
+/**
+ * Print-ready NAME + PLACE index lists as one HTML file (Ahnenblatt-style
+ * Namensliste/Ortsliste). The name index groups people by surname initial;
+ * the place index lists, for every place, who had which event there
+ * (* birth, ~ christening, ⚭ marriage, † death, ▭ burial, ⌂ residence).
+ * Confidential people are excluded from both.
+ */
+export function exportIndexes(filePath: string, langRaw: string): string {
+  const lang: Lang = langRaw === 'hu' || langRaw === 'de' ? langRaw : 'en'
+  const l = L[lang]
+  const people = People.list().filter((p) => !p.isPrivate)
+  const families = Families.list()
+  const byId = new Map(people.map((p) => [p.id, p]))
+  const nameOf = (p: Person): string => fullName(p, lang)
+  const yr = (d: string | null): string => {
+    const m = /(\d{4})/.exec(d ?? '')
+    return m ? m[1] : ''
+  }
+
+  // ---- Name index, grouped by the sort-name's initial ----
+  const sorted = [...people].sort((a, b) =>
+    `${a.surname} ${a.givenName}`.localeCompare(`${b.surname} ${b.givenName}`, lang)
+  )
+  const groups = new Map<string, Person[]>()
+  for (const p of sorted) {
+    const initial = (p.surname || p.givenName || '#').charAt(0).toUpperCase() || '#'
+    const arr = groups.get(initial) ?? []
+    arr.push(p)
+    groups.set(initial, arr)
+  }
+  const nameIndex = [...groups.entries()]
+    .map(
+      ([initial, ps]) => `<h3>${esc(initial)}</h3><ul>` +
+        ps
+          .map((p) => {
+            const b = yr(p.birthDate)
+            const d = yr(p.deathDate)
+            const span = b || d ? ` <span class="muted">${b || '?'}–${p.deceased ? d || '?' : ''}</span>` : ''
+            const place = p.birthPlace ? ` <span class="muted">· ${esc(p.birthPlace.split(',')[0])}</span>` : ''
+            return `<li>${esc(nameOf(p))}${span}${place}</li>`
+          })
+          .join('') +
+        '</ul>'
+    )
+    .join('\n')
+
+  // ---- Place index: place → [symbol name (year)] ----
+  const byPlace = new Map<string, { sym: string; who: string; year: string }[]>()
+  const addUse = (place: string | null, sym: string, who: string, date: string | null): void => {
+    const key = (place ?? '').trim()
+    if (!key) return
+    const arr = byPlace.get(key) ?? []
+    arr.push({ sym, who, year: yr(date) })
+    byPlace.set(key, arr)
+  }
+  for (const p of people) {
+    addUse(p.birthPlace, '*', nameOf(p), p.birthDate)
+    addUse(p.christeningPlace, '~', nameOf(p), p.christeningDate)
+    addUse(p.deathPlace, '†', nameOf(p), p.deathDate)
+    addUse(p.burialPlace, '▭', nameOf(p), p.burialDate)
+    for (const ev of Events.forPerson(p.id)) {
+      if (ev.place && ev.type.toLowerCase() === 'residence') addUse(ev.place, '⌂', nameOf(p), ev.date)
+    }
+  }
+  for (const f of families) {
+    if (!f.marriagePlace) continue
+    const names = [f.husbandId, f.wifeId]
+      .map((id) => (id ? byId.get(id) : undefined))
+      .filter((x): x is Person => !!x)
+      .map(nameOf)
+      .join(' & ')
+    if (names) addUse(f.marriagePlace, '⚭', names, f.marriageDate)
+  }
+  const placeIndex = [...byPlace.entries()]
+    .sort(([a], [b]) => a.localeCompare(b, lang))
+    .map(
+      ([place, uses]) => `<h3>${esc(place)}</h3><ul>` +
+        uses
+          .sort((a, b) => (a.year || '9999').localeCompare(b.year || '9999'))
+          .map((u) => `<li><span class="sym">${u.sym}</span> ${esc(u.who)}${u.year ? ` <span class="muted">(${u.year})</span>` : ''}</li>`)
+          .join('') +
+        '</ul>'
+    )
+    .join('\n')
+
+  const generated = new Date().toISOString().slice(0, 10)
+  const html = `<!DOCTYPE html>
+<html lang="${lang}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(l.indexTitle)}</title>
+<style>
+:root { color-scheme: light dark; }
+body { font-family: Georgia, 'Times New Roman', serif; margin: 0 auto; max-width: 860px; padding: 24px 20px 60px;
+  line-height: 1.45; color: #222; background: #fbfaf7; }
+@media (prefers-color-scheme: dark) { body { color: #ddd; background: #16181d; } }
+header { border-bottom: 3px double #999; margin-bottom: 18px; padding-bottom: 10px; }
+h1 { margin: 0 0 4px; font-size: 1.6rem; }
+h2 { margin: 26px 0 8px; font-size: 1.2rem; border-bottom: 1px solid #ccc; padding-bottom: 4px; break-after: avoid; }
+h3 { margin: 14px 0 3px; font-size: 0.95rem; break-after: avoid; }
+ul { columns: 2; list-style: none; margin: 0; padding: 0; font-size: 0.9rem; }
+li { break-inside: avoid; padding: 1px 0; }
+.muted { color: #888; font-size: 0.85em; }
+.sym { display: inline-block; width: 1.1em; color: #666; }
+.meta { color: #777; font-size: 0.85rem; }
+@media print { body { background: #fff; } ul { columns: 3; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>${esc(l.indexTitle)}</h1>
+  <p class="meta">${esc(l.generated)}: ${generated} · ${people.length} ${esc(l.people)} · ${esc(l.legend)}</p>
+</header>
+<h2>${esc(l.nameIndex)}</h2>
+${nameIndex}
+<h2>${esc(l.placeIndex)}</h2>
+${placeIndex}
 </body>
 </html>
 `

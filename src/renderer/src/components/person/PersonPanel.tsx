@@ -45,6 +45,7 @@ import { PhotoFrameDialog } from './PhotoFrameDialog'
 import { PersonGodparents } from './PersonGodparents'
 import { PersonWitnesses } from './PersonWitnesses'
 import { PersonAttributes } from './PersonAttributes'
+import { GivenNamesEditor } from './GivenNamesEditor'
 import { PersonParticipations } from './PersonParticipations'
 import { FactSources, VitalNote } from './FactSources'
 import { QualityRing } from '@/components/common/QualityRing'
@@ -76,6 +77,8 @@ export function PersonPanel(): JSX.Element | null {
   const [deleting, setDeleting] = useState(false)
   const [framingOpen, setFramingOpen] = useState(false)
   const [person, setPerson] = useState<Person | null>(null)
+  const [moreNames, setMoreNames] = useState(false)
+  const [moreData, setMoreData] = useState(false)
   const [fsConfigured, setFsConfigured] = useState(false)
   const fsMode = useFsMode()
   const [fsSyncOpen, setFsSyncOpen] = useState(false)
@@ -541,7 +544,18 @@ export function PersonPanel(): JSX.Element | null {
                 : (['givenName', 'surname'] as const)
               ).map((f) => (
                 <Field key={f} label={t(`person.${f}`)}>
-                  <Input value={person[f]} onChange={(e) => patch(f, e.target.value)} onBlur={() => save()} />
+                  {f === 'givenName' ? (
+                    <GivenNamesEditor
+                      value={person.givenName}
+                      onCommit={(v) => {
+                        const next = { ...person, givenName: v }
+                        setPerson(next)
+                        void save(next)
+                      }}
+                    />
+                  ) : (
+                    <Input value={person[f]} onChange={(e) => patch(f, e.target.value)} onBlur={() => save()} />
+                  )}
                 </Field>
               ))}
               <Field label={t('person.callName')}>
@@ -551,24 +565,33 @@ export function PersonPanel(): JSX.Element | null {
                   onBlur={() => save()}
                 />
               </Field>
-              <div className="grid grid-cols-2 gap-2">
-                <Field label={t('person.namePrefix')}>
-                  <Input
-                    value={person.namePrefix ?? ''}
-                    onChange={(e) => patch('namePrefix', e.target.value)}
-                    onBlur={() => save()}
-                    placeholder="Dr."
-                  />
-                </Field>
-                <Field label={t('person.nameSuffix')}>
-                  <Input
-                    value={person.nameSuffix ?? ''}
-                    onChange={(e) => patch('nameSuffix', e.target.value)}
-                    onBlur={() => save()}
-                    placeholder="Jr."
-                  />
-                </Field>
-              </div>
+              {moreNames || person.namePrefix || person.nameSuffix ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <Field label={t('person.namePrefix')}>
+                    <Input
+                      value={person.namePrefix ?? ''}
+                      onChange={(e) => patch('namePrefix', e.target.value)}
+                      onBlur={() => save()}
+                      placeholder="Dr."
+                    />
+                  </Field>
+                  <Field label={t('person.nameSuffix')}>
+                    <Input
+                      value={person.nameSuffix ?? ''}
+                      onChange={(e) => patch('nameSuffix', e.target.value)}
+                      onBlur={() => save()}
+                      placeholder="Jr."
+                    />
+                  </Field>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setMoreNames(true)}
+                  className="self-end pb-2 text-left text-[11px] font-medium text-muted-foreground underline-offset-2 hover:text-primary hover:underline"
+                >
+                  + {t('person.moreNameFields')}
+                </button>
+              )}
             </div>
             <Field label={t('person.sex')}>
               <div className="flex gap-1.5">
@@ -657,47 +680,50 @@ export function PersonPanel(): JSX.Element | null {
               <div className="col-span-2">
                 <VitalNote label={t('person.burial')} value={person.burialNote ?? ''} onSave={(v) => saveNote('burialNote', v)} />
               </div>
-              <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={person.deceased || !!person.deathDate}
-                  disabled={!!person.deathDate}
-                  onChange={(e) => setDeceased(e.target.checked)}
-                  className="h-4 w-4 accent-[hsl(var(--primary))]"
-                />
-                <span className={person.deathDate ? 'text-muted-foreground' : ''}>
-                  {t('person.deceased')}
-                </span>
-              </label>
-              {/* Born out of wedlock — plain user-set flag. */}
-              <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={!!person.illegitimate}
-                  onChange={(e) => setIllegitimate(e.target.checked)}
-                  className="h-4 w-4 accent-[hsl(var(--primary))]"
-                />
-                <span>{t('person.illegitimate')}</span>
-              </label>
-              <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={!!person.stillborn}
-                  onChange={(e) => setStillborn(e.target.checked)}
-                  className="h-4 w-4 accent-[hsl(var(--primary))]"
-                />
-                <span>{t('person.stillborn')}</span>
-              </label>
-              {/* Confidential — marked RESN confidential on GEDCOM export. */}
-              <label className="col-span-2 flex cursor-pointer items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={!!person.isPrivate}
-                  onChange={(e) => setPrivate(e.target.checked)}
-                  className="h-4 w-4 accent-[hsl(var(--primary))]"
-                />
-                <span>{t('person.private')}</span>
-              </label>
+              {/* All four flags share one wrapping row — four stacked lines were
+                  eating the narrow panel. */}
+              <div className="col-span-2 flex flex-wrap gap-x-4 gap-y-1.5">
+                <label className="flex cursor-pointer items-center gap-1.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={person.deceased || !!person.deathDate}
+                    disabled={!!person.deathDate}
+                    onChange={(e) => setDeceased(e.target.checked)}
+                    className="h-4 w-4 accent-[hsl(var(--primary))]"
+                  />
+                  <span className={person.deathDate ? 'text-muted-foreground' : ''}>
+                    {t('person.deceased')}
+                  </span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-1.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!person.illegitimate}
+                    onChange={(e) => setIllegitimate(e.target.checked)}
+                    className="h-4 w-4 accent-[hsl(var(--primary))]"
+                  />
+                  <span>{t('person.illegitimate')}</span>
+                </label>
+                <label className="flex cursor-pointer items-center gap-1.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!person.stillborn}
+                    onChange={(e) => setStillborn(e.target.checked)}
+                    className="h-4 w-4 accent-[hsl(var(--primary))]"
+                  />
+                  <span>{t('person.stillborn')}</span>
+                </label>
+                {/* Confidential — marked RESN confidential on GEDCOM export. */}
+                <label className="flex cursor-pointer items-center gap-1.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={!!person.isPrivate}
+                    onChange={(e) => setPrivate(e.target.checked)}
+                    className="h-4 w-4 accent-[hsl(var(--primary))]"
+                  />
+                  <span>{t('person.private')}</span>
+                </label>
+              </div>
               <div className="col-span-2 -mb-1 flex justify-end">
                 <button
                   type="button"
@@ -744,14 +770,28 @@ export function PersonPanel(): JSX.Element | null {
             <PersonOccupations personId={person.id} />
             <PersonEvents personId={person.id} />
             <PersonGodparents person={person} />
-            <PersonWitnesses
-              ownerType="person"
-              ownerId={person.id}
-              title={t('witnesses.christeningTitle')}
-              excludeIds={[person.id]}
-            />
-            <PersonAttributes personId={person.id} />
-            <PersonParticipations personId={person.id} />
+            {/* Rarely-used blocks collapse into one section, closed by default. */}
+            <div className="rounded-xl border border-border/40">
+              <button
+                onClick={() => setMoreData((v) => !v)}
+                className="flex w-full items-center justify-between px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <span>{t('person.moreData')}</span>
+                <ChevronDown className={cn('h-4 w-4 transition-transform', moreData && 'rotate-180')} />
+              </button>
+              {moreData && (
+                <div className="space-y-4 border-t border-border/40 p-3">
+                  <PersonWitnesses
+                    ownerType="person"
+                    ownerId={person.id}
+                    title={t('witnesses.christeningTitle')}
+                    excludeIds={[person.id]}
+                  />
+                  <PersonAttributes personId={person.id} />
+                  <PersonParticipations personId={person.id} />
+                </div>
+              )}
+            </div>
             <PersonTimeline person={person} />
             <Field label={t('person.notes')}>
               <Textarea
