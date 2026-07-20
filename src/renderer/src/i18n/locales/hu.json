@@ -218,7 +218,8 @@
     "adopted": "Örökbefogadott gyermek",
     "foster": "Nevelt gyermek",
     "step": "Mostohagyermek",
-    "titleBoth": "Kapcsolat a szülőkkel (mindkét szülőnél)"
+    "titleBoth": "Kapcsolat a szülőkkel (mindkét szülőnél)",
+    "editBtn": "Kapcsolat"
   },
   "parentRelation": {
     "birth": "Vér szerinti",

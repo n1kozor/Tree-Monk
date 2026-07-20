@@ -218,7 +218,8 @@
     "adopted": "Adoptiertes Kind",
     "foster": "Pflegekind",
     "step": "Stiefkind",
-    "titleBoth": "Verhältnis zu den Eltern (beide Eltern)"
+    "titleBoth": "Verhältnis zu den Eltern (beide Eltern)",
+    "editBtn": "Verhältnis"
   },
   "parentRelation": {
     "birth": "Leiblich",

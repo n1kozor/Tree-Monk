@@ -218,7 +218,8 @@
     "adopted": "Adopted child",
     "foster": "Foster child",
     "step": "Stepchild",
-    "titleBoth": "Relationship to parents (both parents)"
+    "titleBoth": "Relationship to parents (both parents)",
+    "editBtn": "Relation"
   },
   "parentRelation": {
     "birth": "Birth",

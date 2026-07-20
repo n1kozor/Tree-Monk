@@ -55,7 +55,7 @@ function RelationSelect({
       onClick={(e) => e.stopPropagation()}
       title={`${t('childRelation.title')} — ${parentLabel}`}
     >
-      <span className="text-[9px] font-medium uppercase text-muted-foreground/60">{parentLabel}</span>
+      <span className="text-[10px] font-semibold uppercase text-muted-foreground">{parentLabel}</span>
       <select
         value={value}
         onChange={async (e) => {
@@ -68,10 +68,10 @@ function RelationSelect({
           await refreshFamilies()
         }}
         className={cn(
-          'h-6 rounded-md border bg-background px-1 text-[10px] outline-none focus:border-primary',
+          'h-7 rounded-md border bg-background px-1.5 text-[11px] outline-none focus:border-primary',
           value
-            ? 'border-amber-500/50 font-medium text-amber-600 dark:text-amber-400'
-            : 'border-border/40 text-muted-foreground/70'
+            ? 'border-amber-500/60 font-medium text-amber-600 dark:text-amber-400'
+            : 'border-border text-foreground'
         )}
       >
         {/* PARENT-perspective labels — the select sits next to "Apa"/"Anya",
@@ -101,7 +101,7 @@ function ChildRelationControls({ family, childId }: { family: Family; childId: s
 
   if (!open) {
     return (
-      <span className="group/rel flex shrink-0 items-center gap-1">
+      <span className="flex shrink-0 items-center gap-1">
         {badges.map((b) => (
           <button
             key={b.side}
@@ -121,12 +121,10 @@ function ChildRelationControls({ family, childId }: { family: Family; childId: s
             setOpen(true)
           }}
           title={t('childRelation.title')}
-          className={cn(
-            'flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground/40 transition-all hover:bg-accent hover:text-foreground',
-            badges.length === 0 && 'opacity-0 group-hover/rel:opacity-100 focus:opacity-100'
-          )}
+          className="flex h-6 items-center gap-1 rounded-md border border-border/60 px-1.5 text-[10px] font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:bg-accent hover:text-primary"
         >
           <Pencil className="h-3 w-3" />
+          {t('childRelation.editBtn')}
         </button>
       </span>
     )

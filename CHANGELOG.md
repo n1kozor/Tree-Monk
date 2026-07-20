@@ -2,6 +2,19 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.8.9]
+
+### Changed
+- **Descendants view redesigned.** The bare SVG rectangles were replaced with
+  the pedigree's card language: photo avatars (LOD-aware — initials when zoomed
+  out), sex accent bars, rounded connectors, a highlighted root card and a
+  quiet per-card descendant-count badge.
+- The profile header shows FULL birth/death dates (in the chosen display
+  format, qualifiers localized) instead of years only.
+- The per-parent relation control is a labelled chip ("Kapcsolat") with
+  stronger contrast; the pencil-only affordance was too easy to miss.
+- A few code comments reworded to neutral phrasing.
+
 ## [1.8.8]
 
 ### Added

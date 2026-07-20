@@ -39,7 +39,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/common/DateInput'
-import { useDatePlaceholder } from '@/hooks/useDateFormat'
+import { useDateFormat, useDatePlaceholder } from '@/hooks/useDateFormat'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -84,6 +84,7 @@ import type { CitationDetail, Person, PersonInput, SanityIssue, Sex } from '@sha
 export function ProfileView({ personId: personIdProp }: { personId?: string } = {}): JSX.Element | null {
   const { t, i18n } = useTranslation()
   const datePlaceholder = useDatePlaceholder()
+  const fmtDate = useDateFormat()
   // Each profile tab passes its own id; falls back to the active profile slot.
   const activeProfileId = useAppStore((s) => s.profilePersonId)
   const personId = personIdProp ?? activeProfileId
@@ -285,9 +286,11 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   if (!personId || !person) return null
 
   const deceased = person.deceased || !!person.deathDate
-  const by = yearOf(person.birthDate)
-  const dy = yearOf(person.deathDate)
-  const lifespan = by || dy ? `${by || '?'} – ${deceased ? dy || '?' : t('tree.living')}` : ''
+  // FULL dates in the header (user's display format, qualifiers localized) —
+  // falling back naturally to the year when that's all that is recorded.
+  const bd = fmtDate(person.birthDate)
+  const dd = fmtDate(person.deathDate)
+  const lifespan = bd || dd ? `${bd || '?'} – ${deceased ? dd || '?' : t('tree.living')}` : ''
   const rootId = defaultRootId ?? treeRootId
   const rootPerson = rootId && rootId !== person.id ? peopleById.get(rootId) : undefined
 
