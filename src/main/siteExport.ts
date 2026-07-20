@@ -324,8 +324,8 @@ ${sections}
 }
 
 /**
- * Print-ready NAME + PLACE index lists as one HTML file (Ahnenblatt-style
- * Namensliste/Ortsliste). The name index groups people by surname initial;
+ * Print-ready NAME + PLACE index lists as one HTML file (the classic
+ * genealogical Namensliste/Ortsliste). The name index groups people by surname initial;
  * the place index lists, for every place, who had which event there
  * (* birth, ~ christening, ⚭ marriage, † death, ▭ burial, ⌂ residence).
  * Confidential people are excluded from both.

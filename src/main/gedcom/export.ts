@@ -156,7 +156,7 @@ export function exportGedcom(
   let people = include ? allPeople.filter((p) => include.has(p.id)) : allPeople
   if (opts.excludePrivate) people = people.filter((p) => !p.isPrivate)
   const personSet = new Set(people.map((p) => p.id))
-  // Living-person protection (Ahnenblatt-style): the person keeps their place
+  // Living-person protection: the person keeps their place
   // in the structure (FAMS/FAMC), but every identifying fact is withheld.
   const isAnon = (p: Person): boolean => !!opts.anonymizeLiving && !p.deceased
   const byId = new Map(people.map((p) => [p.id, p]))
@@ -271,7 +271,7 @@ export function exportGedcom(
     }
     out.push(line(1, 'NAME', nameValue(p)))
     // Name pieces: prefix/suffix as the standard NPFX/NSFX, the Rufname as the
-    // _RUFNAME custom tag Gramps & the German programs (Ahnenblatt, GFAhnen) use.
+    // _RUFNAME custom tag Gramps & the German genealogy programs use.
     if (p.namePrefix) out.push(line(2, 'NPFX', p.namePrefix))
     if (p.nameSuffix) out.push(line(2, 'NSFX', p.nameSuffix))
     if (p.callName) out.push(line(2, '_RUFNAME', p.callName))

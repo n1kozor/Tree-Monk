@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 import { norm } from '@/lib/nameMatch'
 import type { PlaceInfo } from '@shared/types'
 
-/** Free-form but suggested place types (Ahnenblatt/GOV-style levels). */
+/** Free-form but suggested place types (GOV-style administrative levels). */
 const PLACE_TYPES = ['village', 'town', 'city', 'district', 'county', 'region', 'country', 'other'] as const
 
 /**

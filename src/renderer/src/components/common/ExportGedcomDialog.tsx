@@ -189,7 +189,7 @@ export function ExportGedcomDialog({
             </button>
           )}
 
-          {/* Privacy: drop confidential people / anonymize the living (Ahnenblatt-style). */}
+          {/* Privacy: drop confidential people / anonymize the living. */}
           <div className="space-y-1.5">
             <Label>{t('gedcom.privacyTitle')}</Label>
             <label className="flex cursor-pointer items-start gap-2 text-sm">
