@@ -829,7 +829,6 @@ export interface ApiServerConfig {
   port: number
   token: string
   allowWrites: boolean
-  mcpEnabled: boolean
 }
 export interface ApiServerStatus {
   running: boolean

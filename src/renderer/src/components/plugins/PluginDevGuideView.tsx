@@ -209,7 +209,7 @@ const GUIDES: Record<'hu' | 'en' | 'de', { title: string; intro: string; section
           ]
         },
         paras: [
-          'Az API öndokumentáló: futó szerver mellett a http://127.0.0.1:<port>/docs cím háromnyelvű leírást ad, az /api/v1/openapi.json gépi sémát. Az MCP-végpont bővítmény-tokennel SOHA nem hívható. Csak azt a jogosultságot kérd, amit tényleg használsz — a user a címkéket látja bekapcsolás előtt.'
+          'Az API öndokumentáló: futó szerver mellett a http://127.0.0.1:<port>/docs cím háromnyelvű leírást ad, az /api/v1/openapi.json gépi sémát. Csak azt a jogosultságot kérd, amit tényleg használsz — a user a címkéket látja bekapcsolás előtt.'
         ]
       },
       {
@@ -294,7 +294,7 @@ const GUIDES: Record<'hu' | 'en' | 'de', { title: string; intro: string; section
           ]
         },
         paras: [
-          'The API is self-documenting: with the server running, http://127.0.0.1:<port>/docs gives a trilingual reference and /api/v1/openapi.json a machine-readable schema. The MCP endpoint is NEVER available to plugin tokens. Only request permissions you actually use — the user sees the badges before enabling.'
+          'The API is self-documenting: with the server running, http://127.0.0.1:<port>/docs gives a trilingual reference and /api/v1/openapi.json a machine-readable schema. Only request permissions you actually use — the user sees the badges before enabling.'
         ]
       },
       {
@@ -379,7 +379,7 @@ const GUIDES: Record<'hu' | 'en' | 'de', { title: string; intro: string; section
           ]
         },
         paras: [
-          'Die API ist selbstdokumentierend: Bei laufendem Server liefert http://127.0.0.1:<port>/docs eine dreisprachige Referenz, /api/v1/openapi.json ein maschinenlesbares Schema. Der MCP-Endpunkt ist mit Erweiterungs-Token NIE erreichbar. Fordere nur Berechtigungen an, die du wirklich nutzt — der Nutzer sieht die Abzeichen vor dem Aktivieren.'
+          'Die API ist selbstdokumentierend: Bei laufendem Server liefert http://127.0.0.1:<port>/docs eine dreisprachige Referenz, /api/v1/openapi.json ein maschinenlesbares Schema. Fordere nur Berechtigungen an, die du wirklich nutzt — der Nutzer sieht die Abzeichen vor dem Aktivieren.'
         ]
       },
       {

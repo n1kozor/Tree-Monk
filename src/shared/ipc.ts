@@ -523,7 +523,7 @@ export interface TreeMonkApi {
     setConfig(patch: Partial<Omit<ApiServerConfig, 'token'>>): Promise<ApiServerConfig>
     regenerateToken(): Promise<string>
     status(): Promise<ApiServerStatus>
-    /** Fires when an external API/MCP client changed the data — refresh. */
+    /** Fires when an external API client changed the data — refresh. */
     onExternalChange(cb: () => void): () => void
   }
   plugins: {

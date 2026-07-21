@@ -43,9 +43,6 @@ export const DOCS_HTML = `<!doctype html>
   <h2 data-i="authTitle"></h2>
   <p data-i="authBody"></p>
   <pre id="curl"></pre>
-  <h2>MCP</h2>
-  <p data-i="mcpBody"></p>
-  <pre id="mcp"></pre>
   <h2 data-i="epTitle"></h2>
   <div id="eps" class="mut">…</div>
   <h2 data-i="exTitle"></h2>
@@ -57,21 +54,18 @@ const T = {
     tagline: 'A családfád adatai HTTP-n keresztül — kizárólag ezen a gépen (127.0.0.1).',
     security: 'A szerver csak a 127.0.0.1 címre csatlakozik, a hálózatról nem érhető el. Minden adat-végponthoz a Beállításokban látható Bearer token kell. Az írás külön kapcsoló mögött van.',
     authTitle: 'Hitelesítés', authBody: 'Minden kéréshez add hozzá az Authorization fejlécet a Beállításokban másolható tokennel:',
-    mcpBody: 'A /mcp végponton az app MCP-szerver (Streamable HTTP): kösd hozzá a Claude-ot vagy más MCP-klienst, és beszélgess a családfáddal. Ugyanaz a Bearer token kell.',
     epTitle: 'Végpontok', exTitle: 'Python-példa'
   },
   en: {
     tagline: 'Your family-tree data over HTTP — strictly on this machine (127.0.0.1).',
     security: 'The server binds to 127.0.0.1 only and is not reachable from the network. Every data endpoint requires the Bearer token shown in Settings. Writes sit behind a separate toggle.',
     authTitle: 'Authentication', authBody: 'Add the Authorization header with the token copied from Settings to every request:',
-    mcpBody: 'At /mcp the app is an MCP server (Streamable HTTP): connect Claude or any MCP client and talk to your family tree. The same Bearer token applies.',
     epTitle: 'Endpoints', exTitle: 'Python example'
   },
   de: {
     tagline: 'Deine Stammbaum-Daten über HTTP — ausschließlich auf diesem Rechner (127.0.0.1).',
     security: 'Der Server bindet nur an 127.0.0.1 und ist aus dem Netzwerk nicht erreichbar. Jeder Daten-Endpunkt erfordert das Bearer-Token aus den Einstellungen. Schreibzugriffe stehen hinter einem separaten Schalter.',
     authTitle: 'Authentifizierung', authBody: 'Füge jeder Anfrage den Authorization-Header mit dem Token aus den Einstellungen hinzu:',
-    mcpBody: 'Unter /mcp ist die App ein MCP-Server (Streamable HTTP): Verbinde Claude oder einen anderen MCP-Client und sprich mit deinem Stammbaum. Dasselbe Bearer-Token gilt.',
     epTitle: 'Endpunkte', exTitle: 'Python-Beispiel'
   }
 }
@@ -84,7 +78,6 @@ document.querySelectorAll('.langs button').forEach(b=>b.onclick=()=>setLang(b.da
 const base = location.origin
 document.getElementById('curl').textContent =
   'curl -H "Authorization: Bearer <TOKEN>" ' + base + '/api/v1/people?q=kiss'
-document.getElementById('mcp').textContent = base + '/mcp'
 document.getElementById('py').textContent =
 \`import requests
 BASE = "\${base}"

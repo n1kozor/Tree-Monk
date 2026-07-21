@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import type { ApiServerConfig, ApiServerStatus } from '@shared/types'
 
 /**
- * Settings card for the local API + MCP server. Everything is opt-in: the
+ * Settings card for the local API server. Everything is opt-in: the
  * server binds to 127.0.0.1 only, every request needs the Bearer token below,
  * and writes have their own switch. Docs are served by the app itself at /docs.
  */
@@ -162,24 +162,6 @@ export function ApiServerSettings(): JSX.Element | null {
                 <p className="text-xs text-muted-foreground">{t('settings.api.writesDesc')}</p>
               </div>
               <Toggle on={cfg.allowWrites} onChange={(v) => void patch({ allowWrites: v })} />
-            </div>
-
-            {/* MCP */}
-            <div className="flex items-center gap-3 px-4 py-3">
-              <Bot className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{t('settings.api.mcp')}</p>
-                <p className="text-xs text-muted-foreground">{t('settings.api.mcpDesc')}</p>
-                {cfg.mcpEnabled && (
-                  <button
-                    onClick={() => copy(`${base}/mcp`)}
-                    className="mt-1 flex max-w-full items-center gap-1 truncate rounded bg-secondary/50 px-1.5 py-0.5 text-[11px] text-muted-foreground hover:text-foreground"
-                  >
-                    <Copy className="h-3 w-3 shrink-0" /> {base}/mcp
-                  </button>
-                )}
-              </div>
-              <Toggle on={cfg.mcpEnabled} onChange={(v) => void patch({ mcpEnabled: v })} />
             </div>
 
             {/* Docs */}

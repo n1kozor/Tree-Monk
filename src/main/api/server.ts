@@ -25,7 +25,6 @@ import { buildPedigree } from '../db/pedigree'
 import { buildAtlasPoints } from '../db/atlasData'
 import { exportGedcom } from '../gedcom/export'
 import type { ApiServerConfig, ApiServerStatus, EventRecord, FamilyInput, PersonInput } from '@shared/types'
-import { handleMcpRequest } from './mcp'
 import { DOCS_HTML } from './docs'
 import { anyPluginEnabled, pluginScopesForToken } from '../plugins'
 
@@ -40,7 +39,7 @@ import { anyPluginEnabled, pluginScopesForToken } from '../plugins'
  * windows refresh live.
  *
  * Env overrides (scripts / e2e): TREEMONK_API=1, TREEMONK_API_PORT,
- * TREEMONK_API_TOKEN, TREEMONK_API_WRITES=1, TREEMONK_API_MCP=1.
+ * TREEMONK_API_TOKEN, TREEMONK_API_WRITES=1.
  */
 
 export type ApiConfig = ApiServerConfig
@@ -73,8 +72,7 @@ export function getApiConfig(): ApiConfig {
     enabled: AppSettings.get('api.enabled') === '1',
     port: Number(AppSettings.get('api.port')) || DEFAULT_PORT,
     token,
-    allowWrites: AppSettings.get('api.writes') === '1',
-    mcpEnabled: AppSettings.get('api.mcp') === '1'
+    allowWrites: AppSettings.get('api.writes') === '1'
   }
   // Env overrides — used by scripts and the e2e suite.
   const e = envBool('TREEMONK_API')
@@ -83,8 +81,6 @@ export function getApiConfig(): ApiConfig {
   if (process.env.TREEMONK_API_TOKEN) cfg.token = process.env.TREEMONK_API_TOKEN
   const w = envBool('TREEMONK_API_WRITES')
   if (w !== null) cfg.allowWrites = w
-  const m = envBool('TREEMONK_API_MCP')
-  if (m !== null) cfg.mcpEnabled = m
   return cfg
 }
 
@@ -92,7 +88,6 @@ export function setApiConfig(patch: Partial<Omit<ApiConfig, 'token'>>): ApiConfi
   if (patch.enabled !== undefined) AppSettings.set('api.enabled', patch.enabled ? '1' : '0')
   if (patch.port !== undefined) AppSettings.set('api.port', String(patch.port))
   if (patch.allowWrites !== undefined) AppSettings.set('api.writes', patch.allowWrites ? '1' : '0')
-  if (patch.mcpEnabled !== undefined) AppSettings.set('api.mcp', patch.mcpEnabled ? '1' : '0')
   restartApiServer()
   return getApiConfig()
 }
@@ -482,11 +477,6 @@ async function handle(req: IncomingMessage, res: ServerResponse, cfg: ApiConfig)
   const pluginScopes = isMain ? null : pluginScopesForToken(bearer)
   if (!isMain && !pluginScopes) return json(res, 401, { error: 'Missing or invalid Bearer token' })
 
-  if (path === '/mcp') {
-    if (!isMain) return json(res, 403, { error: 'Plugin tokens cannot use the MCP endpoint' })
-    if (!cfg.mcpEnabled) return json(res, 404, { error: 'MCP endpoint is disabled' })
-    return handleMcpRequest(req, res, cfg.allowWrites, () => broadcast())
-  }
   // The API itself may be off in Settings while the server only runs for
   // plugin panels — then the main token has no data surface here.
   if (isMain && !cfg.enabled) return json(res, 403, { error: 'The local API is disabled in Settings' })
@@ -580,7 +570,7 @@ function buildOpenApi(cfg: ApiConfig): unknown {
       title: 'TreeMonk Local API',
       version: app.getVersion(),
       description:
-        'Local-first genealogy data over HTTP. Bound to 127.0.0.1; every data route requires the Bearer token from Settings. The MCP endpoint lives at /mcp.'
+        'Local-first genealogy data over HTTP. Bound to 127.0.0.1; every data route requires the Bearer token from Settings.'
     },
     servers: [{ url: `http://127.0.0.1:${cfg.port}` }],
     components: {
@@ -655,14 +645,7 @@ function buildOpenApi(cfg: ApiConfig): unknown {
         })
       },
       '/api/v1/atlas/points': { get: p('Every geocoded life event') },
-      '/api/v1/export/gedcom': { get: p('Full GEDCOM export (text)') },
-      '/mcp': {
-        post: {
-          summary: 'Model Context Protocol endpoint (Streamable HTTP) — connect AI assistants',
-          security: [{ bearer: [] }],
-          responses: { '200': { description: 'JSON-RPC response' } }
-        }
-      }
+      '/api/v1/export/gedcom': { get: p('Full GEDCOM export (text)') }
     }
   }
 }

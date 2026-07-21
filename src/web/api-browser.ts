@@ -199,7 +199,7 @@ export function createDemoApi(): TreeMonkApi {
       points: async () => buildAtlasPoints()
     },
     apiServer: {
-      getConfig: async () => ({ enabled: false, port: 27007, token: '', allowWrites: false, mcpEnabled: false }),
+      getConfig: async () => ({ enabled: false, port: 27007, token: '', allowWrites: false }),
       setConfig: async () => blocked(),
       regenerateToken: async () => blocked(),
       status: async () => ({ running: false, port: 27007, error: null }),

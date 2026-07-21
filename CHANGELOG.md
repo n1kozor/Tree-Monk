@@ -2,6 +2,12 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.8.10]
+
+### Changed
+- Internal optimizations and further preparation for the production
+  FamilySearch integration; the local HTTP API is unchanged.
+
 ## [1.8.9]
 
 ### Changed

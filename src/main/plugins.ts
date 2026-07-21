@@ -15,7 +15,7 @@ import { getApiConfig, restartApiServer } from './api/server'
  *   allows network access to 127.0.0.1 ONLY — data cannot leave the machine.
  * - Each plugin gets its OWN API token, scoped to the permissions the
  *   manifest declared (read / write / documents) — never the user's main
- *   token, and never the MCP endpoint.
+ *   token.
  * - Installed plugins start DISABLED; the user flips them on in Settings
  *   after seeing the requested permissions.
  */

@@ -203,7 +203,7 @@ export default function App(): JSX.Element {
     }
   }, [])
 
-  // External API/MCP writes → refresh the stores (debounced; scripts can burst).
+  // External API writes → refresh the stores (debounced; scripts can burst).
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined
     const unsub = window.api.apiServer?.onExternalChange?.(() => {
