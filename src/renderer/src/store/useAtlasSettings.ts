@@ -2,7 +2,7 @@ import { create } from 'zustand'
 import type { AtlasKind } from '@shared/types'
 
 /** Basemap choices — 'auto' follows the app theme (light/dark). */
-export type AtlasBasemap = 'auto' | 'light' | 'dark' | 'satellite' | 'historical'
+export type AtlasBasemap = 'auto' | 'light' | 'dark' | 'historical'
 
 export interface AtlasSettings {
   /** Flat map or tilted 3D terrain. */
@@ -55,6 +55,9 @@ function load(): typeof DEFAULTS {
       ...DEFAULTS,
       ...saved,
       kinds: { ...DEFAULT_KINDS, ...(saved.kinds ?? {}) },
+      // The Esri satellite basemap was removed (licensing) — migrate any
+      // persisted 'satellite' choice back to the default.
+      basemap: saved.basemap === 'satellite' ? 'auto' : (saved.basemap ?? DEFAULTS.basemap),
       // Heatmap + migration paths always start OFF — session-only layers.
       showHeat: false,
       showPaths: false

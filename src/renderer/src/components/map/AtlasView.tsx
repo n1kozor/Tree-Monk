@@ -38,7 +38,7 @@ import { PlacesManagerDialog } from './PlacesManagerDialog'
  *
  * A full-bleed MapLibre canvas plotting every geocoded life event as
  * configurable layers (clustered markers / heatmap / migration paths) over
- * swappable basemaps: modern vector (OpenFreeMap), satellite, and the
+ * swappable basemaps: modern vector (OpenFreeMap), dark raster (Carto), and the
  * OpenHistoricalMap period map whose borders follow the year filter. 3D mode
  * adds terrain, sky and real building extrusions. Focusing one person turns
  * the map into their life journey — everyone else disappears and their stops
@@ -77,24 +77,19 @@ const STYLE_HISTORICAL = historicalStyleRaw as unknown as StyleSpecification
 const OFM_GLYPHS = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf'
 const DEM_TILES = ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png']
 
-/** Key-free raster styles (dark & satellite) with a verified glyph endpoint. */
-function rasterStyle(kind: 'dark' | 'satellite'): StyleSpecification {
-  const src =
-    kind === 'dark'
-      ? {
-          tiles: ['a', 'b', 'c', 'd'].map((s) => `https://${s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png`),
-          attribution: '© OpenStreetMap contributors © CARTO'
-        }
-      : {
-          tiles: [
-            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-          ],
-          attribution: 'Esri, Maxar, Earthstar Geographics'
-        }
+/** Key-free dark raster style (Carto) with a verified glyph endpoint. */
+function darkRasterStyle(): StyleSpecification {
   return {
     version: 8,
     glyphs: OFM_GLYPHS,
-    sources: { base: { type: 'raster', tiles: src.tiles, tileSize: 256, attribution: src.attribution } },
+    sources: {
+      base: {
+        type: 'raster',
+        tiles: ['a', 'b', 'c', 'd'].map((s) => `https://${s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png`),
+        tileSize: 256,
+        attribution: '© OpenStreetMap contributors © CARTO'
+      }
+    },
     layers: [{ id: 'base', type: 'raster', source: 'base' }]
   }
 }
@@ -302,12 +297,11 @@ export function AtlasView(): JSX.Element {
   // 3D over the modern basemaps switches to "liberty" (building heights).
   const resolved = useMemo<ResolvedStyle>(() => {
     const b = settings.basemap
-    if (b === 'satellite') return { key: 'satellite', style: rasterStyle('satellite'), font: 'Noto Sans Bold' }
     if (b === 'historical')
       return { key: 'historical', style: STYLE_HISTORICAL, font: 'OpenHistorical Bold' }
     const dark = b === 'dark' || (b === 'auto' && theme === 'dark')
     if (settings.mode === '3d') return { key: 'liberty', style: STYLE_LIBERTY, font: 'Noto Sans Bold' }
-    if (dark) return { key: 'dark', style: rasterStyle('dark'), font: 'Noto Sans Bold' }
+    if (dark) return { key: 'dark', style: darkRasterStyle(), font: 'Noto Sans Bold' }
     return { key: 'light', style: STYLE_LIGHT, font: 'Noto Sans Bold' }
   }, [settings.basemap, settings.mode, theme])
   const resolvedRef = useRef(resolved)
@@ -353,7 +347,15 @@ export function AtlasView(): JSX.Element {
 
     // Terrain sources (hosted styles don't carry them).
     if (!map.getSource('dem'))
-      map.addSource('dem', { type: 'raster-dem', tiles: DEM_TILES, encoding: 'terrarium', tileSize: 256, maxzoom: 13 })
+      map.addSource('dem', {
+        type: 'raster-dem',
+        tiles: DEM_TILES,
+        encoding: 'terrarium',
+        tileSize: 256,
+        maxzoom: 13,
+        // The AWS Terrain Tiles dataset requires crediting its DEM sources.
+        attribution: 'Terrain: Mapzen/AWS Terrain Tiles (SRTM/NASA, GMTED, ETOPO1)'
+      })
 
     // Period map follows the TO end of the year window.
     if (resolvedRef.current.key === 'historical') safeFilterByDate(map, yTo)
@@ -574,7 +576,9 @@ export function AtlasView(): JSX.Element {
       style: resolvedRef.current.style as StyleSpecification,
       center: [12, 50],
       zoom: 4,
-      attributionControl: { compact: true },
+      // Always-visible attribution: the OSM/ODbL (and Carto/OHM) licences
+      // require the credit to be VISIBLE, not hidden behind a compact ⓘ toggle.
+      attributionControl: { compact: false },
       maxPitch: 72
     })
     mapRef.current = map
@@ -900,7 +904,7 @@ export function AtlasView(): JSX.Element {
               ))}
             </div>
             <div className="flex flex-wrap gap-1">
-              {(['auto', 'light', 'dark', 'satellite', 'historical'] as const).map((b) => (
+              {(['auto', 'light', 'dark', 'historical'] as const).map((b) => (
                 <button
                   key={b}
                   onClick={() => S.set({ basemap: b })}

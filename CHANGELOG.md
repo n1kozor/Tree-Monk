@@ -2,6 +2,36 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.8.11]
+
+### Added
+- **Empty-tree onboarding.** With zero people in the database, the tree view
+  shows a clear call to action instead of a blank canvas: a "Create the first
+  person" button opening a three-step wizard (name/sex → birth date + place →
+  done). The created person becomes the tree's starting person and the tree
+  focuses on them; a GEDCOM-import link is offered as the alternative.
+- **Search button in every place field.** Besides Enter and leaving the field,
+  the lookup can now be triggered by clicking the magnifier inside the field
+  (also in the investigation board's map search).
+
+### Changed
+- **Nominatim-policy-compliant place lookup.** Place fields no longer fire
+  requests while typing; one lookup runs on Enter / blur / button. Lookups
+  route through the TreeMonk geocoder proxy first (a zero-dependency server
+  ships in `deploy/geocoder/` — shared cache + global throttle, optional
+  LocationIQ upstream) and fall back to the public Nominatim transparently.
+- **Map licensing hygiene.** The attribution control is always visible (no
+  longer collapsed behind the compact ⓘ); the terrain DEM source is credited;
+  the board's map cards fetch Carto tiles instead of tile.openstreetmap.org
+  (the OSMF tile policy forbids distributed apps using the community server);
+  the Esri satellite basemap was removed (licensing) with a silent settings
+  migration back to the default; dead/unused hosts were pruned from the CSPs.
+- **Feedback is a direct e-mail** to the developer (mailto) — the third-party
+  Web3Forms relay, its dialog and its CSP entry were removed.
+
+### Removed
+- Vestigial famous-dataset packaging entry in electron-builder.yml.
+
 ## [1.8.10]
 
 ### Changed

@@ -1,13 +1,20 @@
+import { app } from 'electron'
 import { AppSettings, Events, Families, People, Places } from './db/repo'
 import { getDb } from './db/connection'
 import { isSignedIn, searchFamilySearchPlaces } from './familysearch'
 import type { GeoResult } from '@shared/types'
 
-// Nominatim's usage policy allows at most ~1 request/second from a single app,
-// and BLOCKS (HTTP 429) anyone who exceeds it — which silently broke every place
-// lookup. So we (a) cache results per query, and (b) serialise requests with a
-// >1s gap between them. The UA identifies the app as the policy requires.
-const NOMINATIM_UA = 'TreeMonk/1.3 (+https://treemonk.eu)'
+// Geocoding routes through the TreeMonk geocoder proxy FIRST (shared cache +
+// server-side throttle on the VPS — see deploy/geocoder/), so the public
+// Nominatim server isn't hit by every installed copy of the app. The public
+// endpoint is only the fallback when the proxy is unreachable, throttled to
+// ~1 request/second with an identifying UA as Nominatim's usage policy
+// requires (they BLOCK violators with HTTP 429, which silently broke lookups).
+const GEO_PROXY = process.env.TREEMONK_GEOCODER ?? 'https://treemonk.eu/geocode'
+const PUBLIC_NOMINATIM = 'https://nominatim.openstreetmap.org'
+const NOMINATIM_UA = `TreeMonk/${app.getVersion()} (+https://treemonk.eu)`
+/** Set once the proxy failed this session — skip it for subsequent lookups. */
+let proxyDead = false
 
 /** UI language → Accept-Language string (the user's language first, English as
  *  a fallback) so place names come back localized to the app's language. */
@@ -103,22 +110,35 @@ export async function geoSearch(query: string): Promise<GeoResult[]> {
         /* fall through to Nominatim */
       }
     }
-    const wait = lastFetchAt + MIN_INTERVAL_MS - Date.now()
-    if (wait > 0) await new Promise((r) => setTimeout(r, wait))
-    lastFetchAt = Date.now()
-    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6&addressdetails=1&q=${encodeURIComponent(q)}`
-    try {
-      const res = await fetch(url, {
-        headers: { 'User-Agent': NOMINATIM_UA, 'Accept-Language': placeLang() }
-      })
-      if (!res.ok) return [] // don't cache failures (e.g. a transient 429)
-      const data = (await res.json()) as NominatimHit[]
+    const qs = `search?format=jsonv2&limit=6&addressdetails=1&q=${encodeURIComponent(q)}`
+    const headers = { 'User-Agent': NOMINATIM_UA, 'Accept-Language': placeLang() }
+    const finish = (data: NominatimHit[]): GeoResult[] => {
       const out = data
         .map((d) => ({ name: conciseName(d), lat: Number(d.lat), lon: Number(d.lon) }))
         .filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon))
       rankByOverlap(q, out)
       geoCache.set(key, out)
       return out
+    }
+    // 1) The TreeMonk proxy — server-side cache + throttle, so no client-side
+    //    pacing is needed (bulk standardization runs much faster through it).
+    if (!proxyDead) {
+      try {
+        const res = await fetch(`${GEO_PROXY}/${qs}`, { headers, signal: AbortSignal.timeout(5000) })
+        if (res.ok) return finish((await res.json()) as NominatimHit[])
+        proxyDead = true // 404/5xx → not deployed / broken; stop trying this session
+      } catch {
+        proxyDead = true
+      }
+    }
+    // 2) Public Nominatim fallback — strictly ≥1.1s apart.
+    const wait = lastFetchAt + MIN_INTERVAL_MS - Date.now()
+    if (wait > 0) await new Promise((r) => setTimeout(r, wait))
+    lastFetchAt = Date.now()
+    try {
+      const res = await fetch(`${PUBLIC_NOMINATIM}/${qs}`, { headers })
+      if (!res.ok) return [] // don't cache failures (e.g. a transient 429)
+      return finish((await res.json()) as NominatimHit[])
     } catch {
       return []
     }

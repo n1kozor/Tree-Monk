@@ -62,24 +62,10 @@
   },
   "feedback": {
     "section": "Visszajelzés",
-    "title": "Visszajelzés küldése",
+    "title": "Írj a fejlesztőnek",
     "report": "Hiba jelentése",
-    "desc": "Találtál egy hibát, vagy van egy ötleted? Írd meg a fejlesztőnek — regisztráció nélkül.",
-    "intro": "Találtál egy hibát, vagy van egy ötleted? Írj egy üzenetet — egyenesen a fejlesztőhöz jut.",
-    "bug": "Hiba",
-    "idea": "Ötlet",
-    "other": "Egyéb",
-    "messageLabel": "Üzeneted",
-    "messagePlaceholder": "Írd le, mi történt, vagy mit szeretnél látni…",
-    "emailLabel": "E-mail címed (opcionális)",
-    "emailPlaceholder": "nev@pelda.hu — csak ha választ szeretnél",
-    "privacyNote": "A verzió, az operációs rendszer és a nyelv automatikusan csatolva (v{{version}}). Családfa- vagy személyes adat soha nem kerül elküldésre.",
-    "send": "Küldés",
-    "sending": "Küldés…",
-    "sent": "Köszönjük! A visszajelzésedet elküldtük.",
-    "error": "Nem sikerült elküldeni. Próbáld újra később.",
-    "errorNetwork": "Nincs kapcsolat. Ellenőrizd az internetet, és próbáld újra.",
-    "notConfigured": "A visszajelzés még nincs beállítva."
+    "desc": "Találtál hibát, vagy van egy ötleted? Írj közvetlenül e-mailt: barkattila@gmail.com",
+    "send": "E-mail írása"
   },
   "search": {
     "placeholder": "Keresés: személyek, dokumentumok…",
@@ -2076,7 +2062,6 @@
       "auto": "Auto",
       "light": "Világos",
       "dark": "Sötét",
-      "satellite": "Műhold",
       "historical": "Történelmi"
     },
     "kind": {
@@ -2144,5 +2129,29 @@
     "copyForLlm": "Másolás AI-nak",
     "copiedForLlm": "A teljes plugin-specifikáció a vágólapon — illeszd be egy AI-modellnek.",
     "copyForLlmDesc": "Tipp: a „Másolás AI-nak” gomb a TELJES műszaki specifikációt (manifest-szabályok, SDK, teljes API-referencia, működő példa) egyetlen dokumentumként a vágólapra teszi — illeszd be egy AI-asszisztensnek (pl. Claude), írd le mellé, mit csináljon a bővítmény, és kész plugint kapsz."
+  },
+  "geo": {
+    "searchHint": "A helykeresés Enterre vagy a mezőből kilépéskor indul",
+    "pressEnter": "Nyomj Entert a kereséshez",
+    "searchBtn": "Hely keresése"
+  },
+  "firstPerson": {
+    "emptyTitle": "Kezdd el a családfádat!",
+    "emptyDesc": "A fád még üres. Hozd létre az első személyt — jellemzően saját magadat vagy egy ismert őst —, és köré építheted a többieket: szülőket, házastársat, gyerekeket.",
+    "cta": "Első személy létrehozása",
+    "importAlt": "Van már GEDCOM-fájlod?",
+    "importLink": "Importáld a Beállításokban",
+    "step1Desc": "Kivel kezdjük? Általában saját magaddal vagy egy biztosan ismert őssel érdemes indulni. Legalább az egyik névmezőt töltsd ki.",
+    "step2Desc": "Születési adatok — mindkét mező opcionális, később bármikor pótolhatod a profilon.",
+    "birthDate": "Születési dátum",
+    "birthPlace": "Születési hely",
+    "create": "Létrehozás",
+    "doneTitle": "Megvan az első személy! 🎉",
+    "doneBody": "A fa mostantól köré épül: a kártyáján és a profilján tudsz szülőket, házastársat és gyerekeket hozzáadni — a fa nézet plusz gombjaival is.",
+    "openProfile": "Profil megnyitása",
+    "finish": "Kész",
+    "next": "Tovább",
+    "back": "Vissza",
+    "cancel": "Mégse"
   }
 }

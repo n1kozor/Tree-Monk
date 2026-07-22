@@ -9,6 +9,7 @@ import {
   Plus,
   Printer,
   Sprout,
+  UserPlus,
   Wand2, TreeDeciduous } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { usePedigreeSettings, type TreeViewKind } from '@/store/usePedigreeSettings'
@@ -25,6 +26,8 @@ import { useFsMode } from '@/hooks/useFsMode'
 import { useFsChangeWatcher } from '@/hooks/useFsChangeWatcher'
 import { isFamilySearchId } from '@/lib/familySearchSearch'
 import { TreePersonDialog, type PersonDraft } from './TreePersonDialog'
+import { FirstPersonWizard } from './FirstPersonWizard'
+import { Button } from '@/components/ui/button'
 import { ExportTreeDialog } from './ExportTreeDialog'
 import { PedigreeSettingsPanel } from './PedigreeSettingsPanel'
 import { CustomViewPanel, EMPTY_CUSTOM, type CustomConfig } from './CustomViewPanel'
@@ -53,6 +56,9 @@ export function FamilyTree(): JSX.Element {
   const startFsScan = useAppStore((s) => s.startFsScan)
   const fsScanRunning = useAppStore((s) => s.fsScan?.running ?? false)
   const [fsSyncTarget, setFsSyncTarget] = useState<{ personId: string; fid: string } | null>(null)
+  // Empty-database onboarding: the "create the first person" wizard.
+  const peopleLen = useAppStore((s) => s.people.length)
+  const [firstPersonOpen, setFirstPersonOpen] = useState(false)
   useEffect(() => {
     const onOpen = (e: Event): void => {
       const personId = (e as CustomEvent<{ personId: string }>).detail?.personId
@@ -481,14 +487,44 @@ export function FamilyTree(): JSX.Element {
     />
   )
 
+  // Mounted in BOTH returns: creating the first person flips `isEmpty` while
+  // the wizard is still showing its success step — it must survive the switch.
+  const FirstPerson = <FirstPersonWizard open={firstPersonOpen} onOpenChange={setFirstPersonOpen} />
+
   if (isEmpty) {
     return (
       <div className="relative h-full w-full">
         {Controls}
         {Dialog}
         {ExportDialog}
+        {FirstPerson}
         <div className="flex h-full items-center justify-center p-8">
-          <p className="max-w-sm text-center text-sm text-muted-foreground">{t('tree.empty')}</p>
+          {peopleLen === 0 ? (
+            // A truly empty database → onboarding, not a blank canvas.
+            <div className="max-w-md text-center">
+              <div className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-3xl bg-primary/10">
+                <TreeDeciduous className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="mb-1 text-lg font-bold">{t('firstPerson.emptyTitle')}</h2>
+              <p className="mb-5 text-sm text-muted-foreground">{t('firstPerson.emptyDesc')}</p>
+              <Button size="lg" className="gap-2" onClick={() => setFirstPersonOpen(true)} data-testid="first-person-cta">
+                <UserPlus className="h-4 w-4" />
+                {t('firstPerson.cta')}
+              </Button>
+              <p className="mt-4 text-xs text-muted-foreground">
+                {t('firstPerson.importAlt')}{' '}
+                <button
+                  type="button"
+                  className="font-medium text-primary underline-offset-2 hover:underline"
+                  onClick={() => useAppStore.getState().setView('settings')}
+                >
+                  {t('firstPerson.importLink')}
+                </button>
+              </p>
+            </div>
+          ) : (
+            <p className="max-w-sm text-center text-sm text-muted-foreground">{t('tree.empty')}</p>
+          )}
         </div>
       </div>
     )
@@ -499,6 +535,7 @@ export function FamilyTree(): JSX.Element {
       {Controls}
       {Dialog}
       {ExportDialog}
+      {FirstPerson}
       {CustomPanel}
       {view === 'landscape' && pedigree && (
         <>

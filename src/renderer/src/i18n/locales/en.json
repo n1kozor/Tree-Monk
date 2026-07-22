@@ -62,24 +62,10 @@
   },
   "feedback": {
     "section": "Feedback",
-    "title": "Send feedback",
+    "title": "Write to the developer",
     "report": "Report a bug",
-    "desc": "Found a bug or have an idea? Tell the developer — no account needed.",
-    "intro": "Found a bug or have an idea? Drop a message — it goes straight to the developer.",
-    "bug": "Bug",
-    "idea": "Idea",
-    "other": "Other",
-    "messageLabel": "Your message",
-    "messagePlaceholder": "Describe what happened, or what you'd like to see…",
-    "emailLabel": "Your e-mail (optional)",
-    "emailPlaceholder": "name@example.com — only if you'd like a reply",
-    "privacyNote": "App version, OS and language are attached automatically (v{{version}}). No tree or personal data is ever sent.",
-    "send": "Send",
-    "sending": "Sending…",
-    "sent": "Thanks! Your feedback was sent.",
-    "error": "Couldn't send feedback. Please try again later.",
-    "errorNetwork": "No connection. Check your internet and try again.",
-    "notConfigured": "Feedback isn't configured yet."
+    "desc": "Found a bug or have an idea? E-mail the developer directly: barkattila@gmail.com",
+    "send": "Write an e-mail"
   },
   "search": {
     "placeholder": "Search people, documents…",
@@ -2079,7 +2065,6 @@
       "auto": "Auto",
       "light": "Light",
       "dark": "Dark",
-      "satellite": "Satellite",
       "historical": "Historical"
     },
     "kind": {
@@ -2147,5 +2132,29 @@
     "copyForLlm": "Copy for AI",
     "copiedForLlm": "The full plugin specification is on the clipboard — paste it to an AI model.",
     "copyForLlmDesc": "Tip: the “Copy for AI” button puts the ENTIRE technical specification (manifest rules, SDK, full API reference, a working example) on the clipboard as one document — paste it into an AI assistant (e.g. Claude), describe what your plugin should do, and get a ready-made plugin."
+  },
+  "geo": {
+    "searchHint": "The place lookup runs on Enter or when you leave the field",
+    "pressEnter": "Press Enter to search",
+    "searchBtn": "Search place"
+  },
+  "firstPerson": {
+    "emptyTitle": "Start your family tree!",
+    "emptyDesc": "Your tree is empty. Create the first person — usually yourself or a well-known ancestor — and build the rest around them: parents, spouse, children.",
+    "cta": "Create the first person",
+    "importAlt": "Already have a GEDCOM file?",
+    "importLink": "Import it in Settings",
+    "step1Desc": "Who do we start with? Usually yourself or an ancestor you know for certain. Fill in at least one of the name fields.",
+    "step2Desc": "Birth details — both fields are optional; you can add them on the profile any time.",
+    "birthDate": "Birth date",
+    "birthPlace": "Birth place",
+    "create": "Create",
+    "doneTitle": "The first person is in! 🎉",
+    "doneBody": "The tree now builds around them: add parents, a spouse and children from their card or profile — or with the plus buttons in the tree view.",
+    "openProfile": "Open profile",
+    "finish": "Done",
+    "next": "Next",
+    "back": "Back",
+    "cancel": "Cancel"
   }
 }

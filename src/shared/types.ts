@@ -967,27 +967,6 @@ export interface UpdateInfo {
   assetUrl: string | null
 }
 
-/** A user feedback submission from the in-app feedback form. */
-export interface FeedbackInput {
-  /** What kind of feedback: a bug report, an idea/request, or general. */
-  category: 'bug' | 'idea' | 'other'
-  /** The free-text message (required). */
-  message: string
-  /** Optional reply address so the developer can follow up. */
-  email?: string
-  /** The UI language the user is running (for context). */
-  locale?: string
-  /** Optional 1–5 satisfaction rating (from the welcome prompt). */
-  rating?: number
-}
-
-/** Outcome of sending feedback to the collection backend. */
-export interface FeedbackResult {
-  ok: boolean
-  /** Short reason when `ok` is false: "not_configured" | "network" | a server message. */
-  error?: string
-}
-
 /** One recorded change in the audit log (a single row insert/update/delete). */
 export interface AuditEntry {
   /** Monotonic sequence number (also the stable id). */

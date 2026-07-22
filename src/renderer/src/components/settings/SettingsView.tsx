@@ -28,7 +28,6 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
-import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { ExportGedcomDialog } from '@/components/common/ExportGedcomDialog'
 import { useFsMode } from '@/hooks/useFsMode'
 import { runPlaceStandardization } from '@/lib/standardizePlaces'
@@ -141,7 +140,6 @@ export function SettingsView(): JSX.Element {
   } = useSettings()
   const [restoreOpen, setRestoreOpen] = useState(false)
   const [resetOpen, setResetOpen] = useState(false)
-  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
   const [interrupted, setInterrupted] = useState(false)
   const fsMode = useFsMode()
@@ -336,7 +334,11 @@ export function SettingsView(): JSX.Element {
 
           <Category icon={MessageCircle} title={t('feedback.section')}>
             <Row icon={MessageCircle} title={t('feedback.title')} desc={t('feedback.desc')}>
-              <Button size="sm" className="gap-2" onClick={() => setFeedbackOpen(true)}>
+              <Button
+                size="sm"
+                className="gap-2"
+                onClick={() => void window.api.app.openExternal('mailto:barkattila@gmail.com?subject=TreeMonk')}
+              >
                 <MessageCircle className="h-4 w-4" />
                 {t('feedback.send')}
               </Button>
@@ -387,7 +389,6 @@ export function SettingsView(): JSX.Element {
         <p>{t('settings.resetWarning')}</p>
       </ConfirmDialog>
 
-      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <ExportGedcomDialog open={exportOpen} onOpenChange={setExportOpen} />
     </ScrollArea>
   )

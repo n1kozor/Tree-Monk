@@ -26,10 +26,6 @@ extraResources:
   # App icon for the runtime window/taskbar.
   - from: build/icon.png
     to: icon.png
-  # Bundled "notable people" dataset for the Famous-relatives scan (Pantheon,
-  # CC BY 4.0). Populate via `npm run fetch:famous`.
-  - from: resources/famous
-    to: famous
   # Hungarian user manual (self-contained HTML) — opened in an in-app window
   # from the sidebar / Help.
   - from: docs/TreeMonk-Kezikonyv.html

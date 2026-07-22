@@ -69,30 +69,27 @@ export function BoardToolbar({ spawnAt, onWizard }: Props): JSX.Element {
   const [mapOpen, setMapOpen] = useState(false)
   const [mapQ, setMapQ] = useState('')
   const [mapBusy, setMapBusy] = useState(false)
+  const [mapSearched, setMapSearched] = useState(false)
   const [mapResults, setMapResults] = useState<{ name: string; lat: number; lon: number }[]>([])
   const mapInputRef = useRef<HTMLInputElement>(null)
   const openMap = (): void => {
     setMapOpen(true)
     setMapQ('')
     setMapResults([])
+    setMapSearched(false)
     setTimeout(() => mapInputRef.current?.focus(), 10)
   }
-  // Debounced address autocomplete — same proven flow as the profile PlaceInput
-  // (≥3 chars, 400 ms). Results appear as you type.
-  useEffect(() => {
-    if (!mapOpen) return
-    if (mapQ.trim().length < 3) {
-      setMapResults([])
-      return
-    }
+  // Explicit search on Enter — Nominatim's usage policy forbids as-you-type
+  // autocomplete, so nothing is requested while typing (same as PlaceInput).
+  const runMapSearch = async (): Promise<void> => {
+    const q = mapQ.trim()
+    if (q.length < 3) return
     setMapBusy(true)
-    const id = setTimeout(async () => {
-      const r = await window.api.geo.search(mapQ).catch(() => [])
-      setMapResults(r.slice(0, 20))
-      setMapBusy(false)
-    }, 400)
-    return () => clearTimeout(id)
-  }, [mapQ, mapOpen])
+    const r = await window.api.geo.search(q).catch(() => [])
+    setMapResults(r.slice(0, 20))
+    setMapSearched(true)
+    setMapBusy(false)
+  }
   const pickMap = (r: { name: string; lat: number; lon: number }): void => {
     addMap(spawnAt(), { label: r.name.split(',').slice(0, 2).join(',').trim(), lat: r.lat, lng: r.lon })
     setMapOpen(false)
@@ -238,10 +235,27 @@ export function BoardToolbar({ spawnAt, onWizard }: Props): JSX.Element {
                 <input
                   ref={mapInputRef}
                   value={mapQ}
-                  onChange={(e) => setMapQ(e.target.value)}
+                  onChange={(e) => {
+                    setMapQ(e.target.value)
+                    setMapSearched(false)
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') void runMapSearch()
+                  }}
                   placeholder={t('board.mapSearchPlaceholder')}
-                  className="w-full rounded-xl bg-secondary/40 px-2 py-1.5 pl-8 text-sm outline-none"
+                  className="w-full rounded-xl bg-secondary/40 px-2 py-1.5 pl-8 pr-9 text-sm outline-none"
                 />
+                {/* Clickable lookup trigger (besides Enter). */}
+                <button
+                  type="button"
+                  title={t('geo.searchBtn')}
+                  aria-label={t('geo.searchBtn')}
+                  disabled={mapBusy}
+                  onClick={() => void runMapSearch()}
+                  className="absolute right-3 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
               </div>
               <div className="max-h-72 overflow-y-auto p-1">
                 {mapBusy && <p className="px-2 py-3 text-center text-xs text-muted-foreground">…</p>}
@@ -256,7 +270,10 @@ export function BoardToolbar({ spawnAt, onWizard }: Props): JSX.Element {
                       <span className="min-w-0 flex-1 truncate text-sm">{r.name}</span>
                     </button>
                   ))}
-                {!mapBusy && mapQ.trim() && mapResults.length === 0 && (
+                {!mapBusy && !mapSearched && mapQ.trim().length >= 3 && mapResults.length === 0 && (
+                  <p className="px-2 py-3 text-center text-xs text-muted-foreground">{t('geo.pressEnter')}</p>
+                )}
+                {!mapBusy && mapSearched && mapResults.length === 0 && (
                   <p className="px-2 py-3 text-center text-xs text-muted-foreground">—</p>
                 )}
               </div>

@@ -34,7 +34,6 @@ import { localizedPluginText } from '@/lib/plugins'
 import { PluginIcon } from '@/components/plugins/PluginIcon'
 import type { InstalledPlugin } from '@shared/types'
 import { AppIcon } from '@/components/common/AppIcon'
-import { FeedbackDialog } from '@/components/common/FeedbackDialog'
 import { SupportDialog } from '@/components/common/SupportDialog'
 import { HelpDialog } from '@/components/common/HelpDialog'
 import {
@@ -50,6 +49,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
+
+/** Feedback goes straight to the developer's inbox — no third-party form. */
+const FEEDBACK_MAILTO = 'mailto:barkattila@gmail.com?subject=TreeMonk'
 
 const ITEMS: { view: View; icon: typeof Search; labelKey: string }[] = [
   { view: 'board', icon: Search, labelKey: 'nav.board' },
@@ -89,7 +91,6 @@ export function Sidebar(): JSX.Element {
   }, [pluginsNonce])
   const collapsed = useSettings((s) => s.sidebarCollapsed)
   const setCollapsed = useSettings((s) => s.setSidebarCollapsed)
-  const [feedbackOpen, setFeedbackOpen] = useState(false)
   const [supportOpen, setSupportOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [issueCount, setIssueCount] = useState(0)
@@ -238,11 +239,11 @@ export function Sidebar(): JSX.Element {
           )}
         </div>
 
-        {/* Feedback — pinned to the top, above the navigation. */}
+        {/* Feedback — a plain mailto to the developer, above the navigation. */}
         {withTip(
           'feedback.report',
           <button
-            onClick={() => setFeedbackOpen(true)}
+            onClick={() => void window.api.app.openExternal(FEEDBACK_MAILTO)}
             data-testid="open-feedback"
             className={cn(
               'mb-1 flex h-10 shrink-0 items-center rounded-xl border border-primary/30 bg-primary/5 font-medium text-primary transition-colors hover:bg-primary/10',
@@ -390,7 +391,6 @@ export function Sidebar(): JSX.Element {
         </div>
       </aside>
 
-      <FeedbackDialog open={feedbackOpen} onOpenChange={setFeedbackOpen} />
       <SupportDialog open={supportOpen} onOpenChange={setSupportOpen} />
       <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} currentView={view} />
     </TooltipProvider>

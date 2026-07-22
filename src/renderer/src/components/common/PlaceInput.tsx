@@ -1,11 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
-import { Loader2, MapPin } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { Loader2, MapPin, Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
+import { cn } from '@/lib/utils'
 import type { GeoResult } from '@shared/types'
 
 /**
- * A place text field with Nominatim autocomplete. Picking a suggestion stores
- * the canonical name AND persists its lat/lon into the gazetteer (for the map).
+ * A place text field backed by Nominatim — POLICY-CONFORM: typing never sends
+ * a request (Nominatim's usage policy forbids as-you-type autocomplete). ONE
+ * lookup runs when the user presses Enter or leaves the field after editing;
+ * the suggestions then pop up and stay clickable even though the field lost
+ * focus. Picking a suggestion stores the canonical name AND persists its
+ * lat/lon into the gazetteer (for the map).
  */
 export function PlaceInput({
   value,
@@ -20,41 +26,51 @@ export function PlaceInput({
   placeholder?: string
   className?: string
 }): JSX.Element {
+  const { t } = useTranslation()
   const [results, setResults] = useState<GeoResult[]>([])
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [focused, setFocused] = useState(false)
   const [query, setQuery] = useState(value)
-  const skipRef = useRef(false)
-
-  useEffect(() => setQuery(value), [value])
+  /** True once the user actually edited the text (external sync resets it) —
+   *  tabbing through untouched fields must not fire lookups. */
+  const dirtyRef = useRef(false)
+  /** The last string we looked up — never repeat the identical request. */
+  const lastSearchedRef = useRef('')
+  const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (skipRef.current) {
-      skipRef.current = false
-      return
+    setQuery(value)
+    dirtyRef.current = false
+  }, [value])
+
+  // The dropdown can outlive the input's focus (blur-triggered search), so
+  // close it on any click outside the component.
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent): void => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
     }
-    // Only autocomplete while the field is actually focused — never auto-open
-    // just because the panel mounted with an existing place value.
-    if (!focused) return
-    if (query.trim().length < 3) {
-      setResults([])
-      return
-    }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  const runSearch = async (q: string): Promise<void> => {
+    const trimmed = q.trim()
+    if (trimmed.length < 3 || trimmed === lastSearchedRef.current) return
+    lastSearchedRef.current = trimmed
     setLoading(true)
-    const id = setTimeout(async () => {
-      const r = await window.api.geo.search(query).catch(() => [])
-      setResults(r)
-      setOpen(r.length > 0)
-      setLoading(false)
-    }, 400)
-    return () => clearTimeout(id)
-  }, [query, focused])
+    const r = await window.api.geo.search(trimmed).catch(() => [])
+    setLoading(false)
+    setResults(r)
+    setOpen(r.length > 0)
+  }
 
   const pick = (r: GeoResult): void => {
-    skipRef.current = true
     setQuery(r.name)
     onChange(r.name)
+    dirtyRef.current = false
+    // Picking IS the resolution — leaving the field must not look it up again.
+    lastSearchedRef.current = r.name.trim()
     setOpen(false)
     setResults([])
     window.api.geo.savePlace(r)
@@ -62,29 +78,50 @@ export function PlaceInput({
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={rootRef}>
       <Input
         value={query}
         placeholder={placeholder}
-        className={className}
+        title={t('geo.searchHint')}
+        className={cn('pr-9', className)}
         onChange={(e) => {
           setQuery(e.target.value)
           onChange(e.target.value)
+          dirtyRef.current = true
+        }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            void runSearch(query)
+          } else if (e.key === 'Escape') {
+            setOpen(false)
+          }
         }}
         onFocus={() => {
-          setFocused(true)
           if (results.length) setOpen(true)
         }}
         onBlur={() => {
           // Delay so a suggestion click registers first.
           setTimeout(() => {
-            setFocused(false)
-            setOpen(false)
             onCommit?.()
+            // The policy-conform lookup: fires on LEAVING the field, and only
+            // when the user actually changed the text.
+            if (dirtyRef.current) void runSearch(query)
           }, 150)
         }}
       />
-      {loading && <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />}
+      {/* Clickable lookup trigger (besides Enter / leaving the field). */}
+      <button
+        type="button"
+        title={t('geo.searchBtn')}
+        aria-label={t('geo.searchBtn')}
+        disabled={loading}
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => void runSearch(query)}
+        className="absolute right-1 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-accent hover:text-primary"
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+      </button>
       {open && results.length > 0 && (
         <div className="glass-strong absolute z-50 mt-1 max-h-52 w-full overflow-y-auto rounded-2xl p-1">
           {results.map((r, i) => (

@@ -61,25 +61,11 @@
     "later": "Jetzt nicht"
   },
   "feedback": {
-    "section": "Feedback",
-    "title": "Feedback senden",
+    "section": "Rückmeldung",
+    "title": "Schreib dem Entwickler",
     "report": "Fehler melden",
-    "desc": "Einen Fehler gefunden oder eine Idee? Schreib dem Entwickler — ohne Konto.",
-    "intro": "Einen Fehler gefunden oder eine Idee? Schreib eine Nachricht — sie geht direkt an den Entwickler.",
-    "bug": "Fehler",
-    "idea": "Idee",
-    "other": "Sonstiges",
-    "messageLabel": "Deine Nachricht",
-    "messagePlaceholder": "Beschreibe, was passiert ist oder was du dir wünschst…",
-    "emailLabel": "Deine E-Mail (optional)",
-    "emailPlaceholder": "name@beispiel.de — nur wenn du eine Antwort möchtest",
-    "privacyNote": "App-Version, Betriebssystem und Sprache werden automatisch angehängt (v{{version}}). Es werden niemals Stammbaum- oder persönliche Daten gesendet.",
-    "send": "Senden",
-    "sending": "Senden…",
-    "sent": "Danke! Dein Feedback wurde gesendet.",
-    "error": "Senden fehlgeschlagen. Bitte später erneut versuchen.",
-    "errorNetwork": "Keine Verbindung. Prüfe dein Internet und versuche es erneut.",
-    "notConfigured": "Feedback ist noch nicht konfiguriert."
+    "desc": "Fehler gefunden oder eine Idee? Schreib direkt eine E-Mail: barkattila@gmail.com",
+    "send": "E-Mail schreiben"
   },
   "search": {
     "placeholder": "Personen, Dokumente suchen…",
@@ -2076,7 +2062,6 @@
       "auto": "Auto",
       "light": "Hell",
       "dark": "Dunkel",
-      "satellite": "Satellit",
       "historical": "Historisch"
     },
     "kind": {
@@ -2144,5 +2129,29 @@
     "copyForLlm": "Für KI kopieren",
     "copiedForLlm": "Die vollständige Plugin-Spezifikation ist in der Zwischenablage — füge sie einem KI-Modell ein.",
     "copyForLlmDesc": "Tipp: Der Knopf „Für KI kopieren“ legt die GESAMTE technische Spezifikation (Manifest-Regeln, SDK, vollständige API-Referenz, ein funktionierendes Beispiel) als ein Dokument in die Zwischenablage — füge sie einem KI-Assistenten (z. B. Claude) ein, beschreibe, was deine Erweiterung tun soll, und erhalte eine fertige Erweiterung."
+  },
+  "geo": {
+    "searchHint": "Die Ortssuche startet mit Enter oder beim Verlassen des Feldes",
+    "pressEnter": "Enter drücken zum Suchen",
+    "searchBtn": "Ort suchen"
+  },
+  "firstPerson": {
+    "emptyTitle": "Beginne deinen Stammbaum!",
+    "emptyDesc": "Dein Baum ist noch leer. Lege die erste Person an — meist dich selbst oder einen sicher bekannten Vorfahren — und baue die anderen darum herum: Eltern, Ehepartner, Kinder.",
+    "cta": "Erste Person anlegen",
+    "importAlt": "Hast du schon eine GEDCOM-Datei?",
+    "importLink": "Importiere sie in den Einstellungen",
+    "step1Desc": "Mit wem beginnen wir? Meist mit dir selbst oder einem sicher bekannten Vorfahren. Fülle mindestens eines der Namensfelder aus.",
+    "step2Desc": "Geburtsdaten — beide Felder sind optional; du kannst sie jederzeit im Profil nachtragen.",
+    "birthDate": "Geburtsdatum",
+    "birthPlace": "Geburtsort",
+    "create": "Anlegen",
+    "doneTitle": "Die erste Person ist drin! 🎉",
+    "doneBody": "Der Baum wächst nun um sie herum: Eltern, Ehepartner und Kinder fügst du über ihre Karte oder ihr Profil hinzu — oder mit den Plus-Knöpfen in der Baumansicht.",
+    "openProfile": "Profil öffnen",
+    "finish": "Fertig",
+    "next": "Weiter",
+    "back": "Zurück",
+    "cancel": "Abbrechen"
   }
 }

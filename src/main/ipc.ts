@@ -673,7 +673,8 @@ export function registerIpc(): void {
 
   // Open external URLs (board link nodes, etc.) — http(s) only.
   ipcMain.handle(Channels.app.openExternal, (_e, url: string) => {
-    if (/^https?:\/\//i.test(url)) void shell.openExternal(url)
+    // http(s) links + mailto (the feedback "write to the developer" button).
+    if (/^(https?:\/\/|mailto:)/i.test(url)) void shell.openExternal(url)
   })
 
   // Open the bundled Hungarian user manual (self-contained HTML) in its own

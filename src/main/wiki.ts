@@ -1,7 +1,7 @@
-import { net } from 'electron'
+import { app, net } from 'electron'
 import type { HistEvent } from '@shared/types'
 
-const UA = 'TreeMonk-Genealogy/0.11 (+https://github.com/n1kozor/Tree-Monk)'
+const UA = `TreeMonk/${app.getVersion()} (+https://treemonk.eu)`
 const cache = new Map<string, HistEvent[]>()
 
 /**
