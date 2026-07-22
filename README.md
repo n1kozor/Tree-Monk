@@ -15,7 +15,7 @@ machine**, no cloud, no account, your data never leaves your computer.
 [![Website](https://img.shields.io/badge/web-treemonk.eu-2ea44f)](https://treemonk.eu)
 [![Latest release](https://img.shields.io/github/v/release/n1kozor/Tree-Monk)](https://github.com/n1kozor/Tree-Monk/releases/latest)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE)
-![Platforms](https://img.shields.io/badge/platform-Windows%20%C2%B7%20Linux-555)
+![Platforms](https://img.shields.io/badge/platform-Windows%20%C2%B7%20Linux%20%C2%B7%20macOS-555)
 
 Available in **English · Deutsch · Magyar** — auto-detected on first launch.
 
@@ -47,6 +47,10 @@ Grab the latest installer from the
 
 The app checks for updates and tells you when a new version is available; your
 data is always kept.
+
+> **No official macOS build is published** — released `.dmg`s would be
+> ad-hoc signed but not notarized. macOS users: see [Building on
+> macOS](#-building-on-macos) below.
 
 ## 🖼️ Screenshots
 
@@ -130,6 +134,15 @@ reachable from the network.
 
 ## 🛠️ Build from source
 
+### Prerequisites
+
+- **Node.js 20+** and npm (the release CI runs Node 20).
+- **macOS only:** a full **Xcode** install (App Store → Xcode, then
+  `xcode-select -s /Applications/Xcode.app/Contents/Developer`). CommandLineTools
+  alone is not enough — `better-sqlite3`'s postinstall rebuilds against Electron
+  and its C++ headers are only on the full Xcode toolchain. Linux/Windows builds
+  work fine with just the OS package manager's toolchain.
+
 ```bash
 # 1. Install dependencies (postinstall rebuilds better-sqlite3 for Electron)
 npm install
@@ -145,6 +158,9 @@ npm run dist:linux
 
 # 5. Package a Windows app (NSIS installer)
 npm run dist:win
+
+# 6. Package a macOS app (.dmg, Apple Silicon) — requires Xcode, see above
+npm run dist:mac
 
 # Typecheck both processes / run tests
 npm run typecheck
@@ -164,6 +180,38 @@ If the native SQLite module mismatches your Electron version:
 ```bash
 npm run rebuild        # electron-rebuild -f -w better-sqlite3
 ```
+
+---
+
+## 🍎 Building on macOS
+
+Released `.dmg`s would be **ad-hoc signed but not notarized**, so Apple
+would block the first launch behind a Gatekeeper dialog that says the
+app "is from an unidentified developer". macOS users have two
+options:
+
+1. **Build it yourself.** All you need is **Xcode** (App Store) and
+   **Node 20+** — see [Prerequisites](#prerequisites) above. Then:
+
+   ```bash
+   git clone https://github.com/n1kozor/Tree-Monk.git
+   cd Tree-Monk
+   npm install       # postinstall rebuilds better-sqlite3 for Electron
+   npm run dist:mac  # → release/TreeMonk-x.y.z-arm64.dmg
+   ```
+
+   Open the `.dmg`, drag `TreeMonk.app` to **Applications**. On the
+   **first launch**, right-click the app → **Open** → **Open** in the
+   dialog (one-time Gatekeeper bypass; subsequent launches are normal
+   double-click).
+
+   If `npm install`'s postinstall fails with `'climits' file not found`,
+   your toolchain isn't pointing at full Xcode —
+   `xcode-select -s /Applications/Xcode.app/Contents/Developer`.
+
+2. **Wait for a notarized release.** Track this repository (Releases ·
+   Watch → Custom → Releases) — if/when a paid Apple Developer ID is
+   set up, the build pipeline can sign and notarize automatically.
 
 ---
 
