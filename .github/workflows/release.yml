@@ -76,6 +76,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Regenerate the demo DB from the CURRENT schema.ts every release, so it can
+      # never go stale against new columns/tables (which would make the app's
+      # queries throw and the live demo show no data).
+      - name: Regenerate demo database
+        run: node scripts/build-demo-db.mjs
+
       - name: Build read-only web demo
         run: npx vite build --config vite.web.config.ts
 

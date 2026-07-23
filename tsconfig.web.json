@@ -3,7 +3,8 @@
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx",
     "src/shared/**/*",
-    "src/preload/index.d.ts"
+    "src/preload/index.d.ts",
+    "src/web/**/*"
   ],
   "compilerOptions": {
     "composite": true,

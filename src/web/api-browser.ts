@@ -3,20 +3,27 @@ import type { HistEvent } from '@shared/types'
 import {
   Aliases,
   AppSettings,
+  Attributes,
   Board,
   Boards,
   Citations,
+  Collaborations,
   Documents,
+  EventParticipants,
   Events,
   Families,
   Godparents,
   Notes,
   Occupations,
   People,
-  ResearchLogs
+  Places,
+  ResearchLogs,
+  Todos,
+  Witnesses
 } from '../main/db/repo'
 import { buildTree } from '../main/db/tree'
-import { buildPedigree } from '../main/db/pedigree'
+import { buildPedigree, buildPersonDescendants, buildUnionCouple } from '../main/db/pedigree'
+import { detectKinship } from '../main/db/kinship'
 import { buildMapMarkers } from '../main/db/mapData'
 import { buildAtlasPoints } from '../main/db/atlasData'
 import { runSanityCheck } from '../main/db/sanity'
@@ -120,6 +127,24 @@ export function createDemoApi(): TreeMonkApi {
       list: async () => Families.list(),
       create: async () => blocked(),
       update: async () => blocked(),
+      remove: async () => blocked(),
+      setChildRelation: async () => blocked()
+    },
+    eventParticipants: {
+      forEvent: async (eid) => EventParticipants.forEvent(eid),
+      set: async () => blocked(),
+      remove: async () => blocked(),
+      forPerson: async (pid) => EventParticipants.forPerson(pid)
+    },
+    witnesses: {
+      forOwner: async (ot, oid) => Witnesses.forOwner(ot, oid),
+      add: async () => blocked(),
+      remove: async () => blocked()
+    },
+    attributes: {
+      forPerson: async (pid) => Attributes.forPerson(pid),
+      create: async () => blocked(),
+      update: async () => blocked(),
       remove: async () => blocked()
     },
     documents: {
@@ -154,10 +179,17 @@ export function createDemoApi(): TreeMonkApi {
     },
     research: {
       citationsForPerson: async (pid) => Citations.forOwner('person', pid),
+      addCitation: async () => blocked(),
+      attachSourceToPerson: async () => blocked(),
+      peopleForSource: async (sourceId) => Citations.peopleForSource(sourceId),
+      detachSourceFromPerson: async () => blocked(),
+      updateCitation: async () => blocked(),
+      deleteCitation: async () => blocked(),
       notesForPerson: async (pid) => Notes.forOwner('person', pid),
       logsForPerson: async (pid) => ResearchLogs.forPerson(pid),
       allLogs: async () => ResearchLogs.all(),
       createLog: async () => blocked(),
+      updateLog: async () => blocked(),
       removeLog: async () => blocked()
     },
     aliases: {
@@ -180,9 +212,28 @@ export function createDemoApi(): TreeMonkApi {
       add: async () => blocked(),
       remove: async () => blocked()
     },
+    todos: {
+      all: async () => Todos.all(),
+      forPerson: async (pid) => Todos.forPerson(pid),
+      create: async () => blocked(),
+      update: async () => blocked(),
+      remove: async () => blocked()
+    },
+    collaborations: {
+      listForPerson: async (pid) => Collaborations.forPerson(pid)
+    },
+    site: {
+      export: async () => blocked(),
+      exportIndexes: async () => blocked()
+    },
+    csv: {
+      import: async () => blocked()
+    },
     events: {
       forPerson: async (pid) => Events.forPerson(pid),
+      forFamily: async (fid) => Events.forOwner('family', fid),
       create: async () => blocked(),
+      createForFamily: async () => blocked(),
       update: async () => blocked(),
       remove: async () => blocked(),
       reorder: async () => blocked()
@@ -190,6 +241,9 @@ export function createDemoApi(): TreeMonkApi {
     tree: {
       build: async (rootId, mode) => buildTree(rootId, mode),
       pedigree: async (rootId, rootFamilyId) => buildPedigree(rootId, rootFamilyId),
+      unionCouple: async (familyId) => buildUnionCouple(familyId),
+      personDescendants: async (personId, familyId) => buildPersonDescendants(personId, familyId),
+      kinship: async () => detectKinship(),
       exportImage: async () => blocked()
     },
     map: {
@@ -281,6 +335,16 @@ export function createDemoApi(): TreeMonkApi {
     geo: {
       search: async () => [],
       savePlace: async () => blocked(),
+      listPlaces: async () =>
+        Places.list().map((p) => ({
+          name: p.name,
+          lat: p.lat,
+          lon: p.lon,
+          placeType: p.place_type ?? null,
+          parentName: p.parent_name ?? null,
+          govId: p.gov_id ?? null
+        })),
+      setPlaceMeta: async () => blocked(),
       geocodeAll: async () => blocked(),
       onGeocodeProgress: unsubscribe,
       standardizeAll: async () => blocked(),
@@ -304,7 +368,8 @@ export function createDemoApi(): TreeMonkApi {
         publishedAt: null,
         assetUrl: null
       }),
-      download: async () => {}
+      download: async () => {},
+      history: async () => [] // the demo has no update history
     },
     workspaces: {
       list: async () => [DEMO_WORKSPACE],
@@ -330,16 +395,16 @@ export function createDemoApi(): TreeMonkApi {
     names: {
       surnameVariants: async () => surnameVariants(),
       givenNameVariants: async () => givenNameVariants(),
-      normalizeSurname: async () => blocked()
+      normalizeSurname: async () => blocked(),
+      normalizeGivenName: async () => blocked()
     },
     supportInvite: {
       status: async () => true,
       markSeen: async () => {}
     },
-    support: {
-      history: async () => [],
-      save: async () => {},
-      clear: async () => {}
+    fsAnnounce: {
+      status: async () => true,
+      markSeen: async () => {}
     }
   }
 }
