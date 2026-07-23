@@ -2,6 +2,40 @@
 
 All notable changes to TreeMonk are documented here.
 
+## [1.8.12]
+
+### Added
+- **Offline month-name date parsing.** `normalizeDate` now recognises month
+  names + abbreviations in hu/en/de, any order, mixed separators
+  (space/./,/-/ /), Roman-numeral months (I–XII), ordinals, and small typos
+  (Damerau OSA distance ≤1 on full names ≥6 chars). Composes with the existing
+  qualifiers (abt/bef/aft/between) and Julian/dual markers. Requires a 4-digit
+  year to fire. The FamilySearch Date authority stays primary when signed in;
+  this is the offline equivalent.
+- Space-separated numeric dates ("10 04 1992", "1992 04 10").
+- Installer EULA (build/license_{en,hu,de}.txt) + a data-resale notice on the
+  FamilySearch connect dialog and in the terms; README "Terms of use".
+
+### Changed
+- **DateInput shows one format focused and blurred.** Editing now happens on a
+  draft seeded from the display-format value, so a field no longer reads as raw
+  ISO while focused and eu/us after blur. Storage stays ISO (normalized on
+  commit). The suggestion dropdown previews in the display format too.
+
+### Fixed
+- Dual-date parsing only fires when the two years are consecutive, so a plain
+  year/month like "1850/3" canonicalises to "1850-03" instead of "1850/1903".
+- A bare trailing "jul"/"Jul." (July abbreviation) is no longer misread as the
+  Julian-calendar marker.
+- Per-parent child-relation edits persist: the legacy-relation seed is now a
+  one-time, settings-gated migration instead of re-running (and reverting user
+  edits) on every launch.
+- The website export no longer embeds a confidential person's real name in the
+  section's data attribute.
+- GEDCOM import treats only `RESN confidential` as the confidentiality flag
+  (not `RESN privacy`, the anonymize-living marker) — a protected export no
+  longer flags every living person confidential on re-import.
+
 ## [1.8.11]
 
 ### Added

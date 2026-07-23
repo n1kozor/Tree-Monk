@@ -245,6 +245,13 @@ src/
 
 ---
 
+## Terms of use
+
+You may **not sell, lease, or sublicense** to any third party any data
+obtained from FamilySearch International through TreeMonk. Using TreeMonk as
+a tool while providing your own professional research services is not
+affected — the prohibition applies to trading in the raw data itself.
+
 ## 📄 License
 
 TreeMonk is **source-available**, not open source: the full source is public and

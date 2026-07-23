@@ -1,6 +1,6 @@
 {
   "name": "treemonk",
-  "version": "1.8.11",
+  "version": "1.8.12",
   "description": "TreeMonk - a local-first genealogy and historical research workbench",
   "type": "module",
   "main": "./out/main/index.js",

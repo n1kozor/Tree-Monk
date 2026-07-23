@@ -403,8 +403,11 @@ export function importGedcomText(text: string): GedcomImportResult {
         burialNote: eventNote(indi, 'BURI'),
         illegitimate: /^y/i.test(childValue(indi, '_ILLEGITIMATE') ?? '') || undefined,
         stillborn: /^y/i.test(childValue(indi, '_STILLBORN') ?? '') || undefined,
-        // 5.5.1 restriction notice → confidential flag.
-        isPrivate: /confidential|privacy|private/i.test(childValue(indi, 'RESN') ?? '') || undefined,
+        // 5.5.1 restriction notice → confidential flag. ONLY the "confidential"
+        // value sets it — NOT "privacy", which our own protected export writes
+        // as the ANONYMIZE-LIVING marker (RESN privacy). Conflating them would
+        // make every living person permanently confidential after a round-trip.
+        isPrivate: /confidential/i.test(childValue(indi, 'RESN') ?? '') || undefined,
         // Name pieces (NPFX/NSFX + the German-convention _RUFNAME) live under NAME.
         namePrefix: nameNode ? childValue(nameNode, 'NPFX') : null,
         nameSuffix: nameNode ? childValue(nameNode, 'NSFX') : null,

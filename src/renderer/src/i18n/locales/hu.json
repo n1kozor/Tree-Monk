@@ -1528,7 +1528,8 @@
     "wholeTreeNote": "A saját fánál a TELJES fa importálódik (minden személy). A mélység csak a közös fánál értelmezett.",
     "maxPersons": "Max. személyek száma",
     "depthWarning": "Ez sok személyt jelenthet! Az import a megadott {{max}} főnél megáll — a közvetlen felmenők és családjuk élveznek elsőbbséget.",
-    "priorityNote": "Prioritás: közvetlen felmenők → az ő gyerekeik → leszármazottak."
+    "priorityNote": "Prioritás: közvetlen felmenők → az ő gyerekeik → leszármazottak.",
+    "dataResaleNotice": "A FamilySearchből a szoftveren keresztül kinyert adatok harmadik fél részére történő értékesítése, bérbeadása és továbblicencelése tilos."
   },
   "demo": {
     "introTitle": "Üdv a TreeMonk demóban!",

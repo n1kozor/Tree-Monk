@@ -27,14 +27,16 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
   ({ value, onValueChange, onCommit, onBlur, onFocus, ...rest }, ref) => {
     const [suggestion, setSuggestion] = React.useState<string | null>(null)
     const [open, setOpen] = React.useState(false)
-    const [focused, setFocused] = React.useState(false)
+    // While focused we edit a local DRAFT (seeded from the display-formatted
+    // value on focus). This way the field reads in the user's chosen format
+    // BOTH focused and blurred — no more "ISO while editing, eu/us after" jump.
+    // Storage stays ISO: onCommit re-normalizes the draft on blur.
+    const [draft, setDraft] = React.useState<string | null>(null)
     const dateFormat = useSettings((s) => s.dateFormat)
     const { i18n, t } = useTranslation()
     const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
     const seq = React.useRef(0)
-    // Edit on the canonical ISO string; when not editing, show it in the user's
-    // chosen display format (Settings → Date format). Storage stays ISO.
-    const shown = focused ? value : formatDisplayDate(value, dateFormat, i18n.language)
+    const shown = draft !== null ? draft : formatDisplayDate(value, dateFormat, i18n.language)
 
     const lookup = (raw: string): void => {
       if (timer.current) clearTimeout(timer.current)
@@ -60,17 +62,19 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
           value={shown}
           onChange={(e) => {
             const v = maskDateTyping(e.target.value)
+            setDraft(v)
             onValueChange(v)
             lookup(v)
             setOpen(true)
           }}
           onFocus={(e) => {
-            setFocused(true)
+            // Seed the editable draft with the value in DISPLAY format.
+            setDraft(formatDisplayDate(value, dateFormat, i18n.language))
             setOpen(true)
             onFocus?.(e)
           }}
           onBlur={(e) => {
-            setFocused(false)
+            setDraft(null)
             // Let a click on the suggestion land before closing.
             setTimeout(() => setOpen(false), 150)
             onCommit?.()
@@ -85,13 +89,17 @@ export const DateInput = React.forwardRef<HTMLInputElement, DateInputProps>(
               e.preventDefault()
               onValueChange(suggestion)
               setSuggestion(null)
+              setDraft(null) // revert to the formatted display of the applied value
               setOpen(false)
               // Commit right away so the canonical value persists.
               setTimeout(() => onCommit?.(), 0)
             }}
             className="absolute left-0 top-full z-50 mt-1 w-full truncate rounded-md border border-border bg-popover px-3 py-1.5 text-left text-sm shadow-md hover:bg-accent"
           >
-            {suggestion}
+            {/* Preview in the SAME display format the committed value will show
+                (storage stays the ISO `suggestion` via onValueChange above) —
+                otherwise the dropdown shows raw ISO while the field shows eu/us. */}
+            {formatDisplayDate(suggestion, dateFormat, i18n.language)}
           </button>
         )}
       </div>

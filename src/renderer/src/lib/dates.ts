@@ -16,6 +16,135 @@ const pad = (n: number): string => String(n).padStart(2, '0')
 const okMonth = (m: number): boolean => m >= 1 && m <= 12
 const okDay = (d: number): boolean => d >= 1 && d <= 31
 
+/** Lowercase + strip diacritics, so "január"/"März"/"June" all match one table. */
+function deaccent(s: string): string {
+  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+/**
+ * Month names + abbreviations in Hungarian, English and German → month number.
+ * Keys are diacritic-stripped & lowercase (see deaccent). This is what lets the
+ * offline parser recognise "1992 jan. 12", "12 January 1992", "január 1992" —
+ * no network, no API (the FamilySearch Date authority is used when signed in;
+ * this is the local equivalent).
+ */
+const MONTHS: Record<string, number> = (() => {
+  const table: [number, string[]][] = [
+    [1, ['january', 'jan', 'januar', 'januar', 'januar']],
+    [2, ['february', 'feb', 'februar', 'februar']],
+    [3, ['march', 'mar', 'marc', 'marcius', 'marz', 'mrz']],
+    [4, ['april', 'apr', 'aprilis']],
+    [5, ['may', 'maj', 'majus', 'mai']],
+    [6, ['june', 'jun', 'junius', 'juni']],
+    [7, ['july', 'jul', 'julius', 'juli']],
+    [8, ['august', 'aug', 'augusztus']],
+    [9, ['september', 'sep', 'sept', 'szeptember', 'szept', 'szep']],
+    [10, ['october', 'oct', 'okt', 'oktober']],
+    [11, ['november', 'nov']],
+    [12, ['december', 'dec', 'dez', 'dezember']]
+  ]
+  const out: Record<string, number> = {}
+  for (const [n, names] of table) for (const name of names) out[name] = n
+  return out
+})()
+
+/** Roman-numeral months (I–XII) — common for the month in old church records
+ *  ("1850. VII. 12." = 1850-07-12). Only the 12 canonical forms. */
+const ROMAN_MONTHS: Record<string, number> = {
+  i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10, xi: 11, xii: 12
+}
+
+/** Full month names (≥6 chars) used for typo tolerance — abbreviations are
+ *  excluded so a one-edit fuzzy match can never confuse jun/jul, jan/jun, etc. */
+const FUZZY_MONTHS: [string, number][] = Object.entries(MONTHS).filter(([k]) => k.length >= 6)
+
+/** True if `a` is within one edit of `b` — Optimal String Alignment (Damerau–
+ *  Levenshtein with ADJACENT transpositions), so "decmber"→"december" (deletion),
+ *  "januray"/"janaury"→"january" and "szpetember"→"szeptember" (transposition)
+ *  all count as distance 1. Specialised for the ≤1 case (no full DP matrix). */
+function within1(a: string, b: string): boolean {
+  if (a === b) return true
+  const la = a.length
+  const lb = b.length
+  if (Math.abs(la - lb) > 1) return false
+  if (la === lb) {
+    let d1 = -1
+    let d2 = -1
+    for (let i = 0; i < la; i++) {
+      if (a[i] !== b[i]) {
+        if (d1 < 0) d1 = i
+        else if (d2 < 0) d2 = i
+        else return false // >2 differences
+      }
+    }
+    if (d2 < 0) return true // ≤1 substitution
+    return d2 === d1 + 1 && a[d1] === b[d2] && a[d2] === b[d1] // adjacent transposition
+  }
+  // Lengths differ by 1 → exactly one insertion/deletion.
+  const short = la < lb ? a : b
+  const long = la < lb ? b : a
+  let i = 0
+  let j = 0
+  let skipped = false
+  while (i < short.length && j < long.length) {
+    if (short[i] === long[j]) {
+      i++
+      j++
+    } else {
+      if (skipped) return false
+      skipped = true
+      j++
+    }
+  }
+  return true
+}
+
+/** Resolve a non-numeric token to a month number: exact name → Roman numeral →
+ *  conservative typo match. Returns null if it isn't a month. */
+function tokenToMonth(key: string): number | null {
+  if (MONTHS[key] !== undefined) return MONTHS[key]
+  if (ROMAN_MONTHS[key] !== undefined) return ROMAN_MONTHS[key]
+  if (key.length >= 5) {
+    for (const [name, n] of FUZZY_MONTHS) if (within1(key, name)) return n
+  }
+  return null
+}
+
+/**
+ * Recognise a month-name date in any of hu/en/de, any order, with/without a
+ * day and ordinal suffixes, Roman-numeral months, mixed separators, and small
+ * typos: "1992 jan. 12", "12 January 1992", "January 12, 1992", "január 1992",
+ * "1850. VII. 12", "12-Jan-1992", "decmber 1850". Requires a recognised month
+ * AND a 4-digit year; the day is optional. Returns ISO-ish `YYYY-MM[-DD]`, or
+ * null if the text isn't a month-name date (numeric branches / fallback handle it).
+ */
+function parseMonthName(s: string): string | null {
+  const toks = s.split(/[\s.,/-]+/).filter(Boolean)
+  if (toks.length < 2 || toks.length > 3) return null
+  let mo: number | null = null
+  let day: number | null = null
+  let year: number | null = null
+  for (const raw of toks) {
+    if (/^\d{4}$/.test(raw)) {
+      if (year !== null) return null
+      year = Number(raw)
+      continue
+    }
+    const dayM = /^(\d{1,2})(?:st|nd|rd|th)?$/i.exec(raw)
+    if (dayM) {
+      if (day !== null) return null
+      day = Number(dayM[1])
+      continue
+    }
+    const found = tokenToMonth(deaccent(raw).replace(/\.$/, ''))
+    if (found === null || mo !== null) return null
+    mo = found
+  }
+  if (mo === null || year === null) return null
+  if (day !== null && !okDay(day)) return null
+  return day !== null ? `${year}-${pad(mo)}-${pad(day)}` : `${year}-${pad(mo)}`
+}
+
 /** GEDCOM-style date qualifier, stored as a canonical prefix in the SAME text
  *  field ("ABT 1850", "BEF 1850-03", "BET 1850 AND 1860") — so every existing
  *  consumer (sorting, export, DB) keeps working with zero schema change. */
@@ -92,18 +221,22 @@ function normalizeCore(raw: string): string {
   const s = (raw ?? '').trim().replace(/\s+/g, ' ')
   if (!s) return ''
 
-  // Julian-calendar marker at the END — "1700-02-11 (J)", "1700.02.11 jul.",
-  // "1700 julián" → canonical "<normalized> (J)". Only applied when the rest
-  // is a clean numeric date, so free text keeps its trailing words.
-  const jm = /^(.*?)\s*(?:\(J\)|jul(?:ián|iánus|ianisch|ian)?\.?)$/i.exec(s)
+  // Julian-calendar marker at the END — "1700-02-11 (J)", "1700.02.11 julián"
+  // → canonical "<normalized> (J)". Only applied when the rest is a clean
+  // numeric date, so free text keeps its trailing words. The marker word must
+  // be explicit ("julián/julianisch/…" or "(J)") — a bare trailing "jul" is a
+  // JULY abbreviation, not the Julian flag, so it is NOT accepted here.
+  const jm = /^(.*?)\s*(?:\(J\)|jul(?:ian|ián|iánus|ianisch|ianus)\.?)$/i.exec(s)
   if (jm && jm[1].trim() && jm[1].trim() !== s) {
     const core = normalizeCore(jm[1])
     if (/^\d{4}/.test(core)) return `${core} (J)`
   }
 
   // Dual (double-dated) year — the Julian/Gregorian year-start mismatch:
-  // "1699/00" and "1699/1700" → canonical "1699/1700". Sorting uses the
-  // first year; display passes it through untouched.
+  // "1699/00" and "1699/1700" → canonical "1699/1700". ONLY when the two years
+  // are CONSECUTIVE (that is what dual dating means); otherwise this is a plain
+  // YYYY/M[M] year-month ("1850/3" → "1850-03"), which the ISO branch handles.
+  // Sorting uses the first year; display passes the dual form through untouched.
   const dual = /^(\d{4})\s*\/\s*(\d{1,4})$/.exec(s)
   if (dual) {
     const y1 = Number(dual[1])
@@ -112,14 +245,16 @@ function normalizeCore(raw: string): string {
       y2 = Math.floor(y1 / 100) * 100 + y2
       if (y2 <= y1) y2 += 100
     }
-    return `${y1}/${y2}`
+    if (y2 === y1 + 1) return `${y1}/${y2}` // genuine dual date
+    // else: fall through — it's a year/month, let the ISO branch canonicalise it
   }
 
   // Pure year.
   if (/^\d{4}$/.test(s)) return s
 
-  // ISO-ish, year first: YYYY[-/.]M[-/.]D? (day optional).
-  let m = /^(\d{4})[.\-/](\d{1,2})(?:[.\-/](\d{1,2}))?$/.exec(s)
+  // ISO-ish, year first: YYYY[-/. ]M[-/. ]D? (day optional). Space is accepted
+  // as a separator too, so "1992 04 10" works like "1992-04-10".
+  let m = /^(\d{4})[.\-/ ](\d{1,2})(?:[.\-/ ](\d{1,2}))?$/.exec(s)
   if (m) {
     const y = m[1]
     const mo = Number(m[2])
@@ -129,8 +264,8 @@ function normalizeCore(raw: string): string {
     }
   }
 
-  // European, day first: D[-/.]M[-/.]YYYY.
-  m = /^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})$/.exec(s)
+  // European, day first: D[-/. ]M[-/. ]YYYY — "10 04 1992" → "1992-04-10".
+  m = /^(\d{1,2})[.\-/ ](\d{1,2})[.\-/ ](\d{4})$/.exec(s)
   if (m) {
     const d = Number(m[1])
     const mo = Number(m[2])
@@ -138,13 +273,20 @@ function normalizeCore(raw: string): string {
     if (okMonth(mo) && okDay(d)) return `${y}-${pad(mo)}-${pad(d)}`
   }
 
-  // European month-year: M[-/.]YYYY.
-  m = /^(\d{1,2})[.\-/](\d{4})$/.exec(s)
+  // European month-year: M[-/. ]YYYY.
+  m = /^(\d{1,2})[.\-/ ](\d{4})$/.exec(s)
   if (m) {
     const mo = Number(m[1])
     const y = m[2]
     if (okMonth(mo)) return `${y}-${pad(mo)}`
   }
+
+  // Month-name dates in hu/en/de, any order: "1992 jan. 12", "12 January 1992",
+  // "január 1992", "1992 Jul". Offline — the local equivalent of the FS Date
+  // authority. Runs after the numeric branches (month-name input has letters, so
+  // it never collides with them).
+  const byName = parseMonthName(s)
+  if (byName) return byName
 
   // Anything else (qualified/textual) — leave untouched.
   return s

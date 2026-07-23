@@ -1531,7 +1531,8 @@
     "wholeTreeNote": "For a personal tree the ENTIRE tree is imported (every person). Depth only applies to the shared tree.",
     "maxPersons": "Max. number of persons",
     "depthWarning": "This could be a lot of people! The import stops at {{max}} — direct ancestors and their families take priority.",
-    "priorityNote": "Priority: direct ancestors → their children → descendants."
+    "priorityNote": "Priority: direct ancestors → their children → descendants.",
+    "dataResaleNotice": "Selling, leasing, or sublicensing to third parties any data obtained from FamilySearch through this software is prohibited."
   },
   "demo": {
     "introTitle": "Welcome to the TreeMonk demo!",

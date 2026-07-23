@@ -92,16 +92,30 @@ function migrate(database: Database.Database): void {
   add('ALTER TABLE places ADD COLUMN gov_id TEXT')
   // Child↔parents relationship type (GEDCOM PEDI): NULL = birth. Additive → safe.
   add('ALTER TABLE family_children ADD COLUMN relation TEXT')
-  // Per-PARENT relation (apánál/anyánál külön). The legacy couple-level value
-  // seeds both sides; COALESCE keeps this idempotent on every launch.
+  // Per-PARENT relation (apánál/anyánál külön). Additive + nullable → safe.
   add('ALTER TABLE family_children ADD COLUMN father_relation TEXT')
   add('ALTER TABLE family_children ADD COLUMN mother_relation TEXT')
-  add(
-    `UPDATE family_children SET
-       father_relation = COALESCE(father_relation, relation),
-       mother_relation = COALESCE(mother_relation, relation)
-     WHERE relation IS NOT NULL`
-  )
+  // ONE-TIME seed: lift the legacy couple-level `relation` into the per-parent
+  // columns. Gated by a settings flag so it runs ONCE — otherwise it would
+  // re-run every launch and silently REVERT a user who later clears one side
+  // (e.g. sets father_relation=NULL: COALESCE(NULL, relation) would restore it).
+  try {
+    const done = database.prepare("SELECT value FROM settings WHERE key = 'child_relation_seeded_v1'").get()
+    if (!done) {
+      database.exec(
+        `UPDATE family_children SET
+           father_relation = COALESCE(father_relation, relation),
+           mother_relation = COALESCE(mother_relation, relation)
+         WHERE relation IS NOT NULL`
+      )
+      database
+        .prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('child_relation_seeded_v1', '1')")
+        .run()
+    }
+  } catch {
+    /* pre-migration DB without the columns yet — the ALTERs above create them;
+       the seed then runs on the next launch. Never throws out of migrate(). */
+  }
   // Union relationship type: NULL = marriage; partner | none | other. Additive → safe.
   add('ALTER TABLE families ADD COLUMN relationship TEXT')
   // Which marriage this union is for the couple (1st, 2nd, …) — user-set badge.

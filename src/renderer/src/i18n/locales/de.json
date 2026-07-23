@@ -1528,7 +1528,8 @@
     "wholeTreeNote": "Bei einem persönlichen Baum wird der GESAMTE Baum importiert (alle Personen). Die Tiefe gilt nur für den gemeinsamen Baum.",
     "maxPersons": "Max. Personenzahl",
     "depthWarning": "Das können viele Personen sein! Der Import stoppt bei {{max}} — direkte Vorfahren und ihre Familien haben Vorrang.",
-    "priorityNote": "Priorität: direkte Vorfahren → deren Kinder → Nachkommen."
+    "priorityNote": "Priorität: direkte Vorfahren → deren Kinder → Nachkommen.",
+    "dataResaleNotice": "Der Verkauf, die Vermietung oder die Unterlizenzierung von über diese Software aus FamilySearch gewonnenen Daten an Dritte ist untersagt."
   },
   "demo": {
     "introTitle": "Willkommen in der TreeMonk-Demo!",

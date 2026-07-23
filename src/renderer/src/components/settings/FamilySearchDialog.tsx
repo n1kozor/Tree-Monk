@@ -141,6 +141,8 @@ export function FamilySearchDialog({
         ) : !signedIn ? (
           <div className="space-y-3">
             <p className="text-sm leading-relaxed text-muted-foreground">{t('fs.signInHelp')}</p>
+            {/* Express prohibition required by the FSI Solutions Program (§9). */}
+            <p className="text-[11px] leading-relaxed text-muted-foreground/80">{t('fs.dataResaleNotice')}</p>
             <Button onClick={() => void signIn()} disabled={busy !== null} className="w-full gap-2">
               {busy === 'signin' ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -273,6 +275,7 @@ export function FamilySearchDialog({
               {t('fs.importBtn')}
             </Button>
             <p className="text-center text-xs text-muted-foreground">{t('fsImport.hint')}</p>
+            <p className="text-center text-[11px] text-muted-foreground/80">{t('fs.dataResaleNotice')}</p>
           </div>
         )}
 

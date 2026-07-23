@@ -198,7 +198,10 @@ export function exportSite(filePath: string, langRaw: string): string {
     .map((p) => {
       const nm = fullName(p, lang)
       if (p.isPrivate) {
-        return `<section class="person private" id="p-${esc(p.id)}" data-name="${esc(nm.toLowerCase())}">
+        // NEVER embed the real name of a confidential person — not even in a
+        // data attribute. The search box matches data-name, so the real name
+        // would both leak into the HTML source and surface the section.
+        return `<section class="person private" id="p-${esc(p.id)}" data-name="${esc(l.confidential.toLowerCase())}">
 <h2>${esc(l.confidential)}</h2><p class="muted">${esc(l.confidentialNote)}</p></section>`
       }
       const occs = Occupations.forPerson(p.id)
