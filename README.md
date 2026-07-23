@@ -13,6 +13,7 @@ machine**, no cloud, no account, your data never leaves your computer.
 [🌐 treemonk.eu](https://treemonk.eu) · [⬇️ Download](https://github.com/n1kozor/Tree-Monk/releases/latest) · [🐛 Issues](https://github.com/n1kozor/Tree-Monk/issues)
 
 [![Website](https://img.shields.io/badge/web-treemonk.eu-2ea44f)](https://treemonk.eu)
+[![Microsoft Store](https://img.shields.io/badge/Microsoft%20Store-TreeMonk-0078D4?logo=windows)](https://apps.microsoft.com/detail/9pcm9nngj5rv)
 [![Latest release](https://img.shields.io/github/v/release/n1kozor/Tree-Monk)](https://github.com/n1kozor/Tree-Monk/releases/latest)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial-blue)](LICENSE)
 ![Platforms](https://img.shields.io/badge/platform-Windows%20%C2%B7%20Linux%20%C2%B7%20macOS-555)
@@ -38,12 +39,17 @@ Available in **English · Deutsch · Magyar** — auto-detected on first launch.
 
 ## ⬇️ Download
 
-Grab the latest installer from the
-**[Releases page](https://github.com/n1kozor/Tree-Monk/releases/latest)** or from
-**[treemonk.eu](https://treemonk.eu)**:
+<a href="https://apps.microsoft.com/detail/9pcm9nngj5rv?referrer=appbadge&mode=direct">
+  <img src="https://get.microsoft.com/images/en-us%20dark.svg" width="180" alt="Download TreeMonk from the Microsoft Store" />
+</a>
 
-- **Windows** — `TreeMonk-Setup-x.y.z.exe`
-- **Linux** — `TreeMonk-x.y.z.AppImage` (or `.deb`)
+- **Windows** — easiest from the
+  **[Microsoft Store](https://apps.microsoft.com/detail/9pcm9nngj5rv)**
+  (verified install, automatic updates) — or grab `TreeMonk-Setup-x.y.z.exe`
+  from the **[Releases page](https://github.com/n1kozor/Tree-Monk/releases/latest)**
+- **Linux** — `TreeMonk-x.y.z.AppImage` (or `.deb`) from the
+  **[Releases page](https://github.com/n1kozor/Tree-Monk/releases/latest)** or
+  **[treemonk.eu](https://treemonk.eu)**
 
 The app checks for updates and tells you when a new version is available; your
 data is always kept.
