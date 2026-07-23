@@ -48,6 +48,13 @@ win:
   icon: build/icon.ico
   target:
     - nsis
+# Installer EULA (shown on the NSIS license page). Given EXPLICITLY as one
+# combined file — NOT the auto-detected `build/license_<lang>.txt` convention,
+# because those files are ALSO picked up by the macOS DMG license builder, whose
+# legacy Mac-charset encoder chokes on typographic punctuation (— „ " → ©). One
+# nsis.license keeps the Windows EULA while leaving the DMG license-free.
+nsis:
+  license: build/eula.txt
 # Microsoft Store (MSIX/AppX) package — built ONLY via `npm run dist:win:store`,
 # never by the normal release flow. The Store signs the package itself, so no
 # certificate is needed. The identity values below are PLACEHOLDERS: pass the

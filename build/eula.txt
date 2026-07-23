@@ -1,0 +1,71 @@
+TreeMonk — Terms of Use (EULA)
+
+1. LICENSE
+This software is licensed under the PolyForm Noncommercial License 1.0.0
+(see the LICENSE file). It is free to use for personal, hobby, educational,
+research and other noncommercial purposes.
+
+2. THIRD-PARTY DATA (FamilySearch)
+The user is not permitted to sell, lease, or sublicense to any third party
+any data obtained from FamilySearch International (FSI) through this
+software (no selling, leasing, or sublicensing of FSI data). Using the
+software as a tool while providing your own professional research services
+is not affected by this clause; the prohibition applies to trading in the
+raw data itself. Use of FamilySearch is additionally governed by the
+FamilySearch Terms of Use (familysearch.org/legal/terms).
+
+3. NO WARRANTY
+The software is provided "as is", without warranty of any kind. Always keep
+backups of your data (Settings -> Backup).
+
+(c) 2026 TreeMonk - Attila Barkoczi | https://treemonk.eu
+
+==================================================================
+
+TreeMonk — Felhasználási feltételek (EULA)
+
+1. LICENC
+A szoftver a PolyForm Noncommercial License 1.0.0 alatt áll (lásd a LICENSE
+fájlt). Személyes, hobbi-, oktatási, kutatási és más nem kereskedelmi célra
+ingyenesen használható.
+
+2. HARMADIK FÉLTŐL SZÁRMAZÓ ADATOK (FamilySearch)
+A felhasználó nem jogosult a szoftveren keresztül a FamilySearch
+International (FSI) rendszeréből kinyert adatokat harmadik fél számára
+értékesíteni, bérbe adni vagy továbblicencelni (no selling, leasing, or
+sublicensing of FSI data). A szoftver eszközként való használatát saját
+kutatási SZOLGÁLTATÁS nyújtása során ez a pont nem korlátozza; a tilalom a
+nyers adatokkal való kereskedésre vonatkozik. A FamilySearch használatára
+emellett a FamilySearch felhasználási feltételei is irányadók
+(familysearch.org/legal/terms).
+
+3. GARANCIA KIZÁRÁSA
+A szoftver „ahogy van” állapotban érhető el, mindennemű garancia nélkül.
+Mindig készíts biztonsági mentést az adataidról (Beállítások → Mentés).
+
+© 2026 TreeMonk – Barkóczi Attila | https://treemonk.eu
+
+==================================================================
+
+TreeMonk — Nutzungsbedingungen (EULA)
+
+1. LIZENZ
+Die Software steht unter der PolyForm Noncommercial License 1.0.0 (siehe
+LICENSE-Datei). Sie ist für persönliche, Hobby-, Bildungs-, Forschungs- und
+andere nichtkommerzielle Zwecke kostenlos nutzbar.
+
+2. DATEN VON DRITTANBIETERN (FamilySearch)
+Der Nutzer ist nicht berechtigt, über diese Software aus dem System von
+FamilySearch International (FSI) gewonnene Daten an Dritte zu verkaufen, zu
+vermieten oder unterzulizenzieren (no selling, leasing, or sublicensing of
+FSI data). Die Nutzung der Software als Werkzeug im Rahmen eigener
+Forschungs-DIENSTLEISTUNGEN bleibt davon unberührt; das Verbot betrifft den
+Handel mit den Rohdaten selbst. Für die Nutzung von FamilySearch gelten
+zusätzlich die FamilySearch-Nutzungsbedingungen
+(familysearch.org/legal/terms).
+
+3. GEWÄHRLEISTUNGSAUSSCHLUSS
+Die Software wird „wie besehen" bereitgestellt, ohne jegliche Gewähr.
+Erstelle stets Sicherungskopien deiner Daten (Einstellungen → Sicherung).
+
+© 2026 TreeMonk – Attila Barkóczi | https://treemonk.eu
