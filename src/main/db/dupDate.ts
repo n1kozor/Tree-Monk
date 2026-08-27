@@ -1,23 +1,6 @@
 // Precision-aware birth-date comparison for duplicate detection. Kept free of any
 // database / native imports so it stays unit-testable in isolation.
-
-// Month name → 1–12 in EN/HU/DE (full names + 3-letter GEDCOM abbreviations),
-// so "11 JAN 1906", "1850. április", "1. Januar 1907" all parse.
-const MONTHS: Record<string, number> = {}
-;[
-  ['january', 'januar', 'január', 'jänner'], ['february', 'februar', 'február'],
-  ['march', 'märz', 'marz', 'március', 'marcius'], ['april', 'április', 'aprilis'],
-  ['may', 'mai', 'május', 'majus'], ['june', 'juni', 'június', 'junius'],
-  ['july', 'juli', 'július', 'julius'], ['august', 'augusztus'],
-  ['september', 'szeptember'], ['october', 'oktober', 'október'],
-  ['november'], ['december', 'dezember']
-].forEach((names, i) =>
-  names.forEach((n) => {
-    MONTHS[n] = i + 1
-    const p = n.slice(0, 3)
-    if (MONTHS[p] === undefined) MONTHS[p] = i + 1
-  })
-)
+import { monthNumber } from '@shared/months'
 
 interface DParts {
   y: number
@@ -33,8 +16,9 @@ function dateParts(date: string | null): DParts | null {
   if (!ym) return null
   let m: number | null = null
   for (const tok of date.toLowerCase().split(/[^\p{L}]+/u)) {
-    if (tok && MONTHS[tok] !== undefined) {
-      m = MONTHS[tok]
+    const month = monthNumber(tok)
+    if (month !== null) {
+      m = month
       break
     }
   }

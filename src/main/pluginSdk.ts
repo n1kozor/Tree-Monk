@@ -1,3 +1,5 @@
+import { APP_LANGUAGES } from '@shared/languages'
+
 /**
  * The official plugin SDK, served by the app itself at tmplugin://sdk/… so
  * every plugin shares one look and one boot pattern:
@@ -98,24 +100,26 @@ a { color: var(--tm-accent); }
 .tm-state { color: var(--tm-muted); padding: 32px 0; text-align: center; }
 `
 
+const SUPPORTED_LANGUAGES = JSON.stringify(APP_LANGUAGES)
+
 const TREEMONK_JS = `/* TreeMonk plugin SDK. Include AFTER treemonk.css, BEFORE your own script. */
 ;(() => {
   const p = new URLSearchParams(location.hash.slice(1))
   const theme =
     p.get('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
   document.documentElement.dataset.theme = theme
-  const lang = ['hu', 'en', 'de'].includes(p.get('lang')) ? p.get('lang') : 'en'
+  const lang = ${SUPPORTED_LANGUAGES}.includes(p.get('lang')) ? p.get('lang') : 'en'
 
   window.TM = {
     /** http://127.0.0.1:<port> — the local API base. */
     api: p.get('api'),
     /** This plugin's own scoped token. Never send it anywhere else. */
     token: p.get('token'),
-    /** 'hu' | 'en' | 'de' — the app's UI language. */
+    /** 'hu' | 'en' | 'de' | 'fr' — the app's UI language. */
     lang,
     /** 'light' | 'dark' — the app's theme (already applied to <html>). */
     theme,
-    /** Pick the current language from { hu, en, de }. */
+    /** Pick the current language from { hu, en, de, fr }. */
     t(dict) {
       return dict[lang] ?? dict.en ?? Object.values(dict)[0] ?? ''
     },

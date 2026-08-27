@@ -34,7 +34,6 @@ import { LANGUAGES, setLanguage } from '@/i18n'
 import { useAppStore } from '@/store/useAppStore'
 import { useTheme } from '@/store/useTheme'
 import { useFsMode } from '@/hooks/useFsMode'
-import type { AppLanguage } from '@shared/types'
 
 export function Topbar(): JSX.Element {
   const { t, i18n } = useTranslation()
@@ -182,7 +181,7 @@ export function Topbar(): JSX.Element {
             {LANGUAGES.map((lang) => (
               <DropdownMenuItem
                 key={lang.code}
-                onSelect={() => setLanguage(lang.code as AppLanguage)}
+                onSelect={() => setLanguage(lang.code)}
                 className={i18n.language === lang.code ? 'gap-2 bg-accent' : 'gap-2'}
               >
                 <span className="text-base">{lang.flag}</span>

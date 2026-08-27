@@ -1,4 +1,5 @@
 import type { Family, Person } from '@shared/types'
+import { monthNumber } from '@shared/months'
 
 export type EventKind = 'birth' | 'death' | 'marriage'
 
@@ -21,34 +22,10 @@ interface Parts {
   d: number | null
 }
 
-// Month names (Hungarian, English, German — full + common abbreviations) → 1..12.
-const MONTHS: Record<string, number> = {}
-const defMonth = (n: number, ...names: string[]): void => {
-  for (const x of names) MONTHS[x] = n
-}
-// Hungarian
-defMonth(1, 'január', 'jan')
-defMonth(2, 'február', 'febr', 'feb')
-defMonth(3, 'március', 'márc', 'már', 'mar', 'march')
-defMonth(4, 'április', 'ápr', 'apr', 'april')
-defMonth(5, 'május', 'máj', 'may', 'mai')
-defMonth(6, 'június', 'jún', 'jun', 'june', 'juni')
-defMonth(7, 'július', 'júl', 'jul', 'july', 'juli')
-defMonth(8, 'augusztus', 'aug', 'august')
-defMonth(9, 'szeptember', 'szept', 'szep', 'sep', 'sept', 'september')
-defMonth(10, 'október', 'okt', 'oct', 'october', 'oktober')
-defMonth(11, 'november', 'nov')
-defMonth(12, 'december', 'dec', 'dez')
-// English / German full forms not yet covered
-defMonth(1, 'january', 'januar')
-defMonth(2, 'february', 'februar')
-defMonth(3, 'märz', 'maerz')
-defMonth(12, 'dezember')
-
 /**
  * Pull Y/M/D out of a genealogy date. Handles ISO-ish ("1923-05-17", "1923.05",
- * "1923"), day-first numeric ("17.05.1923") AND textual month names in HU/EN/DE
- * ("1913. február 24", "24 February 1913"). Any part may be missing.
+ * "1923"), day-first numeric ("17.05.1923") AND textual month names in HU/EN/DE/FR
+ * ("1913. február 24", "24 February 1913", "12 janvier 1850"). Any part may be missing.
  */
 export function parts(date: string | null | undefined): Parts {
   const s = (date ?? '').toString().trim().toLowerCase()
@@ -56,8 +33,9 @@ export function parts(date: string | null | undefined): Parts {
 
   let mo: number | null = null
   for (const tok of s.split(/[^\p{L}]+/u)) {
-    if (tok && MONTHS[tok] != null) {
-      mo = MONTHS[tok]
+    const month = monthNumber(tok)
+    if (month !== null) {
+      mo = month
       break
     }
   }

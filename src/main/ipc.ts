@@ -2,6 +2,7 @@ import { app, BrowserWindow, dialog, ipcMain, shell, type WebContents } from 'el
 import { existsSync } from 'fs'
 import { join } from 'path'
 import { Channels } from '@shared/ipc'
+import { isAppLanguage } from '@shared/languages'
 import {
   Aliases,
   AppSettings,
@@ -759,16 +760,27 @@ export function registerIpc(): void {
     if (/^(https?:\/\/|mailto:)/i.test(url)) void shell.openExternal(url)
   })
 
-  // Open the bundled Hungarian user manual (self-contained HTML) in its own
+  // Open the bundled multilingual user manual (self-contained HTML) in its own
   // in-app window (NOT the system browser). Packaged: resources/manual.html;
   // dev: the source docs/ copy. Re-opening focuses the existing window.
-  ipcMain.handle(Channels.app.openManual, () => {
+  ipcMain.handle(Channels.app.openManual, (_event, requestedLanguage: unknown) => {
+    const requestedCode = typeof requestedLanguage === 'string' ? requestedLanguage.slice(0, 2).toLowerCase() : ''
+    const language = isAppLanguage(requestedCode) ? requestedCode : 'en'
+    const manualTitle = {
+      hu: 'TreeMonk — Kézikönyv',
+      en: 'TreeMonk — Manual',
+      de: 'TreeMonk — Handbuch',
+      fr: 'TreeMonk — Manuel'
+    }[language]
     const file = [
       join(process.resourcesPath, 'manual.html'),
       join(app.getAppPath(), 'docs', 'TreeMonk-Kezikonyv.html')
     ].find((p) => existsSync(p))
     if (!file) return false
+    const loadOptions = { hash: `lang=${language}` }
     if (manualWindow && !manualWindow.isDestroyed()) {
+      manualWindow.setTitle(manualTitle)
+      void manualWindow.loadFile(file, loadOptions)
       manualWindow.show()
       manualWindow.focus()
       return true
@@ -776,13 +788,13 @@ export function registerIpc(): void {
     const win = new BrowserWindow({
       width: 940,
       height: 860,
-      title: 'TreeMonk — Kézikönyv',
+      title: manualTitle,
       autoHideMenuBar: true,
       backgroundColor: '#ffffff',
       webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true }
     })
     win.setMenuBarVisibility(false)
-    void win.loadFile(file)
+    void win.loadFile(file, loadOptions)
     win.on('closed', () => {
       manualWindow = null
     })

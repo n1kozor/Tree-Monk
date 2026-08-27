@@ -198,6 +198,12 @@ const BROWSER_TEXTS: Record<string, { okTitle: string; okMsg: string; errTitle: 
     okMsg: 'You are signed in. You can close this tab and return to TreeMonk.',
     errTitle: 'Sign-in failed',
     errMsg: 'Something went wrong. Please close this tab and try again in TreeMonk.'
+  },
+  fr: {
+    okTitle: 'Connexion réussie à FamilySearch',
+    okMsg: 'Vous êtes connecté(e). Vous pouvez fermer cet onglet et retourner dans TreeMonk.',
+    errTitle: 'Échec de la connexion',
+    errMsg: 'Une erreur est survenue. Fermez cet onglet et réessayez dans TreeMonk.'
   }
 }
 

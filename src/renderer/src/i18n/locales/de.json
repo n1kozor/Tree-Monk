@@ -1779,7 +1779,7 @@
           },
           {
             "h": "Darstellung und Sprache",
-            "p": "In der oberen Leiste schaltet das Sonne/Mond-Symbol zwischen hellem und dunklem Modus um, daneben stellst du die Sprache der Oberfläche ein (Ungarisch, Englisch oder Deutsch)."
+            "p": "In der oberen Leiste schaltet das Sonne/Mond-Symbol zwischen hellem und dunklem Modus um, daneben stellst du die Sprache der Oberfläche ein (Ungarisch, Englisch, Deutsch oder Französisch)."
           },
           {
             "h": "Tastenkürzel",
@@ -2305,7 +2305,7 @@
       "title": "Erweiterung hinzufügen",
       "step1Intro": "Bevor du installierst, solltest du Folgendes wissen:",
       "reqSandbox": "Erweiterungen laufen in einem isolierten Panel: Sie erreichen nur die lokale API mit ihrem eigenen, eingeschränkten Token — kein externes Netzwerk, deine Daten können den Rechner nicht verlassen.",
-      "reqLangs": "Eine gültige Erweiterung liefert Beschreibung und Menüeinträge in drei Sprachen (Ungarisch, Englisch, Deutsch) — sonst lehnt der Installer sie ab.",
+      "reqLangs": "Eine gültige Erweiterung liefert Beschreibung und Menüeinträge auf Ungarisch, Englisch und Deutsch; Französisch wird unterstützt, wenn es angegeben ist — ohne die ersten drei lehnt der Installer sie ab.",
       "reqTheme": "Sie muss dem hellen UND dunklen Design folgen — mit dem offiziellen Stil-Kit automatisch.",
       "reqZip": "Eine Erweiterung ist eine einzelne .zip-Datei (mit manifest.json). Nach der Installation ist sie zunächst deaktiviert.",
       "step2Intro": "Wähle die .zip-Datei der Erweiterung. Der Installer prüft das Manifest — bei Fehlern zeigen wir genau, was nicht stimmt.",

@@ -10,7 +10,7 @@ welcome and appreciated — please read this short guide first.
   with steps to reproduce, your OS and app version.
 - **Suggest a feature** — open a feature-request issue describing the problem you
   want solved (the *why*), not only the solution.
-- **Improve docs / translations** — the UI ships in English, German and Hungarian
+- **Improve docs / translations** — the UI ships in English, German, Hungarian and French
   (`src/renderer/src/i18n`); fixes and new strings are very welcome.
 - **Send a pull request** — for anything non-trivial, please open an issue first
   so we can agree on the approach before you invest time.

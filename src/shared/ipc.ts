@@ -728,8 +728,8 @@ export interface TreeMonkApi {
   app: {
     /** Open an external http(s) URL in the default browser. */
     openExternal(url: string): Promise<void>
-    /** Open the bundled user-manual PDF in the OS viewer. Resolves false if missing. */
-    openManual(): Promise<boolean>
+    /** Open the bundled user manual in the selected language. Resolves false if missing. */
+    openManual(language?: string): Promise<boolean>
     /** Tell the main process the current UI language (drives geocoding output). */
     setLanguage(lang: string): Promise<void>
   }

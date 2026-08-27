@@ -26,7 +26,7 @@ extraResources:
   # App icon for the runtime window/taskbar.
   - from: build/icon.png
     to: icon.png
-  # Hungarian user manual (self-contained HTML) — opened in an in-app window
+  # Multilingual user manual (self-contained HTML) — opened in an in-app window
   # from the sidebar / Help.
   - from: docs/TreeMonk-Kezikonyv.html
     to: manual.html

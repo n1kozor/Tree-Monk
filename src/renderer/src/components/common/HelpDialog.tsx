@@ -54,7 +54,7 @@ export function HelpDialog({
   onOpenChange: (o: boolean) => void
   currentView: View
 }): JSX.Element {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [selected, setSelected] = useState<string>('general')
 
   // Jump to the section for the page the user opened help from.
@@ -93,10 +93,10 @@ export function HelpDialog({
                 </button>
               ))}
             </div>
-            {/* Full PDF manual — opens in the OS viewer. */}
+            {/* Full HTML manual — opens in its own app window. */}
             <div className="border-t border-border/40 p-2">
               <button
-                onClick={() => void window.api.app.openManual()}
+                onClick={() => void window.api.app.openManual(i18n.language)}
                 className="flex w-full items-center gap-2.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-left text-sm font-medium text-primary transition-colors hover:bg-primary/10"
               >
                 <FileText className="h-4 w-4 shrink-0" />

@@ -44,14 +44,15 @@ my-plugin/
   "description": {
     "hu": "Rövid leírás magyarul.",
     "en": "A short description in English.",
-    "de": "Eine kurze Beschreibung auf Deutsch."
+    "de": "Eine kurze Beschreibung auf Deutsch.",
+    "fr": "Une courte description en français."
   },
   "icon": "icon.svg",
   "permissions": ["read"],
   "menu": [
     {
       "id": "main",
-      "title": { "hu": "Saját nézet", "en": "My view", "de": "Meine Ansicht" },
+      "title": { "hu": "Saját nézet", "en": "My view", "de": "Meine Ansicht", "fr": "Ma vue" },
       "entry": "index.html"
     }
   ]
@@ -73,11 +74,11 @@ my-plugin/
     <div id="out" class="tm-state">…</div>
     <script>
       document.getElementById('title').textContent =
-        TM.t({ hu: 'Helló', en: 'Hello', de: 'Hallo' })
+        TM.t({ hu: 'Helló', en: 'Hello', de: 'Hallo', fr: 'Bonjour' })
 
       TM.fetch('/api/v1/stats').then((s) => {
         document.getElementById('out').textContent =
-          TM.t({ hu: 'Személyek', en: 'People', de: 'Personen' }) + ': ' + s.people
+          TM.t({ hu: 'Személyek', en: 'People', de: 'Personen', fr: 'Personnes' }) + ': ' + s.people
       })
     </script>
   </body>
@@ -94,7 +95,7 @@ so you know what to fix.
 
 | Rule | How it's enforced |
 |---|---|
-| `description` and every menu `title` in **all three languages** (hu/en/de) | **Hard** — the installer rejects the zip otherwise |
+| `description` and every menu `title` in **all three required languages** (hu/en/de); French is supported when supplied | **Hard** — the installer rejects the zip without hu/en/de |
 | Panel **content** localized to `TM.lang` | Expected — trivial with `TM.t({...})`; plugins that ignore it look broken to two-thirds of users |
 | **Light AND dark mode** | Expected — free if you use the SDK stylesheet / `--tm-*` variables; the host passes the app's live theme and reloads your panel when it changes |
 | Only declare permissions you use | Users see the badges before enabling — over-asking kills installs |
@@ -108,7 +109,7 @@ Your entry page receives everything in the **URL hash**:
 |---|---|---|
 | `api` | `http://127.0.0.1:27007` | Local API base URL |
 | `token` | `plg_…` | Your plugin's scoped Bearer token |
-| `lang` | `hu` \| `en` \| `de` | The app's UI language |
+| `lang` | `hu` \| `en` \| `de` \| `fr` | The app's UI language |
 | `theme` | `light` \| `dark` | The app's current theme |
 
 `treemonk.js` parses these for you and exposes them as `TM.api`, `TM.token`,
@@ -129,7 +130,7 @@ Load both from the reserved `sdk` host (served by the app, works offline):
 
 | Member | What it does |
 |---|---|
-| `TM.t({hu, en, de})` | Returns the string for the current app language |
+| `TM.t({hu, en, de, fr})` | Returns the string for the current app language |
 | `TM.fetch(path, opts?)` | `fetch` against the local API — auth header, JSON parsing and error throwing handled. `TM.fetch('/api/v1/people?q=kiss')` |
 | `TM.api`, `TM.token`, `TM.lang`, `TM.theme` | The boot parameters |
 
@@ -174,7 +175,7 @@ back to a puzzle piece.
 | `documents` | Raw document files (`/api/v1/documents/{id}/file`) — photos, scanned records |
 
 The API is self-documenting: with the server running, open
-`http://127.0.0.1:<port>/docs` (hu/en/de) or fetch
+`http://127.0.0.1:<port>/docs` (hu/en/de/fr) or fetch
 `/api/v1/openapi.json`. The MCP endpoint is **never** available to plugin
 tokens.
 
@@ -191,7 +192,7 @@ tokens.
 
 ## Checklist before you ship
 
-- [ ] `description` + all menu `title`s in hu, en and de (the installer checks)
+- [ ] `description` + all menu `title`s in hu, en and de (the installer checks); add fr when supported
 - [ ] All visible text goes through `TM.t({...})`
 - [ ] Looks right in light AND dark (toggle the app theme — your panel reloads)
 - [ ] Colors come from `--tm-*` variables / SDK classes

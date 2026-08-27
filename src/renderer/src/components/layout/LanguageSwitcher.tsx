@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { LANGUAGES, setLanguage } from '@/i18n'
-import type { AppLanguage } from '@shared/types'
 
 export function LanguageSwitcher(): JSX.Element {
   const { i18n, t } = useTranslation()
@@ -31,7 +30,7 @@ export function LanguageSwitcher(): JSX.Element {
         {LANGUAGES.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
-            onSelect={() => setLanguage(lang.code as AppLanguage)}
+            onSelect={() => setLanguage(lang.code)}
             className={i18n.language === lang.code ? 'bg-accent' : ''}
           >
             <span className="text-base">{lang.flag}</span>

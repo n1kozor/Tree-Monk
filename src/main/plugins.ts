@@ -3,7 +3,7 @@ import AdmZip from 'adm-zip'
 import { randomBytes } from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join, normalize, resolve, sep } from 'node:path'
-import type { InstalledPlugin, PluginManifest, PluginPanelInfo, PluginScope } from '@shared/types'
+import type { AppLanguage, InstalledPlugin, PluginManifest, PluginPanelInfo, PluginScope } from '@shared/types'
 import { getApiConfig, restartApiServer } from './api/server'
 
 /**
@@ -61,14 +61,20 @@ function persistRegistry(): void {
 
 // ---- Manifest ----
 
-/** TreeMonk ships in hu/en/de — user-facing plugin strings must too. */
-function requireTrilingual(v: unknown, what: string): Partial<Record<'hu' | 'en' | 'de', string>> {
+/** TreeMonk ships in hu/en/de/fr — existing plugins keep the hu/en/de minimum. */
+function validateLocalizedText(v: unknown, what: string): Partial<Record<AppLanguage, string>> {
   const o = (v ?? {}) as Record<string, unknown>
   for (const lang of ['hu', 'en', 'de'] as const) {
     if (typeof o[lang] !== 'string' || !(o[lang] as string).trim())
       throw new Error(`${what} must be given in all three languages ({ "hu": …, "en": …, "de": … })`)
   }
-  return { hu: String(o.hu).trim(), en: String(o.en).trim(), de: String(o.de).trim() }
+  const localized: Partial<Record<AppLanguage, string>> = {
+    hu: String(o.hu).trim(),
+    en: String(o.en).trim(),
+    de: String(o.de).trim()
+  }
+  if (typeof o.fr === 'string' && o.fr.trim()) localized.fr = o.fr.trim()
+  return localized
 }
 
 /** Validates an untrusted manifest.json; throws a user-readable error. */
@@ -87,7 +93,7 @@ export function validateManifest(raw: unknown): PluginManifest {
     if (typeof e.id !== 'string' || !ID_RE.test(e.id)) throw new Error('menu entry id must be a slug')
     if (typeof e.entry !== 'string' || !ENTRY_RE.test(e.entry) || e.entry.includes('..'))
       throw new Error(`menu entry "${e.id}" needs a relative .html entry file`)
-    const title = requireTrilingual(e.title, `menu entry "${e.id}" title`)
+    const title = validateLocalizedText(e.title, `menu entry "${e.id}" title`)
     return { id: e.id, title, entry: e.entry }
   })
   return {
@@ -95,7 +101,7 @@ export function validateManifest(raw: unknown): PluginManifest {
     name: m.name.trim(),
     version: m.version.trim(),
     author: typeof m.author === 'string' ? m.author : undefined,
-    description: requireTrilingual(m.description, 'description'),
+    description: validateLocalizedText(m.description, 'description'),
     // Icon: an image file inside the plugin (rendered like the app's own
     // stroke icons) or an emoji. A traversal-y path is dropped, not fatal.
     icon:

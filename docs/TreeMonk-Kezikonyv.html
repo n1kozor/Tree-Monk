@@ -103,6 +103,7 @@
   <button data-l="hu">Magyar</button>
   <button data-l="en">English</button>
   <button data-l="de">Deutsch</button>
+  <button data-l="fr">Français</button>
 </div>
 
 <section class="lang" data-lang="hu">
@@ -229,7 +230,7 @@
 <li><b>GEDCOM import / export:</b> adatok behozása és kivitele.</li>
 <li><b>Nappali / éjszakai mód:</b> világos vagy sötét megjelenés.</li>
 <li><b>Súgó (<span class="ui">?</span>):</b> a kézikönyv és segítség előhívása.</li>
-<li><b>Nyelvválasztó:</b> magyar, angol vagy német nyelv.</li>
+<li><b>Nyelvválasztó:</b> magyar, angol, német vagy francia nyelv.</li>
 </ul>
 
 <h2>4.3 A fő terület</h2>
@@ -393,7 +394,7 @@
 <li><b>Nappali / éjszakai mód:</b> világos vagy sötét megjelenés.</li>
 <li><b>Animációk kikapcsolása:</b> nagy családfánál érdemes, hogy gyorsabb legyen.</li>
 <li><b>Dátumformátum:</b> a dátumok megjelenésének beállítása.</li>
-<li><b>Nyelv:</b> magyar, angol vagy német.</li>
+<li><b>Nyelv:</b> magyar, angol, német vagy francia.</li>
 </ul>
 
 <h1>14. Gyakori kérdések és hibaelhárítás</h1>
@@ -735,7 +736,7 @@
   <li><strong>Light or dark</strong> — pick the look you prefer.</li>
   <li><strong>Animations</strong> — turn them off for a snappier feel on very large trees.</li>
   <li><strong>Date format</strong> — show dates the way you like to read them.</li>
-  <li><strong>Language</strong> — Hungarian, English or German.</li>
+  <li><strong>Language</strong> — Hungarian, English, German or French.</li>
 </ul>
 
 <h1>14. FAQ &amp; troubleshooting</h1>
@@ -784,6 +785,314 @@
 <p>The Map view's "Manage places" button assigns a type, parent place and GOV id to places. In Settings, the <b>website export</b> saves the whole tree into one searchable HTML file (confidential people excluded), and "Standardize place names" rewrites long place names to a concise settlement–county–country form. New flags: stillborn, confidential; new block: Other facts (free-form facts).</p>
 <h2>16.7 Protection, CSV import, indexes, Julian dates</h2>
 <p>The GEDCOM export offers two protection options: <b>excluding confidential people</b> and <b>anonymizing the living</b> (they stay in the structure without name or facts). <b>CSV import</b> creates people in bulk from a spreadsheet by recognising header columns. The <b>Name &amp; place index</b> produces printable alphabetical lists. Date fields also understand the <b>Julian calendar</b> ("1700-02-11 (J)") and <b>dual years</b> ("1699/1700").</p>
+</section>
+
+<section class="lang" data-lang="fr">
+
+<div class="cover">
+  <div class="logo">🌳</div>
+  <h1>TreeMonk</h1>
+  <div class="sub">Manuel utilisateur</div>
+  <div class="ver">Valable à partir de la version 1.0</div>
+  <div class="foot">Votre histoire familiale, conservée en toute sécurité sur votre ordinateur.</div>
+</div>
+
+<div class="toc">
+  <h1>Sommaire</h1>
+  <ol>
+    <li>Bienvenue</li>
+    <li>Termes clés</li>
+    <li>Installation et premier démarrage</li>
+    <li>L’écran</li>
+    <li>La barre latérale, rubrique par rubrique
+      <ol>
+        <li>Tableau d’enquête</li>
+        <li>Tableau de bord / Vue d’ensemble</li>
+        <li>Arbre généalogique</li>
+        <li>Carte</li>
+        <li>Personnes</li>
+        <li>Documents</li>
+        <li>Problèmes de données</li>
+        <li>Requête</li>
+        <li>Parenté</li>
+        <li>Calendrier</li>
+        <li>Journal des modifications</li>
+        <li>Paramètres</li>
+      </ol>
+    </li>
+    <li>Panneau personne et profil complet</li>
+    <li>Pas à pas</li>
+    <li>Importation de données</li>
+    <li>Export GEDCOM</li>
+    <li>Sauvegarde et restauration</li>
+    <li>Mise à jour</li>
+    <li>Retours et chat d’assistance</li>
+    <li>Apparence, langue et taille du texte</li>
+    <li>FAQ et dépannage</li>
+    <li>Confidentialité</li>
+    <li>Modèle de données étendu (1.8+)</li>
+  </ol>
+</div>
+
+<h1>1. Bienvenue</h1>
+<p class="lead">TreeMonk est une application de bureau conviviale pour créer votre arbre généalogique. Tout reste sur votre ordinateur : votre histoire familiale reste donc privée et toujours accessible.</p>
+<p>Avec TreeMonk, vous pouvez :</p>
+<ul>
+  <li>Ajouter les membres de votre famille et relier parents, enfants et conjoints.</li>
+  <li>Voir votre arbre sous plusieurs formes et l’explorer en zoomant et en le déplaçant.</li>
+  <li>Placer vos proches sur une carte et suivre les déplacements de votre famille au fil de l’histoire.</li>
+  <li>Associer des photos et des documents aux personnes concernées.</li>
+  <li>Enregistrer vos sources pour savoir d’où vient chaque information.</li>
+  <li>Repérer et corriger les erreurs, fusionner les doublons et harmoniser les variantes de noms.</li>
+  <li>Importer un fichier GEDCOM.</li>
+  <li>Découvrir le lien de parenté entre deux personnes.</li>
+</ul>
+<div class="box tip"><span class="t">N’ayez pas peur d’essayer</span> Vous ne pouvez vraiment rien casser. Chaque modification est enregistrée dans le <span class="menu">journal des modifications</span> et tout peut être annulé, y compris les suppressions. Vous pouvez aussi créer une sauvegarde à tout moment : cliquez donc partout et faites vos essais.</div>
+
+<h1>2. Termes clés</h1>
+<p class="lead">Quelques mots simples que vous rencontrerez dans l’application. Inutile de les mémoriser : ils deviendront vite naturels.</p>
+<table>
+  <tr><th>Terme</th><th>Signification</th></tr>
+  <tr><td>Ancêtre</td><td>Personne dont vous descendez : parent, grand-parent, arrière-grand-parent, etc.</td></tr>
+  <tr><td>Descendant</td><td>Personne qui descend d’une autre : son enfant, son petit-enfant, etc.</td></tr>
+  <tr><td>Parent biologique</td><td>Personne avec laquelle vous êtes apparenté par la naissance, et pas seulement par mariage.</td></tr>
+  <tr><td>Conjoint</td><td>Mari ou épouse, c’est-à-dire un partenaire lié par mariage.</td></tr>
+  <tr><td>Personne de départ</td><td>Personne que l’application place au centre de l’arbre, généralement vous. Plusieurs vues sont organisées autour d’elle.</td></tr>
+  <tr><td>Baptême</td><td>Cérémonie religieuse au cours de laquelle un enfant reçoit son nom. Sa date est souvent proche de celle de la naissance.</td></tr>
+  <tr><td>Parrain ou marraine</td><td>Personne qui accompagne un enfant lors de son baptême.</td></tr>
+  <tr><td>GEDCOM</td><td>Format de fichier standard pour les arbres généalogiques. La plupart des logiciels de généalogie savent le lire et l’écrire.</td></tr>
+  <tr><td>FamilySearch</td><td>Grand service en ligne gratuit consacré aux arbres généalogiques.</td></tr>
+  <tr><td>Photo de profil / portrait</td><td>Image principale affichée pour une personne, dans l’arbre et dans son profil.</td></tr>
+  <tr><td>Espace de travail</td><td>Arbre généalogique séparé. Vous pouvez en conserver plusieurs et passer de l’un à l’autre.</td></tr>
+  <tr><td>Source / citation</td><td>Note indiquant l’origine d’un fait : registre, livre, site web ou document.</td></tr>
+</table>
+
+<h1>3. Installation et premier démarrage</h1>
+<h2>3.1 Windows</h2>
+<ol class="steps">
+  <li>Téléchargez l’installateur TreeMonk et double-cliquez dessus.</li>
+  <li>Windows peut afficher un avertissement bleu <span class="ui">SmartScreen</span> parce que l’application est récente. C’est normal.</li>
+  <li>Cliquez sur <span class="ui">Informations complémentaires</span>, puis sur <span class="ui">Exécuter quand même</span>.</li>
+  <li>Suivez les étapes pour terminer l’installation, puis ouvrez TreeMonk.</li>
+</ol>
+<h2>3.2 Linux</h2>
+<ol class="steps">
+  <li>Téléchargez le fichier <span class="ui">AppImage</span> de TreeMonk.</li>
+  <li>Faites un clic droit, choisissez <span class="ui">Propriétés</span> et cochez <span class="ui">Autoriser l’exécution du fichier comme un programme</span> (ou lancez <kbd>chmod +x</kbd>).</li>
+  <li>Double-cliquez sur l’AppImage pour démarrer TreeMonk.</li>
+</ol>
+<h2>3.3 Le tout premier démarrage</h2>
+<p>Lors de la première ouverture, votre arbre est vide : c’est tout à fait normal. Deux façons simples de commencer s’offrent à vous :</p>
+<ul>
+  <li>Ajouter votre première personne manuellement, en commençant par vous-même par exemple.</li>
+  <li>Importer un arbre existant depuis un fichier GEDCOM.</li>
+</ul>
+<div class="box tip"><span class="t">L’aide est toujours à portée de main</span> Appuyez sur <kbd>F1</kbd> ou cliquez sur le bouton <span class="ui">?</span> pour ouvrir l’aide.</div>
+<div class="box note"><span class="t">Un petit message</span> TreeMonk pourra vous proposer de le noter. Cela n’arrive qu’une seule fois et vous pouvez simplement fermer la fenêtre.</div>
+
+<h1>4. L’écran</h1>
+<p class="lead">TreeMonk comporte trois grandes zones : une barre latérale à gauche, une barre en haut et la grande zone de travail au centre.</p>
+<h2>4.1 La barre latérale gauche</h2>
+<p>La barre latérale contient toutes les grandes rubriques de l’application. Chacune possède une icône et un libellé clair pour vous repérer. Vous pouvez la réduire pour gagner de la place et la rouvrir quand vous le souhaitez. Le lien <span class="ui">Signaler un problème</span> reste épinglé tout en haut.</p>
+<h2>4.2 La barre supérieure</h2>
+<p>La barre supérieure donne rapidement accès aux actions courantes :</p>
+<ul>
+  <li><span class="ui">Sélecteur d’arbre</span> — passer d’un arbre généalogique à l’autre.</li>
+  <li><span class="ui">Personne de départ</span> — voir et modifier la personne au centre de l’arbre.</li>
+  <li><span class="ui">Version et mises à jour</span> — consulter la version et les mises à jour disponibles.</li>
+  <li><span class="ui">Import / export GEDCOM</span> — importer ou exporter un arbre.</li>
+  <li><span class="ui">Clair / sombre</span> — changer l’apparence de l’application.</li>
+  <li><span class="ui">Aide</span> et <span class="ui">Langue</span> — ouvrir ce manuel ou changer la langue.</li>
+</ul>
+<h2>4.3 La zone principale</h2>
+<p>C’est le grand espace central où tout se déroule : arbre, carte, listes et profils apparaissent selon la rubrique choisie.</p>
+
+<h1>5. La barre latérale, rubrique par rubrique</h1>
+<p class="lead">Voici une visite guidée de chaque rubrique pour comprendre exactement son rôle.</p>
+<h2>5.1 Tableau d’enquête</h2>
+<p>Un tableau personnel pour vos recherches. Notez ce que vous faites, ce qu’il reste à trouver et les idées à suivre. C’est votre espace pour réfléchir et organiser votre enquête familiale.</p>
+<h2>5.2 Tableau de bord / Vue d’ensemble</h2>
+<p>Un résumé accueillant de votre arbre : nombre de personnes, faits et chiffres importants, et informations utiles. De nombreux éléments sont cliquables pour accéder directement à une personne ou une rubrique.</p>
+<h2>5.3 Arbre généalogique</h2>
+<p>Le cœur de TreeMonk. Vous y voyez les membres de votre famille reliés entre eux et pouvez explorer librement.</p>
+<p><strong>Quatre vues sont disponibles :</strong></p>
+<table>
+  <tr><th>Vue</th><th>Idéale pour</th></tr>
+  <tr><td>Paysage</td><td>Une disposition large qui s’étend sur l’écran.</td></tr>
+  <tr><td>Portrait</td><td>Une disposition verticale qui descend de haut en bas.</td></tr>
+  <tr><td>Éventail</td><td>Une forme colorée montrant plusieurs générations à la fois.</td></tr>
+  <tr><td>Personnalisée</td><td>Organiser l’arbre comme vous le souhaitez.</td></tr>
+</table>
+<p><strong>Se déplacer dans l’arbre :</strong></p>
+<table>
+  <tr><th>Action</th><th>Résultat</th></tr>
+  <tr><td>Molette</td><td>Zoomer et dézoomer autour du curseur.</td></tr>
+  <tr><td>Glisser</td><td>Déplacer l’ensemble de l’arbre.</td></tr>
+  <tr><td><kbd>Shift</kbd> + molette</td><td>Déplacer l’arbre horizontalement.</td></tr>
+  <tr><td>Double-clic sur un espace vide</td><td>Aller à cet endroit et le centrer.</td></tr>
+</table>
+<p>Vous pouvez <span class="ui">développer</span> ou <span class="ui">réduire</span> les branches, utiliser <span class="ui">Tout développer</span> ou <span class="ui">Tout réduire</span>, puis centrer une personne avec le bouton <span class="ui">réticule</span>. Utilisez <span class="ui">Exporter</span> pour enregistrer l’arbre en SVG ou en PDF.</p>
+<div class="box note"><span class="t">Pourquoi les portraits disparaissent parfois</span> À très faible zoom, les petits portraits sont masqués pour garder l’arbre rapide. Zoomez à nouveau pour les faire réapparaître.</div>
+<h2>5.4 Carte</h2>
+<p>Voyez où votre famille a vécu, s’est mariée et a été inhumée. TreeMonk place des marqueurs pour les lieux de naissance, de décès et de mariage :</p>
+<ul>
+  <li><strong>Frontières historiques</strong> — voir les frontières selon les époques.</li>
+  <li><strong>Carte de chaleur</strong> — repérer les zones où votre famille était concentrée.</li>
+  <li><strong>Animation des migrations</strong> — suivre les déplacements de votre famille dans le temps.</li>
+  <li><strong>Événements historiques proches</strong> — découvrir le contexte historique de vos proches.</li>
+</ul>
+<p>Les noms de lieux sont automatiquement convertis en emplacements cartographiques : c’est le géocodage. Depuis un profil, utilisez <span class="ui">Afficher sur la carte</span>.</p>
+<h2>5.5 Personnes</h2>
+<p>Une liste claire de toutes les personnes de votre arbre, avec leur photo. Recherchez par nom ou filtrez par sexe, année ou lieu. Utilisez <span class="ui">+ Ajouter</span> pour créer une personne.</p>
+<h2>5.6 Documents</h2>
+<p>Tous vos fichiers et photos sont réunis au même endroit, avec l’indication des personnes concernées. La navigation reste rapide, même pour un grand arbre.</p>
+<h2>5.7 Problèmes de données</h2>
+<p>Un assistant pour garder un arbre propre et cohérent, organisé en onglets :</p>
+<ul>
+  <li><strong>Problèmes de données</strong> — signale les dates impossibles ou un parent trop jeune. Si le signalement est normal, cliquez sur <span class="ui">Ignorer</span>.</li>
+  <li><strong>Doublons</strong> — trouve les personnes probablement saisies deux fois et permet de les <span class="ui">Fusionner</span>.</li>
+  <li><strong>Noms de famille</strong> — rapproche les variantes d’orthographe et d’accents.</li>
+  <li><strong>Prénoms</strong> — fait de même pour les prénoms.</li>
+</ul>
+<h2>5.8 Requête</h2>
+<p>Un outil puissant pour trouver des groupes de personnes avec des règles. Combinez les conditions avec <span class="ui">ET</span> et <span class="ui">OU</span> et utilisez des opérateurs comme « contient », « égal » ou « ne contient pas ».</p>
+<h2>5.9 Parenté</h2>
+<p>Vous voulez savoir comment deux personnes sont liées ? La vue Parenté affiche la chaîne de proches la plus courte et nomme le lien en toutes lettres. Le bouton <span class="ui">Quel est notre lien ?</span> permet de commencer rapidement.</p>
+<h2>5.10 Calendrier</h2>
+<p>Un calendrier des anniversaires. Il affiche les naissances, décès et mariages selon le jour de l’année, quelle que soit l’année concernée. Le jour actuel est mis en évidence et un clic sur une date affiche les personnes correspondantes.</p>
+<h2>5.11 Journal des modifications</h2>
+<p>L’historique complet de vos changements : création, modification, suppression et importation. Chaque action peut être <span class="ui">annulée</span>, une erreur n’est donc jamais définitive.</p>
+<h2>5.12 Paramètres</h2>
+<p>Votre centre de contrôle. Vous pouvez :</p>
+<ul>
+  <li>Modifier l’apparence de l’application.</li>
+  <li>Créer une sauvegarde ou en restaurer une.</li>
+  <li>Importer et exporter des fichiers GEDCOM.</li>
+  <li>Supprimer les entrées vides et sans nom.</li>
+  <li>Tout effacer et recommencer, avec prudence.</li>
+  <li>Envoyer un <span class="ui">retour</span> au développeur.</li>
+</ul>
+
+<h1>6. Panneau personne et profil complet</h1>
+<h2>6.1 Le panneau latéral</h2>
+<p>Cliquez sur une personne pour ouvrir son panneau latéral, organisé en onglets :</p>
+<ul>
+  <li><strong>Vue d’ensemble</strong> — les principaux faits en un coup d’œil.</li>
+  <li><strong>Famille</strong> — parents, conjoints et enfants.</li>
+  <li><strong>Sources</strong> — origine des informations.</li>
+  <li><strong>Recherche</strong> — notes et tâches concernant la personne.</li>
+</ul>
+<p>Dans l’onglet <strong>Sources</strong>, les citations sont entièrement modifiables. Une source peut contenir un titre, une date, l’événement associé, une page, un auteur, une publication ou un lien, une transcription et une note. Les <span class="ui">parrains et marraines</span> y sont également enregistrés.</p>
+<h2>6.2 Le profil complet</h2>
+<p>Pour une vue plus riche, ouvrez le profil complet : il occupe l’écran avec une grande photo, des badges et des boutons pour :</p>
+<ul>
+  <li><span class="ui">Arbre de la personne</span> — centrer l’arbre sur cette personne.</li>
+  <li><span class="ui">Afficher sur la carte</span> — trouver ses lieux.</li>
+  <li><span class="ui">Quel est notre lien ?</span> — voir votre relation.</li>
+  <li><span class="ui">Ouvrir</span> — consulter en ligne les personnes ayant un véritable identifiant FamilySearch.</li>
+</ul>
+<p>Vous y trouverez également une chronologie des événements de sa vie et une galerie de photos.</p>
+
+<h1>7. Pas à pas</h1>
+<h2>7.1 Ajouter une personne</h2>
+<ol class="steps">
+  <li>Allez dans <span class="menu">Personnes</span> et cliquez sur <span class="ui">+ Ajouter</span> (ou utilisez les boutons + de l’arbre).</li>
+  <li>Saisissez son nom et les informations connues.</li>
+  <li>Enregistrez. La nouvelle personne est prête.</li>
+</ol>
+<h2>7.2 Ajouter un parent, un enfant ou un conjoint depuis l’arbre</h2>
+<ol class="steps">
+  <li>Ouvrez l’<span class="menu">arbre généalogique</span> et trouvez la personne.</li>
+  <li>Cliquez sur l’un des petits boutons <span class="ui">+</span> autour d’elle.</li>
+  <li>Saisissez les informations puis enregistrez. Le lien est créé automatiquement.</li>
+</ol>
+<h2>7.3 Définir une photo de profil</h2>
+<ol class="steps">
+  <li>Ouvrez le profil de la personne.</li>
+  <li>Choisissez d’ajouter ou de modifier la photo, puis sélectionnez une image sur votre ordinateur.</li>
+  <li>Enregistrez : la photo apparaît dans l’arbre et le profil.</li>
+</ol>
+<h2>7.4 Copier le baptême depuis la naissance</h2>
+<ol class="steps">
+  <li>Ouvrez la personne et trouvez les champs du baptême.</li>
+  <li>Utilisez l’option de copie pour reprendre les informations de naissance.</li>
+  <li>Adaptez la date si nécessaire, puis enregistrez.</li>
+</ol>
+<h2>7.5 Ajouter ou modifier une source avec une date</h2>
+<ol class="steps">
+  <li>Ouvrez la personne et allez dans l’onglet <span class="ui">Sources</span>.</li>
+  <li>Ajoutez une source ou cliquez sur une source existante.</li>
+  <li>Renseignez le titre, la <span class="ui">date</span> et les autres champs disponibles.</li>
+  <li>Enregistrez pour conserver vos preuves.</li>
+</ol>
+
+<h1>8. Importer des données</h1>
+<h2>8.1 Depuis un fichier GEDCOM</h2>
+<p>Pour importer un arbre existant :</p>
+<ol class="steps">
+  <li>Ouvrez les <span class="menu">Paramètres</span> ou la barre supérieure et choisissez l’import GEDCOM.</li>
+  <li>Sélectionnez votre fichier <span class="ui">.ged</span>. L’indicateur « Importation… » montre que l’opération est en cours.</li>
+  <li>Attendez la fin : les gros fichiers peuvent prendre un peu de temps.</li>
+</ol>
+<div class="box note"><span class="t">Bon à savoir</span> TreeMonk évite les doublons et considère comme probablement décédées les personnes ayant vécu il y a très longtemps.</div>
+<h2>8.2 FamilySearch</h2>
+<p>La synchronisation FamilySearch est <strong>en développement</strong> et arrivera prochainement. Pour le moment, vous pouvez importer n’importe quel fichier GEDCOM.</p>
+<h2>12.1 Retours</h2>
+<p>Vous avez trouvé un bug ou une bonne idée ? Envoyez un retour depuis l’application. Choisissez <span class="ui">Bug</span>, <span class="ui">Idée</span> ou <span class="ui">Autre</span>, écrivez votre message et ajoutez éventuellement votre adresse e-mail.</p>
+<div class="box note"><span class="t">Données envoyées</span> Seuls votre message, la version de l’application, le système et la langue sont transmis. Votre arbre généalogique ne l’est <strong>jamais</strong>.</div>
+<h2>12.2 Chat d’assistance</h2>
+<p>Besoin d’aide ? Le chat intégré vous permet de parler directement et anonymement avec le développeur, sans tiers. Vos données généalogiques ne sont jamais envoyées et vous pouvez supprimer la conversation quand vous le souhaitez.</p>
+
+<h1>13. Apparence, langue et taille du texte</h1>
+<p class="lead">Adaptez TreeMonk à vos yeux et à votre langue.</p>
+<ul>
+  <li><strong>Taille du texte</strong> — choisissez petite, moyenne ou grande.</li>
+  <li><strong>Clair ou sombre</strong> — choisissez l’apparence souhaitée.</li>
+  <li><strong>Animations</strong> — désactivez-les pour une application plus réactive sur les très grands arbres.</li>
+  <li><strong>Format des dates</strong> — affichez les dates comme vous aimez les lire.</li>
+  <li><strong>Langue</strong> — hongrois, anglais, allemand ou français.</li>
+</ul>
+<h1>14. FAQ et dépannage</h1>
+<h3>Les photos ont disparu de mon arbre, où sont-elles ?</h3>
+<p>Vous êtes probablement très dézoomé. Les portraits sont masqués à faible zoom pour préserver la fluidité. Zoomez à nouveau pour les retrouver.</p>
+<h3>J’ai ajouté une personne par erreur. Puis-je la supprimer ?</h3>
+<p>Oui. Supprimez-la puis, si vous changez d’avis, ouvrez le <span class="menu">journal des modifications</span> et choisissez <span class="ui">Annuler</span>. Rien n’est définitivement perdu.</p>
+<h3>J’ai des entrées vides sans nom. Comment les nettoyer ?</h3>
+<p>Ouvrez les <span class="menu">Paramètres</span> et utilisez l’option de suppression des entrées vides.</p>
+<h3>L’application est lente avec mon très grand arbre.</h3>
+<p>Désactivez les animations dans les <span class="menu">Paramètres</span> et réduisez un peu le zoom.</p>
+<h3>L’installateur Windows ne démarre pas.</h3>
+<p>Windows SmartScreen se montre prudent avec les nouvelles applications. Cliquez sur <span class="ui">Informations complémentaires</span>, puis <span class="ui">Exécuter quand même</span>.</p>
+
+<h1>15. Confidentialité</h1>
+<p class="lead">TreeMonk est local-first : votre arbre généalogique reste sur votre ordinateur et vous appartient.</p>
+<p>L’application utilise Internet uniquement lorsque vous le demandez, par exemple pour :</p>
+<ul>
+  <li>Trouver les coordonnées de lieux.</li>
+  <li>Télécharger une photo.</li>
+  <li>Rechercher une mise à jour.</li>
+  <li>Envoyer un retour ou utiliser le chat d’assistance.</li>
+</ul>
+<p>Même dans ces cas, votre arbre généalogique lui-même n’est <strong>jamais</strong> envoyé.</p>
+<div class="box tip"><span class="t">Une habitude simple</span> Faites régulièrement une sauvegarde. Cela ne prend qu’un instant et protège durablement votre histoire familiale.</div>
+
+<p style="text-align:center; color:#7a8694; margin-top:24px;">TreeMonk — Manuel utilisateur · Valable à partir de la version 1.0 · Bonne recherche !</p>
+
+<h1>16. Modèle de données étendu (1.8+)</h1>
+<h2>16.1 Témoins, parrains, marraines et participants</h2>
+<p>Dans l’onglet Famille, vous pouvez enregistrer des <b>témoins de baptême</b> en plus des parrains et marraines, ainsi que des <b>témoins de mariage</b> sur chaque fiche de mariage. Les événements personnels et familiaux peuvent aussi contenir des <b>participants</b> avec un rôle libre (prêtre, sage-femme, officier d’état civil, donateur…) : cliquez sur la ligne de l’événement et ajoutez-les en bas de l’éditeur. Le profil du participant affiche un bloc « Participations ».</p>
+<h2>16.2 Événements familiaux et relation du couple</h2>
+<p>La fiche de mariage permet d’enregistrer les fiançailles, la publication des bans, les mariages civil et religieux, le divorce et la séparation (« Événements familiaux »). Le <b>type de relation</b> du couple se définit dans l’éditeur de la ligne de mariage : mariage, partenaires, aucune relation ou autre.</p>
+<h2>16.3 Adoption et plusieurs paires de parents</h2>
+<p>Le lien enfant-parent se définit <b>pour chaque parent</b> : biologique, adoptif, famille d’accueil ou beau-parent, avec l’icône crayon près de la ligne de l’enfant. Les liens non biologiques apparaissent avec un badge ambré. Vous pouvez ajouter un parent manquant et une <b>seconde paire de parents</b>, par exemple des parents adoptifs à côté des parents biologiques.</p>
+<h2>16.4 Noms</h2>
+<p>Plusieurs prénoms peuvent être saisis dans le champ des prénoms, séparés par des espaces ; le <b>prénom usuel</b> indique celui utilisé au quotidien. Les variantes de nom ont un type, notamment <b>nom marital</b> et <b>nom de naissance</b>, qui apparaissent aussi dans l’en-tête du profil.</p>
+<h2>16.5 Dates incertaines</h2>
+<p>Les champs de date comprennent « vers 1850 », « avant 1850 », « après 1850 » et « entre 1850 et 1860 ». Les dates sont stockées dans un format standard, affichées dans votre langue et correctement triées.</p>
+<h2>16.6 Lieux, export de site web et autres fonctions</h2>
+<p>Le bouton « Gérer les lieux » de la vue Carte associe aux lieux un type, un lieu parent et un identifiant GOV. Dans les Paramètres, l’<b>export de site web</b> enregistre tout l’arbre dans un seul fichier HTML consultable (personnes confidentielles exclues) et « Standardiser les noms de lieux » raccourcit les noms longs en une forme commune–département–pays. Nouveaux marqueurs : mort-né, confidentiel ; nouveau bloc : autres faits.</p>
+<h2>16.7 Protection, import CSV, index et dates juliennes</h2>
+<p>L’export GEDCOM propose deux options de protection : <b>exclure les personnes confidentielles</b> et <b>anonymiser les personnes vivantes</b> (elles restent dans la structure sans nom ni faits). L’<b>import CSV</b> crée des personnes en masse depuis un tableau en reconnaissant les colonnes. L’<b>index des noms et des lieux</b> produit des listes alphabétiques imprimables. Les champs de date comprennent aussi le <b>calendrier julien</b> (« 1700-02-11 (J) ») et les <b>années doubles</b> (« 1699/1700 »).</p>
 </section>
 
 <section class="lang" data-lang="de">
@@ -1076,7 +1385,7 @@
   <tr><td>Farbmodus</td><td>Hell oder Dunkel.</td></tr>
   <tr><td>Animationen</td><td>Bei sehr großem Baum abschaltbar für mehr Geschwindigkeit.</td></tr>
   <tr><td>Datumsformat</td><td>Anzeige der Daten nach Ihrem Wunsch.</td></tr>
-  <tr><td>Sprache</td><td>Ungarisch, Englisch oder Deutsch.</td></tr>
+  <tr><td>Sprache</td><td>Ungarisch, Englisch, Deutsch oder Französisch.</td></tr>
 </table>
 
 <h1>14. FAQ &amp; Fehlerbehebung</h1>
@@ -1128,7 +1437,7 @@
 
 <script>
   (function () {
-    var LANGS = ['hu', 'en', 'de'];
+    var LANGS = ['hu', 'en', 'de', 'fr'];
     function setLang(l) {
       if (LANGS.indexOf(l) < 0) l = 'en';
       document.documentElement.lang = l;
@@ -1140,7 +1449,13 @@
       window.scrollTo(0, 0);
     }
     var initial = null;
-    try { initial = localStorage.getItem('tm_manual_lang'); } catch (e) {}
+    try { initial = new URLSearchParams(location.hash.slice(1)).get('lang'); } catch (e) {}
+    if (LANGS.indexOf(initial) < 0) {
+      initial = null;
+    }
+    if (LANGS.indexOf(initial) < 0) {
+      try { initial = localStorage.getItem('tm_manual_lang'); } catch (e) {}
+    }
     if (LANGS.indexOf(initial) < 0) {
       var nav = (navigator.language || 'en').slice(0, 2).toLowerCase();
       initial = LANGS.indexOf(nav) >= 0 ? nav : 'en';

@@ -1779,7 +1779,7 @@
           },
           {
             "h": "Megjelenés és nyelv",
-            "p": "A felső sávban a nap/hold ikonnal váltasz világos és sötét téma között, mellette pedig a felület nyelvét állítod be (magyar, angol vagy német)."
+            "p": "A felső sávban a nap/hold ikonnal váltasz világos és sötét téma között, mellette pedig a felület nyelvét állítod be (magyar, angol, német vagy francia)."
           },
           {
             "h": "Gyorsbillentyűk",
@@ -2305,7 +2305,7 @@
       "title": "Bővítmény hozzáadása",
       "step1Intro": "Mielőtt telepítesz, ezt érdemes tudni:",
       "reqSandbox": "A bővítmények elszigetelt panelben futnak: kizárólag a helyi API-t érik el a saját, szűkített tokenjükkel — külső hálózatot nem, így az adataid nem hagyhatják el a gépet.",
-      "reqLangs": "Egy szabályos bővítmény három nyelven (magyar, angol, német) adja meg a leírását és a menüpontjait — e nélkül a telepítő elutasítja.",
+      "reqLangs": "Egy szabályos bővítmény magyar, angol és német nyelven adja meg a leírását és a menüpontjait; a francia akkor támogatott, ha meg van adva — az első három nélkül a telepítő elutasítja.",
       "reqTheme": "A világos ÉS sötét témát is követnie kell — a hivatalos stíluskészlettel ez automatikus.",
       "reqZip": "A bővítmény egyetlen .zip fájl (benne manifest.json). Telepítés után alapból kikapcsolva kerül a listába.",
       "step2Intro": "Válaszd ki a bővítmény .zip fájlját. A telepítő ellenőrzi a manifestet — ha hibás, pontosan megmutatjuk, mi a gond.",

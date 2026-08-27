@@ -1,6 +1,7 @@
 import { writeFileSync } from 'fs'
 import { Attributes, Events, Families, Godparents, Occupations, People, Witnesses } from './db/repo'
 import type { Family, Person } from '@shared/types'
+import { resolveAppLanguage } from '@shared/languages'
 
 /**
  * Static-website export: ONE self-contained HTML file with a searchable person
@@ -10,7 +11,7 @@ import type { Family, Person } from '@shared/types'
  * placeholder with no data. Photos are intentionally not embedded (file size).
  */
 
-type Lang = 'hu' | 'en' | 'de'
+type Lang = 'hu' | 'en' | 'de' | 'fr'
 
 const L: Record<Lang, Record<string, string>> = {
   hu: {
@@ -123,6 +124,43 @@ const L: Record<Lang, Record<string, string>> = {
     bef: 'vor',
     aft: 'nach',
     illegitimate: 'uneheliches Kind'
+  },
+  fr: {
+    title: 'Arbre généalogique',
+    generated: 'Généré',
+    people: 'personnes',
+    families: 'familles',
+    search: 'Rechercher par nom…',
+    index: 'Index des noms',
+    birth: 'Né(e)',
+    christening: 'Baptisé(e)',
+    death: 'Décédé(e)',
+    burial: 'Inhumé(e)',
+    stillborn: 'mort-né(e)',
+    religion: 'Religion',
+    occupations: 'Profession',
+    events: 'Événements de la vie',
+    attributes: 'Autres faits',
+    parents: 'Parents',
+    unions: 'Mariages / unions',
+    spouse: 'Conjoint(e)',
+    marriage: 'Mariage',
+    children: 'Enfants',
+    godparents: 'Parrain et marraine',
+    witnesses: 'Témoins (baptême)',
+    marriageWitnesses: 'Témoins',
+    notes: 'Notes',
+    confidential: 'Personne confidentielle',
+    confidentialNote: 'Cette personne est marquée comme confidentielle — ses données n’ont pas été exportées.',
+    footer: 'Export d’arbre généalogique TreeMonk',
+    indexTitle: 'Index des noms et des lieux',
+    nameIndex: 'Index des noms',
+    placeIndex: 'Index des lieux',
+    legend: 'Légende : * naissance · ~ baptême · ⚭ mariage · † décès · ▭ inhumation · ⌂ résidence',
+    abt: 'vers',
+    bef: 'avant',
+    aft: 'après',
+    illegitimate: 'enfant illégitime'
   }
 }
 
@@ -138,6 +176,7 @@ function fmtDate(raw: string | null | undefined, l: Record<string, string>, lang
     const [a, b] = [bet[1].trim(), bet[2].trim()]
     if (lang === 'hu') return `${a} és ${b} között`
     if (lang === 'de') return `zwischen ${a} und ${b}`
+    if (lang === 'fr') return `entre ${a} et ${b}`
     return `between ${a} and ${b}`
   }
   const q = /^(ABT|BEF|AFT)\.?\s+(.+)$/i.exec(s)
@@ -170,7 +209,7 @@ const yearOf = (d: string | null): string => {
  * couples and children never dangle.
  */
 export function exportSite(filePath: string, langRaw: string, personIds?: string[]): string {
-  const lang: Lang = langRaw === 'hu' || langRaw === 'de' ? langRaw : 'en'
+  const lang = resolveAppLanguage(langRaw)
   const l = L[lang]
   const keep = personIds && personIds.length ? new Set(personIds) : null
   const people = keep ? People.list().filter((p) => keep.has(p.id)) : People.list()
@@ -347,7 +386,7 @@ ${sections}
  */
 /** See {@link exportSite} for `personIds`. */
 export function exportIndexes(filePath: string, langRaw: string, personIds?: string[]): string {
-  const lang: Lang = langRaw === 'hu' || langRaw === 'de' ? langRaw : 'en'
+  const lang = resolveAppLanguage(langRaw)
   const l = L[lang]
   const keep = personIds && personIds.length ? new Set(personIds) : null
   const people = People.list().filter((p) => !p.isPrivate && (!keep || keep.has(p.id)))

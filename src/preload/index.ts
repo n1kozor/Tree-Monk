@@ -285,7 +285,7 @@ const api: TreeMonkApi = {
   app: {
     setLanguage: (lang) => ipcRenderer.invoke(Channels.app.setLanguage, lang),
     openExternal: (url) => ipcRenderer.invoke(Channels.app.openExternal, url),
-    openManual: () => ipcRenderer.invoke(Channels.app.openManual)
+    openManual: (language) => ipcRenderer.invoke(Channels.app.openManual, language)
   },
   updates: {
     version: () => ipcRenderer.invoke(Channels.updates.version),

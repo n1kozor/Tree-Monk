@@ -1,40 +1,19 @@
 import { DismissedIssues, Families, People } from './repo'
 import { getDb } from './connection'
 import type { Person, SanityFix, SanityIssue } from '@shared/types'
+import { monthNumber } from '@shared/months'
 
 /**
- * Month name → 1–12. Covers full names AND abbreviations in English, Hungarian
- * and German, because FamilySearch / GEDCOM dates arrive in many shapes:
- * "11 JAN 1906", "1. Januar 1907", "1850. április", "March 1900", "1900-03-01".
- * Each registered name also auto-adds its 3-letter prefix (the GEDCOM abbrev),
- * so "Jan", "Jän", "Már", "Szep" etc. all resolve too.
+ * Month name → 1–12 in English, Hungarian, German and French. FamilySearch /
+ * GEDCOM dates arrive in many shapes, including full names and abbreviations.
  */
-const MONTH_TOKENS: Record<string, number> = {}
-const addMonth = (n: number, ...names: string[]): void => {
-  for (const name of names) {
-    MONTH_TOKENS[name] = n
-    const p = name.slice(0, 3)
-    if (MONTH_TOKENS[p] === undefined) MONTH_TOKENS[p] = n
-  }
-}
-addMonth(1, 'january', 'januar', 'január', 'jänner')
-addMonth(2, 'february', 'februar', 'február')
-addMonth(3, 'march', 'märz', 'marz', 'március', 'marcius')
-addMonth(4, 'april', 'április', 'aprilis')
-addMonth(5, 'may', 'mai', 'május', 'majus')
-addMonth(6, 'june', 'juni', 'június', 'junius')
-addMonth(7, 'july', 'juli', 'július', 'julius')
-addMonth(8, 'august', 'augusztus')
-addMonth(9, 'september', 'szeptember', 'sept')
-addMonth(10, 'october', 'oktober', 'október')
-addMonth(11, 'november')
-addMonth(12, 'december', 'dezember')
-
 /** The month (1–12) named anywhere in a free-form date, or null. Splits on
- *  non-letters so "11 JAN 1906", "1. Januar 1907" and "1850. április" all work. */
+ * non-letters so "11 JAN 1906", "1. Januar 1907", "1850. április" and
+ * "12 janvier 1850" all work. */
 function monthIndex(date: string): number | null {
   for (const tok of date.toLowerCase().split(/[^\p{L}]+/u)) {
-    if (tok && MONTH_TOKENS[tok] !== undefined) return MONTH_TOKENS[tok]
+    const month = monthNumber(tok)
+    if (month !== null) return month
   }
   return null
 }

@@ -12,51 +12,17 @@
  *   7.3.1850 / 07/03/1850      → 1850-03-07   (European day-first)
  *   3.1850 / 03/1850           → 1850-03      (European month-year)
  */
+import { fuzzyMonthNames, monthNumbers } from '@shared/months'
+
 const pad = (n: number): string => String(n).padStart(2, '0')
 const okMonth = (m: number): boolean => m >= 1 && m <= 12
 const okDay = (d: number): boolean => d >= 1 && d <= 31
-
-/** Lowercase + strip diacritics, so "január"/"März"/"June" all match one table. */
-function deaccent(s: string): string {
-  return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-}
-
-/**
- * Month names + abbreviations in Hungarian, English and German → month number.
- * Keys are diacritic-stripped & lowercase (see deaccent). This is what lets the
- * offline parser recognise "1992 jan. 12", "12 January 1992", "január 1992" —
- * no network, no API (the FamilySearch Date authority is used when signed in;
- * this is the local equivalent).
- */
-const MONTHS: Record<string, number> = (() => {
-  const table: [number, string[]][] = [
-    [1, ['january', 'jan', 'januar', 'januar', 'januar']],
-    [2, ['february', 'feb', 'februar', 'februar']],
-    [3, ['march', 'mar', 'marc', 'marcius', 'marz', 'mrz']],
-    [4, ['april', 'apr', 'aprilis']],
-    [5, ['may', 'maj', 'majus', 'mai']],
-    [6, ['june', 'jun', 'junius', 'juni']],
-    [7, ['july', 'jul', 'julius', 'juli']],
-    [8, ['august', 'aug', 'augusztus']],
-    [9, ['september', 'sep', 'sept', 'szeptember', 'szept', 'szep']],
-    [10, ['october', 'oct', 'okt', 'oktober']],
-    [11, ['november', 'nov']],
-    [12, ['december', 'dec', 'dez', 'dezember']]
-  ]
-  const out: Record<string, number> = {}
-  for (const [n, names] of table) for (const name of names) out[name] = n
-  return out
-})()
 
 /** Roman-numeral months (I–XII) — common for the month in old church records
  *  ("1850. VII. 12." = 1850-07-12). Only the 12 canonical forms. */
 const ROMAN_MONTHS: Record<string, number> = {
   i: 1, ii: 2, iii: 3, iv: 4, v: 5, vi: 6, vii: 7, viii: 8, ix: 9, x: 10, xi: 11, xii: 12
 }
-
-/** Full month names (≥6 chars) used for typo tolerance — abbreviations are
- *  excluded so a one-edit fuzzy match can never confuse jun/jul, jan/jun, etc. */
-const FUZZY_MONTHS: [string, number][] = Object.entries(MONTHS).filter(([k]) => k.length >= 6)
 
 /** True if `a` is within one edit of `b` — Optimal String Alignment (Damerau–
  *  Levenshtein with ADJACENT transpositions), so "decmber"→"december" (deletion),
@@ -102,19 +68,19 @@ function within1(a: string, b: string): boolean {
 /** Resolve a non-numeric token to a month number: exact name → Roman numeral →
  *  conservative typo match. Returns null if it isn't a month. */
 function tokenToMonth(key: string): number | null {
-  if (MONTHS[key] !== undefined) return MONTHS[key]
+  if (monthNumbers[key] !== undefined) return monthNumbers[key]
   if (ROMAN_MONTHS[key] !== undefined) return ROMAN_MONTHS[key]
   if (key.length >= 5) {
-    for (const [name, n] of FUZZY_MONTHS) if (within1(key, name)) return n
+    for (const [name, n] of fuzzyMonthNames) if (within1(key, name)) return n
   }
   return null
 }
 
 /**
- * Recognise a month-name date in any of hu/en/de, any order, with/without a
+ * Recognise a month-name date in any of hu/en/de/fr, any order, with/without a
  * day and ordinal suffixes, Roman-numeral months, mixed separators, and small
  * typos: "1992 jan. 12", "12 January 1992", "January 12, 1992", "január 1992",
- * "1850. VII. 12", "12-Jan-1992", "decmber 1850". Requires a recognised month
+ * "1850. VII. 12", "12-Jan-1992", "12 janvier 1850", "decmber 1850". Requires a recognised month
  * AND a 4-digit year; the day is optional. Returns ISO-ish `YYYY-MM[-DD]`, or
  * null if the text isn't a month-name date (numeric branches / fallback handle it).
  */
@@ -136,7 +102,9 @@ function parseMonthName(s: string): string | null {
       day = Number(dayM[1])
       continue
     }
-    const found = tokenToMonth(deaccent(raw).replace(/\.$/, ''))
+    const found = tokenToMonth(
+      raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\.$/, '')
+    )
     if (found === null || mo !== null) return null
     mo = found
   }
@@ -177,14 +145,14 @@ function splitInputQualifier(s: string): QualifiedDate {
   const canonical = splitQualifier(s)
   if (canonical.qual) return canonical
   let m =
-    /^(?:between|zwischen)\s+(.+?)\s+(?:and|und)\s+(.+)$/i.exec(s) ??
+    /^(?:between|zwischen|entre)\s+(.+?)\s+(?:and|und|et)\s+(.+)$/i.exec(s) ??
     /^(.+?)\s+és\s+(.+?)\s+között$/i.exec(s)
   if (m) return { qual: 'BET', core: m[1].trim(), end: m[2].trim() }
-  m = /^(?:~|kb\.?|ca\.?|cca\.?|abt\.?|about|approx\.?|um|etwa)\s*(.+)$/i.exec(s)
+  m = /^(?:~|kb\.?|ca\.?|cca\.?|abt\.?|about|approx\.?|um|etwa|vers)\s*(.+)$/i.exec(s)
   if (m) return { qual: 'ABT', core: m[1].trim(), end: null }
-  m = /^(?:<|bef\.?|before|vor)\s*(.+)$/i.exec(s)
+  m = /^(?:<|bef\.?|before|vor|avant)\s*(.+)$/i.exec(s)
   if (m) return { qual: 'BEF', core: m[1].trim(), end: null }
-  m = /^(?:>|aft\.?|after|nach)\s*(.+)$/i.exec(s)
+  m = /^(?:>|aft\.?|after|nach|après|apres)\s*(.+)$/i.exec(s)
   if (m) return { qual: 'AFT', core: m[1].trim(), end: null }
   m = /^(.+?)\s+körül$/i.exec(s)
   if (m) return { qual: 'ABT', core: m[1].trim(), end: null }
@@ -291,7 +259,7 @@ function normalizeCore(raw: string): string {
     if (okMonth(mo)) return `${y}-${pad(mo)}`
   }
 
-  // Month-name dates in hu/en/de, any order: "1992 jan. 12", "12 January 1992",
+  // Month-name dates in hu/en/de/fr, any order: "1992 jan. 12", "12 January 1992",
   // "január 1992", "1992 Jul". Offline — the local equivalent of the FS Date
   // authority. Runs after the numeric branches (month-name input has letters, so
   // it never collides with them).
@@ -331,11 +299,12 @@ export function formatDisplayDate(
     if (q.qual === 'BET') {
       if (l === 'hu') return `${core} és ${end} között`
       if (l === 'de') return `zwischen ${core} und ${end}`
+      if (l === 'fr') return `entre ${core} et ${end}`
       return `between ${core} and ${end}`
     }
-    if (q.qual === 'ABT') return l === 'hu' ? `kb. ${core}` : l === 'de' ? `um ${core}` : `abt. ${core}`
-    if (q.qual === 'BEF') return l === 'hu' ? `${core} előtt` : l === 'de' ? `vor ${core}` : `before ${core}`
-    return l === 'hu' ? `${core} után` : l === 'de' ? `nach ${core}` : `after ${core}`
+    if (q.qual === 'ABT') return l === 'hu' ? `kb. ${core}` : l === 'de' ? `um ${core}` : l === 'fr' ? `vers ${core}` : `abt. ${core}`
+    if (q.qual === 'BEF') return l === 'hu' ? `${core} előtt` : l === 'de' ? `vor ${core}` : l === 'fr' ? `avant ${core}` : `before ${core}`
+    return l === 'hu' ? `${core} után` : l === 'de' ? `nach ${core}` : l === 'fr' ? `après ${core}` : `after ${core}`
   }
   return formatCore(s, fmt)
 }

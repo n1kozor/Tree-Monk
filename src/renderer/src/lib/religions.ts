@@ -45,6 +45,21 @@ const LISTS: Record<string, string[]> = {
     'Adventist',
     'Pentecostal',
     'None'
+  ],
+  fr: [
+    'Catholique romaine',
+    'Catholique grecque',
+    'Protestante',
+    'Luthérienne',
+    'Réformée / calviniste',
+    'Juive',
+    'Orthodoxe',
+    'Unitarienne',
+    'Baptiste',
+    'Méthodiste',
+    'Adventiste',
+    'Pentecôtiste',
+    'Sans religion'
   ]
 }
 

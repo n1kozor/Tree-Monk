@@ -5,8 +5,8 @@ import type { PersonInput, Sex } from '@shared/types'
 /**
  * Bulk person import from CSV — Excel-friendly: the delimiter (`,` `;` tab) is
  * auto-detected from the header line, quoted fields are handled, and the
- * columns are recognised by their header names in Hungarian, English and
- * German. Rows without any name are skipped. Only PEOPLE are created (no
+ * columns are recognised by their header names in Hungarian, English, German
+ * and French. Rows without any name are skipped. Only PEOPLE are created (no
  * relationships) — the point is fast mass entry from a spreadsheet.
  */
 
@@ -27,25 +27,25 @@ type Col =
 
 /** Header → column key, tried in order (first match wins). */
 const HEADER_PATTERNS: [Col, RegExp][] = [
-  ['surname', /vezet[ée]kn[ée]v|csal[áa]dn[ée]v|nachname|familienname|surname|last\s*name|lastname|family\s*name/i],
-  ['given', /keresztn[ée]v|ut[óo]n[ée]v|vorname|given|first\s*name|firstname/i],
-  ['callName', /h[íi]v[óo]n[ée]v|rufname|call\s*name/i],
-  ['sex', /\bnem\b|geschlecht|gender|\bsex\b/i],
-  ['birthDate', /sz[üu]let[ée]si?\s*(d[áa]tum|id[őo])|sz[üu]letett|geburtsdatum|birth\s*date|birthdate|\bborn\b/i],
-  ['birthPlace', /sz[üu]let[ée]si?\s*hely|geburtsort|birth\s*place|birthplace/i],
-  ['deathDate', /hal[áa]l\w*\s*(d[áa]tum|id[őo])?|elhunyt|meghalt|sterbedatum|todesdatum|death\s*date|deathdate|\bdied\b/i],
-  ['deathPlace', /hal[áa]lozási\s*hely|sterbeort|death\s*place|deathplace/i],
+  ['surname', /vezet[ée]kn[ée]v|csal[áa]dn[ée]v|(?:^nom$)|nom\s+de\s+famille|nachname|familienname|surname|last\s*name|lastname|family\s*name/i],
+  ['callName', /h[íi]v[óo]n[ée]v|rufname|pr[ée]nom\s+usuel|nom\s+d['’]usage|call\s*name/i],
+  ['given', /keresztn[ée]v|ut[óo]n[ée]v|vorname|pr[ée]noms?|given|first\s*name|firstname/i],
+  ['sex', /\bnem\b|geschlecht|gender|sexe|\bsex\b/i],
+  ['birthPlace', /sz[üu]let[ée]si?\s*hely|geburtsort|lieu\s+de\s+naissance|birth\s*place|birthplace/i],
+  ['birthDate', /sz[üu]let[ée]si?\s*(d[áa]tum|id[őo])|sz[üu]letett|geburtsdatum|date\s+de\s+naissance|date\s+naissance|\bnaissance\b|birth\s*date|birthdate|\bborn\b/i],
+  ['deathPlace', /hal[áa]lozási\s*hely|sterbeort|lieu\s+de\s+d[ée]c[èe]s|death\s*place|deathplace/i],
+  ['deathDate', /hal[áa]l\w*\s*(d[áa]tum|id[őo])?|elhunyt|meghalt|sterbedatum|todesdatum|date\s+de\s+d[ée]c[èe]s|date\s+d[ée]c[èe]s|^d[ée]c[èe]s$|d[ée]c[ée]d[ée]|death\s*date|deathdate|\bdied\b/i],
   ['occupation', /foglalkoz[áa]s|beruf|occupation|profession/i],
   ['religion', /vall[áa]s|konfession|religion/i],
   ['notes', /megjegyz[ée]s|jegyzet|notiz|bemerkung|note/i],
   // Generic full-name column LAST, so it never shadows surname/given columns.
-  ['fullName', /^n[ée]v$|^name$|teljes\s*n[ée]v|full\s*name/i]
+  ['fullName', /^n[ée]v$|^name$|teljes\s*n[ée]v|nom\s+complet|nom\s+et\s+pr[ée]nom|full\s*name/i]
 ]
 
 function mapSex(raw: string): Sex {
   const s = raw.trim().toLowerCase()
-  if (/^(f|female|n[őo]|w|weiblich|frau)$/.test(s)) return 'F'
-  if (/^(m|male|f[ée]rfi|ffi|m[äa]nnlich|mann)$/.test(s)) return 'M'
+  if (/^(f|female|féminin|feminin|n[őo]|w|weiblich|frau)$/.test(s)) return 'F'
+  if (/^(m|male|masculin|f[ée]rfi|ffi|m[äa]nnlich|mann)$/.test(s)) return 'M'
   return 'U'
 }
 
