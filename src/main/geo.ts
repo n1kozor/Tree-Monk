@@ -3,6 +3,7 @@ import { AppSettings, Events, Families, People, Places } from './db/repo'
 import { getDb } from './db/connection'
 import { isSignedIn, searchFamilySearchPlaces } from './familysearch'
 import type { GeoResult } from '@shared/types'
+import { canonicalCountryName, knownCountryAlias, lastPlacePart } from '@shared/placeNormalize'
 
 // Geocoding routes through the TreeMonk geocoder proxy FIRST (shared cache +
 // server-side throttle on the VPS — see deploy/geocoder/), so the public
@@ -102,9 +103,17 @@ export function placeCandidateFits(original: string, candidate: string): boolean
   // Scotland. The strictest testable claim is that the candidate's own first
   // component IS the queried name — anything looser has already corrupted data.
   if (parts.length === 1) {
+    const country = knownCountryAlias(parts[0])
+    if (country) {
+      const candParts = candidate.split(',').map((x) => x.trim()).filter(Boolean)
+      if (candParts.length === 1) return canonicalCountryName(candParts[0]) === country
+      return canonicalCountryName(candParts.at(-1)) === country
+    }
     const first = (candidate.split(',')[0] ?? '').trim()
     return foldPlace(first) === foldPlace(parts[0])
   }
+  const country = knownCountryAlias(parts.at(-1))
+  if (country && canonicalCountryName(lastPlacePart(candidate)) !== country) return false
   // Multi-part: every stated component except the trailing country must appear.
   const checked = parts.slice(0, -1)
   for (const part of checked) {

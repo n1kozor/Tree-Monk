@@ -1,6 +1,7 @@
 import type { Family, Person } from '@shared/types'
 import { computeInsights, type Insight } from './insights'
 import { aggregateQuality } from './completeness'
+import { canonicalizeCountryInPlace } from '@shared/placeNormalize'
 
 /** A label + count pair used by the bar/list widgets. */
 export interface Bucket {
@@ -98,7 +99,7 @@ export function computeDashboard(
   opts: DashboardComputeOptions = {}
 ): DashboardStats {
   /** Resolve a raw place spelling to its canonical bucket. */
-  const canonPlace = (raw: string): string => opts.placeCanonical?.get(raw) ?? raw
+  const canonPlace = (raw: string): string => canonicalizeCountryInPlace(opts.placeCanonical?.get(raw) ?? raw)
   const limit = Math.max(1, Math.round(opts.topN ?? DEFAULT_TOP_N))
   const isDeceased = (p: Person): boolean => !!(p.deceased || p.deathDate)
 
@@ -154,7 +155,7 @@ export function computeDashboard(
     const bp = (p.birthPlace ?? '').trim()
     if (bp) bump(birthPlaces, canonPlace(bp))
     const dp = (p.deathPlace ?? '').trim()
-    if (dp) bump(deathPlaces, dp)
+    if (dp) bump(deathPlaces, canonPlace(dp))
     const oc = (p.occupation ?? '').trim()
     if (oc) bump(occupations, oc)
     const rel = (p.religion ?? '').trim()

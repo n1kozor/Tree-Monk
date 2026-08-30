@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { peopleFor, lifespanBand, isMissing } from '@/lib/dashboardDrill'
 import type { Person } from '@shared/types'
+import { canonicalizeCountryInPlace } from '@shared/placeNormalize'
 
 /** Build a Person with sane defaults; override only what a test cares about. */
 function mk(p: Partial<Person>): Person {
@@ -46,6 +47,24 @@ describe('peopleFor', () => {
 
   it('filters by birth place', () => {
     expect(peopleFor({ kind: 'birthPlace', value: 'Békés' }, people).map((p) => p.givenName)).toEqual(['Imre'])
+  })
+
+  it('filters canonical place buckets', () => {
+    const rows = [
+      mk({ givenName: 'A', birthPlace: 'Brasil' }),
+      mk({ givenName: 'B', birthPlace: 'Brazil' }),
+      mk({ givenName: 'C', birthPlace: 'São José, Santa Catarina, Brasil' })
+    ]
+    expect(
+      peopleFor({ kind: 'birthPlace', value: 'Brazil' }, rows, {
+        canonPlace: canonicalizeCountryInPlace
+      }).map((p) => p.givenName)
+    ).toEqual(['A', 'B'])
+    expect(
+      peopleFor({ kind: 'birthPlace', value: 'São José, Santa Catarina, Brazil' }, rows, {
+        canonPlace: canonicalizeCountryInPlace
+      }).map((p) => p.givenName)
+    ).toEqual(['C'])
   })
 
   it('filters by sex', () => {

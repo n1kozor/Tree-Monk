@@ -22,6 +22,7 @@ import {
   type LucideIcon
 } from 'lucide-react'
 import type { Family, Person } from '@shared/types'
+import { canonicalizeCountryInPlace } from '@shared/placeNormalize'
 import { useAppStore } from '@/store/useAppStore'
 import { useDashboardSettings } from '@/store/useDashboardSettings'
 import { scopePeople, type DashboardScope } from '@/lib/dashboardScope'
@@ -238,10 +239,17 @@ export function DashboardView(): JSX.Element {
   useEffect(() => {
     void window.api.geo.listPlaces().then((rows) => {
       const m = new Map<string, string>()
-      for (const r of rows) if (r.canonical && r.canonical !== r.name) m.set(r.name, r.canonical)
+      for (const r of rows) {
+        const canonical = canonicalizeCountryInPlace(r.canonical || r.name)
+        if (canonical && canonical !== r.name) m.set(r.name, canonical)
+      }
       setPlaceCanonical(m)
     })
   }, [])
+  const canonPlace = useMemo(
+    () => (raw: string): string => canonicalizeCountryInPlace(placeCanonical.get(raw) ?? raw),
+    [placeCanonical]
+  )
 
   const stats = useMemo(
     () => computeDashboard(scoped.people, scoped.families, { topN: 15, occPersonIds, placeCanonical }),
@@ -251,16 +259,17 @@ export function DashboardView(): JSX.Element {
   const migration = useMemo(() => {
     const m = new Map<string, number>()
     for (const p of scoped.people) {
-      const a = (p.birthPlace ?? '').trim()
-      const b = (p.deathPlace ?? '').trim()
+      const a = canonPlace((p.birthPlace ?? '').trim())
+      const b = canonPlace((p.deathPlace ?? '').trim())
       if (!a || !b || a === b) continue
       m.set(`${a}  →  ${b}`, (m.get(`${a}  →  ${b}`) ?? 0) + 1)
     }
     return [...m.entries()].map(([label, count]) => ({ label, count })).sort((x, y) => y.count - x.count).slice(0, 15)
-  }, [scoped])
+  }, [scoped, canonPlace])
 
   const [drill, setDrill] = useState<{ title: string; people: Person[] } | null>(null)
-  const open = (facet: Facet, title: string): void => setDrill({ title, people: peopleFor(facet, scoped.people) })
+  const open = (facet: Facet, title: string): void =>
+    setDrill({ title, people: peopleFor(facet, scoped.people, { canonPlace }) })
 
   const [tab, setTab] = useState('overview')
 
