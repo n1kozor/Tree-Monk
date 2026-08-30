@@ -197,7 +197,7 @@ function htmlToPdf(html: string): Promise<Buffer> {
       return await win.webContents.printToPDF({
         printBackground: true,
         preferCSSPageSize: true,
-        margins: { marginType: 'none' }
+        margins: { top: 0, bottom: 0, left: 0, right: 0 }
       })
     } finally {
       rmSync(dir, { recursive: true, force: true })
