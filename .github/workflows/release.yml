@@ -17,6 +17,30 @@ jobs:
   prepare:
     runs-on: ubuntu-latest
     steps:
+      # Only here to read package.json for the version guard below. Nothing in
+      # this job runs git, so the contents: write token need not land on disk.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # The tag decides which release-notes file finalize picks up; package.json
+      # decides the version electron-builder stamps into the installers. Nothing
+      # tied the two together, so `git tag v1.9.1` on a 1.9.0 manifest used to
+      # build and publish silently under the wrong name. Fail before the draft
+      # exists, so a mismatch leaves nothing to clean up.
+      #
+      # `node` is preinstalled on ubuntu-latest, so this needs no setup-node.
+      - name: Verify tag matches package.json version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          TAG_VERSION="${TAG#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag ${TAG} does not match package.json version ${PKG_VERSION}. Bump package.json to ${TAG_VERSION} (and add .github/release-notes/${TAG_VERSION}.md), or delete the tag and retag the right commit."
+            exit 1
+          fi
+          echo "Tag ${TAG} matches package.json version ${PKG_VERSION}."
+
       - name: Create draft release if it does not exist
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

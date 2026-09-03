@@ -1,0 +1,49 @@
+name: CI
+
+# Typecheck, unit tests and a build on every PR and push to main. The e2e suite
+# stays out: it needs a built app and a display, so it gets its own workflow.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# The two triggers can never collide: `github.ref` is `refs/pull/<n>/merge` for
+# pull_request but `refs/heads/main` for push, so a merge never cancels a PR run
+# still in flight. `github.workflow` is in the key — groups are repository-wide.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # One runner is enough — nothing here is platform-specific.
+  check:
+    runs-on: ubuntu-latest
+    # A stalled Electron download would otherwise sit on the 6-hour default.
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # 20 to match the runtime release.yml builds the installers on.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Keeps postinstall (electron-rebuild for better-sqlite3) rather than
+      # --ignore-scripts: a broken native build should fail here, not at release.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test:run
+
+      # tsc and the bundler resolve imports differently — a broken alias or JSON
+      # import fails only here. Runs without secrets (integration goes dormant).
+      - name: Build
+        run: npm run build
