@@ -659,6 +659,12 @@ export interface TreeMonkApi {
           found: boolean
           updated: number
           addedRelatives?: { fid: string; name: string; kind: string }[]
+          /** The remote record's lifecycle state, when it was not simply active. */
+          status?: 'active' | 'deleted' | 'merged' | 'not_found'
+          forwardedFid?: string
+          localPersonId?: string
+          mergeAuditSeq?: number
+          snapshot?: PersonSnapshot | null
         }
       | { needCreds: true }
     >
@@ -679,7 +685,7 @@ export interface TreeMonkApi {
           newRelatives: { fid: string; name: string; kind: 'spouse' | 'child' | 'parent' | 'godparent' }[]
           content: Record<'notes' | 'sources' | 'media' | 'occupations' | 'events', { local: number; remote: number }>
         }
-      | { error: string }
+      | { error: string; forwardedFid?: string }
     >
     /** Last-used import settings (to pre-fill the dialog for an easy re-import). */
     getSettings(): Promise<FamilySearchSavedSettings | null>

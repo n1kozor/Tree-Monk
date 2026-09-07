@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { ArrowRight, Baby, Heart, Loader2, LogIn, RefreshCw, Sparkles, UserPlus, Users } from 'lucide-react'
+import { ArrowRight, Baby, Heart, Loader2, LogIn, RefreshCw, Sparkles, Trash2, UserPlus, Users } from 'lucide-react'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { toastUndo } from '@/components/common/ConfirmDialog'
+import type { PersonSnapshot } from '@shared/types'
 
 interface FieldDiff {
   field: string
@@ -45,6 +47,7 @@ export function FsPersonSyncDialog({
   const [relatives, setRelatives] = useState<Relative[]>([])
   const [content, setContent] = useState<Counts | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [remoteChange, setRemoteChange] = useState<{ kind: 'deleted' | 'merged'; forwardedFid?: string } | null>(null)
   const [signedOut, setSignedOut] = useState(false)
   const [signingIn, setSigningIn] = useState(false)
 
@@ -53,6 +56,7 @@ export function FsPersonSyncDialog({
     setRelatives([])
     setContent(null)
     setError(null)
+    setRemoteChange(null)
     setSignedOut(false)
     setLoading(true)
     void window.api.familysearch
@@ -62,6 +66,8 @@ export function FsPersonSyncDialog({
           if (r.error === 'NOT_SIGNED_IN') {
             setSignedOut(true)
             setError(t('fs.signInFirst'))
+          } else if (r.error === 'FS_DELETED' || r.error === 'FS_MERGED') {
+            setRemoteChange({ kind: r.error === 'FS_DELETED' ? 'deleted' : 'merged', forwardedFid: r.forwardedFid })
           } else {
             setError(t('fs.diffFailed'))
           }
@@ -99,19 +105,38 @@ export function FsPersonSyncDialog({
         ([, v]) => v.remote > v.local
       )
     : []
-  const hasChanges = fields.length > 0 || relatives.length > 0 || newContent.length > 0
+  const hasChanges = !!remoteChange || fields.length > 0 || relatives.length > 0 || newContent.length > 0
 
   const apply = async (): Promise<void> => {
     setApplying(true)
     try {
       const r = await window.api.familysearch.syncPerson(fid)
-      if ('needCreds' in r) toast.error(t('fs.signInFirst'))
-      else if (!r.found) toast.error(t('fs.syncNotFound'))
-      else {
+      if ('needCreds' in r) {
+        toast.error(t('fs.signInFirst'))
+        return
+      }
+      if (r.status === 'deleted') {
+        const snapshot = r.snapshot as PersonSnapshot | null | undefined
+        if (!snapshot) {
+          toast.error(t('fs.syncNotFound'))
+          return
+        }
+        await onApplied()
+        toastUndo(t('fs.localDeleted'), t('common.undo'), async () => {
+          await window.api.people.restore(snapshot)
+          await onApplied()
+        })
+      } else if (r.status === 'merged' && r.found) {
+        toast.success(t('fs.localMerged'))
+        await onApplied()
+      } else if (!r.found) {
+        toast.error(t('fs.syncNotFound'))
+        return
+      } else {
         const rels = r.addedRelatives?.length ?? 0
         toast.success(rels > 0 ? t('fs.syncedWithRelatives', { count: rels }) : t('fs.syncedChanged'))
+        await onApplied()
       }
-      await onApplied()
       onOpenChange(false)
     } finally {
       setApplying(false)
@@ -145,6 +170,18 @@ export function FsPersonSyncDialog({
                 {signingIn ? t('fs.signingIn') : t('fs.signInNow')}
               </Button>
             )}
+          </div>
+        ) : remoteChange ? (
+          <div className="space-y-3 rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm">
+            <div className="flex items-start gap-2">
+              <Trash2 className="mt-0.5 h-4 w-4 shrink-0 text-rose-600" />
+              <p>
+                {remoteChange.kind === 'deleted'
+                  ? t('fs.remoteDeletedApply')
+                  : t('fs.remoteMergedApply', { fid: remoteChange.forwardedFid ?? fid })}
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">{t('fs.remoteChangeHint')}</p>
           </div>
         ) : !hasChanges ? (
           <p className="rounded-lg border border-border bg-muted/40 p-3 text-center text-sm text-muted-foreground">

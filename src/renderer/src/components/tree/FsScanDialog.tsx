@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { useAppStore } from '@/store/useAppStore'
 
 /**
- * Read-only FamilySearch change scan. Iterates every FS-linked person and
+ * Read-only FamilySearch change scan. Iterates the scoped FS-linked people and
  * reports (WITHOUT importing anything) where FamilySearch data changed, new
  * data appeared, or a person was deleted/merged. Runs in the store so it keeps
  * going when minimized; results badge the tree cards live.
@@ -23,6 +23,7 @@ export function FsScanDialog({ onOpenPerson }: { onOpenPerson: (personId: string
 
   const changed = scan.results.filter((r) => r.status === 'changed')
   const deleted = scan.results.filter((r) => r.status === 'deleted')
+  const merged = scan.results.filter((r) => r.status === 'merged')
   const pct = scan.total ? Math.round((scan.done / scan.total) * 100) : 100
 
   return (
@@ -50,7 +51,8 @@ export function FsScanDialog({ onOpenPerson }: { onOpenPerson: (personId: string
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span>
-              {scan.running ? t('fsScan.scanning') : t('fsScan.done')} · {scan.done}/{scan.total}
+              {scan.running ? t('fsScan.scanning') : t('fsScan.done')} · {scan.done}/{scan.total} ·{' '}
+              {scan.maxDepth === null ? t('fsScan.depthAll') : t('fsScan.depthValue', { count: scan.maxDepth })}
             </span>
             <span>{pct}%</span>
           </div>
@@ -64,24 +66,31 @@ export function FsScanDialog({ onOpenPerson }: { onOpenPerson: (personId: string
           <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 font-medium text-emerald-700 dark:text-emerald-400">
             {t('fsScan.changedCount', { count: changed.length })}
           </span>
-          {deleted.length > 0 && (
+          {deleted.length + merged.length > 0 && (
             <span className="rounded-full bg-rose-500/10 px-2.5 py-1 font-medium text-rose-700 dark:text-rose-400">
-              {t('fsScan.deletedCount', { count: deleted.length })}
+              {t('fsScan.deletedCount', { count: deleted.length + merged.length })}
             </span>
           )}
         </div>
 
         {/* Results */}
         <div className="max-h-72 space-y-1.5 overflow-y-auto pr-1">
-          {deleted.map((r) => (
-            <div
+          {[...deleted, ...merged].map((r) => (
+            <button
               key={r.personId}
-              className="flex items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm"
+              onClick={() => onOpenPerson(r.personId)}
+              className="flex w-full items-center gap-2 rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-left text-sm transition-colors hover:bg-rose-500/15"
             >
-              <Trash2 className="h-4 w-4 shrink-0 text-rose-600" />
+              {r.status === 'merged' ? (
+                <RefreshCw className="h-4 w-4 shrink-0 text-rose-600" />
+              ) : (
+                <Trash2 className="h-4 w-4 shrink-0 text-rose-600" />
+              )}
               <span className="font-medium">{r.name}</span>
-              <span className="ml-auto text-xs text-muted-foreground">{t('fsScan.deletedTag')}</span>
-            </div>
+              <span className="ml-auto text-xs text-muted-foreground">
+                {r.status === 'merged' ? t('fsScan.mergedTag') : t('fsScan.deletedTag')}
+              </span>
+            </button>
           ))}
           {changed.map((r) => (
             <button
@@ -98,7 +107,7 @@ export function FsScanDialog({ onOpenPerson }: { onOpenPerson: (personId: string
               </span>
             </button>
           ))}
-          {!scan.running && changed.length === 0 && deleted.length === 0 && (
+          {!scan.running && changed.length === 0 && deleted.length === 0 && merged.length === 0 && (
             <p className="rounded-lg border border-border bg-muted/40 p-3 text-center text-sm text-muted-foreground">
               {t('fsScan.allUpToDate')}
             </p>

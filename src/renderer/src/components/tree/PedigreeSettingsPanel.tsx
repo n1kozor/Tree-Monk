@@ -13,7 +13,7 @@ import {
 
 /** Floating, persisted look-and-feel panel for the pedigree canvas.
  *  Lives in the top-right of the canvas; starts collapsed to a labelled button. */
-export function PedigreeSettingsPanel(): JSX.Element {
+export function PedigreeSettingsPanel({ inline = false }: { inline?: boolean }): JSX.Element {
   const { t } = useTranslation()
   const ped = usePedigreeSettings()
   const [open, setOpen] = useState(false)
@@ -23,7 +23,7 @@ export function PedigreeSettingsPanel(): JSX.Element {
       <button
         onClick={() => setOpen(true)}
         title={t('tree.displaySettings')}
-        className="glass-subtle absolute right-4 top-4 z-30 flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-muted-foreground transition-colors hover:text-primary"
+        className={`${inline ? '' : 'absolute right-4 top-4 z-30 '}glass-subtle flex h-9 items-center gap-1.5 rounded-xl px-3 text-xs font-medium text-muted-foreground transition-colors hover:text-primary`}
       >
         <Settings2 className="h-4 w-4" />
         {t('tree.displaySettings')}
@@ -32,7 +32,7 @@ export function PedigreeSettingsPanel(): JSX.Element {
   }
 
   return (
-    <div className="glass-strong absolute right-4 top-4 z-30 w-64 overflow-hidden rounded-2xl text-card-foreground">
+    <div className={`${inline ? '' : 'absolute right-4 top-4 z-30 '}glass-strong w-64 overflow-hidden rounded-2xl text-card-foreground`}>
       <div className="flex items-center justify-between border-b border-border/40 px-3 py-2">
         <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           <Settings2 className="h-3.5 w-3.5" /> {t('tree.displaySettings')}

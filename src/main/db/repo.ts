@@ -456,6 +456,7 @@ export const People = {
     this.create(
       {
         gedcomId: p.gedcomId,
+        fsId: p.fsId,
         givenName: p.givenName,
         surname: p.surname,
         sex: p.sex,
@@ -464,14 +465,26 @@ export const People = {
         deathDate: p.deathDate,
         deathPlace: p.deathPlace,
         deceased: p.deceased,
+        illegitimate: p.illegitimate,
+        verified: p.verified,
+        callName: p.callName,
+        namePrefix: p.namePrefix,
+        nameSuffix: p.nameSuffix,
+        stillborn: p.stillborn,
+        isPrivate: p.isPrivate,
         burialDate: p.burialDate,
         burialPlace: p.burialPlace,
         christeningDate: p.christeningDate,
         christeningPlace: p.christeningPlace,
         religion: p.religion,
+        birthNote: p.birthNote,
+        deathNote: p.deathNote,
+        christeningNote: p.christeningNote,
+        burialNote: p.burialNote,
         occupation: p.occupation,
         notes: p.notes,
-        profilePhotoId: p.profilePhotoId
+        profilePhotoId: p.profilePhotoId,
+        profilePhotoCrop: p.profilePhotoCrop
       },
       p.id
     )

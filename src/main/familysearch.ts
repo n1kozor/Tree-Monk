@@ -527,7 +527,7 @@ async function schedFetch(url: string, init: RequestInit): Promise<Response> {
 async function gxGet(
   path: string,
   media: string = GX_MEDIA
-): Promise<{ status: number; doc: GxDocument | null; location?: string }> {
+): Promise<{ status: number; doc: GxDocument | null; location?: string; forwardedId?: string }> {
   loadTokens()
   if (!cachedToken) return { status: 401, doc: null }
   // Remembered so an exhausted retry loop can say WHY it gave up instead of
@@ -567,7 +567,9 @@ async function gxGet(
     }
     if (res.status === 204) return { status: 204, doc: null }
     if (res.status >= 300 && res.status < 400) {
-      return { status: res.status, doc: null, location: res.headers.get('Location') ?? undefined }
+      const location = res.headers.get('Location') ?? undefined
+      const forwardedId = res.headers.get('X-entity-forwarded-id') ?? location?.match(/\/persons\/([^/?#]+)/i)?.[1]
+      return { status: res.status, doc: null, location, forwardedId }
     }
     if (res.status === 401) {
       // A parallel caller may have refreshed the session while this request was
@@ -849,26 +851,72 @@ function artifactIdOf(url: string): string | null {
 
 /** Read the person document, falling back to the TreeMonk user tree (persons
  *  we contributed live there, not in GLOBAL). */
-const docCache = new Map<string, { doc: GxDocument | null; at: number }>()
-async function getPersonDoc(fid: string): Promise<GxDocument | null> {
-  const hit = docCache.get(fid)
-  if (hit && Date.now() - hit.at < 4000) return hit.doc
-  const doc = await getPersonDocUncached(fid)
-  docCache.set(fid, { doc, at: Date.now() })
-  return doc
+interface FsPersonResponse {
+  doc: GxDocument | null
+  status: number
+  forwardedFid?: string
 }
-async function getPersonDocUncached(fid: string): Promise<GxDocument | null> {
+
+const docCache = new Map<string, { response: FsPersonResponse; at: number }>()
+async function getPersonResponse(fid: string): Promise<FsPersonResponse> {
+  const hit = docCache.get(fid)
+  if (hit && Date.now() - hit.at < 4000) return hit.response
+  const response = await getPersonResponseUncached(fid)
+  docCache.set(fid, { response, at: Date.now() })
+  return response
+}
+
+async function getPersonDoc(fid: string): Promise<GxDocument | null> {
+  return (await getPersonResponse(fid)).doc
+}
+
+async function getPersonResponseUncached(fid: string): Promise<FsPersonResponse> {
   await selectTree('GLOBAL')
   let r = await gxGet(`/platform/tree/persons/${enc(fid)}`)
-  if (!r.doc) {
+  // A 301/410 is a meaningful FamilySearch lifecycle response. Do not hide it
+  // by probing the user tree fallback, which would turn a merge/delete into a
+  // generic "not found" result.
+  if (!r.doc && r.status !== 301 && r.status !== 410) {
     const treeId = AppSettings.get('fs_user_tree_id')
     if (treeId && (await selectTree(treeId))) {
       r = await gxGet(`/platform/tree/persons/${enc(fid)}`)
     }
   }
-  return r.doc
+  return { doc: r.doc, status: r.status, forwardedFid: r.forwardedId }
 }
 
+export type FsPersonRemoteState = 'active' | 'deleted' | 'merged' | 'not_found'
+
+interface ResolvedFsPerson {
+  state: FsPersonRemoteState
+  requestedFid: string
+  resolvedFid?: string
+  forwardedFid?: string
+  doc: GxDocument | null
+}
+
+/** Resolve FamilySearch's lifecycle response without following a merge blindly.
+ *  The original id remains important locally: it identifies the row that must
+ *  be removed or merged into the forwarded canonical person. */
+async function resolveFsPerson(fid: string, seen = new Set<string>()): Promise<ResolvedFsPerson> {
+  if (seen.has(fid)) return { state: 'not_found', requestedFid: fid, doc: null }
+  seen.add(fid)
+  const response = await getPersonResponse(fid)
+  if (response.status === 301 && response.forwardedFid) {
+    const next = await resolveFsPerson(response.forwardedFid, seen)
+    const resolvedFid = next.resolvedFid ?? response.forwardedFid
+    return {
+      state: 'merged',
+      requestedFid: fid,
+      resolvedFid,
+      forwardedFid: resolvedFid,
+      doc: next.doc
+    }
+  }
+  if (response.doc) return { state: 'active', requestedFid: fid, resolvedFid: fid, doc: response.doc }
+  if (response.status === 410) return { state: 'deleted', requestedFid: fid, doc: null }
+  return { state: 'not_found', requestedFid: fid, doc: null }
+}
 /** Fetch EVERYTHING the API offers for one person beyond the core record:
  *  portrait, memories (photos/documents), attached sources and notes. */
 async function fetchPersonExtras(fid: string): Promise<PersonExtras> {
@@ -1674,20 +1722,43 @@ export async function previewFamilySearch(opts: {
   }
 }
 
-export async function syncPersonFromFamilySearch(opts: { fid: string }): Promise<FsNode[]> {
-  const doc = await getPersonDoc(opts.fid)
-  if (!doc) return []
-  const nodes = documentToNodes(doc)
+export interface FsPersonSyncFetch {
+  status: FsPersonRemoteState
+  requestedFid: string
+  resolvedFid?: string
+  forwardedFid?: string
+  nodes: FsNode[]
+}
+
+export async function syncPersonFromFamilySearch(opts: { fid: string }): Promise<FsPersonSyncFetch> {
+  const resolved = await resolveFsPerson(opts.fid)
+  if (!resolved.doc || (resolved.state !== 'active' && resolved.state !== 'merged')) {
+    return {
+      status: resolved.state,
+      requestedFid: opts.fid,
+      resolvedFid: resolved.resolvedFid,
+      forwardedFid: resolved.forwardedFid,
+      nodes: []
+    }
+  }
+  const fid = resolved.resolvedFid ?? opts.fid
+  const nodes = documentToNodes(resolved.doc)
   // Enrich the main person with EVERYTHING the API offers.
-  const main = nodes.find((n) => n.t === 'i' && n.fid === opts.fid)
+  const main = nodes.find((n) => n.t === 'i' && n.fid === fid) ?? nodes.find((n) => n.t === 'i')
   if (main && main.t === 'i') {
-    const extras = await fetchPersonExtras(opts.fid)
+    const extras = await fetchPersonExtras(fid)
     if (extras.media.length) main.media = extras.media
     if (extras.notes.length) main.no = extras.notes
     if (extras.di.length) main.di = extras.di
     nodes.push(...extras.sources)
   }
-  return nodes
+  return {
+    status: resolved.state,
+    requestedFid: opts.fid,
+    resolvedFid: fid,
+    forwardedFid: resolved.forwardedFid,
+    nodes
+  }
 }
 
 export async function searchFamilySearch(opts: { query: string }): Promise<FamilySearchPersonResult[]> {
@@ -1751,8 +1822,10 @@ export async function familySearchPersonDiff(
   const p = People.get(personId)
   if (!p) return { error: 'NOT_FOUND' }
   if (!p.fsId) return { error: 'NOT_LINKED' }
-  const doc = await getPersonDoc(p.fsId)
-  const gp = doc?.persons?.find((x) => x.id === p.fsId) ?? doc?.persons?.[0]
+  const resolved = await resolveFsPerson(p.fsId)
+  if (resolved.state === 'deleted') return { error: 'FS_DELETED' }
+  if (resolved.state === 'merged') return { error: 'FS_MERGED' }
+  const gp = resolved.doc?.persons?.find((x) => x.id === p.fsId) ?? resolved.doc?.persons?.[0]
   if (!gp) return { error: 'FS_NOT_FOUND' }
   const n = personToNode(gp)
   if (!n || n.t !== 'i') return { error: 'FS_NOT_FOUND' }
@@ -2005,21 +2078,24 @@ export interface FsSyncPreview {
  *  FamilySearch carries versus the local record. */
 export async function familySearchSyncPreview(
   personId: string
-): Promise<FsSyncPreview | { error: string }> {
+): Promise<FsSyncPreview | { error: string; forwardedFid?: string }> {
   if (!cachedToken) return { error: 'NOT_SIGNED_IN' }
   const p = People.get(personId)
   if (!p) return { error: 'NOT_FOUND' }
   if (!p.fsId) return { error: 'NOT_LINKED' }
 
-  // ONE parallel burst per person: record + families + extras together (the
-  // change scan calls this for every linked person — serially this was 3×
-  // slower, and the record used to be fetched twice).
-  const [doc, fam, extras] = await Promise.all([
-    getPersonDoc(p.fsId),
+  // Resolve the core record first so a 301 merge or 410 deletion is reported as
+  // a lifecycle change instead of being flattened into a generic empty preview.
+  // For active people the remaining calls still run in one parallel burst.
+  const resolved = await resolveFsPerson(p.fsId)
+  if (resolved.state === 'deleted') return { error: 'FS_DELETED' }
+  if (resolved.state === 'merged') return { error: 'FS_MERGED', forwardedFid: resolved.forwardedFid }
+  if (resolved.state !== 'active' || !resolved.doc) return { error: 'FS_NOT_FOUND' }
+  const [fam, extras] = await Promise.all([
     fetchPersonFamilies(p.fsId),
     fetchPersonExtras(p.fsId)
   ])
-  const gp = doc?.persons?.find((x) => x.id === p.fsId) ?? doc?.persons?.[0]
+  const gp = resolved.doc.persons?.find((x) => x.id === p.fsId) ?? resolved.doc.persons?.[0]
   if (!gp) return { error: 'FS_NOT_FOUND' }
   const node = personToNode(gp)
   if (!node || node.t !== 'i') return { error: 'FS_NOT_FOUND' }

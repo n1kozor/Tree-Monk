@@ -3,6 +3,7 @@ import { toast } from 'sonner'
 import i18n from '@/i18n'
 import type { Alias, DocumentRecord, Family, GedcomImportResult, Person, ResearchLog, Todo } from '@shared/types'
 import { isFamilySearchId } from '@/lib/familySearchSearch'
+import { peopleWithinFamilyTreeDepth, type FsScanDepth } from '@/lib/fsScanDepth'
 
 export type View =
   | 'board'
@@ -147,22 +148,25 @@ interface AppState {
   /** FamilySearch background watcher: personId → pending remote change summary. */
   fsChanges: Record<string, { fields: number; relatives: number; content: number }>
   setFsChange: (personId: string, summary: { fields: number; relatives: number; content: number } | null) => void
-  /** Read-only FamilySearch change scan (iterates every FS-linked person). */
+  /** Read-only FamilySearch change scan (iterates the scoped FS-linked people). */
   fsScan: {
     running: boolean
+    rootId?: string
+    maxDepth: FsScanDepth
     total: number
     done: number
     results: {
       personId: string
       name: string
-      status: 'changed' | 'deleted' | 'ok'
+      status: 'changed' | 'deleted' | 'merged' | 'ok'
       fields: number
       relatives: number
       content: number
+      forwardedFid?: string
     }[]
   } | null
   fsScanMinimized: boolean
-  startFsScan: () => Promise<void>
+  startFsScan: (opts?: { rootId?: string; maxDepth?: FsScanDepth }) => Promise<void>
   cancelFsScan: () => void
   clearFsScan: () => void
   setFsScanMinimized: (v: boolean) => void
@@ -549,27 +553,51 @@ export const useAppStore = create<AppState>((set, get) => ({
       await get().refreshAll()
     }
   },
-  startFsScan: async () => {
-    const people = Array.from(get().peopleById.values()).filter((p) => isFamilySearchId(p.fsId))
-    set({
-      fsScan: { running: true, total: people.length, done: 0, results: [] },
-      fsScanMinimized: false
+  startFsScan: async (opts) => {
+    const state = get()
+    const people = peopleWithinFamilyTreeDepth(
+      Array.from(state.peopleById.values()),
+      state.families,
+      opts?.rootId,
+      opts?.maxDepth ?? null
+    ).filter((p) => isFamilySearchId(p.fsId))
+    const scopedIds = new Set(people.map((p) => p.id))
+    set((s) => {
+      const fsChanges = { ...s.fsChanges }
+      for (const personId of Object.keys(fsChanges)) {
+        if (!scopedIds.has(personId)) delete fsChanges[personId]
+      }
+      return {
+        fsChanges,
+        fsScan: {
+          running: true,
+          rootId: opts?.rootId,
+          maxDepth: opts?.maxDepth ?? null,
+          total: people.length,
+          done: 0,
+          results: []
+        },
+        fsScanMinimized: false
+      }
     })
     const checkOne = async (p: Person): Promise<void> => {
       const name = `${p.givenName ?? ''} ${p.surname ?? ''}`.trim() || p.id
       let entry: {
         personId: string
         name: string
-        status: 'changed' | 'deleted' | 'ok'
+        status: 'changed' | 'deleted' | 'merged' | 'ok'
         fields: number
         relatives: number
         content: number
+        forwardedFid?: string
       } | null = null
       try {
         const r = await window.api.familysearch.syncPreview(p.id)
         if ('error' in r) {
-          if (r.error === 'FS_NOT_FOUND') {
+          if (r.error === 'FS_DELETED' || r.error === 'FS_MERGED') {
             entry = { personId: p.id, name, status: 'deleted', fields: 0, relatives: 0, content: 0 }
+            if (r.error === 'FS_MERGED') entry.status = 'merged'
+            entry.forwardedFid = r.forwardedFid
             get().setFsChange(p.id, { fields: 0, relatives: 0, content: 1 })
           }
         } else {

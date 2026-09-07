@@ -9,8 +9,10 @@ import {
   Plus,
   Printer,
   Sprout,
+  TreeDeciduous,
   UserPlus,
-  Wand2, TreeDeciduous } from 'lucide-react'
+  Wand2
+} from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { usePedigreeSettings, type TreeViewKind } from '@/store/usePedigreeSettings'
 import { FanChart } from './FanChart'
@@ -22,6 +24,7 @@ import { RootPicker } from './RootPicker'
 import { PanZoom } from './PanZoom'
 import { FsPersonSyncDialog } from '@/components/person/FsPersonSyncDialog'
 import { FsScanDialog, FsScanPill } from './FsScanDialog'
+import { FsScanSettingsPanel } from './FsScanSettingsPanel'
 import { ensureFsSession } from '@/lib/fsSession'
 import { useFsMode } from '@/hooks/useFsMode'
 import { useFsChangeWatcher } from '@/hooks/useFsChangeWatcher'
@@ -51,8 +54,6 @@ const VIEWS: { key: TreeViewKind; icon: typeof LayoutGrid; labelKey: string }[] 
 export function FamilyTree(): JSX.Element {
   const { t } = useTranslation()
   const ped = usePedigreeSettings()
-  // Background FamilySearch change watcher (FS mode only) + card-badge clicks.
-  useFsChangeWatcher(true)
   const fsMode = useFsMode()
   const startFsScan = useAppStore((s) => s.startFsScan)
   const fsScanRunning = useAppStore((s) => s.fsScan?.running ?? false)
@@ -74,6 +75,7 @@ export function FamilyTree(): JSX.Element {
   const view = ped.viewKind
   const setView = (v: TreeViewKind): void => ped.set({ viewKind: v })
   const generations = ped.fanGenerations
+  const fsScanDepth = ped.fsScanDepth
   const setGenerations = (fn: number | ((prev: number) => number)): void => {
     const next = typeof fn === 'function' ? fn(ped.fanGenerations) : fn
     ped.set({ fanGenerations: next })
@@ -93,6 +95,9 @@ export function FamilyTree(): JSX.Element {
   const treeRootId = useAppStore((s) => s.treeRootId)
   const treeFocusNonce = useAppStore((s) => s.treeFocusNonce)
   const defaultRootId = useAppStore((s) => s.defaultRootId)
+  const scanRootId = rootId ?? defaultRootId
+  // Background FamilySearch change watcher (FS mode only) + card-badge clicks.
+  useFsChangeWatcher(fsMode, scanRootId, fsScanDepth)
   const refreshAll = useAppStore((s) => s.refreshAll)
   // The tree cards show a per-person source count baked in server-side; re-fetch
   // when a source changes so adding/removing one updates live. docTotal catches
@@ -428,17 +433,19 @@ export function FamilyTree(): JSX.Element {
 
       <RootPicker rootId={rootId} onPick={setStartPerson} />
 
-      {/* FamilySearch: read-only scan for remote changes across every linked
-          person (deletes, new data, updated facts). Minimizable to background. */}
+      {/* FamilySearch: read-only scan for remote changes inside the selected
+          depth (deletes, new data, updated facts). Minimizable to background. */}
       {fsMode && (
         <button
-          onClick={() => void ensureFsSession().then((ok) => ok && void startFsScan())}
-          disabled={fsScanRunning}
-          title={t('fsScan.title')}
-          className="glass-subtle flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
-        >
-          <TreeDeciduous className="h-4 w-4" />
-          <span className="hidden lg:inline">{t('fsScan.button')}</span>
+            onClick={() =>
+              void ensureFsSession().then((ok) => ok && void startFsScan({ rootId: scanRootId, maxDepth: fsScanDepth }))
+            }
+            disabled={fsScanRunning}
+            title={t('fsScan.title')}
+            className="glass-subtle flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-700 transition-colors hover:bg-emerald-500/20 disabled:opacity-50 dark:text-emerald-400"
+          >
+            <TreeDeciduous className="h-4 w-4" />
+            <span className="hidden lg:inline">{t('fsScan.button')}</span>
         </button>
       )}
 
@@ -496,6 +503,7 @@ export function FamilyTree(): JSX.Element {
     return (
       <div className="relative h-full w-full">
         {Controls}
+        {fsMode && <FsScanSettingsPanel />}
         {Dialog}
         {ExportDialog}
         {FirstPerson}
@@ -534,6 +542,7 @@ export function FamilyTree(): JSX.Element {
   return (
     <div className="relative h-full w-full">
       {Controls}
+      {fsMode && view !== 'landscape' && view !== 'portrait' && <FsScanSettingsPanel />}
       {Dialog}
       {ExportDialog}
       {FirstPerson}
@@ -572,7 +581,10 @@ export function FamilyTree(): JSX.Element {
               cardShadow: ped.cardShadow
             }}
           />
-          <PedigreeSettingsPanel />
+          <div className="absolute right-4 top-4 z-30 flex items-start gap-2">
+            {fsMode && <FsScanSettingsPanel inline />}
+            <PedigreeSettingsPanel inline />
+          </div>
         </>
       )}
       {view === 'portrait' && pedigree && (
@@ -610,7 +622,10 @@ export function FamilyTree(): JSX.Element {
               cardShadow: ped.cardShadow
             }}
           />
-          <PedigreeSettingsPanel />
+          <div className="absolute right-4 top-4 z-30 flex items-start gap-2">
+            {fsMode && <FsScanSettingsPanel inline />}
+            <PedigreeSettingsPanel inline />
+          </div>
         </>
       )}
       {/* The fan renders on its own canvas with a built-in infinite camera —

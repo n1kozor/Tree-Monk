@@ -655,71 +655,156 @@ export function registerIpc(): void {
     })
   )
 
-  // Sync ONE person from FamilySearch, reusing the cached session login. The
-  // streamed node is merged NON-destructively (curated fields are preserved).
+  // Sync ONE person from FamilySearch, reusing the cached session login. A
+  // deleted or merged record is also applied locally only after the user has
+  // confirmed it in the renderer.
   ipcMain.handle(
     Channels.familysearch.syncPerson,
     async (_e, fid: string) => {
       // Requires a browser sign-in (OAuth token). If not signed in, ask the
       // renderer to prompt sign-in.
       if (!isSignedIn()) return { needCreds: true as const }
-      const nodes = await syncPersonFromFamilySearch({ fid })
-      const node = nodes.find((n) => n.t === 'i')
-      if (!node) return { found: false, updated: 0 }
-    const existing = People.findByFsId(node.fid)
-    if (!existing) return { found: false, updated: 0 }
-    // Explicit per-person sync → FamilySearch wins for every field it provides.
-    const changed = People.overwriteFrom(existing.id, {
-      givenName: node.g,
-      surname: node.s,
-      sex: node.x,
-      fsId: node.fid,
-      birthDate: node.bd,
-      birthPlace: node.bp,
-      deathDate: node.dd,
-      deathPlace: node.dp,
-      deceased: !!node.dc || !!node.dd,
-      christeningDate: node.cd ?? null,
-      christeningPlace: node.cp ?? null,
-      burialDate: node.bud ?? null,
-      burialPlace: node.bup ?? null,
-      religion: node.re ?? null,
-      birthNote: node.bn ?? null,
-      deathNote: node.dn ?? null,
-      christeningNote: node.cn ?? null,
-      burialNote: node.un ?? null
-    })
-    // Same enrichment as the bulk import: name variations, photos & profile photo,
-    // occupations, life events and notes (all additive / deduped — local edits kept).
-    applyFsAliases(existing.id, node.alt)
-    applyFsMedia(existing.id, node.media)
-    applyFsOccupations(existing.id, node.oc)
-    applyFsEvents(existing.id, node.ev)
-    applyFsNotes(existing.id, node.no)
-    applyFsSources(existing.id, nodes)
-    applyFsGodparents(nodes, node.fid, existing.id)
-    applyFsCollaborations(existing.id, node.di)
-    // NEW relatives on FamilySearch (spouse/child/parent/godparent) → pull them
-    // in complete (record + portrait + notes + sources) and wire the families.
-    let addedRelatives: { fid: string; name: string; kind: string }[] = []
-    try {
-      const rel = await syncPersonRelatives(existing.id)
-      if (rel.nodes.length) {
-        Audit.setEnabled(false)
-        try {
-          const ing = new FsIngester()
-          for (const rn of rel.nodes) ing.ingest(rn)
-        } finally {
-          Audit.setEnabled(true)
+      const remote = await syncPersonFromFamilySearch({ fid })
+      const existing = People.findByFsId(fid)
+
+      if (remote.status === 'deleted') {
+        if (!existing) return { found: false, status: 'deleted' as const, updated: 0 }
+        const snapshot = People.remove(existing.id)
+        if (AppSettings.get('default_root_person_id') === existing.id)
+          AppSettings.set('default_root_person_id', null)
+        return { found: false, status: 'deleted' as const, updated: 0, snapshot }
+      }
+      if (remote.status === 'not_found') return { found: false, status: 'not_found' as const, updated: 0 }
+
+      const node = remote.nodes.find((n) => n.t === 'i' && n.fid === remote.resolvedFid) ?? remote.nodes.find((n) => n.t === 'i')
+      if (!node || node.t !== 'i' || !existing) {
+        return {
+          found: false,
+          status: remote.status,
+          forwardedFid: remote.forwardedFid,
+          updated: 0
         }
       }
-      addedRelatives = rel.added
-    } catch {
-      /* relative sync is best-effort */
-    }
-    // Geocode any new places this sync brought in (background, best-effort).
-    void geocodePlaces(() => undefined).catch(() => undefined)
-    return { found: true, updated: changed ? 1 : 0, addedRelatives }
+
+      const applyNode = (localId: string): boolean => {
+        // Explicit per-person sync → FamilySearch wins for every field it provides.
+        const changed = People.overwriteFrom(localId, {
+          givenName: node.g,
+          surname: node.s,
+          sex: node.x,
+          fsId: node.fid,
+          birthDate: node.bd,
+          birthPlace: node.bp,
+          deathDate: node.dd,
+          deathPlace: node.dp,
+          deceased: !!node.dc || !!node.dd,
+          christeningDate: node.cd ?? null,
+          christeningPlace: node.cp ?? null,
+          burialDate: node.bud ?? null,
+          burialPlace: node.bup ?? null,
+          religion: node.re ?? null,
+          birthNote: node.bn ?? null,
+          deathNote: node.dn ?? null,
+          christeningNote: node.cn ?? null,
+          burialNote: node.un ?? null
+        })
+        // Same enrichment as the bulk import: name variations, photos & profile
+        // photo, occupations, life events and notes (all additive / deduped).
+        applyFsAliases(localId, node.alt)
+        applyFsMedia(localId, node.media)
+        applyFsOccupations(localId, node.oc)
+        applyFsEvents(localId, node.ev)
+        applyFsNotes(localId, node.no)
+        applyFsSources(localId, remote.nodes)
+        applyFsGodparents(remote.nodes, node.fid, localId)
+        applyFsCollaborations(localId, node.di)
+        return changed
+      }
+
+      if (remote.status === 'merged' && remote.forwardedFid) {
+        const target = People.findByFsId(remote.forwardedFid)
+        let targetId = existing.id
+        let mergeAuditSeq: number | undefined
+        if (target && target.id !== existing.id) {
+          // FamilySearch's forwarded person is canonical. Keep the local
+          // research from both rows while making that person the survivor.
+          const joinNotes = [...new Set([target.notes, existing.notes].filter((x): x is string => !!x?.trim()))].join('\n\n') || null
+          const merged = mergePeople(target.id, existing.id, {
+            givenName: node.g || target.givenName || existing.givenName,
+            surname: node.s || target.surname || existing.surname,
+            sex: node.x !== 'U' ? node.x : target.sex !== 'U' ? target.sex : existing.sex,
+            birthDate: node.bd || target.birthDate || existing.birthDate,
+            birthPlace: node.bp || target.birthPlace || existing.birthPlace,
+            deathDate: node.dd || target.deathDate || existing.deathDate,
+            deathPlace: node.dp || target.deathPlace || existing.deathPlace,
+            deceased: !!node.dc || !!node.dd || target.deceased || existing.deceased,
+            christeningDate: node.cd || target.christeningDate || existing.christeningDate,
+            christeningPlace: node.cp || target.christeningPlace || existing.christeningPlace,
+            burialDate: node.bud || target.burialDate || existing.burialDate,
+            burialPlace: node.bup || target.burialPlace || existing.burialPlace,
+            religion: node.re || target.religion || existing.religion,
+            notes: joinNotes,
+            profilePhotoId: target.profilePhotoId || existing.profilePhotoId
+          })
+          targetId = target.id
+          mergeAuditSeq = merged.auditSeq
+        } else if (!target) {
+          // No local copy of the canonical person exists yet. Re-key this row
+          // instead of creating a duplicate and preserve all its local research.
+          People.update(existing.id, { fsId: remote.forwardedFid })
+        }
+
+        const changed = applyNode(targetId)
+        let addedRelatives: { fid: string; name: string; kind: string }[] = []
+        try {
+          const rel = await syncPersonRelatives(targetId)
+          if (rel.nodes.length) {
+            Audit.setEnabled(false)
+            try {
+              const ing = new FsIngester()
+              for (const rn of rel.nodes) ing.ingest(rn)
+            } finally {
+              Audit.setEnabled(true)
+            }
+          }
+          addedRelatives = rel.added
+        } catch {
+          /* relative sync is best-effort */
+        }
+        void geocodePlaces(() => undefined).catch(() => undefined)
+        return {
+          found: true,
+          status: 'merged' as const,
+          forwardedFid: remote.forwardedFid,
+          localPersonId: targetId,
+          mergeAuditSeq,
+          updated: changed ? 1 : 0,
+          addedRelatives
+        }
+      }
+
+      const changed = applyNode(existing.id)
+      // NEW relatives on FamilySearch (spouse/child/parent/godparent) → pull them
+      // in complete (record + portrait + notes + sources) and wire the families.
+      let addedRelatives: { fid: string; name: string; kind: string }[] = []
+      try {
+        const rel = await syncPersonRelatives(existing.id)
+        if (rel.nodes.length) {
+          Audit.setEnabled(false)
+          try {
+            const ing = new FsIngester()
+            for (const rn of rel.nodes) ing.ingest(rn)
+          } finally {
+            Audit.setEnabled(true)
+          }
+        }
+        addedRelatives = rel.added
+      } catch {
+        /* relative sync is best-effort */
+      }
+      // Geocode any new places this sync brought in (background, best-effort).
+      void geocodePlaces(() => undefined).catch(() => undefined)
+      return { found: true, status: 'active' as const, updated: changed ? 1 : 0, addedRelatives }
   })
 
   // Pre-fill data for an easy re-import: saved settings (no password) plus the
