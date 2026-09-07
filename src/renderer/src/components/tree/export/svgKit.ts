@@ -2,6 +2,7 @@
 // tree. Everything here emits plain SVG strings (no DOM, no React) so the same
 // output can be written as a .svg file or rasterised to PDF by the main process.
 import type { Sex } from '@shared/types'
+import type { FanColorMode } from '@/store/usePedigreeSettings'
 
 /** Print-friendly palette: white paper, dark ink, soft sex tints. */
 export const PRINT = {
@@ -71,6 +72,8 @@ export interface ExportContent {
   border: string
   /** Fan chart: CSS font-family for the labels (undefined = poster default). */
   fanFontFamily?: string
+  /** Fan chart: wedge colour mode, matching the on-screen fan. */
+  fanColorMode?: FanColorMode
   /** Fan chart: an @font-face block (base64 woff2) embedded so the chosen font
    *  renders in the standalone export/PDF with no CDN or system dependency. */
   fanFontFaceCss?: string

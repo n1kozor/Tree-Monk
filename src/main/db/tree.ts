@@ -1,6 +1,7 @@
-import { Families, People } from './repo'
+import { Families, People, Places, type PlaceRow } from './repo'
 import { documentCountsByPerson } from './documentCounts'
 import type { Family, Person, TreeNodeDatum } from '@shared/types'
+import { canonicalCountryName, knownCountryAlias, lastPlacePart } from '@shared/placeNormalize'
 
 export type TreeMode = 'ancestors' | 'descendants'
 
@@ -48,6 +49,42 @@ export function buildTree(rootId?: string, mode: TreeMode = 'ancestors'): TreeNo
   if (people.length === 0) return []
   const byId = new Map<string, Person>(people.map((p) => [p.id, p]))
   const docCounts = documentCountsByPerson()
+  const placeRows = new Map<string, PlaceRow>(Places.list().map((p) => [p.name, p]))
+
+  const placeRow = (name: string | null | undefined): PlaceRow | null => {
+    const key = name?.trim()
+    return key ? placeRows.get(key) ?? null : null
+  }
+
+  const canonicalName = (name: string | null | undefined): string | null => {
+    const key = name?.trim()
+    if (!key) return null
+    const row = placeRow(key)
+    return row?.canonical?.trim() || row?.name || key
+  }
+
+  const canonicalCountry = (place: string | null | undefined): string | null => {
+    const statedCountry = knownCountryAlias(lastPlacePart(place))
+    if (statedCountry) return statedCountry
+
+    const canonical = canonicalName(place)
+    if (!canonical) return null
+
+    let cur = placeRow(canonical) ?? placeRow(place)
+    const seen = new Set<string>()
+    while (cur && !seen.has(cur.name) && seen.size < 12) {
+      seen.add(cur.name)
+      if ((cur.place_type ?? '').toLowerCase() === 'country') {
+        return canonicalCountryName(canonicalName(cur.name) ?? cur.name)
+      }
+      cur = cur.parent_name ? placeRow(cur.parent_name) : null
+    }
+
+    return canonicalCountryName(lastPlacePart(canonical) ?? lastPlacePart(place))
+  }
+
+  const countryFor = (person: Person): string | null =>
+    canonicalCountry(person.birthPlace) ?? canonicalCountry(person.deathPlace)
 
   // Indexes.
   const parentFamilies = new Map<string, Family[]>() // person -> families where parent
@@ -94,6 +131,9 @@ export function buildTree(rootId?: string, mode: TreeMode = 'ancestors'): TreeNo
       sex: person.sex,
       birthYear: yearOf(person.birthDate),
       deathYear: yearOf(person.deathDate),
+      birthPlace: person.birthPlace,
+      deathPlace: person.deathPlace,
+      country: countryFor(person),
       attributes: attributesFor(person, docCounts),
       children: parents.length ? parents : undefined
     }
@@ -123,6 +163,9 @@ export function buildTree(rootId?: string, mode: TreeMode = 'ancestors'): TreeNo
       sex: person.sex,
       birthYear: yearOf(person.birthDate),
       deathYear: yearOf(person.deathDate),
+      birthPlace: person.birthPlace,
+      deathPlace: person.deathPlace,
+      country: countryFor(person),
       attributes: attributesFor(person, docCounts, { spouse: spouses.join(', ') }),
       children: children.length ? children : undefined
     }

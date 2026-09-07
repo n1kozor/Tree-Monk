@@ -2,6 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import type { TreeNodeDatum } from '@shared/types'
+import { canonicalCountryName } from '@shared/placeNormalize'
 import type { FanColorMode, FanSweep } from '@/store/usePedigreeSettings'
 import { formatName } from '@/lib/utils'
 import { chartFontFamily, ensureChartFont } from '@/lib/chartFonts'
@@ -66,6 +67,24 @@ function alphaFor(gen: number): number {
 }
 
 const GEN_HUES = [212, 250, 286, 330, 8, 40, 158, 186]
+const COUNTRY_HUES = [168, 36, 212, 334, 78, 266, 16, 196, 118, 308, 46, 226, 356, 144]
+
+function hashText(text: string): number {
+  let h = 0
+  for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) >>> 0
+  return h
+}
+
+function countryFromPlace(place: string | null | undefined): string | null {
+  const raw = place?.trim()
+  if (!raw) return null
+  const parts = raw.split(',').map((p) => p.trim()).filter(Boolean)
+  return canonicalCountryName(parts.at(-1))
+}
+
+function countryOf(datum: TreeNodeDatum): string | null {
+  return datum.country ?? countryFromPlace(datum.birthPlace) ?? countryFromPlace(datum.deathPlace)
+}
 
 function fillFor(
   datum: TreeNodeDatum,
@@ -77,6 +96,12 @@ function fillFor(
   if (mode === 'generation') {
     const h = GEN_HUES[(gen - 1) % GEN_HUES.length]
     return `hsl(${h} 64% 56% / ${a})`
+  }
+  if (mode === 'country') {
+    const country = countryOf(datum)
+    if (!country) return `rgba(148,163,184,${Math.max(0.12, a * 0.72)})`
+    const h = COUNTRY_HUES[hashText(country.toLowerCase()) % COUNTRY_HUES.length]
+    return `hsl(${h} 68% 50% / ${a})`
   }
   if (mode === 'mono') return `rgba(${accent[0]},${accent[1]},${accent[2]},${a})`
   const rgb =
@@ -690,7 +715,12 @@ function FanChartImpl({
           const canvas = canvasRef.current
           if (canvas) canvas.style.cursor = t ? 'pointer' : 'grab'
           if (t?.datum) {
-            setHover({ label: t.full, sub: t.years, mx: e.clientX, my: e.clientY })
+            setHover({
+              label: t.full,
+              sub: [t.years, countryOf(t.datum)].filter(Boolean).join(' · '),
+              mx: e.clientX,
+              my: e.clientY
+            })
           } else {
             setHover((h) => (h ? null : h))
           }

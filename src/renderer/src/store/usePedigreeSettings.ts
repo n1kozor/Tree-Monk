@@ -62,7 +62,7 @@ export type TreeViewKind = 'landscape' | 'portrait' | 'fan' | 'descendants'
 /** Fan chart sweep (degrees): full wheel, three-quarter, or classic semicircle. */
 export type FanSweep = 360 | 270 | 180
 /** Fan wedge colouring. */
-export type FanColorMode = 'sex' | 'generation' | 'mono'
+export type FanColorMode = 'sex' | 'generation' | 'country' | 'mono'
 /** Card-tree name label emphasis — opt-in, for readability when zoomed out. */
 export type LabelStrength = 'normal' | 'bold' | 'strong'
 
