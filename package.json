@@ -45,7 +45,7 @@
     "@turf/length": "^7.3.5",
     "adm-zip": "^0.5.17",
     "archiver": "^7.0.1",
-    "better-sqlite3": "^11.3.0",
+    "better-sqlite3": "^13.0.3",
     "d3-hierarchy": "^3.1.2",
     "d3-shape": "^3.2.0",
     "electron-updater": "^6.3.9",
@@ -58,7 +58,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@electron/rebuild": "^3.6.0",
+    "@electron/rebuild": "^4.2.0",
     "@playwright/test": "^1.61.0",
     "@radix-ui/react-dialog": "^1.1.2",
     "@radix-ui/react-dropdown-menu": "^2.1.2",
@@ -85,7 +85,7 @@
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
-    "electron": "^31.3.0",
+    "electron": "^43.4.1",
     "electron-builder": "^24.13.3",
     "electron-vite": "^2.3.0",
     "i18next": "^23.15.1",
