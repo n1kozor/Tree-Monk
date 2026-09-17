@@ -698,10 +698,10 @@ export function createLocalApi(): TreeMonkApi {
       },
       export: async (personIds, defaultName, opts) => {
         const base_ = (defaultName ?? '').replace(/[\\/]+/g, '').replace(/\.ged$/i, '').trim() || 'treemonk-export'
-        const text = exportGedcom(`${base_}.ged`, personIds, opts)
+        const { text, mediaCount } = exportGedcom(`${base_}.ged`, personIds, opts)
         takeLastWrittenFile()
         downloadFile(`${base_}.ged`, text, 'text/plain;charset=utf-8')
-        return { path: `${base_}.ged` }
+        return { path: `${base_}.ged`, mediaCount }
       }
     },
     csv: {

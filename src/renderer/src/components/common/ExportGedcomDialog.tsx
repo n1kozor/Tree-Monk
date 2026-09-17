@@ -8,6 +8,7 @@ import {
   Globe,
   Heart,
   Network,
+  Package,
   type LucideIcon
 } from 'lucide-react'
 import {
@@ -24,6 +25,7 @@ import { useAppStore } from '@/store/useAppStore'
 import { scopePeople, type DashboardScope } from '@/lib/dashboardScope'
 import { cn, fullName } from '@/lib/utils'
 import { safeFileBase } from '@/lib/fileName'
+import { isDesktopApp } from '@/lib/platform'
 
 const SCOPES: { id: DashboardScope; icon: LucideIcon; descKey: string }[] = [
   { id: 'all', icon: Globe, descKey: 'gedcom.scopeAllDesc' },
@@ -55,6 +57,10 @@ export function ExportGedcomDialog({
   const [includeSpouses, setIncludeSpouses] = useState(true)
   const [excludePrivate, setExcludePrivate] = useState(false)
   const [anonymizeLiving, setAnonymizeLiving] = useState(false)
+  // Desktop only: a .zip holding the .ged + its media/ folder, so the pictures
+  // cannot be left behind when the file moves to another machine.
+  const [bundleMedia, setBundleMedia] = useState(false)
+  const canBundle = isDesktopApp()
   const [busy, setBusy] = useState(false)
   const [fileName, setFileName] = useState('')
   const [nameEdited, setNameEdited] = useState(false)
@@ -65,6 +71,7 @@ export function ExportGedcomDialog({
       setRootId(defaultRootId ?? treeRootId)
       setExcludePrivate(false)
       setAnonymizeLiving(false)
+      setBundleMedia(false)
     }
   }, [open, defaultRootId, treeRootId])
 
@@ -97,13 +104,20 @@ export function ExportGedcomDialog({
     setBusy(true)
     // 'all' → no filter (export everyone); otherwise the resolved scope ids.
     const ids = scope === 'all' ? undefined : [...scoped.ids]
+    const bundle = canBundle && bundleMedia
     const res = await window.api.gedcom.export(ids, safeFileBase(fileName), {
       excludePrivate,
-      anonymizeLiving
+      anonymizeLiving,
+      bundleMedia: bundle
     })
     setBusy(false)
     if (res) {
-      toast.success(t('gedcom.exported', { path: res.path }))
+      // A loose .ged with pictures gets a louder toast: the media/ folder next
+      // to it must travel along, and nothing else tells the user it exists.
+      if (bundle) toast.success(t('gedcom.exportedPackage', { path: res.path, count: res.mediaCount }))
+      else if (res.mediaCount > 0)
+        toast.success(t('gedcom.exportedMedia', { path: res.path, count: res.mediaCount }), { duration: 12000 })
+      else toast.success(t('gedcom.exported', { path: res.path }))
       onOpenChange(false)
     }
   }
@@ -218,6 +232,24 @@ export function ExportGedcomDialog({
             </label>
           </div>
 
+          {/* Package: .ged + media/ in one zip (desktop only — the browser
+              build downloads a plain .ged). */}
+          {canBundle && (
+            <button
+              onClick={() => setBundleMedia((v) => !v)}
+              className={cn(
+                'flex w-full items-center gap-2 rounded-xl border px-3 py-2 text-left text-sm transition-colors',
+                bundleMedia ? 'border-primary bg-primary/10' : 'border-border/40 hover:bg-accent'
+              )}
+            >
+              <Package className={cn('h-4 w-4 shrink-0', bundleMedia ? 'text-primary' : 'text-muted-foreground')} />
+              <span className="flex-1">
+                <span className="font-medium">{t('gedcom.bundleMedia')}</span>
+                <span className="block text-[11px] text-muted-foreground">{t('gedcom.bundleMediaHint')}</span>
+              </span>
+            </button>
+          )}
+
           {/* File name — pre-filled from the starting person, editable here. */}
           <div className="space-y-1.5">
             <Label>{t('gedcom.exportFileName')}</Label>
@@ -231,7 +263,7 @@ export function ExportGedcomDialog({
                 placeholder="treemonk-export"
                 className="flex-1"
               />
-              <span className="text-xs text-muted-foreground">.ged</span>
+              <span className="text-xs text-muted-foreground">{canBundle && bundleMedia ? '.zip' : '.ged'}</span>
             </div>
           </div>
 

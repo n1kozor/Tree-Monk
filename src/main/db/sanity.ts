@@ -71,8 +71,30 @@ function dateBounds(dateRaw: string | null): { lo: number; hi: number } | null {
   if (!ym) return null
   const y = Number(ym[0])
   const m = monthIndex(date)
-  if (m !== null) return { lo: y + (m - 1) / 12, hi: y + m / 12 }
+  if (m !== null) {
+    // Day-of-month when present ("10 MAY 1850", "1850. május 10."): without
+    // it, order checks inside one month — christening vs birth, burial vs
+    // death — could never fire on GEDCOM/FamilySearch-style date strings.
+    const day = dayOfMonth(date)
+    if (day !== null) {
+      const v = y + (m - 1) / 12 + (day - 1) / 365
+      return { lo: v, hi: v + 1 / 365 }
+    }
+    return { lo: y + (m - 1) / 12, hi: y + m / 12 }
+  }
   return { lo: y, hi: y + 1 }
+}
+
+/** A standalone 1–2 digit number (1–31) in a date that also names a month —
+ *  the day. The 4-digit year never matches; month-only dates return null. */
+function dayOfMonth(date: string): number | null {
+  for (const tok of date.split(/\D+/)) {
+    if (tok.length >= 1 && tok.length <= 2) {
+      const n = Number(tok)
+      if (n >= 1 && n <= 31) return n
+    }
+  }
+  return null
 }
 
 /** A date string is "unparsable" when it carries digits (so it's meant to be a

@@ -23,9 +23,9 @@ function project(lat: number, lng: number, z: number): { x: number; y: number } 
 }
 
 /** A static raster map centred on (lat,lng), filling w×h. No interactivity —
- *  it's a torn map fragment for the corkboard. Tiles come from OpenStreetMap (NOT from
- *  tile.openstreetmap.org: the OSMF tile policy forbids distributed apps using
- *  a keyed provider — Carto locked its basemaps behind API keys). © OpenStreetMap. */
+ *  it's a torn map fragment for the corkboard. Tiles come straight from
+ *  OpenStreetMap (key-free; Carto locked its basemaps behind API keys).
+ *  The host must stay whitelisted in both index.html CSP img-src lists. */
 function MapTiles({ lat, lng, w, h }: { lat: number; lng: number; w: number; h: number }): JSX.Element {
   const tiles = useMemo(() => {
     const n = 2 ** ZOOM

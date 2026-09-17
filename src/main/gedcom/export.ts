@@ -168,15 +168,23 @@ export interface GedcomExportOptions {
   anonymizeLiving?: boolean
 }
 
+export interface GedcomExportResult {
+  /** The GEDCOM text that was written. */
+  text: string
+  /** Local files copied into the sibling `media/` folder next to the .ged —
+   *  the caller tells the user about that folder (it is easy to leave behind). */
+  mediaCount: number
+}
+
 /**
  * Exports the database (or a subset of people) to a GEDCOM 5.5.1 string.
- * Writes it to `filePath` and returns the string.
+ * Writes it to `filePath` and returns the string plus the media-file count.
  */
 export function exportGedcom(
   filePath: string,
   personIds?: string[],
   opts: GedcomExportOptions = {}
-): string {
+): GedcomExportResult {
   const allPeople = People.list()
   const include = personIds && personIds.length ? new Set(personIds) : null
   let people = include ? allPeople.filter((p) => include.has(p.id)) : allPeople
@@ -512,6 +520,10 @@ export function exportGedcom(
       out.push(line(2, 'FILE', m.file))
       out.push(line(3, 'FORM', m.form))
       if (m.title) out.push(line(2, 'TITL', m.title))
+      // The profile photo carries the Ancestry/FamilySearch "preferred" flag,
+      // which our import (and theirs) turns back into the portrait — without it
+      // a round trip kept the pictures but lost which one was the face.
+      if (d.id === p.profilePhotoId) out.push(line(2, '_PRIM', 'Y'))
     }
     // Godparents as the standard association structure (ASSO + RELA), which
     // Gramps & co. read back as an association — and our import restores it.
@@ -654,5 +666,7 @@ export function exportGedcom(
   out.push(line(0, 'TRLR'))
   const text = out.join('\n') + '\n'
   writeFileSync(filePath, text, 'utf-8')
-  return text
+  let mediaCount = 0
+  for (const m of mediaRefs.values()) if (m.file.startsWith('media/')) mediaCount++
+  return { text, mediaCount }
 }

@@ -42,6 +42,7 @@ import { hiddenIssues, restoreHidden, runSanityCheck } from './db/sanity'
 import { findRelationshipPath } from './db/relationship'
 import { runPersonQuery, listSavedQueries, saveQuery, removeSavedQuery } from './db/query'
 import { createBackup, restoreBackup } from './backup'
+import { exportGedcomPackage, importGedcomPackage, isGedcomPackage } from './gedcom/package'
 import {
   cancelFamilySearchImport,
   familySearchSyncPreview,
@@ -449,11 +450,15 @@ export function registerIpc(): void {
     const res = await dialog.showOpenDialog(win, {
       title: 'Import GEDCOM',
       properties: ['openFile'],
-      filters: [{ name: 'GEDCOM', extensions: ['ged', 'gedcom'] }]
+      filters: [
+        { name: 'GEDCOM', extensions: ['ged', 'gedcom', 'zip'] },
+        { name: 'GEDCOM package (zip)', extensions: ['zip'] }
+      ]
     })
     if (res.canceled || !res.filePaths[0]) return null
     markActiveWorkspaceKind('manual')
-    return Audit.pause(() => importGedcomFile(res.filePaths[0]))
+    const file = res.filePaths[0]
+    return Audit.pause(() => (isGedcomPackage(file) ? importGedcomPackage(file) : importGedcomFile(file)))
   })
   ipcMain.handle(Channels.gedcom.importContent, (_e, text: string) => {
     markActiveWorkspaceKind('manual')
@@ -872,23 +877,28 @@ export function registerIpc(): void {
       e,
       personIds?: string[],
       defaultName?: string,
-      opts?: { excludePrivate?: boolean; anonymizeLiving?: boolean }
+      opts?: { excludePrivate?: boolean; anonymizeLiving?: boolean; bundleMedia?: boolean }
     ) => {
     const win = BrowserWindow.fromWebContents(e.sender) ?? undefined!
-    // Strip path separators / a stray .ged so the suggested name can't redirect
-    // the dialog to another folder, then re-add the extension.
+    // Strip path separators / a stray extension so the suggested name can't
+    // redirect the dialog to another folder, then re-add the extension.
     const base =
-      (defaultName ?? '').replace(/[\\/]+/g, '').replace(/\.ged$/i, '').trim() || 'treemonk-export'
+      (defaultName ?? '').replace(/[\\/]+/g, '').replace(/\.(ged|zip)$/i, '').trim() || 'treemonk-export'
+    const bundle = !!opts?.bundleMedia
     const res = await dialog.showSaveDialog(win, {
       title: 'Export GEDCOM',
-      defaultPath: `${base}.ged`,
-      filters: [{ name: 'GEDCOM', extensions: ['ged'] }],
+      defaultPath: bundle ? `${base}.zip` : `${base}.ged`,
+      filters: bundle
+        ? [{ name: 'GEDCOM package (zip)', extensions: ['zip'] }]
+        : [{ name: 'GEDCOM', extensions: ['ged'] }],
       // Linux/GTK does not confirm overwrites unless asked explicitly.
       properties: ['showOverwriteConfirmation', 'createDirectory']
     })
     if (res.canceled || !res.filePath) return null
-    exportGedcom(res.filePath, personIds, opts)
-    return { path: res.filePath }
+    const { mediaCount } = bundle
+      ? exportGedcomPackage(res.filePath, personIds, opts)
+      : exportGedcom(res.filePath, personIds, opts)
+    return { path: res.filePath, mediaCount }
     }
   )
   ipcMain.handle(Channels.site.export, async (e, lang: string, personIds?: string[]) => {

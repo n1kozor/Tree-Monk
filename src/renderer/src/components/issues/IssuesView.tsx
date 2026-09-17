@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarDays, CheckCircle2, ChevronDown, EyeOff, GitMerge, Heart, Loader2, MapPin, RefreshCw, RotateCcw, ShieldAlert, Bird, SpellCheck, Type, Users, Users2, Wand2, X, type LucideIcon } from 'lucide-react'
+import { AlertTriangle, ArrowLeftRight, ArrowRight, CalendarDays, CheckCircle2, ChevronDown, EyeOff, GitMerge, Heart, History, Loader2, MapPin, RefreshCw, RotateCcw, ShieldAlert, Bird, SpellCheck, Type, Users, Users2, Wand2, X, type LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -869,6 +869,10 @@ function NameNormalizeList({
         {renBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <SpellCheck className="h-3.5 w-3.5" />}
         {applyLabel}
       </Button>
+      <p className="w-full text-[11px] text-muted-foreground">
+        <History className="mr-1 inline h-3 w-3 align-[-2px]" />
+        {t('issues.customRenameLogHint')}
+      </p>
     </div>
   )
   if (!groups || groups.length === 0)

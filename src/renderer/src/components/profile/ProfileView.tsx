@@ -22,6 +22,7 @@ import {
   MapPin,
   MoreHorizontal,
   Network,
+  Pin,
   RefreshCw,
   Route,
   Search,
@@ -74,6 +75,7 @@ import { personQuality } from '@/lib/completeness'
 import { canSearchFamilySearch, familySearchPersonUrl, familySearchSearchUrl, isFamilySearchId } from '@/lib/familySearchSearch'
 import { PersonAliases, NameOriginLine } from '@/components/person/PersonAliases'
 import { useAppStore } from '@/store/useAppStore'
+import { useBoardStore } from '@/components/board/useBoardStore'
 import { useAtlasSettings, type AtlasBasemap } from '@/store/useAtlasSettings'
 import { useSettings } from '@/store/useSettings'
 import { useFsMode } from '@/hooks/useFsMode'
@@ -99,6 +101,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   const focusPersonTree = useAppStore((s) => s.focusPersonTree)
   const openKinship = useAppStore((s) => s.openKinship)
   const openPersonOnMap = useAppStore((s) => s.openPersonOnMap)
+  const setView = useAppStore((s) => s.setView)
   const setAtlas = useAtlasSettings((s) => s.set)
   /** Save pending edits, choose the basemap, then jump to the atlas. */
   const showOn = (basemap: AtlasBasemap): void => {
@@ -131,6 +134,73 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   const [fsSyncOpen, setFsSyncOpen] = useState(false)
   const [fsExpandOpen, setFsExpandOpen] = useState(false)
   const [sheet, setSheet] = useState<'person' | 'family' | null>(null)
+
+  // Investigation-board presence: the first board node (any board) referencing
+  // this person. undefined = still checking, null = not on any board.
+  const [boardHit, setBoardHit] = useState<{ boardId: string; nodeId: string } | null | undefined>(undefined)
+  useEffect(() => {
+    let alive = true
+    setBoardHit(undefined)
+    if (!personId) return undefined
+    void (async () => {
+      try {
+        const boards = await window.api.boards.list()
+        for (const b of boards) {
+          const state = await window.api.board.get(b.id)
+          const n = state.nodes.find((x) => x.kind === 'person' && x.refId === personId)
+          if (n) {
+            if (alive) setBoardHit({ boardId: b.id, nodeId: n.id })
+            return
+          }
+        }
+        if (alive) setBoardHit(null)
+      } catch {
+        if (alive) setBoardHit(null)
+      }
+    })()
+    return () => {
+      alive = false
+    }
+  }, [personId])
+
+  /** Pin this person onto the active investigation board. */
+  const addToBoard = async (): Promise<void> => {
+    if (!person) return
+    const st = useBoardStore.getState()
+    const boardId = st.currentBoardId
+    const nodeId = `person_${Date.now()}_${Math.floor(Math.random() * 997)}`
+    await window.api.board.saveNode({
+      id: nodeId,
+      boardId,
+      kind: 'person',
+      refId: person.id,
+      label: fullName(person) || '—',
+      content: null,
+      posX: 140 + Math.random() * 260,
+      posY: 120 + Math.random() * 200,
+      width: null,
+      height: null,
+      data: {}
+    })
+    // The board keeps its nodes in memory once visited — refresh so the new
+    // pin is there when the user switches over.
+    if (st.loaded && st.currentBoardId === boardId) await st.load()
+    setBoardHit({ boardId, nodeId })
+    toast.success(t('person.addedToBoard'))
+  }
+
+  /** Jump to the board node that references this person, spotlighting it. */
+  const openOnBoard = (): void => {
+    if (!boardHit) return
+    void save()
+    const st = useBoardStore.getState()
+    const wasLoaded = st.loaded
+    st.prepareFocus(boardHit.boardId, boardHit.nodeId)
+    // Mounted board: reload now (its mount-load already ran). Fresh board:
+    // its own mount-load consumes the prepared focus.
+    if (wasLoaded) void st.load()
+    setView('board')
+  }
 
   const reload = useCallback(async () => {
     if (!personId) {
@@ -476,6 +546,24 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
               >
                 <Route className="h-3.5 w-3.5" />
                 {t('person.howRelatedGeneric')}
+              </Button>
+            )}
+            {boardHit !== undefined && (
+              // On the board already → amber jump-link that spotlights the pin;
+              // not yet → one click pins the person onto the active board.
+              <Button
+                variant="outline"
+                size="sm"
+                className={cn(
+                  'gap-1.5',
+                  boardHit
+                    ? 'border-amber-500/40 bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 dark:text-amber-400'
+                    : 'border-primary/25 bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary'
+                )}
+                onClick={() => (boardHit ? openOnBoard() : void addToBoard())}
+              >
+                <Pin className="h-3.5 w-3.5" />
+                {boardHit ? t('person.onBoard') : t('person.addToBoard')}
               </Button>
             )}
 

@@ -602,11 +602,13 @@ export interface TreeMonkApi {
   gedcom: {
     import(): Promise<GedcomImportResult | null>
     importContent(text: string): Promise<GedcomImportResult>
+    /** `bundleMedia` writes a .zip package (the .ged + its media/ folder)
+     *  instead of a loose .ged; `mediaCount` = files copied either way. */
     export(
       personIds?: string[],
       defaultName?: string,
-      opts?: { excludePrivate?: boolean; anonymizeLiving?: boolean }
-    ): Promise<{ path: string } | null>
+      opts?: { excludePrivate?: boolean; anonymizeLiving?: boolean; bundleMedia?: boolean }
+    ): Promise<{ path: string; mediaCount: number } | null>
   }
   site: {
     /** Static-website export: one self-contained, searchable HTML file. */

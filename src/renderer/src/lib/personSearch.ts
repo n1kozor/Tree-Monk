@@ -16,9 +16,10 @@ export function aliasMap(aliases: Alias[]): Map<string, string[]> {
 }
 
 /** A query wrapped in quotes ("Dosa") asks for an EXACT, accent-sensitive
- *  match — "Dosa" finds only the short-o spelling, never "Dósa". */
+ *  match — "Dosa" finds only the short-o spelling, never "Dósa". Typographic
+ *  quotes count too: Hungarian „…”, curly “…”, guillemets »…« / «…». */
 function exactQuery(query: string): string | null {
-  const m = /^\s*"(.*)"\s*$/.exec(query)
+  const m = /^\s*["„“”»«](.*)["„“”»«]\s*$/.exec(query)
   const inner = m?.[1].trim()
   return inner ? inner : null
 }

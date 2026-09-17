@@ -322,7 +322,8 @@
     "sortBirthAsc": "Naissance (ancienne → récente)",
     "sortBirthDesc": "Naissance (récente → ancienne)",
     "filters": "Filtres",
-    "notVerified": "Non vérifié"
+    "notVerified": "Non vérifié",
+    "christeningYear": "Année de baptême — aucune date de naissance saisie"
   },
   "workspace": {
     "label": "Arbre",
@@ -1209,7 +1210,8 @@
     "customRenameTitle": "Renommage par lot",
     "customRenameFrom": "De…",
     "customRenameTo": "Vers…",
-    "customRenameCount": "{{count}} correspondances"
+    "customRenameCount": "{{count}} correspondances",
+    "customRenameLogHint": "Chaque renommage est consigné dans l'Historique, où il peut être annulé."
   },
   "query": {
     "title": "Constructeur de requêtes",
@@ -1424,7 +1426,10 @@
       "witness": "témoin",
       "undertaker": "croque-mort"
     },
-    "copyChristeningToBirth": "Utiliser la date et le lieu du baptême comme naissance"
+    "copyChristeningToBirth": "Utiliser la date et le lieu du baptême comme naissance",
+    "onBoard": "Sur le tableau",
+    "addToBoard": "Épingler au tableau",
+    "addedToBoard": "Épinglé au tableau d'enquête"
   },
   "research": {
     "history": "Historique des recherches",
@@ -1569,7 +1574,11 @@
     "excludePrivate": "Exclure les personnes confidentielles",
     "excludePrivateHint": "Les personnes marquées comme confidentielles (et les liens vers elles) sont entièrement exclues du fichier.",
     "anonymizeLiving": "Anonymiser les personnes vivantes",
-    "anonymizeLivingHint": "Les personnes vivantes conservent leur place dans la structure mais sont exportées sans nom ni faits (« Vivant(e) ») — leurs informations de mariage sont également masquées."
+    "anonymizeLivingHint": "Les personnes vivantes conservent leur place dans la structure mais sont exportées sans nom ni faits (« Vivant(e) ») — leurs informations de mariage sont également masquées.",
+    "bundleMedia": "Paquet (.zip) avec les images et documents",
+    "bundleMediaHint": "Le .ged et ses fichiers joints dans un seul zip — à emporter sur une autre machine ; l’import ouvre le zip directement.",
+    "exportedMedia": "Exporté : {{path}} — {{count}} image(s)/document(s) placé(s) dans le dossier « media » à côté. Emportez ce dossier avec le fichier sur une autre machine !",
+    "exportedPackage": "Paquet exporté : {{path}} ({{count}} image(s)/document(s) dans le zip)"
   },
   "fs": {
     "interrupted": "Un import précédent a été interrompu. Vous pouvez nettoyer les entrées vides qu'il a laissées.",
@@ -2084,7 +2093,7 @@
           },
           {
             "h": "Import et export",
-            "p": "La barre supérieure permet d'importer et d'exporter des fichiers GEDCOM, le format standard d'échange entre logiciels de généalogie. Les fonctions plus avancées — sauvegarde et restauration — se trouvent dans les paramètres."
+            "p": "La barre supérieure permet d'importer et d'exporter des fichiers GEDCOM, le format standard d'échange entre logiciels de généalogie. Les fonctions plus avancées — sauvegarde et restauration — se trouvent dans les paramètres. À l’export GEDCOM, les images et documents vont dans un dossier « media » à côté du .ged — ou demandez un paquet .zip unique, que l’import ouvre directement ; c’est le moyen le plus simple de déplacer un arbre vers une autre machine."
           },
           {
             "h": "Apparence et langue",
@@ -2360,7 +2369,7 @@
           },
           {
             "h": "Données et sauvegarde",
-            "p": "Créez ici une sauvegarde complète de la base et des images jointes dans un seul fichier que vous pourrez restaurer plus tard. Vous pouvez aussi importer et exporter au format GEDCOM."
+            "p": "Créez ici une sauvegarde complète de la base et des images jointes dans un seul fichier que vous pourrez restaurer plus tard. Vous pouvez aussi importer et exporter au format GEDCOM. Pour changer de machine, la sauvegarde est la voie la plus complète (tous les arbres, notes et images dans un seul fichier) ; avec GEDCOM, les images voyagent dans le paquet .zip ou dans le dossier « media » à côté du .ged."
           },
           {
             "h": "Effacer les données",

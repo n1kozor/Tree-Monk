@@ -2,7 +2,35 @@
 
 All notable changes to TreeMonk are documented here.
 
-## [1.10.7]
+## [Unreleased]
+
+### Added
+- **GEDCOM package export/import (.zip with media)**: the export dialog can
+  write one .zip holding the .ged plus its `media/` folder, and the import
+  opens such a package directly (extracts it, imports the .ged with the media
+  resolved). A plain .ged export still writes the pictures into the sibling
+  `media/` folder — the success toast now says so, with the file count, so the
+  folder is not left behind when the file moves to another machine. The
+  profile photo is marked `_PRIM Y` on export, so a round trip restores which
+  picture is the portrait. Prompted by a GitHub feature request (#18).
+- **Investigation-board shortcuts on the profile**: a new Pin button puts the
+  person straight onto the active investigation board, and when they are
+  already pinned (on any board) it turns into an amber "On the board" link
+  that jumps to the board and spotlights their node.
+- **Christening year stands in on the People list**: when a person has no
+  birth date but has a christening, the list shows the christening year —
+  amber, with a leading ~ — instead of an empty lifespan.
+- The batch-rename box now says where its trail lives: every rename is
+  recorded in the History view and can be undone there.
+
+### Fixed
+- **Corkboard map fragments were blank in the desktop app**: the 1.10.7 tile
+  switch (Carto → OpenStreetMap) missed the renderer's Content-Security-Policy
+  image whitelist, so Electron silently blocked the new tiles. The browser
+  webapp was unaffected. Stale Carto entries left the CSP too.
+- **Exact search now accepts typographic quotes**: „Dosa”, “Dosa” and »Dosa«
+  work the same as "Dosa" — Hungarian keyboards and autocorrect often produce
+  curly quotes, which the exact-match detector previously ignored.
 
 ### Added
 - **Six new UI languages**: French (contributed by @AntGervais), Italian,

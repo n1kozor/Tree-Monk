@@ -546,7 +546,8 @@
     "sortBirthAsc": "Geburt (alt→neu)",
     "sortBirthDesc": "Geburt (neu→alt)",
     "filters": "Filter",
-    "notVerified": "Nicht verifiziert"
+    "notVerified": "Nicht verifiziert",
+    "christeningYear": "Taufjahr — kein Geburtsdatum erfasst"
   },
   "famous": {
     "title": "Berühmte Verwandte",
@@ -802,7 +803,8 @@
     "customRenameTitle": "Stapel-Umbenennung",
     "customRenameFrom": "Von…",
     "customRenameTo": "Zu…",
-    "customRenameCount": "{{count}} Treffer"
+    "customRenameCount": "{{count}} Treffer",
+    "customRenameLogHint": "Jede Umbenennung wird im Verlauf festgehalten und lässt sich dort rückgängig machen."
   },
   "query": {
     "title": "Abfrage-Generator",
@@ -1398,7 +1400,10 @@
       "witness": "Zeuge",
       "undertaker": "Bestatter"
     },
-    "copyChristeningToBirth": "Taufdatum und -ort als Geburt übernehmen"
+    "copyChristeningToBirth": "Taufdatum und -ort als Geburt übernehmen",
+    "onBoard": "Auf der Tafel",
+    "addToBoard": "An die Tafel",
+    "addedToBoard": "An die Ermittlungstafel geheftet"
   },
   "research": {
     "history": "Rechercheverlauf",
@@ -1543,7 +1548,11 @@
     "excludePrivate": "Vertrauliche Personen auslassen",
     "excludePrivateHint": "Als vertraulich markierte Personen (und Verweise auf sie) bleiben ganz aus der Datei.",
     "anonymizeLiving": "Lebende Personen anonymisieren",
-    "anonymizeLivingHint": "Lebende behalten ihren Platz in der Struktur, exportieren aber ohne Namen und Fakten („Living“) — auch ihre Ehedaten bleiben zurück."
+    "anonymizeLivingHint": "Lebende behalten ihren Platz in der Struktur, exportieren aber ohne Namen und Fakten („Living“) — auch ihre Ehedaten bleiben zurück.",
+    "bundleMedia": "Paket (.zip) mit Bildern und Dokumenten",
+    "bundleMediaHint": "Die .ged und ihre angehängten Dateien in einer Zip — zum Umzug auf einen anderen Rechner; der Import öffnet die Zip direkt.",
+    "exportedMedia": "Exportiert: {{path}} — {{count}} Bild(er)/Dokument(e) liegen im Ordner „media“ daneben. Nimm diesen Ordner auf einen anderen Rechner mit!",
+    "exportedPackage": "Paket exportiert: {{path}} ({{count}} Bild(er)/Dokument(e) in der Zip)"
   },
   "fs": {
     "interrupted": "Ein früherer Import wurde unterbrochen. Du solltest die leeren Einträge bereinigen.",
@@ -1794,7 +1803,7 @@
           },
           {
             "h": "Daten ein- und ausgeben",
-            "p": "In der oberen Leiste kannst du GEDCOM-Dateien importieren und exportieren, das Standard-Austauschformat zwischen Genealogie-Programmen. Erweiterte Datenverwaltung — Backup und Wiederherstellen — findest du in den Einstellungen."
+            "p": "In der oberen Leiste kannst du GEDCOM-Dateien importieren und exportieren, das Standard-Austauschformat zwischen Genealogie-Programmen. Erweiterte Datenverwaltung — Backup und Wiederherstellen — findest du in den Einstellungen. Beim GEDCOM-Export landen Bilder und Dokumente im Ordner „media“ neben der .ged — oder du wählst ein einzelnes .zip-Paket, das der Import direkt öffnet; so zieht ein Stammbaum am einfachsten auf einen anderen Rechner um."
           },
           {
             "h": "Darstellung und Sprache",
@@ -2070,7 +2079,7 @@
           },
           {
             "h": "Daten und Backup",
-            "p": "Von hier erstellst du ein vollständiges Backup, das die ganze Datenbank samt angehängter Bilder in eine Datei sichert, die du später wiederherstellen kannst. Außerdem kannst du im GEDCOM-Format exportieren und importieren."
+            "p": "Von hier erstellst du ein vollständiges Backup, das die ganze Datenbank samt angehängter Bilder in eine Datei sichert, die du später wiederherstellen kannst. Außerdem kannst du im GEDCOM-Format exportieren und importieren. Für den Umzug zwischen Rechnern ist das Backup der vollständigste Weg (alle Bäume, Notizen und Bilder in einer Datei); per GEDCOM reisen die Bilder im .zip-Paket oder im Ordner „media“ neben der .ged."
           },
           {
             "h": "Daten löschen",

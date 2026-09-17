@@ -546,7 +546,8 @@
     "sortBirthAsc": "Birth (old→new)",
     "sortBirthDesc": "Birth (new→old)",
     "filters": "Filters",
-    "notVerified": "Not verified"
+    "notVerified": "Not verified",
+    "christeningYear": "Christening year — no birth date recorded"
   },
   "famous": {
     "title": "Famous relatives",
@@ -802,7 +803,8 @@
     "customRenameTitle": "Batch rename",
     "customRenameFrom": "From…",
     "customRenameTo": "To…",
-    "customRenameCount": "{{count}} matches"
+    "customRenameCount": "{{count}} matches",
+    "customRenameLogHint": "Every rename is recorded in the History and can be undone there."
   },
   "query": {
     "title": "Query Builder",
@@ -1401,7 +1403,10 @@
       "witness": "witness",
       "undertaker": "undertaker"
     },
-    "copyChristeningToBirth": "Use christening date & place as the birth"
+    "copyChristeningToBirth": "Use christening date & place as the birth",
+    "onBoard": "On the board",
+    "addToBoard": "Pin to board",
+    "addedToBoard": "Pinned to the investigation board"
   },
   "research": {
     "history": "Research history",
@@ -1546,7 +1551,11 @@
     "excludePrivate": "Exclude confidential people",
     "excludePrivateHint": "People marked confidential (and links pointing at them) are left out of the file entirely.",
     "anonymizeLiving": "Anonymize living people",
-    "anonymizeLivingHint": "Living people keep their place in the structure but export without name or facts (\"Living\") — their marriage details are withheld too."
+    "anonymizeLivingHint": "Living people keep their place in the structure but export without name or facts (\"Living\") — their marriage details are withheld too.",
+    "bundleMedia": "Package (.zip) with pictures and documents",
+    "bundleMediaHint": "The .ged and its attached files in one zip — take this to another machine; the import opens the zip directly.",
+    "exportedMedia": "Exported: {{path}} — {{count}} picture(s)/document(s) went into the “media” folder next to it. Take that folder along to another machine!",
+    "exportedPackage": "Package exported: {{path}} ({{count}} picture(s)/document(s) in the zip)"
   },
   "fs": {
     "interrupted": "A previous import was interrupted. You may want to clean up the empty entries it left.",
@@ -1797,7 +1806,7 @@
           },
           {
             "h": "Importing and exporting",
-            "p": "From the top bar you can import and export GEDCOM files, the standard exchange format between genealogy programs. More advanced data handling — backup and restore — lives in Settings."
+            "p": "From the top bar you can import and export GEDCOM files, the standard exchange format between genealogy programs. More advanced data handling — backup and restore — lives in Settings. On GEDCOM export the pictures and documents go into a “media” folder next to the .ged — or ask for a single .zip package, which the import opens directly; that is the easiest way to move a tree to another machine."
           },
           {
             "h": "Appearance and language",
@@ -2073,7 +2082,7 @@
           },
           {
             "h": "Data and backup",
-            "p": "From here you can create a full backup that saves the whole database, together with attached images, into one file you can later restore. You can also export and import in GEDCOM format."
+            "p": "From here you can create a full backup that saves the whole database, together with attached images, into one file you can later restore. You can also export and import in GEDCOM format. For moving between machines the backup is the most complete route (every tree, note and picture in one file); with GEDCOM the pictures travel in the .zip package or in the “media” folder next to the .ged."
           },
           {
             "h": "Wiping data",

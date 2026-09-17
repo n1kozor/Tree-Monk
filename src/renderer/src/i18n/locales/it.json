@@ -546,7 +546,8 @@
     "sortBirthAsc": "Nascita (vecchi→nuovi)",
     "sortBirthDesc": "Nascita (nuovi→vecchi)",
     "filters": "Filtri",
-    "notVerified": "Non verificato"
+    "notVerified": "Non verificato",
+    "christeningYear": "Anno di battesimo — nessuna data di nascita registrata"
   },
   "famous": {
     "title": "Parenti famosi",
@@ -802,7 +803,8 @@
     "customRenameTitle": "Rinomina in blocco",
     "customRenameFrom": "Da…",
     "customRenameTo": "A…",
-    "customRenameCount": "{{count}} corrispondenze"
+    "customRenameCount": "{{count}} corrispondenze",
+    "customRenameLogHint": "Ogni rinomina è registrata nella Cronologia e può essere annullata da lì."
   },
   "query": {
     "title": "Costruttore di interrogazioni",
@@ -1401,7 +1403,10 @@
       "witness": "testimone",
       "undertaker": "becchino"
     },
-    "copyChristeningToBirth": "Usa data e luogo del battesimo come nascita"
+    "copyChristeningToBirth": "Usa data e luogo del battesimo come nascita",
+    "onBoard": "Sulla bacheca",
+    "addToBoard": "Aggiungi alla bacheca",
+    "addedToBoard": "Aggiunto alla bacheca d'indagine"
   },
   "research": {
     "history": "Cronologia delle ricerche",
@@ -1546,7 +1551,11 @@
     "excludePrivate": "Escludi le persone riservate",
     "excludePrivateHint": "Le persone contrassegnate riservate (e i collegamenti che puntano a loro) restano del tutto fuori dal file.",
     "anonymizeLiving": "Anonimizza i viventi",
-    "anonymizeLivingHint": "I viventi mantengono il loro posto nella struttura ma vengono esportati senza nome né fatti (\"Living\") — anche i dettagli dei loro matrimoni sono omessi."
+    "anonymizeLivingHint": "I viventi mantengono il loro posto nella struttura ma vengono esportati senza nome né fatti (\"Living\") — anche i dettagli dei loro matrimoni sono omessi.",
+    "bundleMedia": "Pacchetto (.zip) con immagini e documenti",
+    "bundleMediaHint": "Il .ged e i file allegati in un unico zip — da portare su un altro computer; l’importazione apre lo zip direttamente.",
+    "exportedMedia": "Esportato: {{path}} — {{count}} immagine/i o documento/i nella cartella “media” accanto. Porta anche quella cartella su un altro computer!",
+    "exportedPackage": "Pacchetto esportato: {{path}} ({{count}} immagine/i o documento/i nello zip)"
   },
   "fs": {
     "interrupted": "Un'importazione precedente è stata interrotta. Potresti voler ripulire le voci vuote rimaste.",
@@ -1797,7 +1806,7 @@
           },
           {
             "h": "Importare ed esportare",
-            "p": "Dalla barra in alto importi ed esporti file GEDCOM, il formato di scambio standard tra i programmi di genealogia. La gestione più avanzata dei dati — backup e ripristino — vive nelle Impostazioni."
+            "p": "Dalla barra in alto importi ed esporti file GEDCOM, il formato di scambio standard tra i programmi di genealogia. La gestione più avanzata dei dati — backup e ripristino — vive nelle Impostazioni. Nell’esportazione GEDCOM le immagini e i documenti finiscono in una cartella “media” accanto al .ged — oppure si può chiedere un singolo pacchetto .zip, che l’importazione apre direttamente; è il modo più semplice per spostare un albero su un altro computer."
           },
           {
             "h": "Aspetto e lingua",
@@ -2073,7 +2082,7 @@
           },
           {
             "h": "Dati e backup",
-            "p": "Da qui crei un backup completo che salva l'intero database, insieme alle immagini allegate, in un unico file ripristinabile. Puoi anche esportare e importare in formato GEDCOM."
+            "p": "Da qui crei un backup completo che salva l'intero database, insieme alle immagini allegate, in un unico file ripristinabile. Puoi anche esportare e importare in formato GEDCOM. Per spostarsi tra computer il backup è la via più completa (tutti gli alberi, le note e le immagini in un solo file); con GEDCOM le immagini viaggiano nel pacchetto .zip o nella cartella “media” accanto al .ged."
           },
           {
             "h": "Cancellare i dati",

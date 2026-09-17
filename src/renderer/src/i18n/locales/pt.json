@@ -546,7 +546,8 @@
     "sortBirthAsc": "Nascimento (antigos→novos)",
     "sortBirthDesc": "Nascimento (novos→antigos)",
     "filters": "Filtros",
-    "notVerified": "Não verificado"
+    "notVerified": "Não verificado",
+    "christeningYear": "Ano de batismo — sem data de nascimento registrada"
   },
   "famous": {
     "title": "Parentes famosos",
@@ -802,7 +803,8 @@
     "customRenameTitle": "Renomear em lote",
     "customRenameFrom": "De…",
     "customRenameTo": "Para…",
-    "customRenameCount": "{{count}} correspondências"
+    "customRenameCount": "{{count}} correspondências",
+    "customRenameLogHint": "Cada renomeação fica registrada no Histórico e pode ser desfeita lá."
   },
   "query": {
     "title": "Construtor de consultas",
@@ -1401,7 +1403,10 @@
       "witness": "testemunha",
       "undertaker": "agente funerário"
     },
-    "copyChristeningToBirth": "Usar data e local do batismo como nascimento"
+    "copyChristeningToBirth": "Usar data e local do batismo como nascimento",
+    "onBoard": "No quadro",
+    "addToBoard": "Fixar no quadro",
+    "addedToBoard": "Fixado no quadro de investigação"
   },
   "research": {
     "history": "Histórico de pesquisa",
@@ -1546,7 +1551,11 @@
     "excludePrivate": "Excluir pessoas confidenciais",
     "excludePrivateHint": "Pessoas marcadas como confidenciais (e vínculos que apontam para elas) ficam totalmente fora do arquivo.",
     "anonymizeLiving": "Anonimizar os vivos",
-    "anonymizeLivingHint": "Os vivos mantêm seu lugar na estrutura, mas são exportados sem nome nem fatos (\"Living\") — os detalhes de seus casamentos também são omitidos."
+    "anonymizeLivingHint": "Os vivos mantêm seu lugar na estrutura, mas são exportados sem nome nem fatos (\"Living\") — os detalhes de seus casamentos também são omitidos.",
+    "bundleMedia": "Pacote (.zip) com imagens e documentos",
+    "bundleMediaHint": "O .ged e os arquivos anexados em um único zip — leve-o para outro computador; a importação abre o zip diretamente.",
+    "exportedMedia": "Exportado: {{path}} — {{count}} imagem(ns)/documento(s) foram para a pasta “media” ao lado. Leve essa pasta junto para outro computador!",
+    "exportedPackage": "Pacote exportado: {{path}} ({{count}} imagem(ns)/documento(s) no zip)"
   },
   "fs": {
     "interrupted": "Uma importação anterior foi interrompida. Talvez você queira limpar as entradas vazias que ela deixou.",
@@ -1797,7 +1806,7 @@
           },
           {
             "h": "Importar e exportar",
-            "p": "Pela barra superior você importa e exporta arquivos GEDCOM, o formato padrão de intercâmbio entre programas de genealogia. A gestão mais avançada de dados — backup e restauração — mora nas Configurações."
+            "p": "Pela barra superior você importa e exporta arquivos GEDCOM, o formato padrão de intercâmbio entre programas de genealogia. A gestão mais avançada de dados — backup e restauração — mora nas Configurações. Na exportação GEDCOM, as imagens e documentos vão para uma pasta “media” ao lado do .ged — ou peça um único pacote .zip, que a importação abre diretamente; é a forma mais simples de levar uma árvore para outro computador."
           },
           {
             "h": "Aparência e idioma",
@@ -2073,7 +2082,7 @@
           },
           {
             "h": "Dados e backup",
-            "p": "Daqui você cria um backup completo que salva o banco inteiro, junto com as imagens anexadas, num único arquivo restaurável. Também dá para exportar e importar no formato GEDCOM."
+            "p": "Daqui você cria um backup completo que salva o banco inteiro, junto com as imagens anexadas, num único arquivo restaurável. Também dá para exportar e importar no formato GEDCOM. Para mudar de computador, o backup é o caminho mais completo (todas as árvores, notas e imagens em um só arquivo); com GEDCOM as imagens viajam no pacote .zip ou na pasta “media” ao lado do .ged."
           },
           {
             "h": "Apagar os dados",

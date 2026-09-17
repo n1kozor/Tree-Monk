@@ -157,15 +157,30 @@ export function PeopleView(): JSX.Element {
     selectPerson(p.id)
   }
 
-  // One-line lifespan: "1850 – 1900", "* 1850", "1850 – ?", or "—".
-  const lifespan = (p: Person): string => {
+  // One-line lifespan: "1850 – 1900", "* 1850", "1850 – ?", or "—". When there
+  // is no birth date but a christening exists, its year stands in — amber with
+  // a leading ~ so it cannot be mistaken for a birth year.
+  const lifespan = (p: Person): JSX.Element => {
     const b = yearOf(p.birthDate)
+    const chr = b ? null : yearOf(p.christeningDate)
     const d = yearOf(p.deathDate)
     const dead = p.deceased || !!p.deathDate
-    if (b && d) return `${b} – ${d}`
-    if (b) return dead ? `${b} – ?` : `* ${b}`
-    if (d) return `? – ${d}`
-    return dead ? '†' : '—'
+    const start = b ? (
+      <>{b}</>
+    ) : chr ? (
+      <span className="text-amber-600 dark:text-amber-400" title={t('people.christeningYear')}>
+        ~{chr}
+      </span>
+    ) : null
+    if (start && d)
+      return (
+        <>
+          {start} – {d}
+        </>
+      )
+    if (start) return dead ? <>{start} – ?</> : <>* {start}</>
+    if (d) return <>? – {d}</>
+    return <>{dead ? '†' : '—'}</>
   }
 
   const SEXES: [('' | 'M' | 'F'), string][] = [

@@ -546,7 +546,8 @@
     "sortBirthAsc": "Születés (régi→új)",
     "sortBirthDesc": "Születés (új→régi)",
     "filters": "Szűrők",
-    "notVerified": "Nem ellenőrzött"
+    "notVerified": "Nem ellenőrzött",
+    "christeningYear": "Keresztelési év — nincs rögzített születési dátum"
   },
   "famous": {
     "title": "Híres rokonok",
@@ -802,7 +803,8 @@
     "customRenameTitle": "Kötegelt átnevezés",
     "customRenameFrom": "Erről…",
     "customRenameTo": "Erre…",
-    "customRenameCount": "{{count}} találat"
+    "customRenameCount": "{{count}} találat",
+    "customRenameLogHint": "Minden átnevezés a Naplóban követhető, és ott vissza is vonható."
   },
   "query": {
     "title": "Lekérdezés-építő",
@@ -1398,7 +1400,10 @@
       "witness": "tanú",
       "undertaker": "temetkező"
     },
-    "copyChristeningToBirth": "Keresztelő dátuma és helye legyen a születés"
+    "copyChristeningToBirth": "Keresztelő dátuma és helye legyen a születés",
+    "onBoard": "Nyomozótáblán",
+    "addToBoard": "Nyomozótáblára",
+    "addedToBoard": "Felkerült a nyomozótáblára"
   },
   "research": {
     "history": "Kutatási előzmények",
@@ -1543,7 +1548,11 @@
     "excludePrivate": "Bizalmas személyek kihagyása",
     "excludePrivateHint": "A bizalmasként jelölt személyek (és a rájuk mutató kapcsolatok) teljesen kimaradnak a fájlból.",
     "anonymizeLiving": "Élő személyek anonimizálása",
-    "anonymizeLivingHint": "Az élők a fa szerkezetében maradnak, de név és adatok nélkül („Living”) kerülnek a fájlba — a házasságuk adatai is rejtve."
+    "anonymizeLivingHint": "Az élők a fa szerkezetében maradnak, de név és adatok nélkül („Living”) kerülnek a fájlba — a házasságuk adatai is rejtve.",
+    "bundleMedia": "Csomag (.zip) a képekkel és dokumentumokkal",
+    "bundleMediaHint": "A .ged és a csatolt fájlok egyetlen zipben — másik gépre költöztetéshez ezt vidd át; az import a zipet közvetlenül megnyitja.",
+    "exportedMedia": "Exportálva: {{path}} — {{count}} kép/dokumentum a mellette lévő „media” mappába került. Másik gépre azt is vidd magaddal!",
+    "exportedPackage": "Csomag exportálva: {{path}} ({{count}} kép/dokumentum a zipben)"
   },
   "fs": {
     "interrupted": "Egy korábbi importálás megszakadt. Érdemes letakarítani az üres bejegyzéseket.",
@@ -1794,7 +1803,7 @@
           },
           {
             "h": "Adatok ki- és bevitele",
-            "p": "A felső sávban GEDCOM fájlt importálhatsz és exportálhatsz; ez a genealógiai programok közötti szabványos csereformátum. A részletesebb adatkezelés — mentés és visszaállítás — a Beállításokban érhető el."
+            "p": "A felső sávban GEDCOM fájlt importálhatsz és exportálhatsz; ez a genealógiai programok közötti szabványos csereformátum. A részletesebb adatkezelés — mentés és visszaállítás — a Beállításokban érhető el. A GEDCOM-exportnál a képek és dokumentumok a .ged melletti „media” mappába kerülnek — vagy kérhető egyetlen .zip csomag, amelyet az import közvetlenül megnyit; ez a legegyszerűbb, ha a fát másik gépre viszed."
           },
           {
             "h": "Megjelenés és nyelv",
@@ -2070,7 +2079,7 @@
           },
           {
             "h": "Adatok és mentés",
-            "p": "Innen készíthetsz teljes biztonsági mentést, amely a teljes adatbázist a csatolt képekkel együtt egy fájlba menti — ezt később vissza is állíthatod. GEDCOM formátumban is exportálhatsz és importálhatsz."
+            "p": "Innen készíthetsz teljes biztonsági mentést, amely a teljes adatbázist a csatolt képekkel együtt egy fájlba menti — ezt később vissza is állíthatod. GEDCOM formátumban is exportálhatsz és importálhatsz. Gépek közötti költözéshez a biztonsági mentés a legteljesebb út (minden fa, jegyzet, kép egyben); GEDCOM-mal a képek a .zip csomagban vagy a .ged melletti „media” mappában utaznak."
           },
           {
             "h": "Adatok törlése",

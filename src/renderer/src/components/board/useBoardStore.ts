@@ -49,11 +49,18 @@ interface BoardStore {
   editingNodeId: string | null
   /** Spotlight focus — when set, unconnected nodes/edges dim. */
   spotlightId: string | null
+  /** One-shot: node to spotlight when the NEXT load() completes — set by the
+   *  profile's "on the board" jump, consumed exactly once by load(). */
+  pendingSpotlightId: string | null
 
   setBoardMode: (m: BoardMode) => void
   setConnecting: (v: boolean) => void
   requestEdit: (id: string | null) => void
   setSpotlight: (id: string | null) => void
+  /** Profile → board jump: aim the store at (boardId, nodeId) without loading.
+   *  The next load() — the board's own mount-load, or one the caller starts —
+   *  lands on that board and spotlights the node. */
+  prepareFocus: (boardId: string, nodeId: string) => void
 
   load: () => Promise<void>
   loadBoards: () => Promise<void>
@@ -245,6 +252,7 @@ export const useBoardStore = create<BoardStore>((set, get) => ({
   connecting: false,
   editingNodeId: null,
   spotlightId: null,
+  pendingSpotlightId: null,
 
   setBoardMode: (boardMode) => {
     localStorage.setItem(MODE_KEY, boardMode)
@@ -253,6 +261,12 @@ export const useBoardStore = create<BoardStore>((set, get) => ({
   setConnecting: (connecting) => set({ connecting }),
   requestEdit: (editingNodeId) => set({ editingNodeId }),
   setSpotlight: (spotlightId) => set({ spotlightId }),
+
+  prepareFocus: (boardId, nodeId) => {
+    activeBoardId = boardId
+    localStorage.setItem(BOARD_KEY, boardId)
+    set({ currentBoardId: boardId, loaded: false, pendingSpotlightId: nodeId })
+  },
 
   load: async () => {
     const state = await window.api.board.get(activeBoardId)
@@ -266,7 +280,8 @@ export const useBoardStore = create<BoardStore>((set, get) => ({
     set({
       nodes: state.nodes.map(toRfNode),
       edges: liveEdges.map(toRfEdge),
-      spotlightId: null,
+      spotlightId: get().pendingSpotlightId,
+      pendingSpotlightId: null,
       loaded: true
     })
   },
