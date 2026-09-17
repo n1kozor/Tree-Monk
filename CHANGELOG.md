@@ -23,6 +23,15 @@ All notable changes to TreeMonk are documented here.
 - The batch-rename box now says where its trail lives: every rename is
   recorded in the History view and can be undone there.
 
+### Technical
+- **Electron 31 → 43.4.1** (community PR by @AntGervais, GitHub #14/#15):
+  Electron 31 was end-of-life and macOS XProtect now deletes its binary, which
+  made `npm run dev` impossible on a Mac. With it: better-sqlite3 13 (ABI 148),
+  @electron/rebuild 4, `printToPDF` numeric margins, and — because Electron 32
+  removed `File.path` — dropped files are resolved through the preload's
+  `webUtils.getPathForFile`, so drag-and-drop onto the investigation board and
+  onto a person's sources keeps working. CI builds on Node 22.
+
 ### Fixed
 - **Corkboard map fragments were blank in the desktop app**: the 1.10.7 tile
   switch (Carto → OpenStreetMap) missed the renderer's Content-Security-Policy

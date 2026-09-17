@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import { Channels, type TreeMonkApi } from '@shared/ipc'
 import { RegionChannels } from '@shared/regions'
 
@@ -287,7 +287,10 @@ const api: TreeMonkApi = {
   app: {
     setLanguage: (lang) => ipcRenderer.invoke(Channels.app.setLanguage, lang),
     openExternal: (url) => ipcRenderer.invoke(Channels.app.openExternal, url),
-    openManual: (language) => ipcRenderer.invoke(Channels.app.openManual, language)
+    openManual: (language) => ipcRenderer.invoke(Channels.app.openManual, language),
+    // Electron 32 removed File.path; the preload is the only place that can
+    // still turn a dropped File into its absolute path.
+    pathForFile: (file) => webUtils.getPathForFile(file)
   },
   updates: {
     version: () => ipcRenderer.invoke(Channels.updates.version),

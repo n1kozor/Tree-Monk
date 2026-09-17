@@ -142,7 +142,7 @@ reachable from the network.
 
 ### Prerequisites
 
-- **Node.js 20+** and npm (the release CI runs Node 20).
+- **Node.js 22.12+** and npm (the release CI runs Node 22; Electron 43's install tooling needs it).
 - **macOS only:** a full **Xcode** install (App Store → Xcode, then
   `xcode-select -s /Applications/Xcode.app/Contents/Developer`). CommandLineTools
   alone is not enough — `better-sqlite3`'s postinstall rebuilds against Electron
@@ -197,7 +197,7 @@ app "is from an unidentified developer". macOS users have two
 options:
 
 1. **Build it yourself.** All you need is **Xcode** (App Store) and
-   **Node 20+** — see [Prerequisites](#prerequisites) above. Then:
+   **Node 22.12+** — see [Prerequisites](#prerequisites) above. Then:
 
    ```bash
    git clone https://github.com/n1kozor/Tree-Monk.git

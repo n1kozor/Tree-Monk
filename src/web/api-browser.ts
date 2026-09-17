@@ -412,7 +412,9 @@ export function createDemoApi(): TreeMonkApi {
         window.open(url, '_blank', 'noopener')
       },
       openManual: async () => false,
-      setLanguage: async () => {}
+      setLanguage: async () => {},
+      // Browsers never expose local paths — drop handlers get nothing, as before.
+      pathForFile: () => ''
     },
     updates: {
       version: async () => DEMO_VERSION,

@@ -427,9 +427,9 @@ export function PersonSources({ personId }: { personId: string }): JSX.Element {
   const onDrop = async (e: React.DragEvent): Promise<void> => {
     e.preventDefault()
     setDragOver(false)
-    const paths = (Array.from(e.dataTransfer.files) as Array<File & { path?: string }>)
-      .map((f) => f.path)
-      .filter((p): p is string => !!p)
+    const paths = Array.from(e.dataTransfer.files)
+      .map((f) => window.api.app.pathForFile(f))
+      .filter((p) => !!p)
     if (paths.length) {
       const created = await window.api.documents.importPaths(paths, personId)
       await after()

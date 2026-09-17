@@ -154,8 +154,9 @@ function BoardCanvas(): JSX.Element {
   const onDrop = useCallback(
     (e: React.DragEvent): void => {
       e.preventDefault()
-      const files = Array.from(e.dataTransfer.files) as Array<File & { path?: string }>
-      const paths = files.map((f) => f.path).filter((p): p is string => !!p)
+      const paths = Array.from(e.dataTransfer.files)
+        .map((f) => window.api.app.pathForFile(f))
+        .filter((p) => !!p)
       if (!paths.length) return
       addDroppedFiles(paths, screenToFlowPosition({ x: e.clientX, y: e.clientY }))
     },

@@ -740,6 +740,9 @@ export interface TreeMonkApi {
     openManual(language?: string): Promise<boolean>
     /** Tell the main process the current UI language (drives geocoding output). */
     setLanguage(lang: string): Promise<void>
+    /** Absolute path of a dropped/picked File — Electron 32 removed `File.path`,
+     *  so the preload resolves it. Empty string in the browser build. */
+    pathForFile(file: File): string
   }
   updates: {
     /** The running app version (fast, no network). */
