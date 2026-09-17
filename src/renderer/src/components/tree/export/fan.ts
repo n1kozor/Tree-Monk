@@ -2,7 +2,8 @@
 // generation rings of ancestor wedges with curved labels, recentred into a
 // positive `0 0 size size` box so the poster wrapper can place it.
 import { arc as d3arc } from 'd3-shape'
-import type { Sex, TreeNodeDatum } from '@shared/types'
+import type { TreeNodeDatum } from '@shared/types'
+import { canonicalCountryName } from '@shared/placeNormalize'
 import { formatName } from '@/lib/utils'
 import { PRINT, esc, truncate, type ExportContent, type TreeSvg } from './svgKit'
 
@@ -22,9 +23,50 @@ function pointAt(r: number, a: number): [number, number] {
   return [r * Math.sin(a), -r * Math.cos(a)]
 }
 
-function fillFor(sex: Sex | undefined, gen: number): string {
-  const base = sex === 'F' ? [244, 114, 182] : sex === 'M' ? [45, 212, 191] : [148, 163, 184]
+const GEN_HUES = [212, 250, 286, 330, 8, 40, 158, 186]
+const COUNTRY_HUES = [168, 36, 212, 334, 78, 266, 16, 196, 118, 308, 46, 226, 356, 144]
+
+function hashText(text: string): number {
+  let h = 0
+  for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) >>> 0
+  return h
+}
+
+function hexToRgb(hex: string): [number, number, number] | null {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex.trim())
+  if (!m) return null
+  const n = parseInt(m[1], 16)
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+function countryFromPlace(place: string | null | undefined): string | null {
+  const raw = place?.trim()
+  if (!raw) return null
+  const parts = raw.split(',').map((p) => p.trim()).filter(Boolean)
+  return canonicalCountryName(parts.at(-1))
+}
+
+function countryOf(datum: TreeNodeDatum): string | null {
+  return datum.country ?? countryFromPlace(datum.birthPlace) ?? countryFromPlace(datum.deathPlace)
+}
+
+function fillFor(datum: TreeNodeDatum, gen: number, content: ExportContent): string {
   const fade = Math.max(0.18, 0.5 - gen * 0.05)
+  if (content.fanColorMode === 'generation') {
+    const h = GEN_HUES[(gen - 1) % GEN_HUES.length]
+    return `hsla(${h},64%,56%,${fade})`
+  }
+  if (content.fanColorMode === 'country') {
+    const country = countryOf(datum)
+    if (!country) return `rgba(148,163,184,${Math.max(0.13, fade * 0.72)})`
+    const h = COUNTRY_HUES[hashText(country.toLowerCase()) % COUNTRY_HUES.length]
+    return `hsla(${h},68%,50%,${fade})`
+  }
+  if (content.fanColorMode === 'mono') {
+    const rgb = hexToRgb(content.accent) ?? [71, 85, 105]
+    return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${fade})`
+  }
+  const base = datum.sex === 'F' ? [244, 114, 182] : datum.sex === 'M' ? [45, 212, 191] : [148, 163, 184]
   return `rgba(${base[0]},${base[1]},${base[2]},${fade})`
 }
 
@@ -69,7 +111,7 @@ export function buildFanTreeSvg(
     const outer = R0 + w.gen * RING
     const d = arcGen({ inner, outer, a0: w.a0, a1: w.a1 }) ?? ''
     fills.push(
-      `<path d="${d}" fill="${fillFor(w.datum.sex, w.gen)}" stroke="#ffffff" stroke-width="1"/>`
+      `<path d="${d}" fill="${fillFor(w.datum, w.gen, content)}" stroke="#ffffff" stroke-width="1"/>`
     )
 
     // Curved text guides.

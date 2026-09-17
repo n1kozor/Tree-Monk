@@ -9,7 +9,7 @@ import {
 import { CHART_FONTS, chartFontFamily, ensureChartFont, type FontCategory } from '@/lib/chartFonts'
 
 const SWEEPS: FanSweep[] = [360, 270, 180]
-const COLOR_MODES: FanColorMode[] = ['sex', 'generation', 'mono']
+const COLOR_MODES: FanColorMode[] = ['sex', 'generation', 'country', 'mono']
 const FONT_CATS: FontCategory[] = ['sans', 'serif', 'script', 'display']
 
 /** Compact popover with the fan-chart's look settings (sweep, colours, years). */
@@ -41,7 +41,7 @@ export function FanOptions(): JSX.Element {
       {open && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="glass-strong absolute left-0 top-10 z-50 w-60 space-y-3 rounded-2xl p-3 text-card-foreground">
+          <div className="glass-strong absolute left-0 top-10 z-50 w-72 space-y-3 rounded-2xl p-3 text-card-foreground">
             {/* Sweep */}
             <Field label={t('tree.fanSweep')}>
               <Segmented
@@ -141,7 +141,7 @@ function Segmented<T extends string | number>({
         <button
           key={String(o.value)}
           onClick={() => onChange(o.value)}
-          className={`flex-1 rounded-lg px-2 py-1 text-xs font-medium transition-colors ${
+          className={`min-w-0 flex-1 rounded-lg px-1 py-1 text-[11px] font-medium transition-colors ${
             value === o.value
               ? 'bg-card text-foreground shadow-[inset_0_1px_0_hsl(var(--glass-highlight)/0.4)] ring-1 ring-primary/20'
               : 'text-muted-foreground hover:text-foreground'
