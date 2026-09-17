@@ -12,6 +12,8 @@ import { canonicalizeCountryInPlace } from '@shared/placeNormalize'
  */
 
 const t = (k: string, o?: Record<string, unknown>): string => i18n.t(k, o ?? {}) as string
+/** Place bucket label with the country in the report's language. */
+const canonPlace = (raw: string): string => canonicalizeCountryInPlace(raw, i18n.language)
 
 const yearNum = (d: string | null): number | null => {
   const m = d?.match(/\b(\d{4})\b/)
@@ -213,8 +215,8 @@ export function buildDashboardReportHtml(params: {
       ${section(t('dashboard.topGivenNames'), barTable(dist(people, (p) => p.givenName), t('dashboard.topGivenNames'), '#6366f1'))}
     </div>` +
     `<div class="two">
-      ${section(t('dashboard.topPlaces'), barTable(dist(people, (p) => p.birthPlace, canonicalizeCountryInPlace), t('dashboard.topPlaces'), '#10b981'))}
-      ${section(t('dashboard.topDeathPlaces'), barTable(dist(people, (p) => p.deathPlace, canonicalizeCountryInPlace), t('dashboard.topDeathPlaces'), '#64748b'))}
+      ${section(t('dashboard.topPlaces'), barTable(dist(people, (p) => p.birthPlace, canonPlace), t('dashboard.topPlaces'), '#10b981'))}
+      ${section(t('dashboard.topDeathPlaces'), barTable(dist(people, (p) => p.deathPlace, canonPlace), t('dashboard.topDeathPlaces'), '#64748b'))}
     </div>` +
     `<div class="two">
       ${section(t('dashboard.topOccupations'), barTable(dist(people, (p) => p.occupation), t('dashboard.topOccupations'), '#8b5cf6'))}

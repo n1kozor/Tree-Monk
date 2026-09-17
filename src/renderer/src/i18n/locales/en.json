@@ -154,7 +154,10 @@
       "death": "Death info",
       "photo": "Photo",
       "occupation": "Occupation"
-    }
+    },
+    "weightsTitle": "Data-quality weighting",
+    "weightsDesc": "0 = does not count (e.g. a photo for 18th-century ancestors); ×2 / ×3 = counts more.",
+    "weightOff": "Doesn't count"
   },
   "godparents": {
     "title": "Godparents",

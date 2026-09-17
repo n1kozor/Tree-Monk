@@ -154,7 +154,10 @@
       "death": "Elhalálozási adatok",
       "photo": "Fénykép",
       "occupation": "Foglalkozás"
-    }
+    },
+    "weightsTitle": "Adatminőség súlyozása",
+    "weightsDesc": "0 = nem számít bele (pl. fénykép a 18. századi ősöknél); ×2 / ×3 = többet nyom a latban.",
+    "weightOff": "Nem számít"
   },
   "godparents": {
     "title": "Keresztszülők",

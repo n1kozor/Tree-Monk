@@ -52,6 +52,7 @@ import { PersonParticipations } from './PersonParticipations'
 import { FactSources, VitalNote } from './FactSources'
 import { QualityRing } from '@/components/common/QualityRing'
 import { personQuality } from '@/lib/completeness'
+import { useQualitySettings } from '@/store/useQualitySettings'
 import { PersonResearch } from './PersonResearch'
 import { PersonTodos } from './PersonTodos'
 import type { CitationDetail, Person, PersonInput, SanityIssue, Sex } from '@shared/types'
@@ -79,6 +80,7 @@ export function PersonPanel(): JSX.Element | null {
   const peopleById = useAppStore((s) => s.peopleById)
   const families = useAppStore((s) => s.families)
   const occPersonIds = useAppStore((s) => s.occupationPersonIds)
+  const qualityWeights = useQualitySettings((s) => s.weights)
   const researchByPerson = useAppStore((s) => s.researchByPerson)
   const refreshPeople = useAppStore((s) => s.refreshPeople)
   const refreshAll = useAppStore((s) => s.refreshAll)
@@ -371,7 +373,7 @@ export function PersonPanel(): JSX.Element | null {
                 <p className="text-xs text-muted-foreground">{t('person.profile')}</p>
               )}
             </div>
-            <QualityRing value={personQuality(person, occPersonIds).score} size={34} title={t('quality.title')} className="ml-1 shrink-0" />
+            <QualityRing value={personQuality(person, occPersonIds, qualityWeights).score} size={34} title={t('quality.title')} className="ml-1 shrink-0" />
           </div>
           <div className="flex shrink-0 items-center gap-1">
             <Button

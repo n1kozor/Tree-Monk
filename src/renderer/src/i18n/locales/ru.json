@@ -154,7 +154,10 @@
       "death": "Данные о смерти",
       "photo": "Фото",
       "occupation": "Профессия"
-    }
+    },
+    "weightsTitle": "Веса качества данных",
+    "weightsDesc": "0 = не учитывается (например, фото для предков XVIII века); ×2 / ×3 = учитывается сильнее.",
+    "weightOff": "Не учитывать"
   },
   "godparents": {
     "title": "Крёстные",
@@ -1139,6 +1142,7 @@
     "fanColors": "Цвета",
     "fanColor_sex": "Пол",
     "fanColor_generation": "Поколение",
+    "fanColor_country": "Страна",
     "fanColor_mono": "Однотонный",
     "fanYears": "Годы",
     "fanFont": "Шрифт",

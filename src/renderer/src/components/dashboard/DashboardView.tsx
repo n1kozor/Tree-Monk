@@ -25,6 +25,7 @@ import type { Family, Person } from '@shared/types'
 import { canonicalizeCountryInPlace } from '@shared/placeNormalize'
 import { useAppStore } from '@/store/useAppStore'
 import { useDashboardSettings } from '@/store/useDashboardSettings'
+import { useQualitySettings } from '@/store/useQualitySettings'
 import { scopePeople, type DashboardScope } from '@/lib/dashboardScope'
 import { computeDashboard, type Bucket } from '@/lib/dashboard'
 import { peopleFor, type Facet } from '@/lib/dashboardDrill'
@@ -217,7 +218,8 @@ function Columns({ buckets, color = 'hsl(var(--primary))' }: { buckets: Bucket[]
 /* --------------------------------------------------------------- main view */
 
 export function DashboardView(): JSX.Element {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const qualityWeights = useQualitySettings((s) => s.weights)
   const people = useAppStore((s) => s.people)
   const families = useAppStore((s) => s.families)
   const selectPerson = useAppStore((s) => s.selectPerson)
@@ -240,20 +242,27 @@ export function DashboardView(): JSX.Element {
     void window.api.geo.listPlaces().then((rows) => {
       const m = new Map<string, string>()
       for (const r of rows) {
-        const canonical = canonicalizeCountryInPlace(r.canonical || r.name)
+        const canonical = canonicalizeCountryInPlace(r.canonical || r.name, i18n.language)
         if (canonical && canonical !== r.name) m.set(r.name, canonical)
       }
       setPlaceCanonical(m)
     })
-  }, [])
+  }, [i18n.language])
   const canonPlace = useMemo(
-    () => (raw: string): string => canonicalizeCountryInPlace(placeCanonical.get(raw) ?? raw),
-    [placeCanonical]
+    () => (raw: string): string => canonicalizeCountryInPlace(placeCanonical.get(raw) ?? raw, i18n.language),
+    [placeCanonical, i18n.language]
   )
 
   const stats = useMemo(
-    () => computeDashboard(scoped.people, scoped.families, { topN: 15, occPersonIds, placeCanonical }),
-    [scoped, occPersonIds, placeCanonical]
+    () =>
+      computeDashboard(scoped.people, scoped.families, {
+        topN: 15,
+        occPersonIds,
+        placeCanonical,
+        lang: i18n.language,
+        qualityWeights
+      }),
+    [scoped, occPersonIds, placeCanonical, i18n.language, qualityWeights]
   )
   const generations = useMemo(() => maxGenerations(scoped.people, scoped.families), [scoped])
   const migration = useMemo(() => {

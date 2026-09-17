@@ -3,6 +3,7 @@ import { CheckCircle2, Sparkles } from 'lucide-react'
 import type { Person } from '@shared/types'
 import { personQuality } from '@/lib/completeness'
 import { useAppStore } from '@/store/useAppStore'
+import { useQualitySettings } from '@/store/useQualitySettings'
 import { QualityRing } from '@/components/common/QualityRing'
 
 /**
@@ -13,7 +14,8 @@ import { QualityRing } from '@/components/common/QualityRing'
 export function PersonQualityCard({ person }: { person: Person }): JSX.Element {
   const { t } = useTranslation()
   const occSet = useAppStore((s) => s.occupationPersonIds)
-  const q = personQuality(person, occSet)
+  const weights = useQualitySettings((s) => s.weights)
+  const q = personQuality(person, occSet, weights)
   const complete = q.missing.length === 0
 
   return (

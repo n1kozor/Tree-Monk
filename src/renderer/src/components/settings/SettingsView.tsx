@@ -44,6 +44,8 @@ import { runPlaceStandardization } from '@/lib/standardizePlaces'
 import { importGedcomWithToast } from '@/lib/importGedcom'
 import { useAppStore } from '@/store/useAppStore'
 import { useSettings, type DateFormat, type FontSize } from '@/store/useSettings'
+import { useQualitySettings, QUALITY_WEIGHT_STEPS, type QualityWeightStep } from '@/store/useQualitySettings'
+import { QUALITY_FIELDS } from '@/lib/completeness'
 import { ApiServerSettings } from './ApiServerSettings'
 import { ChangelogView } from '@/components/changelog/ChangelogView'
 
@@ -202,6 +204,8 @@ export function SettingsView(): JSX.Element {
     setDateFormat,
     setVerificationMarks
   } = useSettings()
+  const qualityWeights = useQualitySettings((s) => s.weights)
+  const setQualityWeight = useQualitySettings((s) => s.setWeight)
   const [restoreOpen, setRestoreOpen] = useState(false)
   const [resetOpen, setResetOpen] = useState(false)
   const [exportOpen, setExportOpen] = useState(false)
@@ -376,6 +380,7 @@ export function SettingsView(): JSX.Element {
             )}
 
             {section === 'data' && (
+              <>
               <Category icon={Database} title={t('settings.sectionData')}>
                 <Row
                   icon={TreeDeciduous}
@@ -425,6 +430,23 @@ export function SettingsView(): JSX.Element {
                   </Button>
                 </Row>
               </Category>
+              {/* Data-quality weights: 0 drops a field from the score (no portrait
+                  can exist for an 18th-century ancestor), 2–3 make it count more. */}
+              <Category icon={Gauge} title={t('quality.weightsTitle')}>
+                {QUALITY_FIELDS.map((f) => (
+                  <Row key={f} icon={Sparkles} title={t(`quality.field.${f}`)} desc={t('quality.weightsDesc')}>
+                    <Segmented<string>
+                      value={String(qualityWeights[f])}
+                      onChange={(v) => setQualityWeight(f, Number(v) as QualityWeightStep)}
+                      options={QUALITY_WEIGHT_STEPS.map((w) => ({
+                        value: String(w),
+                        label: w === 0 ? t('quality.weightOff') : `×${w}`
+                      }))}
+                    />
+                  </Row>
+                ))}
+              </Category>
+              </>
             )}
 
             {section === 'io' && (

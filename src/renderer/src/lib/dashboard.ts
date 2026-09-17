@@ -1,6 +1,6 @@
 import type { Family, Person } from '@shared/types'
 import { computeInsights, type Insight } from './insights'
-import { aggregateQuality } from './completeness'
+import { aggregateQuality, DEFAULT_QUALITY_WEIGHTS, type QualityWeights } from './completeness'
 import { canonicalizeCountryInPlace } from '@shared/placeNormalize'
 
 /** A label + count pair used by the bar/list widgets. */
@@ -58,6 +58,11 @@ export interface DashboardComputeOptions {
    *  their raw text on purpose; this map is what merges "Csány, Hungary" and
    *  "Csány, Magyarország" into ONE statistics bucket. */
   placeCanonical?: ReadonlyMap<string, string>
+  /** UI language for the canonical country label ("Magyarország" for hu,
+   *  "Hungary" otherwise) — grouping is the same either way. */
+  lang?: string
+  /** User-tuned field weights for the quality score (0 drops a field). */
+  qualityWeights?: QualityWeights
 }
 
 const DEFAULT_TOP_N = 8
@@ -99,7 +104,8 @@ export function computeDashboard(
   opts: DashboardComputeOptions = {}
 ): DashboardStats {
   /** Resolve a raw place spelling to its canonical bucket. */
-  const canonPlace = (raw: string): string => canonicalizeCountryInPlace(opts.placeCanonical?.get(raw) ?? raw)
+  const canonPlace = (raw: string): string =>
+    canonicalizeCountryInPlace(opts.placeCanonical?.get(raw) ?? raw, opts.lang)
   const limit = Math.max(1, Math.round(opts.topN ?? DEFAULT_TOP_N))
   const isDeceased = (p: Person): boolean => !!(p.deceased || p.deathDate)
 
@@ -176,13 +182,15 @@ export function computeDashboard(
   const occSet = opts.occPersonIds
   const hasOccupation = (p: Person): boolean => !!p.occupation?.trim() || !!occSet?.has(p.id)
   const have = (pred: (p: Person) => boolean): number => people.filter(pred).length
+  const weights = opts.qualityWeights ?? DEFAULT_QUALITY_WEIGHTS
   const completeness: Completeness[] = [
     { key: 'birthDate', have: have((p) => !!p.birthDate), total: people.length },
     { key: 'birthPlace', have: have((p) => !!p.birthPlace), total: people.length },
     { key: 'deathInfo', have: have((p) => !!p.deathDate || isDeceased(p)), total: people.length },
     { key: 'photo', have: have((p) => !!p.profilePhotoId), total: people.length },
     { key: 'occupation', have: have(hasOccupation), total: people.length }
-  ]
+    // A field the user weighted to 0 is not "missing" anywhere, so its bar goes too.
+  ].filter((c) => weights[c.key === 'deathInfo' ? 'death' : (c.key as keyof QualityWeights)] > 0)
 
   const records = computeInsights(people, families, canonPlace).filter((i) => RECORD_KEYS.has(i.key))
 
@@ -209,7 +217,7 @@ export function computeDashboard(
     deathsByCentury: byCentury(deathCenturies),
     lifespanDist,
     completeness,
-    qualityScore: aggregateQuality(people, occSet),
+    qualityScore: aggregateQuality(people, occSet, weights),
     records
   }
 }

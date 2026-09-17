@@ -154,7 +154,10 @@
       "death": "Datos de defunción",
       "photo": "Foto",
       "occupation": "Profesión"
-    }
+    },
+    "weightsTitle": "Ponderación de la calidad de datos",
+    "weightsDesc": "0 = no cuenta (p. ej. una foto para antepasados del siglo XVIII); ×2 / ×3 = cuenta más.",
+    "weightOff": "No cuenta"
   },
   "godparents": {
     "title": "Padrinos",
@@ -1137,6 +1140,7 @@
     "fanColors": "Colores",
     "fanColor_sex": "Sexo",
     "fanColor_generation": "Generación",
+    "fanColor_country": "País",
     "fanColor_mono": "Mono",
     "fanYears": "Años",
     "fanFont": "Tipografía",

@@ -154,7 +154,10 @@
       "death": "Informations de décès",
       "photo": "Photo",
       "occupation": "Profession"
-    }
+    },
+    "weightsTitle": "Pondération de la qualité des données",
+    "weightsDesc": "0 = ne compte pas (p. ex. une photo pour des ancêtres du XVIIIe siècle) ; ×2 / ×3 = compte davantage.",
+    "weightOff": "Ne compte pas"
   },
   "godparents": {
     "title": "Parrain et marraine",
@@ -415,6 +418,7 @@
     "fanColors": "Couleurs",
     "fanColor_sex": "Sexe",
     "fanColor_generation": "Génération",
+    "fanColor_country": "Pays",
     "fanColor_mono": "Monochrome",
     "fanYears": "Années",
     "fanFont": "Police",

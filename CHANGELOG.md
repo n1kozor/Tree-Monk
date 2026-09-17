@@ -5,6 +5,27 @@ All notable changes to TreeMonk are documented here.
 ## [Unreleased]
 
 ### Added
+- **Localized country names are grouped together** (community PRs by
+  @galo2099, GitHub #12): "Brasil", "Brasilien" and "Brazil" — any spelling in
+  English or one of the nine UI languages, resolved through the ISO 3166
+  region list — now count as ONE country in the dashboard's place buckets,
+  the migration list, the drill-down and the PDF report; the geocoder's
+  candidate check and the FamilySearch place comparison use the same
+  resolution. Raw place text is never rewritten. The label shown follows the
+  UI language ("Budapest, Magyarország" for Hungarian, "Budapest, Hungary"
+  for English).
+- **Fan chart: colour by country** (GitHub #13): a fourth colour mode gives
+  every wedge a stable hue from the person's canonical country (birth place,
+  else death place); the hover shows the country, and the printable/exported
+  fan honours the chosen colour mode — including generation and mono, which
+  the export used to ignore.
+- **Configurable data-quality score** (Settings → Data): every criterion —
+  name, sex, birth date, birth place, death data, photo, occupation — can be
+  weighted 0, ×1, ×2 or ×3. At 0 a field stops counting anywhere (person ring,
+  profile card, dashboard gauge and completeness bars), so a tree reaching
+  back to the 18th century is no longer marked incomplete for portraits that
+  cannot exist; ×2/×3 let a field matter more for your research goal. Prompted
+  by a user suggestion.
 - **GEDCOM package export/import (.zip with media)**: the export dialog can
   write one .zip holding the .ged plus its `media/` folder, and the import
   opens such a package directly (extracts it, imports the .ged with the media

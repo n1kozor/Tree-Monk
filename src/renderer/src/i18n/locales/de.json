@@ -154,7 +154,10 @@
       "death": "Sterbedaten",
       "photo": "Foto",
       "occupation": "Beruf"
-    }
+    },
+    "weightsTitle": "Gewichtung der Datenqualität",
+    "weightsDesc": "0 = zählt nicht (z. B. ein Foto bei Vorfahren aus dem 18. Jh.); ×2 / ×3 = zählt stärker.",
+    "weightOff": "Zählt nicht"
   },
   "godparents": {
     "title": "Paten",

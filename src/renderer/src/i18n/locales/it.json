@@ -154,7 +154,10 @@
       "death": "Dati di morte",
       "photo": "Foto",
       "occupation": "Professione"
-    }
+    },
+    "weightsTitle": "Pesi della qualità dei dati",
+    "weightsDesc": "0 = non conta (ad es. una foto per antenati del Settecento); ×2 / ×3 = conta di più.",
+    "weightOff": "Non conta"
   },
   "godparents": {
     "title": "Padrino e madrina",
@@ -1137,6 +1140,7 @@
     "fanColors": "Colori",
     "fanColor_sex": "Sesso",
     "fanColor_generation": "Generazione",
+    "fanColor_country": "Paese",
     "fanColor_mono": "Mono",
     "fanYears": "Anni",
     "fanFont": "Carattere",

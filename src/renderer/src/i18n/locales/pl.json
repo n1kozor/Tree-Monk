@@ -154,7 +154,10 @@
       "death": "Dane o zgonie",
       "photo": "Zdjęcie",
       "occupation": "Zawód"
-    }
+    },
+    "weightsTitle": "Wagi jakości danych",
+    "weightsDesc": "0 = nie liczy się (np. zdjęcie u przodków z XVIII wieku); ×2 / ×3 = liczy się bardziej.",
+    "weightOff": "Nie liczy się"
   },
   "godparents": {
     "title": "Rodzice chrzestni",
@@ -1139,6 +1142,7 @@
     "fanColors": "Kolory",
     "fanColor_sex": "Płeć",
     "fanColor_generation": "Pokolenie",
+    "fanColor_country": "Kraj",
     "fanColor_mono": "Mono",
     "fanYears": "Lata",
     "fanFont": "Czcionka",

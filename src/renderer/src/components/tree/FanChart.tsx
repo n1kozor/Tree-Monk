@@ -717,7 +717,7 @@ function FanChartImpl({
           if (t?.datum) {
             setHover({
               label: t.full,
-              sub: [t.years, countryOf(t.datum)].filter(Boolean).join(' · '),
+              sub: [t.years, canonicalCountryName(countryOf(t.datum), i18n.language)].filter(Boolean).join(' · '),
               mx: e.clientX,
               my: e.clientY
             })

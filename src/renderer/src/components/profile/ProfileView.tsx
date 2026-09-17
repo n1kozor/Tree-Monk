@@ -72,6 +72,7 @@ import { FactSources, VitalNote } from '@/components/person/FactSources'
 import { FactParticipants } from '@/components/person/FactParticipants'
 import { QualityRing } from '@/components/common/QualityRing'
 import { personQuality } from '@/lib/completeness'
+import { useQualitySettings } from '@/store/useQualitySettings'
 import { canSearchFamilySearch, familySearchPersonUrl, familySearchSearchUrl, isFamilySearchId } from '@/lib/familySearchSearch'
 import { PersonAliases, NameOriginLine } from '@/components/person/PersonAliases'
 import { useAppStore } from '@/store/useAppStore'
@@ -102,6 +103,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
   const openKinship = useAppStore((s) => s.openKinship)
   const openPersonOnMap = useAppStore((s) => s.openPersonOnMap)
   const setView = useAppStore((s) => s.setView)
+  const qualityWeights = useQualitySettings((s) => s.weights)
   const setAtlas = useAtlasSettings((s) => s.set)
   /** Save pending edits, choose the basemap, then jump to the atlas. */
   const showOn = (basemap: AtlasBasemap): void => {
@@ -488,7 +490,7 @@ export function ProfileView({ personId: personIdProp }: { personId?: string } = 
             </div>
 
             <div className="hidden shrink-0 flex-col items-center gap-1 sm:flex">
-              <QualityRing value={personQuality(person, occPersonIds).score} size={56} title={t('quality.title')} />
+              <QualityRing value={personQuality(person, occPersonIds, qualityWeights).score} size={56} title={t('quality.title')} />
               <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {t('quality.title')}
               </span>

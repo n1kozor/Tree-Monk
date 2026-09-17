@@ -20,4 +20,14 @@ describe('place normalization', () => {
     expect(canonicalizeCountryInPlace('Berlin, Deutschland')).toBe('Berlin, Germany')
     expect(canonicalizeCountryInPlace('São Paulo')).toBe('São Paulo')
   })
+
+  it('labels the canonical country in the UI language', () => {
+    // Grouping stays language-neutral (both spellings resolve to HU), but the
+    // label shown to a Hungarian user is Hungarian, not English.
+    expect(canonicalizeCountryInPlace('Budapest, Hungary', 'hu')).toBe('Budapest, Magyarország')
+    expect(canonicalizeCountryInPlace('Budapest, Magyarország', 'hu')).toBe('Budapest, Magyarország')
+    expect(canonicalCountryName('Germany', 'hu')).toBe('Németország')
+    expect(canonicalCountryName('Deutschland', 'pl')).toBe('Niemcy')
+    expect(knownCountryAlias('not a country', 'hu')).toBeNull()
+  })
 })
