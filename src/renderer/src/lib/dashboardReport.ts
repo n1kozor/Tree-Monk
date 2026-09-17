@@ -2,6 +2,7 @@ import type { Family, Person } from '@shared/types'
 import type { DashboardStats } from './dashboard'
 import i18n from '@/i18n'
 import { fullName } from './utils'
+import { canonicalizeCountryInPlace } from '@shared/placeNormalize'
 
 /**
  * Builds a self-contained, multi-page A4 HTML report of EVERY dashboard
@@ -27,10 +28,14 @@ interface Row {
 }
 
 /** Full (untruncated) distribution of a person field, most common first. */
-function dist(people: Person[], get: (p: Person) => string | null | undefined): Row[] {
+function dist(
+  people: Person[],
+  get: (p: Person) => string | null | undefined,
+  normalize: (raw: string) => string = (raw) => raw
+): Row[] {
   const m = new Map<string, number>()
   for (const p of people) {
-    const v = (get(p) ?? '').trim()
+    const v = normalize((get(p) ?? '').trim())
     if (v) m.set(v, (m.get(v) ?? 0) + 1)
   }
   return [...m.entries()]
@@ -208,8 +213,8 @@ export function buildDashboardReportHtml(params: {
       ${section(t('dashboard.topGivenNames'), barTable(dist(people, (p) => p.givenName), t('dashboard.topGivenNames'), '#6366f1'))}
     </div>` +
     `<div class="two">
-      ${section(t('dashboard.topPlaces'), barTable(dist(people, (p) => p.birthPlace), t('dashboard.topPlaces'), '#10b981'))}
-      ${section(t('dashboard.topDeathPlaces'), barTable(dist(people, (p) => p.deathPlace), t('dashboard.topDeathPlaces'), '#64748b'))}
+      ${section(t('dashboard.topPlaces'), barTable(dist(people, (p) => p.birthPlace, canonicalizeCountryInPlace), t('dashboard.topPlaces'), '#10b981'))}
+      ${section(t('dashboard.topDeathPlaces'), barTable(dist(people, (p) => p.deathPlace, canonicalizeCountryInPlace), t('dashboard.topDeathPlaces'), '#64748b'))}
     </div>` +
     `<div class="two">
       ${section(t('dashboard.topOccupations'), barTable(dist(people, (p) => p.occupation), t('dashboard.topOccupations'), '#8b5cf6'))}

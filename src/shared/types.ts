@@ -228,6 +228,10 @@ export interface TreeNodeDatum {
   sex?: Sex
   birthYear?: string
   deathYear?: string
+  birthPlace?: string | null
+  deathPlace?: string | null
+  /** Canonical country for fan-chart colouring, derived from birth place first, then death place. */
+  country?: string | null
   __rd3t?: unknown
   children?: TreeNodeDatum[]
 }

@@ -36,6 +36,7 @@ import type {
   Person
 } from '@shared/types'
 import { DEFAULT_IMPORT_PERSONS, MAX_IMPORT_PERSONS } from '@shared/familysearch'
+import { canonicalizeCountryInPlace } from '@shared/placeNormalize'
 
 // ---- Config ----------------------------------------------------------------
 const env = import.meta.env
@@ -1767,6 +1768,7 @@ export async function familySearchPersonDiff(
 function samePlace(a: string | null, b: string | null): boolean {
   if (!a || !b) return false
   if (a.trim() === b.trim()) return true
+  if (canonicalizeCountryInPlace(a) === canonicalizeCountryInPlace(b)) return true
   const pa = Places.get(a)
   if (!pa) return false
   const pb = Places.get(b)

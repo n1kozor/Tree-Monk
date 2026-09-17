@@ -22,6 +22,7 @@ const yearNum = (d: string | null): number | null => {
 }
 const isDeceased = (p: Person): boolean => !!(p.deceased || p.deathDate)
 const trimEq = (a: string | null | undefined, b: string): boolean => (a ?? '').trim() === b
+const identity = (raw: string): string => raw
 
 /** The same 10-year age band label the Dashboard histogram uses (or null). */
 export function lifespanBand(p: Person): string | null {
@@ -51,7 +52,16 @@ export function isMissing(p: Person, field: string): boolean {
 }
 
 /** Resolves the people behind a facet from the already-scoped list. */
-export function peopleFor(facet: Facet, people: Person[]): Person[] {
+export function peopleFor(
+  facet: Facet,
+  people: Person[],
+  opts: { canonPlace?: (raw: string) => string } = {}
+): Person[] {
+  const canonPlace = opts.canonPlace ?? identity
+  const placeEq = (raw: string | null | undefined, value: string): boolean => {
+    const place = (raw ?? '').trim()
+    return place === value || (place ? canonPlace(place) === value : false)
+  }
   switch (facet.kind) {
     case 'all':
       return people
@@ -66,9 +76,9 @@ export function peopleFor(facet: Facet, people: Person[]): Person[] {
     case 'given':
       return people.filter((p) => trimEq(p.givenName, facet.value))
     case 'birthPlace':
-      return people.filter((p) => trimEq(p.birthPlace, facet.value))
+      return people.filter((p) => placeEq(p.birthPlace, facet.value))
     case 'deathPlace':
-      return people.filter((p) => trimEq(p.deathPlace, facet.value))
+      return people.filter((p) => placeEq(p.deathPlace, facet.value))
     case 'occupation':
       return people.filter((p) => trimEq(p.occupation, facet.value))
     case 'religion':
