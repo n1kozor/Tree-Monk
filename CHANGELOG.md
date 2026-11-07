@@ -2,9 +2,28 @@
 
 All notable changes to TreeMonk are documented here.
 
-## [Unreleased]
+## [1.10.8]
 
 ### Added
+- **Families page** (new sidebar item after People): every couple of the tree
+  in four views — **cards** (portraits, wedding date and place, children,
+  length of the marriage), a sortable **table**, a **timeline** (each union a
+  bar from the wedding to the divorce or the first spouse's death, children's
+  births as clickable dots, dashed when the start is estimated from the first
+  child) and **insights** (weddings by decade and by month, children per
+  family, age gap between spouses, average wedding ages, records). Search by
+  spouse, child or wedding place; filter by scope, union type, children,
+  wedding year and place, and by characteristics (divorced, remarriage,
+  missing wedding data, unknown spouse). A side panel shows each family's
+  ages at the wedding, length, age gap, first child, grandchildren, family
+  events and children, with shortcuts to the tree, the family sheet and the
+  Kinship view (opened for the couple).
+- **Blood-related couples** are detected automatically: husband and wife who
+  descend from a shared ancestor within eight generations (birth parents
+  only — adoptive, foster and step links never count) get an amber badge, a
+  filter, an insights list and the nearest shared ancestor in the panel.
+  Translated in all nine languages, with a new chapter in the in-app help
+  and the manual.
 - **Localized country names are grouped together** (community PRs by
   @galo2099, GitHub #12): "Brasil", "Brasilien" and "Brazil" — any spelling in
   English or one of the nine UI languages, resolved through the ISO 3166
@@ -45,6 +64,9 @@ All notable changes to TreeMonk are documented here.
   recorded in the History view and can be undone there.
 
 ### Technical
+- `events.forAllFamilies()` (IPC + browser API): every family-owned event in
+  one query, so the Families page sees all divorces and weddings without a
+  call per family. `openKinship()` takes an optional starting person.
 - **Electron 31 → 43.4.1** (community PR by @AntGervais, GitHub #14/#15):
   Electron 31 was end-of-life and macOS XProtect now deletes its binary, which
   made `npm run dev` impossible on a Mac. With it: better-sqlite3 13 (ABI 148),
@@ -54,6 +76,28 @@ All notable changes to TreeMonk are documented here.
   onto a person's sources keeps working. CI builds on Node 22.
 
 ### Fixed
+- **Cyrillic (and every other non-Latin) name was invisible to name search**
+  (GitHub #21 — thanks to @joshwebtimestwo for the diagnosis): the name
+  normalizer kept ASCII letters only, so every Cyrillic, Greek, … name
+  collapsed to an empty key and all of them "matched" each other, burying the
+  person searched for. Letters of every script now survive (ё folds like an
+  accent; ł, ß, ø, æ fold to plain Latin), and query words made only of
+  punctuation no longer match or block. This repairs the "Link existing
+  spouse/child" search, the investigation-board wizard, the drill-down, the
+  document and place filters and the command palette; name-variant grouping
+  and duplicate detection work for Cyrillic trees too. Russian, Ukrainian and
+  Polish forms joined the given-name synonym groups (Иван = Иоанн = János =
+  Johann, Paweł = Pál …).
+- **The family-tree switcher could not scroll**: with many trees the menu ran
+  off the screen and "New family tree…" became unreachable. The tree list now
+  scrolls inside a menu sized to the window, the actions (new / rename /
+  delete) always stay in view, the active tree is scrolled into view on
+  open, and from nine trees on a filter box narrows the list (Enter switches
+  to the first match, ↓ steps into the list).
+- **"Link existing person" no longer stops after 60 names**: every person is
+  reachable by scrolling (rows are mounted as you scroll), and the search —
+  like the investigation board's person search — ranks exactly as the People
+  page does (aliases, either name order, "quoted" exact spelling).
 - **Corkboard map fragments were blank in the desktop app**: the 1.10.7 tile
   switch (Carto → OpenStreetMap) missed the renderer's Content-Security-Policy
   image whitelist, so Electron silently blocked the new tiles. The browser
@@ -61,6 +105,13 @@ All notable changes to TreeMonk are documented here.
 - **Exact search now accepts typographic quotes**: „Dosa”, “Dosa” and »Dosa«
   work the same as "Dosa" — Hungarian keyboards and autocorrect often produce
   curly quotes, which the exact-match detector previously ignored.
+- **Christening before birth (and burial before death) went unreported on
+  dates written with a month name** ("10 MAY 1850", the GEDCOM / FamilySearch
+  form): the data checker compared those only to the month, so a christening
+  on 10 May and a birth on 1 June of the same year passed. Comparisons are now
+  day-precise; year-only dates stay silent, since their order is unknowable.
+
+## [1.10.7]
 
 ### Added
 - **Six new UI languages**: French (contributed by @AntGervais), Italian,
