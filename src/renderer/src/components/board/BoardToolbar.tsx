@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { useAppStore } from '@/store/useAppStore'
+import { aliasMap, personScore } from '@/lib/personSearch'
 import { useBoardStore } from './useBoardStore'
 
 interface Props {
@@ -46,18 +47,20 @@ export function BoardToolbar({ spawnAt, onWizard }: Props): JSX.Element {
   const [q, setQ] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Only ever build (at most) MAX_RESULTS rows — never the whole list.
+  const aliases = useAppStore((s) => s.aliases)
+  const aMap = useMemo(() => aliasMap(aliases), [aliases])
+  // Only ever build (at most) MAX_RESULTS rows — never the whole list. A search
+  // ranks like the People page: accents, aliases, either name order.
   const matches = useMemo(() => {
-    const needle = q.trim().toLowerCase()
-    const out: typeof people = []
-    for (const p of people) {
-      if (!needle || fullName(p).toLowerCase().includes(needle)) {
-        out.push(p)
-        if (out.length >= MAX_RESULTS) break
-      }
-    }
-    return out
-  }, [people, q])
+    const needle = q.trim()
+    if (!needle) return people.slice(0, MAX_RESULTS)
+    return people
+      .map((p) => ({ p, s: personScore(p, aMap.get(p.id) ?? [], needle) }))
+      .filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, MAX_RESULTS)
+      .map((x) => x.p)
+  }, [people, q, aMap])
 
   const openPicker = (): void => {
     setPickerOpen(true)

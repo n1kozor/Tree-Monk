@@ -6,6 +6,60 @@ describe('norm', () => {
     expect(norm('Behán Mária')).toBe('behanmaria')
     expect(norm('Kovács-János')).toBe('kovacsjanos')
   })
+
+  it('keeps the letters of every script', () => {
+    expect(norm('Яков')).toBe('яков')
+    expect(norm('Анна-Мария')).toBe('аннамария')
+    expect(norm('Γιώργος')).toBe('γιωργος')
+  })
+
+  it('folds Latin letters that NFD cannot decompose', () => {
+    expect(norm('Łukasz')).toBe('lukasz')
+    expect(norm('Weiß')).toBe('weiss')
+    expect(norm('Søren')).toBe('soren')
+  })
+
+  it('treats ё like an accented е', () => {
+    expect(norm('Королёв')).toBe(norm('Королев'))
+  })
+})
+
+describe('Cyrillic names (GitHub #21)', () => {
+  it('never treats unrelated names as identical', () => {
+    expect(nameScore('Яков', 'Анна')).toBe(0)
+    expect(matchesName('Яков', 'Анна Петрова')).toBe(false)
+  })
+
+  it('finds a person by full name, prefix and either word order', () => {
+    expect(matchesName('Яков', 'Яков Иванов')).toBe(true)
+    expect(nameScore('Иванов Як', 'Яков Иванов')).toBeGreaterThan(0)
+    expect(nameScore('Яков', 'Яков Иванов')).toBeGreaterThan(nameScore('Як', 'Яков Иванов'))
+  })
+
+  it('ranks only the searched person among many Cyrillic names', () => {
+    const names = ['Анна Петрова', 'Борис Смирнов', 'Вера Козлова', 'Галина Попова', 'Яков Иванов']
+    const hits = names.filter((n) => nameScore('Яков', n) > 0)
+    expect(hits).toEqual(['Яков Иванов'])
+  })
+
+  it('maps church, civil and foreign forms of a given name to one key', () => {
+    expect(canon('Иоанн')).toBe(canon('Иван'))
+    expect(canon('Иван')).toBe(canon('János'))
+    expect(canon('Paweł')).toBe(canon('Pál'))
+  })
+
+  it('pairs church and civil forms for duplicate detection, nothing else', () => {
+    expect(sameNameForDup('Иван', 'Петров', 'Иоанн', 'Петров')).toBe(true)
+    expect(sameNameForDup('Яков', 'Иванов', 'Анна', 'Иванов')).toBe(false)
+  })
+})
+
+describe('punctuation-only query words', () => {
+  it('neither match nor block a name', () => {
+    expect(matchesName('Kovács - János', 'Kovács János')).toBe(true)
+    expect(nameScore('-', 'Kovács János')).toBe(0)
+    expect(matchesName('?', 'Kovács János')).toBe(false)
+  })
 })
 
 describe('matchesName', () => {

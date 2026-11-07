@@ -1,12 +1,15 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Users, Heart, MapPin } from 'lucide-react'
 import { useAppStore } from '@/store/useAppStore'
 import { fullName, yearOf } from '@/lib/utils'
-import { matchesName, nameScore } from '@/lib/nameMatch'
+import { aliasMap, personScore } from '@/lib/personSearch'
 import { PersonAvatar } from '@/components/common/PersonAvatar'
 import { Input } from '@/components/ui/input'
 import type { Family, Person } from '@shared/types'
+
+/** Rows mounted per step while scrolling; the full list stays reachable. */
+const PAGE = 80
 
 const lifespan = (p: Person): string => {
   const b = yearOf(p.birthDate)
@@ -15,9 +18,11 @@ const lifespan = (p: Person): string => {
 }
 
 /**
- * Searchable list of EXISTING people. Fuzzy name match (accents / synonyms /
- * spelling drift) ranked by relevance. Picking one calls `onPick`. Reused by the
- * "attach existing person" add flows and the godparent picker.
+ * Searchable list of EXISTING people — every one of them, reachable by
+ * scrolling. Search is the People page's: accents / synonyms / spelling drift,
+ * aliases, either name order, "quoted" for an exact spelling; ranked by
+ * relevance. Picking one calls `onPick`. Reused by the "attach existing
+ * person" add flows and the godparent picker.
  */
 export function ExistingPersonPicker({
   onPick,
@@ -30,21 +35,35 @@ export function ExistingPersonPicker({
   autoFocus?: boolean
   placeholder?: string
 }): JSX.Element {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const people = useAppStore((s) => s.people)
   const families = useAppStore((s) => s.families)
+  const aliases = useAppStore((s) => s.aliases)
   const [q, setQ] = useState('')
 
   const byId = useMemo(() => new Map(people.map((p) => [p.id, p])), [people])
+  const aMap = useMemo(() => aliasMap(aliases), [aliases])
+  // First birth family / first union per person, indexed once — the rows below
+  // look these up for every visible person.
+  const { childFam, unionFam } = useMemo(() => {
+    const childFam = new Map<string, Family>()
+    const unionFam = new Map<string, Family>()
+    for (const f of families) {
+      for (const c of f.childIds) if (!childFam.has(c)) childFam.set(c, f)
+      for (const id of [f.husbandId, f.wifeId]) if (id && !unionFam.has(id)) unionFam.set(id, f)
+    }
+    return { childFam, unionFam }
+  }, [families])
+
   // Distinguishing details so two same-name people (e.g. two "Takács Erzsébet")
   // can be told apart: birth place, parents, and spouse.
   const details = (p: Person): { birthPlace: string | null; parents: string; spouse: string | null } => {
     const shortName = (x?: Person | null): string => (x ? fullName(x) : '')
-    const asChild = families.find((f: Family) => f.childIds.includes(p.id))
+    const asChild = childFam.get(p.id)
     const father = asChild?.husbandId ? byId.get(asChild.husbandId) : null
     const mother = asChild?.wifeId ? byId.get(asChild.wifeId) : null
     const parents = [father, mother].map(shortName).filter(Boolean).join(' & ')
-    const spouseFam = families.find((f: Family) => f.husbandId === p.id || f.wifeId === p.id)
+    const spouseFam = unionFam.get(p.id)
     const spouseId = spouseFam ? (spouseFam.husbandId === p.id ? spouseFam.wifeId : spouseFam.husbandId) : null
     const spouse = spouseId ? shortName(byId.get(spouseId)) : null
     return { birthPlace: p.birthPlace, parents, spouse: spouse || null }
@@ -54,15 +73,32 @@ export function ExistingPersonPicker({
     const pool = excludeIds ? people.filter((p) => !excludeIds.has(p.id)) : people
     const needle = q.trim()
     if (!needle) {
-      return [...pool].sort((a, b) => fullName(a).localeCompare(fullName(b))).slice(0, 60)
+      const collator = new Intl.Collator(i18n.language)
+      return [...pool].sort((a, b) => collator.compare(fullName(a), fullName(b)))
     }
     return pool
-      .map((p) => ({ p, s: nameScore(needle, fullName(p)) }))
-      .filter((x) => x.s > 0 || matchesName(needle, fullName(x.p)))
+      .map((p) => ({ p, s: personScore(p, aMap.get(p.id) ?? [], needle) }))
+      .filter((x) => x.s > 0)
       .sort((a, b) => b.s - a.s)
-      .slice(0, 60)
       .map((x) => x.p)
-  }, [people, q, excludeIds])
+  }, [people, q, excludeIds, aMap, i18n.language])
+
+  // Windowed rendering: mount a page of rows and grow as the sentinel at the
+  // bottom of the scroll box comes into view.
+  const [limit, setLimit] = useState(PAGE)
+  useEffect(() => setLimit(PAGE), [q])
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const sentinelRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!el || limit >= results.length) return
+    const io = new IntersectionObserver(
+      (es) => es[0]?.isIntersecting && setLimit((l) => Math.min(l + PAGE, results.length)),
+      { root: listRef.current, rootMargin: '240px' }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [limit, results.length])
 
   return (
     <div className="flex min-h-0 flex-col gap-2">
@@ -76,11 +112,11 @@ export function ExistingPersonPicker({
           className="pl-8"
         />
       </div>
-      <div className="max-h-64 min-h-0 space-y-0.5 overflow-y-auto pr-1">
+      <div ref={listRef} data-testid="existing-person-list" className="max-h-64 min-h-0 space-y-0.5 overflow-y-auto pr-1">
         {results.length === 0 ? (
           <p className="px-2 py-6 text-center text-xs text-muted-foreground">{t('picker.noResults')}</p>
         ) : (
-          results.map((p) => {
+          results.slice(0, limit).map((p) => {
             const d = details(p)
             const hasMeta = d.birthPlace || d.parents || d.spouse
             return (
@@ -120,6 +156,11 @@ export function ExistingPersonPicker({
               </button>
             )
           })
+        )}
+        {limit < results.length && (
+          <div ref={sentinelRef} className="py-2 text-center text-[11px] text-muted-foreground tabular-nums">
+            {limit} / {results.length}
+          </div>
         )}
       </div>
     </div>

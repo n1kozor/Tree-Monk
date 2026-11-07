@@ -7,52 +7,72 @@
  * roots, and a small edit-distance tolerance for spelling drift (Kovács/Kovats).
  */
 
-/** Lowercase, strip diacritics & punctuation → a comparable token. */
+/** Latin letters NFD does not decompose, folded to plain Latin so "Łukasz" /
+ *  "Lukasz", "Weiß" / "Weiss" and "Søren" / "Soren" still meet. */
+const FOLD: Record<string, string> = {
+  ß: 'ss',
+  æ: 'ae',
+  œ: 'oe',
+  ø: 'o',
+  ł: 'l',
+  đ: 'd',
+  ð: 'd',
+  þ: 'th',
+  ħ: 'h',
+  ı: 'i'
+}
+
+/**
+ * Lowercase, strip diacritics & punctuation → a comparable token. Letters of
+ * every script must survive (Cyrillic, Greek, …): a key that comes out empty
+ * would make every such name look identical to every other.
+ */
 export function norm(s: string): string {
   return s
     .toLowerCase()
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
-    .replace(/[^a-z0-9]/g, '')
+    .replace(/[ßæœøłđðþħı]/g, (c) => FOLD[c] ?? c)
+    .replace(/[^\p{L}\p{N}]/gu, '')
 }
 
 // Groups of historically-equivalent given names (Latin / German / Hungarian /
-// English / Slavic). First entry is the canonical key for the group.
+// English / Slavic, Cyrillic forms included). First entry is the canonical key.
 const SYNONYM_GROUPS: string[][] = [
-  ['johann', 'joannes', 'johannes', 'janos', 'john', 'jan', 'ivan', 'hans', 'jean', 'giovanni', 'juan'],
-  ['georg', 'georgius', 'gyorgy', 'george', 'jiri', 'jurij', 'gyuri'],
-  ['stephan', 'stephanus', 'istvan', 'steven', 'stefan', 'stephen', 'pista'],
-  ['joseph', 'josephus', 'jozsef', 'josef', 'jozef', 'giuseppe', 'jozsi'],
-  ['michael', 'mihaly', 'michal', 'mikhail', 'michel', 'misi'],
-  ['nicholas', 'nicolaus', 'miklos', 'nikolaus', 'nikola', 'mikulas'],
-  ['peter', 'petrus', 'peter', 'pietro', 'pedro', 'petr'],
-  ['paul', 'paulus', 'pal', 'paolo', 'pavel', 'pablo'],
-  ['andrew', 'andreas', 'andras', 'andre', 'andrej', 'andi'],
-  ['anthony', 'antonius', 'antal', 'anton', 'antonio', 'antonin'],
-  ['francis', 'franciscus', 'ferenc', 'franz', 'francesco', 'frantisek', 'feri'],
-  ['ladislaus', 'laszlo', 'ladislav', 'laci'],
+  ['johann', 'joannes', 'johannes', 'janos', 'john', 'jan', 'ivan', 'hans', 'jean', 'giovanni', 'juan', 'иван', 'иоанн', 'іван', 'ян'],
+  ['georg', 'georgius', 'gyorgy', 'george', 'jiri', 'jurij', 'gyuri', 'jerzy', 'георгий', 'юрий', 'егор'],
+  ['stephan', 'stephanus', 'istvan', 'steven', 'stefan', 'stephen', 'pista', 'szczepan', 'степан', 'стефан'],
+  ['joseph', 'josephus', 'jozsef', 'josef', 'jozef', 'giuseppe', 'jozsi', 'иосиф', 'осип'],
+  ['michael', 'mihaly', 'michal', 'mikhail', 'michel', 'misi', 'михаил', 'михайло'],
+  ['nicholas', 'nicolaus', 'miklos', 'nikolaus', 'nikola', 'mikulas', 'mikolaj', 'николай', 'микола'],
+  ['peter', 'petrus', 'peter', 'pietro', 'pedro', 'petr', 'piotr', 'пётр', 'петро'],
+  ['paul', 'paulus', 'pal', 'paolo', 'pavel', 'pablo', 'pawel', 'павел', 'павло'],
+  ['andrew', 'andreas', 'andras', 'andre', 'andrej', 'andi', 'andrzej', 'андрей', 'андрій'],
+  ['anthony', 'antonius', 'antal', 'anton', 'antonio', 'antonin', 'antoni', 'антон', 'антоний'],
+  ['francis', 'franciscus', 'ferenc', 'franz', 'francesco', 'frantisek', 'feri', 'franciszek', 'франц'],
+  ['ladislaus', 'laszlo', 'ladislav', 'laci', 'wladyslaw', 'владислав'],
   ['emeric', 'emericus', 'imre'],
-  ['matthias', 'mathias', 'matyas', 'matthew', 'matej', 'mate'],
-  ['thomas', 'tamas', 'tomas', 'tom'],
-  ['martin', 'martinus', 'marton', 'marci'],
-  ['gregory', 'gregorius', 'gergely', 'gregor', 'gergo'],
-  ['alexander', 'sandor', 'aleksandr', 'alexius'],
-  ['charles', 'carolus', 'karoly', 'karl', 'carlo', 'karcsi'],
-  ['louis', 'ludovicus', 'lajos', 'ludwig', 'luigi'],
-  ['william', 'guilelmus', 'vilmos', 'wilhelm'],
-  ['mary', 'maria', 'marie', 'mari', 'mariska'],
-  ['elizabeth', 'elisabetha', 'erzsebet', 'elisabeth', 'erzsi', 'bozsi'],
-  ['catherine', 'catharina', 'katalin', 'katharina', 'kata', 'kati'],
-  ['anne', 'anna', 'anci', 'annus'],
-  ['margaret', 'margaretha', 'margit', 'margarethe', 'manci'],
-  ['helen', 'helena', 'ilona', 'helene', 'ilus'],
-  ['barbara', 'borbala', 'barbora', 'bori'],
-  ['theresa', 'theresia', 'terez', 'teresa', 'teri'],
-  ['eve', 'eva', 'evi'],
-  ['julia', 'julianna', 'juliana', 'juli'],
-  ['rosalia', 'rozalia', 'rozsa', 'rosa'],
-  ['agnes', 'agnesa', 'agi'],
-  ['susanna', 'zsuzsanna', 'susan', 'zsuzsa']
+  ['matthias', 'mathias', 'matyas', 'matthew', 'matej', 'mate', 'maciej', 'mateusz', 'матвей'],
+  ['thomas', 'tamas', 'tomas', 'tom', 'tomasz', 'фома'],
+  ['martin', 'martinus', 'marton', 'marci', 'marcin', 'мартин'],
+  ['gregory', 'gregorius', 'gergely', 'gregor', 'gergo', 'grzegorz', 'григорий'],
+  ['alexander', 'sandor', 'aleksandr', 'alexius', 'aleksander', 'александр'],
+  ['charles', 'carolus', 'karoly', 'karl', 'carlo', 'karcsi', 'karol', 'карл'],
+  ['louis', 'ludovicus', 'lajos', 'ludwig', 'luigi', 'ludwik', 'людвиг'],
+  ['william', 'guilelmus', 'vilmos', 'wilhelm', 'вильгельм'],
+  ['mary', 'maria', 'marie', 'mari', 'mariska', 'мария', 'марья'],
+  ['elizabeth', 'elisabetha', 'erzsebet', 'elisabeth', 'erzsi', 'bozsi', 'elzbieta', 'елизавета'],
+  ['catherine', 'catharina', 'katalin', 'katharina', 'kata', 'kati', 'katarzyna', 'екатерина', 'катерина'],
+  ['anne', 'anna', 'anci', 'annus', 'анна'],
+  ['margaret', 'margaretha', 'margit', 'margarethe', 'manci', 'malgorzata', 'маргарита'],
+  ['helen', 'helena', 'ilona', 'helene', 'ilus', 'елена', 'олена'],
+  ['barbara', 'borbala', 'barbora', 'bori', 'варвара'],
+  ['theresa', 'theresia', 'terez', 'teresa', 'teri', 'тереза'],
+  ['eve', 'eva', 'evi', 'ewa', 'ева'],
+  ['julia', 'julianna', 'juliana', 'juli', 'юлия', 'юлиания'],
+  ['rosalia', 'rozalia', 'rozsa', 'rosa', 'розалия'],
+  ['agnes', 'agnesa', 'agi', 'agnieszka', 'агнесса'],
+  ['susanna', 'zsuzsanna', 'susan', 'zsuzsa', 'zuzanna', 'сусанна']
 ]
 
 const CANON = new Map<string, string>()
@@ -99,21 +119,28 @@ function tokenMatch(q: string, t: string): boolean {
   return editDistance(nq, nt, tol) <= tol // spelling drift
 }
 
+/** Split a name field into trimmed, non-empty word tokens. */
+function nameTokens(s: string): string[] {
+  return s.trim().split(/\s+/).filter(Boolean)
+}
+
+/** Word tokens that still carry letters or digits after normalization — a
+ *  stray "-" or "&" in a query must neither match nor block a name. */
+function meaningfulTokens(s: string): string[] {
+  return nameTokens(s).filter((tok) => norm(tok) !== '')
+}
+
 /**
  * Whether `query` matches `fullName` linguistically — every query word must map
  * to some word in the name. "Kovács János" matches "Joannes Kovats".
  */
 export function matchesName(query: string, fullName: string): boolean {
-  const qs = query.trim().split(/\s+/).filter(Boolean)
-  if (!qs.length) return true
-  const ts = fullName.split(/\s+/).filter(Boolean)
+  if (!query.trim()) return true
+  const qs = meaningfulTokens(query)
+  if (!qs.length) return false
+  const ts = meaningfulTokens(fullName)
   if (!ts.length) return false
   return qs.every((q) => ts.some((t) => tokenMatch(q, t)))
-}
-
-/** Split a name field into trimmed, non-empty word tokens. */
-function nameTokens(s: string): string[] {
-  return s.trim().split(/\s+/).filter(Boolean)
 }
 
 /**
@@ -131,8 +158,8 @@ export function sameNameForDup(
   givenB: string,
   surnameB: string
 ): boolean {
-  const givenMatch = nameTokens(givenA).some((x) =>
-    nameTokens(givenB).some((y) => canon(x) === canon(y))
+  const givenMatch = meaningfulTokens(givenA).some((x) =>
+    meaningfulTokens(givenB).some((y) => canon(x) === canon(y))
   )
   if (!givenMatch) return false
 
@@ -150,9 +177,10 @@ export function sameNameForDup(
 
 /** Relevance score for ranking matches (higher = better). 0 = no match. */
 export function nameScore(query: string, fullName: string): number {
-  const qs = query.trim().split(/\s+/).filter(Boolean)
-  if (!qs.length) return 1
-  const ts = fullName.split(/\s+/).filter(Boolean)
+  if (!query.trim()) return 1
+  const qs = meaningfulTokens(query)
+  if (!qs.length) return 0
+  const ts = meaningfulTokens(fullName)
   let score = 0
   for (const q of qs) {
     const nq = norm(q)

@@ -17,6 +17,7 @@ import { useBoardStore } from './useBoardStore'
 import { buildInvestigationPlan, type WizardFocus, type WizardRelation } from '@/lib/boardWizard'
 import { cn, fullName, yearOf } from '@/lib/utils'
 import { norm } from '@/lib/nameMatch'
+import { aliasMap, personScore } from '@/lib/personSearch'
 
 const RELATIONS: { id: WizardRelation; icon: typeof Baby; defaultFocus: WizardFocus }[] = [
   { id: 'father', icon: UserSquare2, defaultFocus: 'birth' },
@@ -62,17 +63,23 @@ export function BoardWizard({
     }
   }, [open])
 
+  const aliases = useAppStore((s) => s.aliases)
+  const aMap = useMemo(() => aliasMap(aliases), [aliases])
+  // Name matches rank like the People page; a birth-place hit ranks below them.
   const matches = useMemo(() => {
-    const nq = norm(q)
-    const out: typeof people = []
-    for (const p of people) {
-      if (!nq || norm(fullName(p)).includes(nq) || norm(p.birthPlace ?? '').includes(nq)) {
-        out.push(p)
-        if (out.length >= MAX_RESULTS) break
-      }
-    }
-    return out
-  }, [people, q])
+    const needle = q.trim()
+    if (!needle) return people.slice(0, MAX_RESULTS)
+    const nq = norm(needle)
+    return people
+      .map((p) => ({
+        p,
+        s: personScore(p, aMap.get(p.id) ?? [], needle) || (nq && norm(p.birthPlace ?? '').includes(nq) ? 0.5 : 0)
+      }))
+      .filter((x) => x.s > 0)
+      .sort((a, b) => b.s - a.s)
+      .slice(0, MAX_RESULTS)
+      .map((x) => x.p)
+  }, [people, q, aMap])
 
   const generate = async (anchorId: string): Promise<void> => {
     const anchor = peopleById.get(anchorId)
