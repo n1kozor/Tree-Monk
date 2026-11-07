@@ -387,6 +387,7 @@
     "tree": "Family Tree",
     "map": "Map",
     "people": "People",
+    "families": "Families",
     "documents": "Documents",
     "issues": "Data Issues",
     "query": "Query",
@@ -551,6 +552,132 @@
     "filters": "Filters",
     "notVerified": "Not verified",
     "christeningYear": "Christening year — no birth date recorded"
+  },
+  "families": {
+    "search": "Search spouses, children or place…",
+    "results_one": "{{count}} family",
+    "results_other": "{{count}} families",
+    "view": {
+      "cards": "Cards",
+      "table": "Table",
+      "timeline": "Timeline",
+      "stats": "Insights"
+    },
+    "sort": {
+      "marriageAsc": "Wedding, oldest first",
+      "marriageDesc": "Wedding, newest first",
+      "children": "Most children",
+      "duration": "Longest marriage",
+      "name": "Name (A–Z)"
+    },
+    "kind": {
+      "all": "All",
+      "other": "Other"
+    },
+    "kids": {
+      "all": "All",
+      "with": "With children",
+      "without": "Childless"
+    },
+    "traitsLabel": "Characteristics",
+    "trait": {
+      "related": "Spouses are blood relatives",
+      "divorced": "Divorced or separated",
+      "remarriage": "A spouse married more than once",
+      "noDate": "No wedding date",
+      "noPlace": "No wedding place",
+      "oneSpouse": "One spouse unknown"
+    },
+    "empty": "No families yet",
+    "emptyHint": "Families appear here once spouses, or parents and their children, are linked — on a profile, on the tree, or by importing a GEDCOM file.",
+    "noMatch": "No family matches these filters.",
+    "unknownSpouse": "Unknown",
+    "noDate": "Date unknown",
+    "estimatedStart": "Estimated from the first child's birth",
+    "childrenN_one": "{{count}} child",
+    "childrenN_other": "{{count}} children",
+    "noChildren": "No children recorded",
+    "years_one": "{{count}} year",
+    "years_other": "{{count}} years",
+    "aged_one": "aged {{count}}",
+    "aged_other": "aged {{count}}",
+    "ongoing": "ongoing",
+    "related": "Blood relatives",
+    "relatedTip": "The spouses share an ancestor (generations up: {{genA}} / {{genB}})",
+    "commonAncestor": "Shared ancestor: {{names}}",
+    "generationsUp": "generations up: {{genA}} / {{genB}}",
+    "col": {
+      "couple": "Couple",
+      "duration": "Length",
+      "ages": "Ages at the wedding",
+      "status": "Characteristics"
+    },
+    "timeline": {
+      "estimated": "Estimated start",
+      "openEnd": "End unknown",
+      "childBirth": "Child born",
+      "death": "Death of a spouse",
+      "empty": "No family has a wedding date or a dated child yet, so there is nothing to place on the timeline.",
+      "hidden_one": "{{count}} family has no date at all and is not shown on the timeline.",
+      "hidden_other": "{{count}} families have no date at all and are not shown on the timeline."
+    },
+    "stats": {
+      "withChildren": "With children",
+      "avgDuration": "Average marriage length",
+      "avgAges": "Average age at the wedding",
+      "avgAgesSub": "grooms / brides",
+      "related": "Blood-related couples",
+      "relatedSub_one": "shared ancestor within {{count}} generation",
+      "relatedSub_other": "shared ancestor within {{count}} generations",
+      "decades": "Weddings by decade",
+      "months": "Weddings by month",
+      "monthsHint": "Traditionally few weddings in Lent and Advent; many in late autumn and before Lent.",
+      "noMonths": "No wedding date with a month yet.",
+      "childrenDist": "Children per family",
+      "ageGap": "Age gap between spouses",
+      "ageGapDesc": "Years by which the husband was older",
+      "gapWifeOlder": "Wife older",
+      "kinds": "Types of union",
+      "divorces": "Divorces and separations",
+      "remarried_one": "{{count}} person married more than once",
+      "remarried_other": "{{count}} people married more than once",
+      "records": "Records",
+      "recLargest": "Largest family",
+      "recLongest": "Longest marriage",
+      "recYoungestBride": "Youngest bride",
+      "recYoungestGroom": "Youngest groom",
+      "recAgeGap": "Largest age gap",
+      "relatedList": "Blood-related couples",
+      "relatedDesc_one": "Spouses with a shared ancestor within {{count}} generation (birth parents only)",
+      "relatedDesc_other": "Spouses with a shared ancestor within {{count}} generations (birth parents only)",
+      "relatedNone_one": "No couple here shares a known ancestor within {{count}} generation.",
+      "relatedNone_other": "No couple here shares a known ancestor within {{count}} generations."
+    },
+    "detail": {
+      "wedding": "Wedding",
+      "ageAtWedding_one": "{{count}} year old at the wedding",
+      "ageAtWedding_other": "{{count}} years old at the wedding",
+      "untilDivorce": "until the divorce ({{year}})",
+      "untilSeparation": "until the separation ({{year}})",
+      "untilDeath": "until a spouse's death ({{year}})",
+      "gapHusband_one": "The husband is {{count}} year older",
+      "gapHusband_other": "The husband is {{count}} years older",
+      "gapWife_one": "The wife is {{count}} year older",
+      "gapWife_other": "The wife is {{count}} years older",
+      "gapNone": "Born in the same year",
+      "firstChild": "First child",
+      "firstChildAfter_one": "{{count}} year after the wedding",
+      "firstChildAfter_other": "{{count}} years after the wedding",
+      "firstChildBefore_one": "{{count}} year before the wedding",
+      "firstChildBefore_other": "{{count}} years before the wedding",
+      "firstChildSameYear": "In the year of the wedding",
+      "grandchildren": "Grandchildren",
+      "related": "The spouses are blood relatives",
+      "relatedBody": "Nearest shared ancestor — generations up from the husband: {{genA}}, from the wife: {{genB}}.",
+      "openKinship": "Show the connection",
+      "events": "Family events",
+      "showOnTree": "Show on the tree"
+    }
   },
   "famous": {
     "title": "Famous relatives",
@@ -1945,6 +2072,28 @@
           {
             "h": "Opening and creating",
             "p": "Click a card to open that person's detailed profile. The add button at the top creates a new, empty person whose details you then fill in on the profile."
+          }
+        ]
+      },
+      "families": {
+        "title": "Families",
+        "intro": "Every couple of the tree — with their wedding, their children and how the union ended — in one place, in four views.",
+        "blocks": [
+          {
+            "h": "Four views",
+            "p": "Cards show each couple with portraits, wedding date and place, children and the length of the marriage. The table packs the same into sortable columns (click a column header). The timeline draws every union as a bar from the wedding to the divorce or the first spouse's death, with each child's birth as a dot; a dashed bar means the start was estimated from the first child. Insights summarises weddings by decade and month, family sizes, ages at the wedding, records and blood-related couples."
+          },
+          {
+            "h": "Search and filters",
+            "p": "Search finds couples by either spouse, by their children or by the wedding place; quoted text matches exactly. The scope buttons narrow the list to your bloodline, ancestors or descendants; you can also filter by type of union, children, wedding year or place — and under Characteristics by divorced couples, remarriages, blood-related spouses or missing data (no wedding date or place, one spouse unknown)."
+          },
+          {
+            "h": "The family panel",
+            "p": "Click a family to open its panel: both spouses with their age at the wedding, the length of the marriage, the age gap, how soon the first child arrived, the grandchildren, family events, notes and every child. Names open the person; the buttons show the family on the tree, print a family sheet or open the Kinship view for the couple."
+          },
+          {
+            "h": "Blood-related couples",
+            "p": "TreeMonk checks whether husband and wife descend from a shared ancestor within eight generations, counting birth parents only — adoptive, foster and step links never make blood relatives. Such couples carry an amber badge; the panel names the nearest shared ancestor, and the Kinship view shows the full path."
           }
         ]
       },

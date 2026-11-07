@@ -24,6 +24,7 @@ import {
   ShieldAlert,
   SlidersHorizontal,
   Users,
+  HeartHandshake,
   GitMerge
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -105,6 +106,7 @@ const ITEMS: { view: View; icon: typeof Search; labelKey: string }[] = [
   { view: 'tree', icon: Network, labelKey: 'nav.tree' },
   { view: 'map', icon: MapPin, labelKey: 'nav.map' },
   { view: 'people', icon: Users, labelKey: 'nav.people' },
+  { view: 'families', icon: HeartHandshake, labelKey: 'nav.families' },
   { view: 'documents', icon: Images, labelKey: 'nav.documents' },
   { view: 'issues', icon: ShieldAlert, labelKey: 'nav.issues' },
   { view: 'query', icon: Filter, labelKey: 'nav.query' },

@@ -387,6 +387,7 @@
     "tree": "Stammbaum",
     "map": "Karte",
     "people": "Personen",
+    "families": "Familien",
     "documents": "Dokumente",
     "issues": "Datenprobleme",
     "query": "Abfrage",
@@ -551,6 +552,132 @@
     "filters": "Filter",
     "notVerified": "Nicht verifiziert",
     "christeningYear": "Taufjahr — kein Geburtsdatum erfasst"
+  },
+  "families": {
+    "search": "Ehepartner, Kinder oder Ort suchen…",
+    "results_one": "{{count}} Familie",
+    "results_other": "{{count}} Familien",
+    "view": {
+      "cards": "Karten",
+      "table": "Tabelle",
+      "timeline": "Zeitleiste",
+      "stats": "Auswertung"
+    },
+    "sort": {
+      "marriageAsc": "Heirat – älteste zuerst",
+      "marriageDesc": "Heirat – neueste zuerst",
+      "children": "Meiste Kinder",
+      "duration": "Längste Ehe",
+      "name": "Name (A–Z)"
+    },
+    "kind": {
+      "all": "Alle",
+      "other": "Sonstige"
+    },
+    "kids": {
+      "all": "Alle",
+      "with": "Mit Kindern",
+      "without": "Kinderlos"
+    },
+    "traitsLabel": "Merkmale",
+    "trait": {
+      "related": "Ehepartner sind blutsverwandt",
+      "divorced": "Geschieden oder getrennt",
+      "remarriage": "Ein Partner war mehrfach verheiratet",
+      "noDate": "Kein Heiratsdatum",
+      "noPlace": "Kein Heiratsort",
+      "oneSpouse": "Ein Partner unbekannt"
+    },
+    "empty": "Noch keine Familien",
+    "emptyHint": "Familien erscheinen hier, sobald Ehepartner oder Eltern und ihre Kinder verknüpft sind — im Profil, im Stammbaum oder durch den Import einer GEDCOM-Datei.",
+    "noMatch": "Keine Familie entspricht diesen Filtern.",
+    "unknownSpouse": "Unbekannt",
+    "noDate": "Datum unbekannt",
+    "estimatedStart": "Geschätzt aus der Geburt des ersten Kindes",
+    "childrenN_one": "{{count}} Kind",
+    "childrenN_other": "{{count}} Kinder",
+    "noChildren": "Keine Kinder erfasst",
+    "years_one": "{{count}} Jahr",
+    "years_other": "{{count}} Jahre",
+    "aged_one": "mit {{count}} Jahr",
+    "aged_other": "mit {{count}} Jahren",
+    "ongoing": "andauernd",
+    "related": "Blutsverwandt",
+    "relatedTip": "Die Ehepartner haben einen gemeinsamen Vorfahren (Generationen zurück: {{genA}} / {{genB}})",
+    "commonAncestor": "Gemeinsamer Vorfahre: {{names}}",
+    "generationsUp": "Generationen zurück: {{genA}} / {{genB}}",
+    "col": {
+      "couple": "Paar",
+      "duration": "Dauer",
+      "ages": "Alter bei der Heirat",
+      "status": "Merkmale"
+    },
+    "timeline": {
+      "estimated": "Geschätzter Beginn",
+      "openEnd": "Ende unbekannt",
+      "childBirth": "Geburt eines Kindes",
+      "death": "Tod eines Partners",
+      "empty": "Noch hat keine Familie ein Heiratsdatum oder ein datiertes Kind — auf der Zeitleiste gibt es nichts zu zeigen.",
+      "hidden_one": "{{count}} Familie hat gar kein Datum und fehlt deshalb auf der Zeitleiste.",
+      "hidden_other": "{{count}} Familien haben gar kein Datum und fehlen deshalb auf der Zeitleiste."
+    },
+    "stats": {
+      "withChildren": "Familien mit Kindern",
+      "avgDuration": "Durchschnittliche Ehedauer",
+      "avgAges": "Durchschnittliches Heiratsalter",
+      "avgAgesSub": "Bräutigame / Bräute",
+      "related": "Blutsverwandte Paare",
+      "relatedSub_one": "gemeinsamer Vorfahre innerhalb von {{count}} Generation",
+      "relatedSub_other": "gemeinsamer Vorfahre innerhalb von {{count}} Generationen",
+      "decades": "Heiraten nach Jahrzehnt",
+      "months": "Heiraten nach Monat",
+      "monthsHint": "In der Fasten- und Adventszeit wurde traditionell kaum geheiratet, im Spätherbst und im Fasching umso mehr.",
+      "noMonths": "Noch kein Heiratsdatum mit Monatsangabe.",
+      "childrenDist": "Kinder pro Familie",
+      "ageGap": "Altersunterschied der Ehepartner",
+      "ageGapDesc": "Um wie viele Jahre der Ehemann älter war",
+      "gapWifeOlder": "Ehefrau älter",
+      "kinds": "Arten der Verbindung",
+      "divorces": "Scheidungen und Trennungen",
+      "remarried_one": "{{count}} Person war mehrfach verheiratet",
+      "remarried_other": "{{count}} Personen waren mehrfach verheiratet",
+      "records": "Rekorde",
+      "recLargest": "Größte Familie",
+      "recLongest": "Längste Ehe",
+      "recYoungestBride": "Jüngste Braut",
+      "recYoungestGroom": "Jüngster Bräutigam",
+      "recAgeGap": "Größter Altersunterschied",
+      "relatedList": "Blutsverwandte Paare",
+      "relatedDesc_one": "Gemeinsamer Vorfahre innerhalb von {{count}} Generation (nur leibliche Eltern)",
+      "relatedDesc_other": "Gemeinsamer Vorfahre innerhalb von {{count}} Generationen (nur leibliche Eltern)",
+      "relatedNone_one": "Hier hat kein Paar einen bekannten gemeinsamen Vorfahren innerhalb von {{count}} Generation.",
+      "relatedNone_other": "Hier hat kein Paar einen bekannten gemeinsamen Vorfahren innerhalb von {{count}} Generationen."
+    },
+    "detail": {
+      "wedding": "Heirat",
+      "ageAtWedding_one": "bei der Heirat {{count}} Jahr alt",
+      "ageAtWedding_other": "bei der Heirat {{count}} Jahre alt",
+      "untilDivorce": "bis zur Scheidung ({{year}})",
+      "untilSeparation": "bis zur Trennung ({{year}})",
+      "untilDeath": "bis zum Tod eines Partners ({{year}})",
+      "gapHusband_one": "Der Ehemann ist {{count}} Jahr älter",
+      "gapHusband_other": "Der Ehemann ist {{count}} Jahre älter",
+      "gapWife_one": "Die Ehefrau ist {{count}} Jahr älter",
+      "gapWife_other": "Die Ehefrau ist {{count}} Jahre älter",
+      "gapNone": "Im selben Jahr geboren",
+      "firstChild": "Erstes Kind",
+      "firstChildAfter_one": "{{count}} Jahr nach der Heirat",
+      "firstChildAfter_other": "{{count}} Jahre nach der Heirat",
+      "firstChildBefore_one": "{{count}} Jahr vor der Heirat",
+      "firstChildBefore_other": "{{count}} Jahre vor der Heirat",
+      "firstChildSameYear": "Im Jahr der Heirat",
+      "grandchildren": "Enkel",
+      "related": "Die Ehepartner sind blutsverwandt",
+      "relatedBody": "Nächster gemeinsamer Vorfahre — Generationen zurück vom Ehemann: {{genA}}, von der Ehefrau: {{genB}}.",
+      "openKinship": "Verbindung anzeigen",
+      "events": "Familienereignisse",
+      "showOnTree": "Im Stammbaum zeigen"
+    }
   },
   "famous": {
     "title": "Berühmte Verwandte",
@@ -1942,6 +2069,28 @@
           {
             "h": "Öffnen und anlegen",
             "p": "Ein Klick auf eine Karte öffnet das ausführliche Profil der Person. Der Hinzufügen-Knopf oben legt eine neue, leere Person an, deren Daten du dann im Profil ausfüllst."
+          }
+        ]
+      },
+      "families": {
+        "title": "Familien",
+        "intro": "Alle Paare des Stammbaums — mit Heirat, Kindern und dem Ende der Verbindung — an einem Ort, in vier Ansichten.",
+        "blocks": [
+          {
+            "h": "Vier Ansichten",
+            "p": "Die Karten zeigen jedes Paar mit Porträts, Heiratsdatum und -ort, Kindern und Ehedauer. Die Tabelle fasst dasselbe in sortierbare Spalten (Klick auf einen Spaltenkopf). Die Zeitleiste zeichnet jede Verbindung als Balken von der Heirat bis zur Scheidung oder zum Tod des ersten Partners, die Geburt jedes Kindes als Punkt; ein gestrichelter Balken bedeutet, dass der Beginn aus dem ersten Kind geschätzt wurde. Die Auswertung fasst Heiraten nach Jahrzehnt und Monat, Familiengrößen, Heiratsalter, Rekorde und blutsverwandte Paare zusammen."
+          },
+          {
+            "h": "Suche und Filter",
+            "p": "Die Suche findet Paare über einen der Ehepartner, über ihre Kinder oder über den Heiratsort; Text in Anführungszeichen wird exakt gesucht. Die Bereichsknöpfe beschränken die Liste auf deine Blutlinie, Vorfahren oder Nachkommen; filtern lässt sich auch nach Art der Verbindung, Kindern, Heiratsjahr oder -ort — und unter Merkmale nach Geschiedenen, Wiederverheiratungen, blutsverwandten Ehepartnern oder fehlenden Daten (kein Heiratsdatum oder -ort, ein Partner unbekannt)."
+          },
+          {
+            "h": "Das Familienpanel",
+            "p": "Ein Klick auf eine Familie öffnet ihr Panel: beide Ehepartner mit ihrem Heiratsalter, die Ehedauer, der Altersunterschied, wie bald das erste Kind kam, die Enkel, Familienereignisse, Notizen und alle Kinder. Namen öffnen die Person; die Knöpfe zeigen die Familie im Stammbaum, drucken ein Familienblatt oder öffnen die Ansicht Verwandtschaft für das Paar."
+          },
+          {
+            "h": "Blutsverwandte Paare",
+            "p": "TreeMonk prüft, ob Ehemann und Ehefrau innerhalb von acht Generationen von einem gemeinsamen Vorfahren abstammen — nur über leibliche Eltern; Adoption, Pflege- und Stiefverhältnisse machen niemals blutsverwandt. Solche Paare tragen ein bernsteinfarbenes Abzeichen; das Panel nennt den nächsten gemeinsamen Vorfahren, die Ansicht Verwandtschaft zeigt den vollständigen Weg."
           }
         ]
       },

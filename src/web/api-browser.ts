@@ -278,6 +278,7 @@ export function createDemoApi(): TreeMonkApi {
     events: {
       forPerson: async (pid) => Events.forPerson(pid),
       forFamily: async (fid) => Events.forOwner('family', fid),
+      forAllFamilies: async () => Events.forAllFamilies(),
       create: async () => blocked(),
       createForFamily: async () => blocked(),
       update: async () => blocked(),

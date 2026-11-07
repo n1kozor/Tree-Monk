@@ -2052,6 +2052,17 @@ export const Events = {
   forPerson(personId: string): EventRecord[] {
     return this.forOwner('person', personId)
   },
+  /** Every family-owned event in one query — the Families page needs the
+   *  divorce/separation dates of the whole tree, not one family at a time. */
+  forAllFamilies(): EventRecord[] {
+    return getDb()
+      .prepare(
+        `SELECT * FROM events WHERE owner_type = 'family'
+         ORDER BY owner_id, ordinal, (date IS NULL OR date = ''), date, type`
+      )
+      .all()
+      .map((r) => mapEvent(r as EventRow))
+  },
   create(ownerType: 'person' | 'family', ownerId: string, input: EventInput, id = uuid()): EventRecord {
     const db = getDb()
     // A dated event slots into its chronological place; an undated one appends to

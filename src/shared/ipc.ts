@@ -156,6 +156,7 @@ export const Channels = {
   events: {
     forPerson: 'events:forPerson',
     forFamily: 'events:forFamily',
+    forAllFamilies: 'events:forAllFamilies',
     create: 'events:create',
     createForFamily: 'events:createForFamily',
     update: 'events:update',
@@ -517,6 +518,8 @@ export interface TreeMonkApi {
     forPerson(personId: string): Promise<EventRecord[]>
     /** A family's events (engagement, civil/church wedding, divorce, …). */
     forFamily(familyId: string): Promise<EventRecord[]>
+    /** Every family-owned event of the tree in one call (Families page). */
+    forAllFamilies(): Promise<EventRecord[]>
     create(personId: string, input: EventInput): Promise<EventRecord>
     createForFamily(familyId: string, input: EventInput): Promise<EventRecord>
     update(id: string, input: EventInput): Promise<EventRecord>

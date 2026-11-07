@@ -10,6 +10,7 @@ export type View =
   | 'tree'
   | 'map'
   | 'people'
+  | 'families'
   | 'documents'
   | 'issues'
   | 'query'
@@ -129,8 +130,8 @@ interface AppState {
   setDefaultRoot: (id: string | null) => Promise<void>
   /** Open the Family Tree focused on a given person. */
   focusPersonTree: (id: string) => void
-  /** Open the Relationship finder from the default root to `toId`. */
-  openKinship: (toId: string) => void
+  /** Open the Relationship finder from `fromId` (default: the root person) to `toId`. */
+  openKinship: (toId: string, fromId?: string) => void
   /** Show a person on the Map: centre on their places + set the historical year. */
   openPersonOnMap: (id: string) => void
 
@@ -388,7 +389,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         treeFocusNonce: s.treeFocusNonce + 1
       }
     }),
-  openKinship: (toId) =>
+  openKinship: (toId, fromId) =>
     set((s) => {
       persistTabs('kinship', s.tabs, null)
       return {
@@ -398,7 +399,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         selectedPersonId: null,
         // "Me" is the persisted default root, or whatever root the tree is focused
         // on; the finder still lets you change it if neither is set.
-        kinshipFrom: s.defaultRootId ?? s.treeRootId,
+        kinshipFrom: fromId ?? s.defaultRootId ?? s.treeRootId,
         kinshipTo: toId
       }
     }),

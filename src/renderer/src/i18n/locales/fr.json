@@ -247,6 +247,7 @@
     "tree": "Arbre généalogique",
     "map": "Carte",
     "people": "Personnes",
+    "families": "Familles",
     "documents": "Documents",
     "issues": "Problèmes de données",
     "query": "Requête",
@@ -327,6 +328,132 @@
     "filters": "Filtres",
     "notVerified": "Non vérifié",
     "christeningYear": "Année de baptême — aucune date de naissance saisie"
+  },
+  "families": {
+    "search": "Chercher un conjoint, un enfant ou un lieu…",
+    "results_one": "{{count}} famille",
+    "results_other": "{{count}} familles",
+    "view": {
+      "cards": "Cartes",
+      "table": "Tableau",
+      "timeline": "Chronologie",
+      "stats": "Analyse"
+    },
+    "sort": {
+      "marriageAsc": "Mariage, plus ancien d'abord",
+      "marriageDesc": "Mariage, plus récent d'abord",
+      "children": "Le plus d'enfants",
+      "duration": "Mariage le plus long",
+      "name": "Nom (A–Z)"
+    },
+    "kind": {
+      "all": "Toutes",
+      "other": "Autre"
+    },
+    "kids": {
+      "all": "Toutes",
+      "with": "Avec enfants",
+      "without": "Sans enfants"
+    },
+    "traitsLabel": "Caractéristiques",
+    "trait": {
+      "related": "Conjoints apparentés par le sang",
+      "divorced": "Divorcés ou séparés",
+      "remarriage": "Un conjoint s'est marié plusieurs fois",
+      "noDate": "Pas de date de mariage",
+      "noPlace": "Pas de lieu de mariage",
+      "oneSpouse": "Un conjoint inconnu"
+    },
+    "empty": "Aucune famille pour l'instant",
+    "emptyHint": "Les familles apparaissent ici dès que des conjoints, ou des parents et leurs enfants, sont reliés — sur une fiche, dans l'arbre ou en important un fichier GEDCOM.",
+    "noMatch": "Aucune famille ne correspond à ces filtres.",
+    "unknownSpouse": "Inconnu",
+    "noDate": "Date inconnue",
+    "estimatedStart": "Estimé d'après la naissance du premier enfant",
+    "childrenN_one": "{{count}} enfant",
+    "childrenN_other": "{{count}} enfants",
+    "noChildren": "Aucun enfant enregistré",
+    "years_one": "{{count}} an",
+    "years_other": "{{count}} ans",
+    "aged_one": "à {{count}} an",
+    "aged_other": "à {{count}} ans",
+    "ongoing": "en cours",
+    "related": "Apparentés",
+    "relatedTip": "Les conjoints ont un ancêtre commun (générations en amont : {{genA}} / {{genB}})",
+    "commonAncestor": "Ancêtre commun : {{names}}",
+    "generationsUp": "générations en amont : {{genA}} / {{genB}}",
+    "col": {
+      "couple": "Couple",
+      "duration": "Durée",
+      "ages": "Âges au mariage",
+      "status": "Caractéristiques"
+    },
+    "timeline": {
+      "estimated": "Début estimé",
+      "openEnd": "Fin inconnue",
+      "childBirth": "Naissance d'un enfant",
+      "death": "Décès d'un conjoint",
+      "empty": "Aucune famille n'a encore de date de mariage ni d'enfant daté : rien à placer sur la chronologie.",
+      "hidden_one": "{{count}} famille sans aucune date n'apparaît pas sur la chronologie.",
+      "hidden_other": "{{count}} familles sans aucune date n'apparaissent pas sur la chronologie."
+    },
+    "stats": {
+      "withChildren": "Familles avec enfants",
+      "avgDuration": "Durée moyenne du mariage",
+      "avgAges": "Âge moyen au mariage",
+      "avgAgesSub": "époux / épouses",
+      "related": "Couples apparentés",
+      "relatedSub_one": "ancêtre commun sur {{count}} génération",
+      "relatedSub_other": "ancêtre commun sur {{count}} générations",
+      "decades": "Mariages par décennie",
+      "months": "Mariages par mois",
+      "monthsHint": "Traditionnellement peu de mariages pendant le Carême et l'Avent ; beaucoup à la fin de l'automne et avant le Carême.",
+      "noMonths": "Aucune date de mariage avec le mois pour l'instant.",
+      "childrenDist": "Enfants par famille",
+      "ageGap": "Écart d'âge entre conjoints",
+      "ageGapDesc": "Nombre d'années de plus du mari",
+      "gapWifeOlder": "Épouse plus âgée",
+      "kinds": "Types d'union",
+      "divorces": "Divorces et séparations",
+      "remarried_one": "{{count}} personne s'est mariée plusieurs fois",
+      "remarried_other": "{{count}} personnes se sont mariées plusieurs fois",
+      "records": "Records",
+      "recLargest": "Famille la plus nombreuse",
+      "recLongest": "Mariage le plus long",
+      "recYoungestBride": "Plus jeune mariée",
+      "recYoungestGroom": "Plus jeune marié",
+      "recAgeGap": "Plus grand écart d'âge",
+      "relatedList": "Couples apparentés",
+      "relatedDesc_one": "Ancêtre commun sur {{count}} génération (parents biologiques uniquement)",
+      "relatedDesc_other": "Ancêtre commun sur {{count}} générations (parents biologiques uniquement)",
+      "relatedNone_one": "Aucun couple n'a ici d'ancêtre commun connu sur {{count}} génération.",
+      "relatedNone_other": "Aucun couple n'a ici d'ancêtre commun connu sur {{count}} générations."
+    },
+    "detail": {
+      "wedding": "Mariage",
+      "ageAtWedding_one": "{{count}} an au mariage",
+      "ageAtWedding_other": "{{count}} ans au mariage",
+      "untilDivorce": "jusqu'au divorce ({{year}})",
+      "untilSeparation": "jusqu'à la séparation ({{year}})",
+      "untilDeath": "jusqu'au décès d'un conjoint ({{year}})",
+      "gapHusband_one": "Le mari a {{count}} an de plus",
+      "gapHusband_other": "Le mari a {{count}} ans de plus",
+      "gapWife_one": "L'épouse a {{count}} an de plus",
+      "gapWife_other": "L'épouse a {{count}} ans de plus",
+      "gapNone": "Nés la même année",
+      "firstChild": "Premier enfant",
+      "firstChildAfter_one": "{{count}} an après le mariage",
+      "firstChildAfter_other": "{{count}} ans après le mariage",
+      "firstChildBefore_one": "{{count}} an avant le mariage",
+      "firstChildBefore_other": "{{count}} ans avant le mariage",
+      "firstChildSameYear": "L'année du mariage",
+      "grandchildren": "Petits-enfants",
+      "related": "Les conjoints sont apparentés",
+      "relatedBody": "Ancêtre commun le plus proche — générations en amont du mari : {{genA}}, de l'épouse : {{genB}}.",
+      "openKinship": "Afficher le lien",
+      "events": "Événements familiaux",
+      "showOnTree": "Voir dans l'arbre"
+    }
   },
   "workspace": {
     "label": "Arbre",
@@ -2232,6 +2359,28 @@
           {
             "h": "Ouvrir et créer",
             "p": "Cliquez sur une carte pour ouvrir le profil détaillé. Le bouton d'ajout en haut crée une personne vide dont vous pourrez ensuite renseigner les détails dans le profil."
+          }
+        ]
+      },
+      "families": {
+        "title": "Familles",
+        "intro": "Tous les couples de l'arbre — avec leur mariage, leurs enfants et la fin de leur union — réunis en un seul endroit, sous quatre vues.",
+        "blocks": [
+          {
+            "h": "Quatre vues",
+            "p": "Les cartes présentent chaque couple avec portraits, date et lieu du mariage, enfants et durée de l'union. Le tableau regroupe les mêmes informations en colonnes triables (cliquez sur un en-tête). La chronologie dessine chaque union comme une barre allant du mariage au divorce ou au décès du premier conjoint, la naissance de chaque enfant formant un point ; une barre en pointillés signifie que le début a été estimé d'après le premier enfant. L'analyse résume les mariages par décennie et par mois, la taille des familles, les âges au mariage, les records et les couples apparentés."
+          },
+          {
+            "h": "Recherche et filtres",
+            "p": "La recherche retrouve les couples par l'un des conjoints, par leurs enfants ou par le lieu du mariage ; un texte entre guillemets est cherché à l'identique. Les boutons de portée limitent la liste à votre lignée, à vos ancêtres ou à vos descendants ; filtrez aussi par type d'union, par enfants, par année ou lieu de mariage — et, sous Caractéristiques, par couples divorcés, remariages, conjoints apparentés ou données manquantes (pas de date ou de lieu de mariage, conjoint inconnu)."
+          },
+          {
+            "h": "Le panneau de la famille",
+            "p": "Un clic sur une famille ouvre son panneau : les deux conjoints avec leur âge au mariage, la durée du mariage, l'écart d'âge, le délai avant le premier enfant, les petits-enfants, les événements familiaux, les notes et tous les enfants. Les noms ouvrent la personne ; les boutons montrent la famille dans l'arbre, impriment une fiche famille ou ouvrent la vue Parenté pour le couple."
+          },
+          {
+            "h": "Couples apparentés",
+            "p": "TreeMonk vérifie si le mari et l'épouse descendent d'un ancêtre commun sur huit générations, en ne comptant que les parents biologiques : l'adoption, l'accueil et les liens de beaux-parents ne rendent jamais apparentés par le sang. Ces couples portent un badge ambre ; le panneau nomme l'ancêtre commun le plus proche et la vue Parenté montre le chemin complet."
           }
         ]
       },

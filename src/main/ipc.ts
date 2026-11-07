@@ -366,6 +366,7 @@ export function registerIpc(): void {
   // Life events / facts (residences, military, nationality, …) — person-scoped.
   ipcMain.handle(Channels.events.forPerson, (_e, pid: string) => Events.forPerson(pid))
   ipcMain.handle(Channels.events.forFamily, (_e, fid: string) => Events.forOwner('family', fid))
+  ipcMain.handle(Channels.events.forAllFamilies, () => Events.forAllFamilies())
   ipcMain.handle(Channels.events.create, (_e, pid: string, input) => Events.create('person', pid, input))
   ipcMain.handle(Channels.events.createForFamily, (_e, fid: string, input) => Events.create('family', fid, input))
   ipcMain.handle(Channels.events.update, (_e, id: string, input) => Events.update(id, input))

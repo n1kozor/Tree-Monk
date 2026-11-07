@@ -90,7 +90,7 @@ function maxGenerations(people: Person[], families: Family[]): number {
 
 const fade = { initial: { opacity: 0, y: 12 }, animate: { opacity: 1, y: 0 } }
 
-function Kpi({
+export function Kpi({
   icon: Icon, label, value, sub, accent, onClick
 }: {
   icon: LucideIcon; label: string; value: number | string; sub?: string; accent: string; onClick?: () => void
@@ -122,7 +122,7 @@ function Kpi({
   )
 }
 
-function Panel({
+export function Panel({
   icon: Icon, title, desc, children, className
 }: {
   icon?: LucideIcon; title: string; desc?: string; children: React.ReactNode; className?: string
@@ -146,7 +146,7 @@ function Panel({
 }
 
 /** Ranked horizontal bar list (surnames, places, occupations…). */
-function BarList({
+export function BarList({
   buckets, unit, onPick
 }: {
   buckets: Bucket[]; unit: string; onPick?: (label: string) => void
@@ -192,7 +192,7 @@ function BarList({
  *  Bars use PIXEL heights — a percentage height would collapse to 0 against the
  *  auto-height flex column parent. */
 const BAR_MAX_PX = 132
-function Columns({ buckets, color = 'hsl(var(--primary))' }: { buckets: Bucket[]; color?: string }): JSX.Element {
+export function Columns({ buckets, color = 'hsl(var(--primary))' }: { buckets: Bucket[]; color?: string }): JSX.Element {
   const max = Math.max(1, ...buckets.map((b) => b.count))
   if (!buckets.length) return <p className="py-6 text-center text-sm text-muted-foreground">—</p>
   return (

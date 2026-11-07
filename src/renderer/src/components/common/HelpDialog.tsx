@@ -14,6 +14,7 @@ import {
   Settings,
   ShieldAlert,
   Users,
+  HeartHandshake,
   UserRound,
   type LucideIcon
 } from 'lucide-react'
@@ -30,6 +31,7 @@ const SECTIONS: { id: string; icon: LucideIcon }[] = [
   { id: 'tree', icon: Network },
   { id: 'map', icon: MapPin },
   { id: 'people', icon: Users },
+  { id: 'families', icon: HeartHandshake },
   { id: 'documents', icon: Images },
   { id: 'person', icon: UserRound },
   { id: 'kinship', icon: Route },

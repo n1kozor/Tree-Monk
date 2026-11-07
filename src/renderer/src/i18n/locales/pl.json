@@ -387,6 +387,7 @@
     "tree": "Drzewo genealogiczne",
     "map": "Mapa",
     "people": "Osoby",
+    "families": "Rodziny",
     "documents": "Dokumenty",
     "issues": "Błędy danych",
     "query": "Zapytanie",
@@ -551,6 +552,160 @@
     "filters": "Filtry",
     "notVerified": "Niezweryfikowany",
     "christeningYear": "Rok chrztu — brak zapisanej daty urodzenia"
+  },
+  "families": {
+    "search": "Szukaj małżonków, dzieci lub miejsca…",
+    "results_one": "{{count}} rodzina",
+    "results_few": "{{count}} rodziny",
+    "results_many": "{{count}} rodzin",
+    "results_other": "{{count}} rodziny",
+    "view": {
+      "cards": "Karty",
+      "table": "Tabela",
+      "timeline": "Oś czasu",
+      "stats": "Analiza"
+    },
+    "sort": {
+      "marriageAsc": "Ślub: najstarsze najpierw",
+      "marriageDesc": "Ślub: najnowsze najpierw",
+      "children": "Najwięcej dzieci",
+      "duration": "Najdłuższe małżeństwo",
+      "name": "Nazwisko (A–Z)"
+    },
+    "kind": {
+      "all": "Wszystkie",
+      "other": "Inne"
+    },
+    "kids": {
+      "all": "Wszystkie",
+      "with": "Z dziećmi",
+      "without": "Bezdzietne"
+    },
+    "traitsLabel": "Cechy",
+    "trait": {
+      "related": "Małżonkowie są spokrewnieni",
+      "divorced": "Rozwiedzeni lub w separacji",
+      "remarriage": "Jedno z małżonków zawarło kilka małżeństw",
+      "noDate": "Brak daty ślubu",
+      "noPlace": "Brak miejsca ślubu",
+      "oneSpouse": "Jedno z małżonków nieznane"
+    },
+    "empty": "Brak rodzin",
+    "emptyHint": "Rodziny pojawią się tutaj, gdy połączysz małżonków albo rodziców z dziećmi — w profilu, na drzewie lub importując plik GEDCOM.",
+    "noMatch": "Żadna rodzina nie pasuje do tych filtrów.",
+    "unknownSpouse": "Nieznany",
+    "noDate": "Data nieznana",
+    "estimatedStart": "Szacowane na podstawie urodzin pierwszego dziecka",
+    "childrenN_one": "{{count}} dziecko",
+    "childrenN_few": "{{count}} dzieci",
+    "childrenN_many": "{{count}} dzieci",
+    "childrenN_other": "{{count}} dzieci",
+    "noChildren": "Brak zapisanych dzieci",
+    "years_one": "{{count}} rok",
+    "years_few": "{{count}} lata",
+    "years_many": "{{count}} lat",
+    "years_other": "{{count}} lat",
+    "aged_one": "w wieku {{count}} roku",
+    "aged_few": "w wieku {{count}} lat",
+    "aged_many": "w wieku {{count}} lat",
+    "aged_other": "w wieku {{count}} lat",
+    "ongoing": "trwa",
+    "related": "Spokrewnieni",
+    "relatedTip": "Małżonkowie mają wspólnego przodka (pokoleń wstecz: {{genA}} / {{genB}})",
+    "commonAncestor": "Wspólny przodek: {{names}}",
+    "generationsUp": "pokoleń wstecz: {{genA}} / {{genB}}",
+    "col": {
+      "couple": "Para",
+      "duration": "Czas trwania",
+      "ages": "Wiek w dniu ślubu",
+      "status": "Cechy"
+    },
+    "timeline": {
+      "estimated": "Szacowany początek",
+      "openEnd": "Nieznany koniec",
+      "childBirth": "Narodziny dziecka",
+      "death": "Śmierć małżonka",
+      "empty": "Żadna rodzina nie ma jeszcze daty ślubu ani dziecka z datą — nie ma czego pokazać na osi czasu.",
+      "hidden_one": "{{count}} rodzina bez żadnej daty nie jest pokazana na osi czasu.",
+      "hidden_few": "{{count}} rodziny bez żadnej daty nie są pokazane na osi czasu.",
+      "hidden_many": "{{count}} rodzin bez żadnej daty nie jest pokazanych na osi czasu.",
+      "hidden_other": "{{count}} rodziny bez żadnej daty nie są pokazane na osi czasu."
+    },
+    "stats": {
+      "withChildren": "Rodziny z dziećmi",
+      "avgDuration": "Średni czas trwania małżeństwa",
+      "avgAges": "Średni wiek w dniu ślubu",
+      "avgAgesSub": "panowie młodzi / panny młode",
+      "related": "Spokrewnione pary",
+      "relatedSub_one": "wspólny przodek w obrębie {{count}} pokolenia",
+      "relatedSub_few": "wspólny przodek w obrębie {{count}} pokoleń",
+      "relatedSub_many": "wspólny przodek w obrębie {{count}} pokoleń",
+      "relatedSub_other": "wspólny przodek w obrębie {{count}} pokoleń",
+      "decades": "Śluby według dekad",
+      "months": "Śluby według miesięcy",
+      "monthsHint": "Tradycyjnie w Wielkim Poście i w Adwencie ślubów było niewiele; dużo — późną jesienią i w karnawale.",
+      "noMonths": "Brak jeszcze daty ślubu z miesiącem.",
+      "childrenDist": "Dzieci w rodzinie",
+      "ageGap": "Różnica wieku małżonków",
+      "ageGapDesc": "O ile lat mąż był starszy",
+      "gapWifeOlder": "Żona starsza",
+      "kinds": "Rodzaje związków",
+      "divorces": "Rozwody i separacje",
+      "remarried_one": "{{count}} osoba zawarła więcej niż jedno małżeństwo",
+      "remarried_few": "{{count}} osoby zawarły więcej niż jedno małżeństwo",
+      "remarried_many": "{{count}} osób zawarło więcej niż jedno małżeństwo",
+      "remarried_other": "{{count}} osoby zawarły więcej niż jedno małżeństwo",
+      "records": "Rekordy",
+      "recLargest": "Największa rodzina",
+      "recLongest": "Najdłuższe małżeństwo",
+      "recYoungestBride": "Najmłodsza panna młoda",
+      "recYoungestGroom": "Najmłodszy pan młody",
+      "recAgeGap": "Największa różnica wieku",
+      "relatedList": "Spokrewnione pary",
+      "relatedDesc_one": "Wspólny przodek w obrębie {{count}} pokolenia (tylko rodzice biologiczni)",
+      "relatedDesc_few": "Wspólny przodek w obrębie {{count}} pokoleń (tylko rodzice biologiczni)",
+      "relatedDesc_many": "Wspólny przodek w obrębie {{count}} pokoleń (tylko rodzice biologiczni)",
+      "relatedDesc_other": "Wspólny przodek w obrębie {{count}} pokoleń (tylko rodzice biologiczni)",
+      "relatedNone_one": "Żadna para nie ma tu znanego wspólnego przodka w obrębie {{count}} pokolenia.",
+      "relatedNone_few": "Żadna para nie ma tu znanego wspólnego przodka w obrębie {{count}} pokoleń.",
+      "relatedNone_many": "Żadna para nie ma tu znanego wspólnego przodka w obrębie {{count}} pokoleń.",
+      "relatedNone_other": "Żadna para nie ma tu znanego wspólnego przodka w obrębie {{count}} pokoleń."
+    },
+    "detail": {
+      "wedding": "Ślub",
+      "ageAtWedding_one": "{{count}} rok w dniu ślubu",
+      "ageAtWedding_few": "{{count}} lata w dniu ślubu",
+      "ageAtWedding_many": "{{count}} lat w dniu ślubu",
+      "ageAtWedding_other": "{{count}} lat w dniu ślubu",
+      "untilDivorce": "do rozwodu ({{year}})",
+      "untilSeparation": "do separacji ({{year}})",
+      "untilDeath": "do śmierci jednego z małżonków ({{year}})",
+      "gapHusband_one": "Mąż jest starszy o {{count}} rok",
+      "gapHusband_few": "Mąż jest starszy o {{count}} lata",
+      "gapHusband_many": "Mąż jest starszy o {{count}} lat",
+      "gapHusband_other": "Mąż jest starszy o {{count}} lat",
+      "gapWife_one": "Żona jest starsza o {{count}} rok",
+      "gapWife_few": "Żona jest starsza o {{count}} lata",
+      "gapWife_many": "Żona jest starsza o {{count}} lat",
+      "gapWife_other": "Żona jest starsza o {{count}} lat",
+      "gapNone": "Urodzeni w tym samym roku",
+      "firstChild": "Pierwsze dziecko",
+      "firstChildAfter_one": "{{count}} rok po ślubie",
+      "firstChildAfter_few": "{{count}} lata po ślubie",
+      "firstChildAfter_many": "{{count}} lat po ślubie",
+      "firstChildAfter_other": "{{count}} lat po ślubie",
+      "firstChildBefore_one": "{{count}} rok przed ślubem",
+      "firstChildBefore_few": "{{count}} lata przed ślubem",
+      "firstChildBefore_many": "{{count}} lat przed ślubem",
+      "firstChildBefore_other": "{{count}} lat przed ślubem",
+      "firstChildSameYear": "W roku ślubu",
+      "grandchildren": "Wnuki",
+      "related": "Małżonkowie są spokrewnieni",
+      "relatedBody": "Najbliższy wspólny przodek — pokoleń wstecz od męża: {{genA}}, od żony: {{genB}}.",
+      "openKinship": "Pokaż powiązanie",
+      "events": "Wydarzenia rodzinne",
+      "showOnTree": "Pokaż na drzewie"
+    }
   },
   "famous": {
     "title": "Sławni krewni",
@@ -1947,6 +2102,28 @@
           {
             "h": "Otwieranie i tworzenie",
             "p": "Kliknij kartę, aby otworzyć szczegółowy profil osoby. Przycisk dodawania u góry tworzy nową, pustą osobę, której dane uzupełniasz potem w profilu."
+          }
+        ]
+      },
+      "families": {
+        "title": "Rodziny",
+        "intro": "Wszystkie pary z drzewa — ze ślubem, dziećmi i tym, jak zakończył się związek — w jednym miejscu, w czterech widokach.",
+        "blocks": [
+          {
+            "h": "Cztery widoki",
+            "p": "Karty pokazują każdą parę z portretami, datą i miejscem ślubu, dziećmi i długością małżeństwa. Tabela zbiera to samo w sortowalnych kolumnach (kliknij nagłówek). Oś czasu rysuje każdy związek jako pasek od ślubu do rozwodu lub śmierci pierwszego z małżonków, a narodziny każdego dziecka jako kropkę; przerywany pasek oznacza, że początek oszacowano na podstawie pierwszego dziecka. Analiza podsumowuje śluby według dekad i miesięcy, wielkość rodzin, wiek w dniu ślubu, rekordy i spokrewnione pary."
+          },
+          {
+            "h": "Wyszukiwanie i filtry",
+            "p": "Wyszukiwarka znajduje pary po dowolnym z małżonków, po ich dzieciach lub po miejscu ślubu; tekst w cudzysłowie jest wyszukiwany dokładnie. Przyciski zakresu zawężają listę do twojej linii krwi, przodków lub potomków; filtrować można też według rodzaju związku, dzieci, roku lub miejsca ślubu — a w sekcji Cechy według rozwiedzionych par, ponownych małżeństw, spokrewnionych małżonków lub brakujących danych (brak daty lub miejsca ślubu, jedno z małżonków nieznane)."
+          },
+          {
+            "h": "Panel rodziny",
+            "p": "Kliknięcie rodziny otwiera jej panel: oboje małżonkowie z wiekiem w dniu ślubu, długość małżeństwa, różnica wieku, po jakim czasie urodziło się pierwsze dziecko, wnuki, wydarzenia rodzinne, notatki i wszystkie dzieci. Imiona otwierają osobę; przyciski pokazują rodzinę na drzewie, drukują kartę rodziny lub otwierają widok Pokrewieństwo dla pary."
+          },
+          {
+            "h": "Spokrewnione pary",
+            "p": "TreeMonk sprawdza, czy mąż i żona pochodzą od wspólnego przodka w obrębie ośmiu pokoleń, licząc wyłącznie rodziców biologicznych: adopcja, rodzina zastępcza i więzi z ojczymem lub macochą nigdy nie tworzą pokrewieństwa. Takie pary mają bursztynową plakietkę; panel podaje najbliższego wspólnego przodka, a widok Pokrewieństwo pokazuje pełną ścieżkę."
           }
         ]
       },

@@ -13,6 +13,7 @@ import { DashboardView } from '@/components/dashboard/DashboardView'
 import { FamilyTree } from '@/components/tree/FamilyTree'
 import { AtlasView } from '@/components/map/AtlasView'
 import { PeopleView } from '@/components/people/PeopleView'
+import { FamiliesView } from '@/components/families/FamiliesView'
 import { DocumentsView } from '@/components/documents/DocumentsView'
 import { IssuesView } from '@/components/issues/IssuesView'
 import { QueryView } from '@/components/query/QueryView'
@@ -71,6 +72,7 @@ function ViewRenderer(): JSX.Element {
       {view === 'dashboard' && <DashboardView />}
       {view === 'map' && <AtlasView />}
       {view === 'people' && <PeopleView />}
+      {view === 'families' && <FamiliesView />}
       {view === 'documents' && <DocumentsView />}
       {view === 'issues' && <IssuesView />}
       {view === 'query' && <QueryView />}

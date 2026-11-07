@@ -387,6 +387,7 @@
     "tree": "Albero genealogico",
     "map": "Mappa",
     "people": "Persone",
+    "families": "Famiglie",
     "documents": "Documenti",
     "issues": "Errori nei dati",
     "query": "Interrogazione",
@@ -551,6 +552,132 @@
     "filters": "Filtri",
     "notVerified": "Non verificato",
     "christeningYear": "Anno di battesimo — nessuna data di nascita registrata"
+  },
+  "families": {
+    "search": "Cerca coniugi, figli o luogo…",
+    "results_one": "{{count}} famiglia",
+    "results_other": "{{count}} famiglie",
+    "view": {
+      "cards": "Schede",
+      "table": "Tabella",
+      "timeline": "Cronologia",
+      "stats": "Analisi"
+    },
+    "sort": {
+      "marriageAsc": "Matrimonio, dal più antico",
+      "marriageDesc": "Matrimonio, dal più recente",
+      "children": "Più figli",
+      "duration": "Matrimonio più lungo",
+      "name": "Nome (A–Z)"
+    },
+    "kind": {
+      "all": "Tutte",
+      "other": "Altro"
+    },
+    "kids": {
+      "all": "Tutte",
+      "with": "Con figli",
+      "without": "Senza figli"
+    },
+    "traitsLabel": "Caratteristiche",
+    "trait": {
+      "related": "Coniugi consanguinei",
+      "divorced": "Divorziati o separati",
+      "remarriage": "Un coniuge si è sposato più volte",
+      "noDate": "Nessuna data di matrimonio",
+      "noPlace": "Nessun luogo di matrimonio",
+      "oneSpouse": "Un coniuge sconosciuto"
+    },
+    "empty": "Ancora nessuna famiglia",
+    "emptyHint": "Le famiglie compaiono qui non appena colleghi dei coniugi, o genitori e figli — nella scheda di una persona, nell'albero o importando un file GEDCOM.",
+    "noMatch": "Nessuna famiglia corrisponde a questi filtri.",
+    "unknownSpouse": "Sconosciuto",
+    "noDate": "Data sconosciuta",
+    "estimatedStart": "Stimato dalla nascita del primo figlio",
+    "childrenN_one": "{{count}} figlio",
+    "childrenN_other": "{{count}} figli",
+    "noChildren": "Nessun figlio registrato",
+    "years_one": "{{count}} anno",
+    "years_other": "{{count}} anni",
+    "aged_one": "a {{count}} anno",
+    "aged_other": "a {{count}} anni",
+    "ongoing": "in corso",
+    "related": "Consanguinei",
+    "relatedTip": "I coniugi hanno un antenato comune (generazioni indietro: {{genA}} / {{genB}})",
+    "commonAncestor": "Antenato comune: {{names}}",
+    "generationsUp": "generazioni indietro: {{genA}} / {{genB}}",
+    "col": {
+      "couple": "Coppia",
+      "duration": "Durata",
+      "ages": "Età alle nozze",
+      "status": "Caratteristiche"
+    },
+    "timeline": {
+      "estimated": "Inizio stimato",
+      "openEnd": "Fine sconosciuta",
+      "childBirth": "Nascita di un figlio",
+      "death": "Morte di un coniuge",
+      "empty": "Nessuna famiglia ha ancora una data di matrimonio o un figlio datato: non c'è nulla da collocare sulla cronologia.",
+      "hidden_one": "{{count}} famiglia senza alcuna data non compare nella cronologia.",
+      "hidden_other": "{{count}} famiglie senza alcuna data non compaiono nella cronologia."
+    },
+    "stats": {
+      "withChildren": "Famiglie con figli",
+      "avgDuration": "Durata media del matrimonio",
+      "avgAges": "Età media alle nozze",
+      "avgAgesSub": "sposi / spose",
+      "related": "Coppie consanguinee",
+      "relatedSub_one": "antenato comune entro {{count}} generazione",
+      "relatedSub_other": "antenato comune entro {{count}} generazioni",
+      "decades": "Matrimoni per decennio",
+      "months": "Matrimoni per mese",
+      "monthsHint": "Tradizionalmente pochi matrimoni in Quaresima e in Avvento; molti a fine autunno e prima della Quaresima.",
+      "noMonths": "Ancora nessuna data di matrimonio con il mese.",
+      "childrenDist": "Figli per famiglia",
+      "ageGap": "Differenza d'età tra i coniugi",
+      "ageGapDesc": "Anni in più del marito",
+      "gapWifeOlder": "Moglie più grande",
+      "kinds": "Tipi di unione",
+      "divorces": "Divorzi e separazioni",
+      "remarried_one": "{{count}} persona si è sposata più volte",
+      "remarried_other": "{{count}} persone si sono sposate più volte",
+      "records": "Record",
+      "recLargest": "Famiglia più numerosa",
+      "recLongest": "Matrimonio più lungo",
+      "recYoungestBride": "Sposa più giovane",
+      "recYoungestGroom": "Sposo più giovane",
+      "recAgeGap": "Maggiore differenza d'età",
+      "relatedList": "Coppie consanguinee",
+      "relatedDesc_one": "Antenato comune entro {{count}} generazione (solo genitori biologici)",
+      "relatedDesc_other": "Antenato comune entro {{count}} generazioni (solo genitori biologici)",
+      "relatedNone_one": "Nessuna coppia qui ha un antenato comune noto entro {{count}} generazione.",
+      "relatedNone_other": "Nessuna coppia qui ha un antenato comune noto entro {{count}} generazioni."
+    },
+    "detail": {
+      "wedding": "Matrimonio",
+      "ageAtWedding_one": "{{count}} anno alle nozze",
+      "ageAtWedding_other": "{{count}} anni alle nozze",
+      "untilDivorce": "fino al divorzio ({{year}})",
+      "untilSeparation": "fino alla separazione ({{year}})",
+      "untilDeath": "fino alla morte di un coniuge ({{year}})",
+      "gapHusband_one": "Il marito ha {{count}} anno in più",
+      "gapHusband_other": "Il marito ha {{count}} anni in più",
+      "gapWife_one": "La moglie ha {{count}} anno in più",
+      "gapWife_other": "La moglie ha {{count}} anni in più",
+      "gapNone": "Nati nello stesso anno",
+      "firstChild": "Primo figlio",
+      "firstChildAfter_one": "{{count}} anno dopo le nozze",
+      "firstChildAfter_other": "{{count}} anni dopo le nozze",
+      "firstChildBefore_one": "{{count}} anno prima delle nozze",
+      "firstChildBefore_other": "{{count}} anni prima delle nozze",
+      "firstChildSameYear": "Nell'anno delle nozze",
+      "grandchildren": "Nipoti",
+      "related": "I coniugi sono consanguinei",
+      "relatedBody": "Antenato comune più vicino — generazioni indietro dal marito: {{genA}}, dalla moglie: {{genB}}.",
+      "openKinship": "Mostra il legame",
+      "events": "Eventi familiari",
+      "showOnTree": "Mostra nell'albero"
+    }
   },
   "famous": {
     "title": "Parenti famosi",
@@ -1945,6 +2072,28 @@
           {
             "h": "Aprire e creare",
             "p": "Clicca una scheda per aprire il profilo dettagliato di quella persona. Il pulsante aggiungi in alto crea una nuova persona vuota, i cui dettagli compili poi nel profilo."
+          }
+        ]
+      },
+      "families": {
+        "title": "Famiglie",
+        "intro": "Tutte le coppie dell'albero — con il matrimonio, i figli e la fine dell'unione — in un unico posto, in quattro viste.",
+        "blocks": [
+          {
+            "h": "Quattro viste",
+            "p": "Le schede mostrano ogni coppia con ritratti, data e luogo del matrimonio, figli e durata dell'unione. La tabella raccoglie le stesse informazioni in colonne ordinabili (clic su un'intestazione). La cronologia disegna ogni unione come una barra dal matrimonio al divorzio o alla morte del primo coniuge, con la nascita di ogni figlio come un punto; una barra tratteggiata indica un inizio stimato dal primo figlio. L'analisi riassume i matrimoni per decennio e per mese, le dimensioni delle famiglie, le età alle nozze, i record e le coppie consanguinee."
+          },
+          {
+            "h": "Ricerca e filtri",
+            "p": "La ricerca trova le coppie tramite uno dei coniugi, i figli o il luogo del matrimonio; il testo tra virgolette viene cercato esattamente. I pulsanti dell'ambito limitano l'elenco alla tua linea di sangue, agli antenati o ai discendenti; puoi filtrare anche per tipo di unione, figli, anno o luogo del matrimonio — e, sotto Caratteristiche, per coppie divorziate, seconde nozze, coniugi consanguinei o dati mancanti (nessuna data o luogo di matrimonio, coniuge sconosciuto)."
+          },
+          {
+            "h": "Il pannello della famiglia",
+            "p": "Un clic su una famiglia apre il suo pannello: entrambi i coniugi con l'età alle nozze, la durata del matrimonio, la differenza d'età, quanto presto è arrivato il primo figlio, i nipoti, gli eventi familiari, le note e tutti i figli. I nomi aprono la persona; i pulsanti mostrano la famiglia nell'albero, stampano la scheda della famiglia o aprono la vista Parentela per la coppia."
+          },
+          {
+            "h": "Coppie consanguinee",
+            "p": "TreeMonk verifica se marito e moglie discendono da un antenato comune entro otto generazioni, contando solo i genitori biologici: adozione, affido e legami acquisiti non rendono mai consanguinei. Queste coppie hanno un badge color ambra; il pannello indica l'antenato comune più vicino e la vista Parentela mostra il percorso completo."
           }
         ]
       },

@@ -136,6 +136,7 @@ const api: TreeMonkApi = {
   events: {
     forPerson: (pid) => ipcRenderer.invoke(Channels.events.forPerson, pid),
     forFamily: (fid) => ipcRenderer.invoke(Channels.events.forFamily, fid),
+    forAllFamilies: () => ipcRenderer.invoke(Channels.events.forAllFamilies),
     create: (pid, input) => ipcRenderer.invoke(Channels.events.create, pid, input),
     createForFamily: (fid, input) => ipcRenderer.invoke(Channels.events.createForFamily, fid, input),
     update: (id, input) => ipcRenderer.invoke(Channels.events.update, id, input),

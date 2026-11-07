@@ -387,6 +387,7 @@
     "tree": "Családfa",
     "map": "Térkép",
     "people": "Személyek",
+    "families": "Családok",
     "documents": "Dokumentumok",
     "issues": "Adathibák",
     "query": "Lekérdezés",
@@ -551,6 +552,118 @@
     "filters": "Szűrők",
     "notVerified": "Nem ellenőrzött",
     "christeningYear": "Keresztelési év — nincs rögzített születési dátum"
+  },
+  "families": {
+    "search": "Házastárs, gyermek vagy hely keresése…",
+    "results": "{{count}} család",
+    "view": {
+      "cards": "Kártyák",
+      "table": "Táblázat",
+      "timeline": "Idővonal",
+      "stats": "Elemzés"
+    },
+    "sort": {
+      "marriageAsc": "Házasságkötés – legrégebbi elöl",
+      "marriageDesc": "Házasságkötés – legújabb elöl",
+      "children": "Legtöbb gyermek",
+      "duration": "Leghosszabb házasság",
+      "name": "Név (A–Z)"
+    },
+    "kind": {
+      "all": "Mind",
+      "other": "Egyéb"
+    },
+    "kids": {
+      "all": "Mind",
+      "with": "Gyermekes",
+      "without": "Gyermektelen"
+    },
+    "traitsLabel": "Jellemzők",
+    "trait": {
+      "related": "A házastársak vérrokonok",
+      "divorced": "Elváltak vagy különváltak",
+      "remarriage": "Valamelyik fél többször házasodott",
+      "noDate": "Nincs házasságkötési dátum",
+      "noPlace": "Nincs házasságkötési hely",
+      "oneSpouse": "Az egyik házastárs ismeretlen"
+    },
+    "empty": "Még nincsenek családok",
+    "emptyHint": "A családok itt jelennek meg, amint házastársakat, vagy szülőket és gyermekeiket összekapcsolsz — a profilon, a családfán vagy GEDCOM-fájl behozásával.",
+    "noMatch": "Egyetlen család sem felel meg a szűrésnek.",
+    "unknownSpouse": "Ismeretlen",
+    "noDate": "Ismeretlen dátum",
+    "estimatedStart": "Becslés az első gyermek születése alapján",
+    "childrenN": "{{count}} gyermek",
+    "noChildren": "Nincs rögzített gyermek",
+    "years": "{{count}} év",
+    "aged": "{{count}} évesen",
+    "ongoing": "folyamatban",
+    "related": "Vérrokonok",
+    "relatedTip": "A házastársaknak közös őse van (generációk felfelé: {{genA}} / {{genB}})",
+    "commonAncestor": "Közös ős: {{names}}",
+    "generationsUp": "generációk felfelé: {{genA}} / {{genB}}",
+    "col": {
+      "couple": "Pár",
+      "duration": "Időtartam",
+      "ages": "Életkor az esküvőn",
+      "status": "Jellemzők"
+    },
+    "timeline": {
+      "estimated": "Becsült kezdet",
+      "openEnd": "Ismeretlen vég",
+      "childBirth": "Gyermek születése",
+      "death": "Házastárs halála",
+      "empty": "Egyik családnak sincs még házasságkötési dátuma vagy datált gyermeke, így nincs mit az idővonalra tenni.",
+      "hidden": "{{count}} család semmilyen dátummal nem rendelkezik, ezért nem látszik az idővonalon."
+    },
+    "stats": {
+      "withChildren": "Gyermekes családok",
+      "avgDuration": "Átlagos házassághossz",
+      "avgAges": "Átlagos életkor az esküvőn",
+      "avgAgesSub": "vőlegények / menyasszonyok",
+      "related": "Vérrokon házaspárok",
+      "relatedSub": "közös ős {{count}} generáción belül",
+      "decades": "Házasságkötések évtizedenként",
+      "months": "Esküvők hónapok szerint",
+      "monthsHint": "Nagyböjtben és adventben hagyományosan alig volt esküvő; ősz végén és farsangkor annál több.",
+      "noMonths": "Még nincs hónapot is tartalmazó házasságkötési dátum.",
+      "childrenDist": "Gyermekszám családonként",
+      "ageGap": "Korkülönbség a házastársak között",
+      "ageGapDesc": "Hány évvel volt idősebb a férj",
+      "gapWifeOlder": "A feleség idősebb",
+      "kinds": "Kapcsolattípusok",
+      "divorces": "Válások és különválások",
+      "remarried": "{{count}} személy többször házasodott",
+      "records": "Rekordok",
+      "recLargest": "Legnagyobb család",
+      "recLongest": "Leghosszabb házasság",
+      "recYoungestBride": "Legfiatalabb menyasszony",
+      "recYoungestGroom": "Legfiatalabb vőlegény",
+      "recAgeGap": "Legnagyobb korkülönbség",
+      "relatedList": "Vérrokon házaspárok",
+      "relatedDesc": "Közös ős {{count}} generáción belül (csak vér szerinti szülők alapján)",
+      "relatedNone": "Itt egyetlen házaspárnak sincs ismert közös őse {{count}} generáción belül."
+    },
+    "detail": {
+      "wedding": "Házasságkötés",
+      "ageAtWedding": "esküvőkor {{count}} éves",
+      "untilDivorce": "a válásig ({{year}})",
+      "untilSeparation": "a különválásig ({{year}})",
+      "untilDeath": "az egyik házastárs haláláig ({{year}})",
+      "gapHusband": "A férj {{count}} évvel idősebb",
+      "gapWife": "A feleség {{count}} évvel idősebb",
+      "gapNone": "Ugyanabban az évben születtek",
+      "firstChild": "Első gyermek",
+      "firstChildAfter": "{{count}} évvel az esküvő után",
+      "firstChildBefore": "{{count}} évvel az esküvő előtt",
+      "firstChildSameYear": "Az esküvő évében",
+      "grandchildren": "Unokák",
+      "related": "A házastársak vérrokonok",
+      "relatedBody": "Legközelebbi közös ős — generációk felfelé a férjtől: {{genA}}, a feleségtől: {{genB}}.",
+      "openKinship": "Kapcsolat megmutatása",
+      "events": "Családi események",
+      "showOnTree": "Megnyitás a családfán"
+    }
   },
   "famous": {
     "title": "Híres rokonok",
@@ -1942,6 +2055,28 @@
           {
             "h": "Megnyitás és létrehozás",
             "p": "Egy kártyára kattintva megnyílik az adott személy részletes profilja. A fent található hozzáadás gombbal új, üres személyt hozol létre, akinek az adatait a profilban töltöd ki."
+          }
+        ]
+      },
+      "families": {
+        "title": "Családok",
+        "intro": "A családfa összes házaspárja — esküvővel, gyermekekkel, és azzal, hogyan ért véget a kapcsolat — egy helyen, négy nézetben.",
+        "blocks": [
+          {
+            "h": "Négy nézet",
+            "p": "A Kártyák minden párt arcképekkel, a házasságkötés dátumával és helyével, a gyermekekkel és a házasság hosszával mutatnak. A Táblázat ugyanezt rendezhető oszlopokba sűríti (az oszlopfejlécre kattintva rendez). Az Idővonal minden kapcsolatot sávként rajzol az esküvőtől a válásig vagy az első házastárs haláláig, a gyermekek születése pöttyként jelenik meg rajta; a szaggatott sáv azt jelenti, hogy a kezdetet az első gyermek születéséből becsültük. Az Elemzés összesíti a házasságkötéseket évtizedek és hónapok szerint, a családméreteket, az esküvőkori életkorokat, a rekordokat és a vérrokon házaspárokat."
+          },
+          {
+            "h": "Keresés és szűrés",
+            "p": "A kereső bármelyik házastárs, a gyermekek vagy az esküvő helye alapján megtalálja a párokat; az idézőjeles kifejezés pontos egyezést keres. A hatókör-gombokkal a saját vérvonaladra, az ősökre vagy a leszármazottakra szűkíthetsz; szűrhetsz kapcsolattípus, gyermekek, házasságkötési év vagy hely szerint is — a Jellemzők alatt pedig az elváltakra, az újraházasodásokra, a vérrokon házastársakra vagy a hiányzó adatokra (nincs dátum vagy hely, ismeretlen házastárs)."
+          },
+          {
+            "h": "A családpanel",
+            "p": "Egy családra kattintva megnyílik a panelje: mindkét házastárs az esküvőkori életkorával, a házasság hossza, a korkülönbség, hogy mennyivel az esküvő után született az első gyermek, az unokák száma, a családi események, a jegyzet és az összes gyermek. A nevekre kattintva a személy nyílik meg; a gombokkal a családfán mutathatod meg a családot, családlapot nyomtathatsz, vagy a Rokonság nézetben megnyithatod a pár kapcsolatát."
+          },
+          {
+            "h": "Vérrokon házaspárok",
+            "p": "A TreeMonk megvizsgálja, hogy a férj és a feleség nyolc generáción belül egy közös őstől származik-e — kizárólag vér szerinti szülők alapján; az örökbefogadás, a nevelés és a mostohakapcsolat sosem tesz vérrokonná. Az ilyen párok borostyánszínű jelvényt kapnak, a panel megnevezi a legközelebbi közös őst, a Rokonság nézet pedig a teljes utat is megmutatja."
           }
         ]
       },
