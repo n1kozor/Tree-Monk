@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { DEFAULT_FS_SCAN_DEPTH } from '@shared/familysearch'
+import { normalizeFsScanDepth, type FsScanDepth } from '@/lib/fsScanDepth'
 
 /** Accent presets for the pedigree (card ring + connector lines). */
 export const PEDIGREE_ACCENTS: { key: string; color: string }[] = [
@@ -97,6 +99,8 @@ export interface PedigreeValues {
   fanFont: string
   /** Card-tree name emphasis (opt-in bolder/higher-contrast labels). */
   labelStrength: LabelStrength
+  /** FamilySearch change scan depth around the current tree root. Null = all. */
+  fsScanDepth: FsScanDepth
   /** Horizontal spacing between generations (px). */
   colGap: number
   /** Vertical spacing between sibling cards (px). */
@@ -146,6 +150,7 @@ const DEFAULTS: PedigreeValues = {
   fanShowYears: true,
   fanFont: 'system',
   labelStrength: 'normal',
+  fsScanDepth: DEFAULT_FS_SCAN_DEPTH,
   colGap: 320,
   rowGap: 188,
   accent: PEDIGREE_ACCENTS[0].color,
@@ -177,6 +182,7 @@ function load(): PedigreeValues {
       merged.viewKind = 'landscape'
     // Fan chart is capped at 13 generations; pull older, larger saved values down.
     merged.fanGenerations = Math.min(13, Math.max(2, merged.fanGenerations))
+    merged.fsScanDepth = normalizeFsScanDepth(merged.fsScanDepth)
     // v2: standardise the tree-view frame/line look — switch EXISTING users to
     // the new defaults once (frame 4, corner 24, line 5, opacity 100%). After
     // this they can freely re-tune; the version stamp stops it re-applying.

@@ -36,3 +36,8 @@ export const MAX_COLLATERAL = 3
  *  descendants are not — hence the far lower bound. */
 export const MAX_ASCEND = 20
 export const MAX_DESCEND = 10
+
+/** Default depth for change scans around the current tree root. */
+export const DEFAULT_FS_SCAN_DEPTH = 6
+/** User-facing ceiling for depth-limited change scans. */
+export const MAX_FS_SCAN_DEPTH = 20
